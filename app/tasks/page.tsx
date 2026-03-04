@@ -1,7 +1,7 @@
 "use client";
 import { useData } from "@/lib/hooks";
 import { useState, useCallback } from "react";
-import { Plus, X, Flag, Calendar, User, Link2, GripVertical, MessageSquare } from "lucide-react";
+import { Plus, X, Flag, Calendar, GripVertical, MessageSquare } from "lucide-react";
 import {
   DndContext,
   DragOverlay,
@@ -12,8 +12,8 @@ import {
   useSensors,
   DragStartEvent,
   DragEndEvent,
-  DragOverEvent,
   useDroppable,
+  type DraggableSyntheticListeners,
 } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -54,8 +54,18 @@ const priorityConfig: Record<string, { label: string; color: string; flagColor: 
 const assigneeColors: Record<string, string> = {
   Jahan: "bg-teal-600",
   Kimberly: "bg-purple-600",
+  Kevin: "bg-amber-600",
   "Sub-agent": "bg-indigo-600",
 };
+
+const assigneeInitials: Record<string, string> = {
+  Jahan: "JH",
+  Kimberly: "KI",
+  Kevin: "KV",
+  "Sub-agent": "SA",
+};
+
+const assigneeOptions = ["Jahan", "Kimberly", "Kevin", "Sub-agent"] as const;
 
 function getInitials(name: string) {
   return name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
@@ -63,16 +73,17 @@ function getInitials(name: string) {
 
 function formatDate(dateStr?: string) {
   if (!dateStr) return null;
-  const d = new Date(dateStr);
+  const d = new Date(`${dateStr}T00:00:00`);
   const now = new Date();
-  const isOverdue = d < now;
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const isOverdue = d < todayStart;
   const month = d.toLocaleString("en", { month: "short" });
   const day = d.getDate();
   return { text: `${month} ${day}`, isOverdue };
 }
 
 // ─── Sortable Task Card ────────────────────────────────────
-function SortableTaskCard({ task, onRemove, onUpdate }: { task: Task; onRemove: (id: string) => void; onUpdate: (task: Task) => void }) {
+function SortableTaskCard({ task, onRemove }: { task: Task; onRemove: (id: string) => void }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: task.id });
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -82,23 +93,24 @@ function SortableTaskCard({ task, onRemove, onUpdate }: { task: Task; onRemove: 
 
   return (
     <div ref={setNodeRef} style={style} {...attributes}>
-      <TaskCard task={task} onRemove={onRemove} onUpdate={onUpdate} dragListeners={listeners} />
+      <TaskCard task={task} onRemove={onRemove} dragListeners={listeners} />
     </div>
   );
 }
 
 // ─── Task Card (ClickUp style) ─────────────────────────────
-function TaskCard({ task, onRemove, onUpdate, dragListeners, overlay }: {
+function TaskCard({ task, onRemove, dragListeners, overlay }: {
   task: Task;
   onRemove: (id: string) => void;
-  onUpdate: (task: Task) => void;
-  dragListeners?: any;
+  dragListeners?: DraggableSyntheticListeners;
   overlay?: boolean;
 }) {
   const priority = priorityConfig[task.priority] || priorityConfig.med;
   const due = formatDate(task.dueDate);
   const subtasksDone = task.subtasks?.filter(s => s.done).length || 0;
   const subtasksTotal = task.subtasks?.length || 0;
+  const isKevinBuilding = task.assignee === "Kevin" && task.status === "in-progress";
+  const assigneeInitial = assigneeInitials[task.assignee] || getInitials(task.assignee);
 
   return (
     <div className={`bg-[#1e1f25] border border-[#2a2b33] rounded-lg p-3 hover:border-[#3a3b45] transition-all group cursor-pointer ${overlay ? "shadow-2xl shadow-black/50 rotate-2 scale-105" : ""}`}>
@@ -119,12 +131,17 @@ function TaskCard({ task, onRemove, onUpdate, dragListeners, overlay }: {
           {task.description && (
             <p className="text-[11px] text-gray-500 mt-1 line-clamp-1">{task.description}</p>
           )}
+          {isKevinBuilding && (
+            <span className="inline-flex items-center text-[10px] mt-1 px-1.5 py-0.5 rounded border border-amber-500/40 bg-amber-500/10 text-amber-300 animate-pulse">
+              ⚙️ Building...
+            </span>
+          )}
 
           {/* Metadata row — ClickUp style */}
           <div className="flex items-center gap-3 mt-2.5 flex-wrap">
             {/* Assignee avatar */}
             <div className={`w-5 h-5 rounded-full ${assigneeColors[task.assignee] || "bg-gray-600"} flex items-center justify-center`} title={task.assignee}>
-              <span className="text-[8px] font-bold text-white">{getInitials(task.assignee)}</span>
+              <span className="text-[8px] font-bold text-white">{assigneeInitial}</span>
             </div>
 
             {/* Due date */}
@@ -168,11 +185,10 @@ function TaskCard({ task, onRemove, onUpdate, dragListeners, overlay }: {
 }
 
 // ─── Droppable Column ──────────────────────────────────────
-function DroppableColumn({ column, tasks, onRemove, onUpdate, onAddClick }: {
+function DroppableColumn({ column, tasks, onRemove, onAddClick }: {
   column: typeof columns[0];
   tasks: Task[];
   onRemove: (id: string) => void;
-  onUpdate: (task: Task) => void;
   onAddClick: (status: string) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: column.id });
@@ -200,7 +216,7 @@ function DroppableColumn({ column, tasks, onRemove, onUpdate, onAddClick }: {
       >
         <SortableContext items={tasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
           {tasks.map(task => (
-            <SortableTaskCard key={task.id} task={task} onRemove={onRemove} onUpdate={onUpdate} />
+            <SortableTaskCard key={task.id} task={task} onRemove={onRemove} />
           ))}
         </SortableContext>
 
@@ -294,9 +310,9 @@ export default function TasksPage() {
         <div className="flex gap-3 items-center">
           <select value={filterAssignee} onChange={e => setFilterAssignee(e.target.value)} className="bg-[#1e1f25] border border-[#2a2b33] rounded-md px-3 py-1.5 text-xs text-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500/50">
             <option value="">All Assignees</option>
-            <option value="Kimberly">Kimberly</option>
-            <option value="Jahan">Jahan</option>
-            <option value="Sub-agent">Sub-agent</option>
+            {assigneeOptions.map(assignee => (
+              <option key={assignee} value={assignee}>{assignee}</option>
+            ))}
           </select>
           <select value={filterPriority} onChange={e => setFilterPriority(e.target.value)} className="bg-[#1e1f25] border border-[#2a2b33] rounded-md px-3 py-1.5 text-xs text-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500/50">
             <option value="">All Priorities</option>
@@ -326,7 +342,9 @@ export default function TasksPage() {
                 <div>
                   <label className="text-[11px] text-gray-500 mb-1 block">Assignee</label>
                   <select value={form.assignee} onChange={e => setForm({ ...form, assignee: e.target.value })} className="w-full bg-[#15161b] border border-[#2a2b33] rounded-lg px-3 py-2 text-sm text-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500/50">
-                    <option>Kimberly</option><option>Jahan</option><option>Sub-agent</option>
+                    {assigneeOptions.map(assignee => (
+                      <option key={assignee} value={assignee}>{assignee}</option>
+                    ))}
                   </select>
                 </div>
                 <div>
@@ -372,7 +390,6 @@ export default function TasksPage() {
               column={col}
               tasks={filtered.filter(t => t.status === col.id)}
               onRemove={remove}
-              onUpdate={update}
               onAddClick={openAddForm}
             />
           ))}
@@ -381,7 +398,7 @@ export default function TasksPage() {
         {/* Drag overlay — shows the card being dragged */}
         <DragOverlay>
           {activeTask ? (
-            <TaskCard task={activeTask} onRemove={() => {}} onUpdate={() => {}} overlay />
+            <TaskCard task={activeTask} onRemove={() => {}} overlay />
           ) : null}
         </DragOverlay>
       </DndContext>
