@@ -1,0 +1,133 @@
+// Seed data for all screens
+export const seedTasks = [
+  { id: "t1", title: "Build restaurant landing page", description: "Create high-converting landing page for restaurant offer using Sabri Suby direct response style", assignee: "Jahan", priority: "urgent", status: "in-progress", projectId: "p2", createdAt: "2026-03-01T10:00:00Z", dueDate: "2026-03-07", tags: ["restaurant-offer", "landing-page"], comments: 3 },
+  { id: "t2", title: "DerbyFlow WordPress plugin — Elementor dynamic tags + repeater", description: "Build WP plugin that pulls menu data from DerbyFlow API and renders via Elementor dynamic tags with repeater support", assignee: "Kimberly", priority: "high", status: "backlog", projectId: "p1", createdAt: "2026-03-02T17:00:00Z", dueDate: "2026-03-15", tags: ["derbyflow", "wordpress"], comments: 0 },
+  { id: "t3", title: "Add sub-category support to DerbyFlow", description: "Add parentId to Category model in Prisma for nested sub-categories. Update store API and dashboard.", assignee: "Kimberly", priority: "high", status: "backlog", projectId: "p1", createdAt: "2026-03-02T20:00:00Z", tags: ["derbyflow", "backend"], comments: 0 },
+  { id: "t4", title: "Deep competitor research — Glassdoor + Trustpilot", description: "Dig into Glassdoor reviews for SpotHopper/Popmenu employee complaints, Trustpilot customer reviews, BBB complaints", assignee: "Kimberly", priority: "med", status: "backlog", projectId: "p5", createdAt: "2026-03-02T21:30:00Z", tags: ["research", "competitors"], comments: 0 },
+  { id: "t5", title: "Set up cold email outreach system", description: "Build repeatable cold email system targeting SpotHopper/BentoBox/Owner.com restaurant customers", assignee: "Kimberly", priority: "high", status: "backlog", projectId: "p3", createdAt: "2026-03-02T16:00:00Z", dueDate: "2026-03-20", tags: ["outreach", "sales"], comments: 0 },
+  { id: "t6", title: "Deploy DerbyFlow to Vercel", description: "Get the orderflow codebase deployed so we have a live API to build the WP plugin against", assignee: "Jahan", priority: "high", status: "backlog", projectId: "p1", createdAt: "2026-03-02T22:00:00Z", tags: ["derbyflow", "deployment"], comments: 0 },
+  { id: "t7", title: "Competitor intel posted to Discord", description: "Deep research on SpotHopper, BentoBox, Owner.com, Popmenu, Restaurant Growth with real pricing and user complaints from Reddit", assignee: "Kimberly", priority: "med", status: "done", projectId: "p5", createdAt: "2026-03-02T16:30:00Z", tags: ["research", "competitors"], comments: 2 },
+  { id: "t8", title: "Discord server setup — Derby Digital OS", description: "Built out full Discord server with Operations, Restaurant Division, Home Services, Marketing categories + channels", assignee: "Kimberly", priority: "med", status: "done", projectId: "p6", createdAt: "2026-03-02T16:15:00Z", tags: ["discord", "setup"], comments: 0 },
+  { id: "t9", title: "Build Mission Control dashboard", description: "Next.js 14 custom dashboard with 14 screens for Derby Digital operations", assignee: "Kimberly", priority: "urgent", status: "in-progress", projectId: "p6", createdAt: "2026-03-03T00:30:00Z", tags: ["mission-control"], comments: 0 },
+  { id: "t10", title: "Write Sabri Suby ad templates for restaurants", description: "Create 5+ ad copy templates: direct response, social proof, urgency. For Facebook, Instagram, Google.", assignee: "Kimberly", priority: "med", status: "backlog", projectId: "p5", createdAt: "2026-03-03T00:00:00Z", tags: ["ads", "copy", "templates"], comments: 0 },
+  { id: "t11", title: "Set up Brave Search API key", description: "Run openclaw configure --section web to enable deep web search", assignee: "Jahan", priority: "med", status: "backlog", projectId: "p6", createdAt: "2026-03-02T21:00:00Z", tags: ["setup", "tools"], comments: 0 },
+  { id: "t12", title: "Client onboarding checklist", description: "Create standardized onboarding process for new restaurant clients — repeatable system", assignee: "Kimberly", priority: "high", status: "backlog", projectId: "p5", createdAt: "2026-03-02T09:00:00Z", tags: ["systems", "onboarding"], comments: 0 },
+];
+
+export const seedProjects = [
+  { id: "p1", name: "DerbyFlow", description: "Restaurant Software Platform — online ordering, menu management, analytics", progress: 35, status: "active", lastUpdated: "2026-03-02T18:00:00Z", color: "#6366f1" },
+  { id: "p2", name: "Restaurant Offer Landing Page", description: "High-converting landing page for restaurant lead gen offer", progress: 60, status: "active", lastUpdated: "2026-03-01T14:00:00Z", color: "#f59e0b" },
+  { id: "p3", name: "Cold Email Outreach System", description: "Automated cold email campaigns targeting restaurants using competitor data", progress: 20, status: "active", lastUpdated: "2026-02-28T10:00:00Z", color: "#10b981" },
+  { id: "p4", name: "WordPress Menu Integration Plugin", description: "WordPress plugin for restaurant menu display and online ordering", progress: 70, status: "active", lastUpdated: "2026-02-25T16:00:00Z", color: "#3b82f6" },
+  { id: "p5", name: "Derby Digital Marketing", description: "Agency marketing, branding, and client acquisition", progress: 45, status: "active", lastUpdated: "2026-03-02T12:00:00Z", color: "#ef4444" },
+  { id: "p6", name: "Mission Control", description: "Internal dashboard for managing Derby Digital operations", progress: 10, status: "active", lastUpdated: "2026-03-03T00:00:00Z", color: "#8b5cf6" },
+];
+
+export const seedCalendar = [
+  { id: "e1", name: "Weekly client review", time: "09:00", recurrence: "weekly-mon", type: "reminder", status: "active", description: "Review all client accounts and performance" },
+  { id: "e2", name: "Send weekly report", time: "17:00", recurrence: "weekly-fri", type: "cron", status: "active", description: "Automated weekly performance report to Jahan" },
+  { id: "e3", name: "Cold email batch send", time: "10:00", recurrence: "daily", type: "cron", status: "active", description: "Send daily batch of cold emails to restaurant prospects" },
+  { id: "e4", name: "Memory cleanup", time: "02:00", recurrence: "weekly-sun", type: "cron", status: "active", description: "Review and consolidate memory files" },
+  { id: "e5", name: "DerbyFlow demo prep", time: "14:00", recurrence: "none", type: "task", status: "active", date: "2026-03-10", description: "Prepare demo for potential restaurant client" },
+];
+
+export const seedTeam = [
+  { id: "tm1", name: "Jahan", role: "Founder & CEO", status: "active", currentTask: "DerbyFlow development", model: "Human", avatar: "👨‍💻", type: "human" },
+  { id: "tm2", name: "Kimberly", role: "AI Chief of Staff", status: "active", currentTask: "Building Mission Control", model: "Claude Opus", avatar: "🤖", type: "agent" },
+];
+
+export const seedClients = [
+  { id: "c1", name: "Bella's Italian Kitchen", type: "restaurant", monthlyRevenue: 800, services: ["ads", "website"], status: "active", lastContact: "2026-03-01", healthScore: 92, contact: { email: "bella@bellaskitchen.com", phone: "555-0101" }, notes: "Great client, very responsive. Running FB ads + custom WordPress site." },
+  { id: "c2", name: "Dragon Palace", type: "restaurant", monthlyRevenue: 600, services: ["ads", "website", "software"], status: "active", lastContact: "2026-02-28", healthScore: 85, contact: { email: "info@dragonpalace.com", phone: "555-0102" }, notes: "Early DerbyFlow adopter. Using online ordering." },
+  { id: "c3", name: "Mike's Plumbing", type: "home-services", monthlyRevenue: 500, services: ["ads"], status: "active", lastContact: "2026-02-25", healthScore: 78, contact: { email: "mike@mikesplumbing.com", phone: "555-0103" }, notes: "Google Ads only. Good ROI." },
+  { id: "c4", name: "Taco Fiesta", type: "restaurant", monthlyRevenue: 450, services: ["website"], status: "active", lastContact: "2026-03-02", healthScore: 88, contact: { email: "carlos@tacofiesta.com", phone: "555-0104" }, notes: "WordPress site with menu plugin. Looking to add ads." },
+  { id: "c5", name: "Elite HVAC", type: "home-services", monthlyRevenue: 700, services: ["ads", "website"], status: "active", lastContact: "2026-02-20", healthScore: 72, contact: { email: "john@elitehvac.com", phone: "555-0105" }, notes: "Running seasonal campaigns. Needs landing page refresh." },
+  { id: "c6", name: "Sushi Wave", type: "restaurant", monthlyRevenue: 550, services: ["ads", "website"], status: "onboarding", lastContact: "2026-03-02", healthScore: 95, contact: { email: "yuki@sushiwave.com", phone: "555-0106" }, notes: "New client. Setting up ads and building WordPress site." },
+  { id: "c7", name: "Golden Wok", type: "restaurant", monthlyRevenue: 400, services: ["website"], status: "active", lastContact: "2026-02-15", healthScore: 65, contact: { email: "lee@goldenwok.com", phone: "555-0107" }, notes: "Basic website client. Could upsell ads." },
+  { id: "c8", name: "CleanPro Services", type: "home-services", monthlyRevenue: 350, services: ["ads"], status: "paused", lastContact: "2026-02-10", healthScore: 45, contact: { email: "sarah@cleanpro.com", phone: "555-0108" }, notes: "Paused ads due to seasonal slowdown. Resume in March." },
+  { id: "c9", name: "Pizzeria Napoli", type: "restaurant", monthlyRevenue: 900, services: ["ads", "website", "software"], status: "active", lastContact: "2026-03-01", healthScore: 96, contact: { email: "tony@pizzerianapoli.com", phone: "555-0109" }, notes: "Top client. Full stack — ads, website, DerbyFlow." },
+  { id: "c10", name: "Fresh Garden Cafe", type: "restaurant", monthlyRevenue: 500, services: ["ads", "website"], status: "active", lastContact: "2026-02-27", healthScore: 82, contact: { email: "lisa@freshgarden.com", phone: "555-0110" }, notes: "Organic-focused marketing. Instagram ads doing well." },
+];
+
+export const seedPipeline = [
+  { id: "d1", name: "Riverside Grill", contact: "Mark Johnson", email: "mark@riversidegrill.com", dealValue: 800, source: "cold-email", stage: "demo-scheduled", daysInStage: 3, notes: "Interested in full website + ads package. Demo on Thursday." },
+  { id: "d2", name: "Thai Orchid", contact: "Suwanna Chen", email: "suwanna@thaiorchid.com", dealValue: 600, source: "referral", stage: "contacted", daysInStage: 5, notes: "Referred by Dragon Palace. Sent initial email." },
+  { id: "d3", name: "Burger Baron", contact: "Dave Smith", email: "dave@burgerbaron.com", dealValue: 1200, source: "cold-email", stage: "proposal-sent", daysInStage: 2, notes: "Multi-location. Wants DerbyFlow + ads for all 3 locations." },
+  { id: "d4", name: "La Maison", contact: "Pierre Dubois", email: "pierre@lamaison.com", dealValue: 900, source: "inbound", stage: "demo-done", daysInStage: 1, notes: "Loved the demo. Sending proposal tomorrow." },
+  { id: "d5", name: "Coast Seafood", contact: "Amy Waters", email: "amy@coastseafood.com", dealValue: 700, source: "cold-email", stage: "lead", daysInStage: 7, notes: "Found via SpotHopper competitor list. High potential." },
+  { id: "d6", name: "Mama Rosa's", contact: "Rosa Martinez", email: "rosa@mamarosas.com", dealValue: 500, source: "referral", stage: "closed-won", daysInStage: 0, notes: "Closed! Starting with website + ads." },
+  { id: "d7", name: "Garden Bistro", contact: "Emily Park", email: "emily@gardenbistro.com", dealValue: 650, source: "cold-email", stage: "closed-lost", daysInStage: 0, notes: "Went with BentoBox. Follow up in 6 months." },
+  { id: "d8", name: "Smoky BBQ House", contact: "Jim Tucker", email: "jim@smokybbq.com", dealValue: 750, source: "inbound", stage: "lead", daysInStage: 2, notes: "Found us on Google. Wants online ordering system." },
+];
+
+export const seedRevenue = {
+  mrr: 15000,
+  arr: 180000,
+  target: 1000000,
+  totalClients: 45,
+  avgRevenuePerClient: 333,
+  mrrHistory: [
+    { month: "Sep 2025", mrr: 8000 },
+    { month: "Oct 2025", mrr: 9200 },
+    { month: "Nov 2025", mrr: 10500 },
+    { month: "Dec 2025", mrr: 11800 },
+    { month: "Jan 2026", mrr: 13000 },
+    { month: "Feb 2026", mrr: 14200 },
+    { month: "Mar 2026", mrr: 15000 },
+  ],
+  byType: [
+    { name: "Restaurants", value: 9500 },
+    { name: "Home Services", value: 3800 },
+    { name: "Other", value: 1700 },
+  ],
+  byService: [
+    { name: "Ads Management", value: 7200 },
+    { name: "Websites", value: 5100 },
+    { name: "Software (DerbyFlow)", value: 2700 },
+  ],
+};
+
+export const seedAdTemplates = [
+  { id: "at1", headline: "Is Your [City] Restaurant Losing Customers to DoorDash?", body: "Every day, your best customers are ordering from DoorDash, Uber Eats, and Grubhub. And you're paying 30% commission on every single order.\n\nWhat if you could keep those customers — and that 30% — for yourself?\n\nWe've helped restaurants like [Restaurant] build their own online ordering system that:\n✅ Costs ZERO commission per order\n✅ Keeps customer data in YOUR hands\n✅ Increases repeat orders by 40%\n✅ Looks better than any third-party app\n\nStop giving away your profits to Silicon Valley.\n\n👉 Click below to see how [Restaurant] saved $4,200/month in delivery commissions.", cta: "Get Your Free Restaurant Growth Audit", type: "Facebook", style: "Direct Response", niche: "Restaurant", notes: "Classic Sabri Suby problem-agitation-solution. Replace [City] and [Restaurant] with specifics." },
+  { id: "at2", headline: "How [Restaurant] Increased Online Orders by 40% in 30 Days", body: "When [Owner] came to us, they were struggling with:\n❌ $3,000/month in DoorDash commissions\n❌ No control over customer data\n❌ Menu changes taking days to update\n❌ Zero repeat customer marketing\n\n30 days later:\n✅ Own ordering system live and running\n✅ 40% more direct orders\n✅ $0 commission per order\n✅ Automated email marketing bringing customers back\n\nThe best part? It took less than a week to set up.\n\nWant the same results for your restaurant?", cta: "See How It Works — Free Demo", type: "Facebook", style: "Social Proof", niche: "Restaurant", notes: "Social proof template. Use real numbers when possible." },
+  { id: "at3", headline: "Your Competitors Are Already Doing This", body: "Right now, restaurants in [City] are switching from expensive third-party ordering platforms to their own branded systems.\n\nThey're saving thousands per month. They're building customer lists. They're running circles around restaurants still paying 30% to DoorDash.\n\nThe question isn't IF you should make the switch.\n\nIt's whether you'll do it before your competitors take all your customers.\n\n⏰ We're only taking on 5 new restaurants this month.", cta: "Claim Your Spot — Book a Free Call", type: "Instagram", style: "Urgency", niche: "Restaurant", notes: "Urgency/scarcity play. Adjust the number based on capacity." },
+  { id: "at4", headline: "The Real Cost of DoorDash (It's More Than You Think)", body: "Let's do the math.\n\nAverage restaurant on DoorDash:\n• 200 orders/month through the app\n• Average order: $35\n• DoorDash commission: 30%\n• Monthly cost: $2,100\n• Annual cost: $25,200\n\nThat's $25,000+ per year going straight to DoorDash.\n\nNow imagine keeping that money AND your customer data.\n\nDerby Digital builds custom online ordering systems for restaurants that:\n1. Eliminate third-party commissions entirely\n2. Give you a branded ordering experience\n3. Build YOUR customer email list\n4. Integrate with your existing POS\n5. Cost a fraction of what you're paying in commissions\n\nWe've helped 40+ restaurants make the switch.\n\nReady to stop leaving money on the table?", cta: "Calculate Your Savings — Free Analysis", type: "Facebook", style: "Direct Response", niche: "Restaurant", notes: "Long-form educational + direct response hybrid. Great for retargeting." },
+  { id: "at5", headline: "The #1 Reason [City] Homeowners Choose [Service]", body: "When [City] homeowners need [service], they don't just Google and pick the first result.\n\nThey look for:\n✅ 5-star reviews from real neighbors\n✅ Transparent pricing with no hidden fees\n✅ Licensed, insured, and background-checked technicians\n✅ Same-day service availability\n✅ A company that actually answers the phone\n\nThat's exactly why 847 [City] homeowners chose [Company] last year.\n\nAnd here's what they said:\n⭐⭐⭐⭐⭐ 'Best [service] experience I've ever had. On time, fair price, and they cleaned up after themselves.' — [Name], [City]\n\nDon't waste time calling companies that don't pick up.\n\n👉 Get a free quote in 60 seconds.", cta: "Get Your Free Quote Now", type: "Facebook", style: "Direct Response", niche: "Home Services", notes: "Home services direct response. Fill in [City], [Service], [Company], and real review." },
+  { id: "at6", headline: "[Service] in [City]? Get a Free Quote in 60 Seconds", body: "Need [service] fast?\n\nSkip the runaround. Skip the voicemails. Skip the 'we'll get back to you in 3-5 business days.'\n\n[Company] provides:\n🔧 Same-day [service] appointments\n💰 Upfront pricing — no surprises\n⭐ 4.9 stars from 500+ [City] homeowners\n🛡️ Fully licensed and insured\n\nIt takes 60 seconds to get your free quote.\nNo commitment. No pressure. Just answers.\n\n👉 Tap below to get started.", cta: "Get My Free Quote", type: "Google", style: "Lead Gen", niche: "Home Services", notes: "Lead gen template for home services. High urgency, low commitment CTA." },
+  { id: "at7", headline: "The Problem-Agitation-Solution Framework", body: "PROBLEM:\nIdentify the #1 pain point your prospect faces right now. Make it specific and visceral.\n\nExample: 'You're paying $2,500/month to DoorDash and you don't even know your customers' names.'\n\nAGITATION:\nTwist the knife. Show them how bad it really is. Make them FEEL the pain.\n\nExample: 'That's $30,000 a year going straight to a Silicon Valley company that's actively trying to replace you with ghost kitchens. Meanwhile, they own your customer data, control your reviews, and can change their commission rate anytime they want. You're building THEIR business, not yours.'\n\nSOLUTION:\nPresent your offer as the obvious answer. Make it feel inevitable.\n\nExample: 'What if you could keep every dollar of that $30k AND own your customer relationships? Our restaurants do exactly that — with their own branded ordering system that costs a fraction of what they were paying in commissions.'\n\nCTA:\nOne clear action. Low commitment. High value.\n\nExample: 'See how much you'd save → Free 5-minute analysis'", cta: "[Custom CTA based on offer]", type: "Facebook", style: "Direct Response", niche: "General", notes: "Master PAS framework template. Sabri Suby's bread and butter. Use this structure for any niche." },
+];
+
+export const seedFinance = {
+  months: [
+    { month: "Jan 2026", revenue: 13000, expenses: { software: 800, contractors: 2500, ads: 500, hosting: 200, subscriptions: 300 }, profit: 8700 },
+    { month: "Feb 2026", revenue: 14200, expenses: { software: 800, contractors: 2800, ads: 600, hosting: 200, subscriptions: 300 }, profit: 9500 },
+    { month: "Mar 2026", revenue: 15000, expenses: { software: 850, contractors: 2800, ads: 700, hosting: 250, subscriptions: 400 }, profit: 10000 },
+  ],
+};
+
+export const seedCompetitors = [
+  { id: "comp1", name: "SpotHopper", pricing: "~$3k upfront + monthly fee", threatLevel: "medium", weaknesses: ["Got restaurants blacklisted from Google with shady SEO tactics", "~$3k upfront cost is brutal for small restaurants", "Manipulative high-pressure sales tactics", "Cookie-cutter templates with limited customization", "Locked contracts hard to escape"], ourAdvantage: "No upfront cost. No shady SEO. Custom-built sites. Month-to-month. DerbyFlow integration.", lastUpdated: "2026-02-28", salesAmmo: ["Ask them about the Google blacklisting incidents — restaurants lost all their search traffic", "Their $3k upfront fee is just to get in the door", "High-pressure sales team will say anything to close", "We charge zero upfront and you own everything we build"], details: "SpotHopper charges ~$3k upfront plus ongoing monthly fees. They've been caught using aggressive SEO tactics that got restaurants blacklisted from Google entirely — devastating for local businesses. Their sales team uses manipulative tactics and overpromises results. Templates are cookie-cutter with minimal customization. Hard to leave once locked in." },
+  { id: "comp2", name: "BentoBox", pricing: "$200-$500/mo tiered", threatLevel: "medium", weaknesses: ["Owned by Fiserv/Clover — now a faceless corporate machine", "Nickel-and-dimes every feature as add-ons", "Basic features locked behind higher tiers", "Support quality tanked post-acquisition", "Templates all look the same"], ourAdvantage: "We're nimble and personal. All features included. Custom WordPress sites. DerbyFlow beats their ordering.", lastUpdated: "2026-02-28", salesAmmo: ["Acquired by Fiserv — you're just a ticket number now", "Want online ordering? That's an add-on. Want analytics? Add-on. Want email? Add-on.", "Every feature they nickel-and-dime you for, we include", "Their ordering system is basic — DerbyFlow is purpose-built"], details: "BentoBox was acquired by Fiserv/Clover in 2021. They offer tiered pricing from $200-$500/mo but nickel-and-dime every feature. Online ordering, analytics, email marketing — all add-ons at higher tiers. Since the acquisition, support has declined significantly and innovation has stalled. Templates are generic and all look similar." },
+  { id: "comp3", name: "Owner.com", pricing: "Flat monthly + 5% order fee", threatLevel: "high", weaknesses: ["5% commission on every customer order — adds up fast", "Cookie-cutter template websites, zero customization", "VC-funded — focused on growth metrics not restaurant success", "Aggressive sales tactics and overpromising", "You're building THEIR platform, not your brand"], ourAdvantage: "Zero commission on orders. Fully custom sites. You own everything. DerbyFlow is YOUR platform.", lastUpdated: "2026-02-28", salesAmmo: ["Do the math: 5% of $20k in monthly orders = $1,000/mo just in fees ON TOP of their monthly charge", "Their websites are templates — every restaurant looks the same", "With us, you own your site, your data, your customer list", "DerbyFlow charges zero commission per order — flat rate, period"], details: "Owner.com charges a flat monthly fee PLUS 5% commission on every customer order placed through their system. For a busy restaurant doing $20k+ in online orders, that 5% adds up to $1,000+/mo on top of the subscription. Their websites are cookie-cutter templates with minimal customization. They're VC-funded and optimizing for growth metrics, not individual restaurant success." },
+  { id: "comp4", name: "Popmenu", pricing: "$349-$600/mo", threatLevel: "low", weaknesses: ["Terrible customer support — long wait times, outsourced", "Horrible UI/UX reviews from actual restaurant owners", "AI features are gimmicky marketing buzzwords", "Menu digitization is inconsistent and error-prone", "Expensive for the poor quality delivered"], ourAdvantage: "Real AI (Kimberly), not gimmicks. Beautiful custom UIs. Responsive support. Better value.", lastUpdated: "2026-02-28", salesAmmo: ["Check their reviews — restaurant owners hate the UI", "Their 'AI' is just auto-generated social posts that look terrible", "Support wait times are 48+ hours for paying customers", "We respond same-day and build custom, not template"], details: "Popmenu charges $349-$600/mo and markets heavily on 'AI-powered' features that are mostly gimmicky auto-generated social media posts. Real restaurant owners consistently complain about terrible UI/UX, horrible customer support with long wait times, and inconsistent menu digitization. The product looks flashy in demos but underdelivers in practice." },
+  { id: "comp5", name: "Restaurant Growth", pricing: "$1,000-$2,500/mo", threatLevel: "medium", weaknesses: ["Ads only — no website, no software, no ordering system", "Expensive for pure ad management", "Cookie-cutter ad campaigns across clients", "No software moat — clients can leave anytime", "Strong testimonials but inconsistent results"], ourAdvantage: "Software + service combo. DerbyFlow creates stickiness. Ads + website + software bundled for less.", lastUpdated: "2026-02-28", salesAmmo: ["They charge $1-2.5k/mo for JUST ads — no website, no software, nothing else", "When their ads stop working, what do you have? Nothing.", "We build you a complete digital presence — ads, website, ordering system", "DerbyFlow keeps delivering value even if you pause ads"], details: "Restaurant Growth is a pure-play ad agency charging $1,000-$2,500/mo for Facebook/Instagram ad management only. No websites, no software, no ordering systems. They have strong testimonials but results are inconsistent. Their weakness is zero software moat — clients can leave anytime since there's no switching cost. They do have good case studies though, so don't underestimate their sales pitch." },
+];
+
+export const seedDerbyflow = {
+  platformStatus: "development",
+  tenants: [
+    { id: "df1", name: "Dragon Palace", slug: "dragon-palace", plan: "pro", mrr: 199, orderCount: 342, menuItems: 85, status: "active" },
+    { id: "df2", name: "Pizzeria Napoli", slug: "pizzeria-napoli", plan: "pro", mrr: 199, orderCount: 567, menuItems: 62, status: "active" },
+    { id: "df3", name: "Bella's Italian Kitchen", slug: "bellas-italian", plan: "basic", mrr: 99, orderCount: 128, menuItems: 45, status: "active" },
+    { id: "df4", name: "Taco Fiesta", slug: "taco-fiesta", plan: "starter", mrr: 99, orderCount: 0, menuItems: 38, status: "onboarding" },
+    { id: "df5", name: "Sushi Wave", slug: "sushi-wave", plan: "enterprise", mrr: 349, orderCount: 891, menuItems: 120, status: "active" },
+  ],
+  stats: { totalOrders: 1037, totalRevenue: 36295, avgOrderValue: 35 },
+};
+
+export const seedDocs = [
+  { id: "doc1", title: "Restaurant Niche Strategy", category: "plan", format: "md", createdAt: "2026-02-20T10:00:00Z", preview: "Strategic plan for niching down to restaurants...", filename: "restaurant-strategy.md" },
+  { id: "doc2", title: "Cold Email Templates", category: "template", format: "md", createdAt: "2026-02-22T14:00:00Z", preview: "Email templates for restaurant outreach...", filename: "cold-email-templates.md" },
+  { id: "doc3", title: "Competitor Analysis Report", category: "research", format: "md", createdAt: "2026-02-28T09:00:00Z", preview: "Deep dive into SpotHopper, BentoBox, Owner.com...", filename: "competitor-analysis.md" },
+  { id: "doc4", title: "Client Onboarding SOP", category: "plan", format: "md", createdAt: "2026-03-01T11:00:00Z", preview: "Standard operating procedure for new client onboarding...", filename: "client-onboarding-sop.md" },
+];
