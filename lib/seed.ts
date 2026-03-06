@@ -32,8 +32,9 @@ export const seedCalendar = [
 ];
 
 export const seedTeam = [
-  { id: "tm1", name: "Jahan", role: "Founder & CEO", status: "active", currentTask: "DerbyFlow development", model: "Human", avatar: "👨‍💻", type: "human" },
-  { id: "tm2", name: "Kimberly", role: "AI Chief of Staff", status: "active", currentTask: "Building Mission Control", model: "Claude Opus", avatar: "🤖", type: "agent" },
+  { id: "tm1", name: "Jahan", role: "Founder & CEO", status: "sleeping", currentTask: "Out for the night", model: "Human", avatar: "🧑‍💼", type: "human" },
+  { id: "tm2", name: "Kimberly", role: "Chief of Staff", status: "working", currentTask: "Running Mission Control", model: "Claude Opus", avatar: "👩‍💻", type: "agent" },
+  { id: "tm3", name: "Kevin", role: "Developer", status: "working", currentTask: "Rebuilding the Office screen", model: "GPT-5", avatar: "🧑‍💻", type: "agent" },
 ];
 
 export const seedClients = [
