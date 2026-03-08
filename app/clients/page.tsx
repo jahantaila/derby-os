@@ -1,222 +1,166 @@
 "use client";
-
-import { useState } from "react";
-import { Building2, Plus } from "lucide-react";
 import { useData } from "@/lib/hooks";
-import type { Client, ClientStatus } from "@/lib/mission-control";
+import { useState } from "react";
+import { Plus, X, Users, DollarSign, TrendingUp, ChevronDown, ChevronUp } from "lucide-react";
 
-const serviceOptions = ["LSA", "PPC", "Meta Ads", "Website", "Creative", "Community Growth"];
-const statusOptions: ClientStatus[] = ["Active", "Onboarding", "Paused"];
+type Client = { id: string; name: string; type: string; monthlyRevenue: number; services: string[]; status: string; lastContact: string; healthScore: number; contact: { email: string; phone: string }; notes: string };
 
-const statusStyles: Record<ClientStatus, string> = {
-  Active: "border-emerald-400/35 bg-emerald-500/15 text-emerald-100",
-  Onboarding: "border-blue-300/35 bg-blue-500/15 text-blue-100",
-  Paused: "border-amber-300/35 bg-amber-500/15 text-amber-100",
-};
+const statusColors: Record<string, string> = { active: "bg-green-500/20 text-green-400", onboarding: "bg-blue-500/20 text-blue-400", paused: "bg-yellow-500/20 text-yellow-400" };
+const healthColor = (s: number) => s >= 80 ? "text-green-400" : s >= 60 ? "text-yellow-400" : "text-red-400";
 
 export default function ClientsPage() {
-  const { data: clients, loading, add } = useData<Client[]>("/api/clients", []);
-  const { data: team } = useData<{ id: string; name: string }[]>("/api/team", []);
-  const [isAdding, setIsAdding] = useState(false);
-  const [form, setForm] = useState({
-    businessName: "",
-    industry: "",
-    location: "",
-    services: [] as string[],
-    monthlyBudget: 0,
-    assignedTeam: [] as string[],
-    status: "Onboarding" as ClientStatus,
-  });
+  const { data: clients, loading, add, update, remove } = useData<Client[]>("/api/clients", []);
+  const [showForm, setShowForm] = useState(false);
+  const [filterType, setFilterType] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const [form, setForm] = useState({ name: "", type: "restaurant", monthlyRevenue: 0, services: [] as string[], status: "onboarding", contact: { email: "", phone: "" }, notes: "" });
 
-  if (loading) {
-    return <div className="text-sm text-slate-300">Loading clients...</div>;
-  }
+  const filtered = clients.filter(c => (!filterType || c.type === filterType) && (!filterStatus || c.status === filterStatus));
+  const totalMRR = clients.reduce((s, c) => s + c.monthlyRevenue, 0);
+  const avgRevenue = clients.length ? Math.round(totalMRR / clients.length) : 0;
+
+  const handleAdd = async () => {
+    if (!form.name) return;
+    await add({ ...form, healthScore: 80, lastContact: new Date().toISOString().split("T")[0], createdAt: new Date().toISOString() });
+    setForm({ name: "", type: "restaurant", monthlyRevenue: 0, services: [], status: "onboarding", contact: { email: "", phone: "" }, notes: "" });
+    setShowForm(false);
+  };
+
+  const toggleService = (svc: string) => {
+    setForm(f => ({ ...f, services: f.services.includes(svc) ? f.services.filter(s => s !== svc) : [...f.services, svc] }));
+  };
+
+  if (loading) return <div className="text-muted-foreground">Loading clients...</div>;
 
   return (
-    <section className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-semibold text-white">Clients</h1>
-          <p className="mt-1 text-sm text-slate-300">Client operations, monthly performance, and team ownership.</p>
-        </div>
-        <button
-          onClick={() => setIsAdding(true)}
-          className="derby-gradient rounded-xl px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
-        >
-          <span className="inline-flex items-center gap-2">
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold">Clients</h1>
+        <div className="flex gap-3 items-center">
+          <select value={filterType} onChange={e => setFilterType(e.target.value)} className="bg-card border border-border rounded px-3 py-1.5 text-sm">
+            <option value="">All Types</option>
+            <option value="restaurant">Restaurant</option>
+            <option value="home-services">Home Services</option>
+            <option value="other">Other</option>
+          </select>
+          <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="bg-card border border-border rounded px-3 py-1.5 text-sm">
+            <option value="">All Statuses</option>
+            <option value="active">Active</option>
+            <option value="onboarding">Onboarding</option>
+            <option value="paused">Paused</option>
+          </select>
+          <button onClick={() => setShowForm(true)} className="bg-primary text-primary-foreground px-4 py-1.5 rounded-md text-sm font-medium flex items-center gap-1 hover:opacity-90">
             <Plus size={16} /> Add Client
-          </span>
-        </button>
+          </button>
+        </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {clients.map((client) => {
-          const cpl = client.monthLeads > 0 ? client.monthSpend / client.monthLeads : 0;
-          return (
-            <article key={client.id} className="glass-surface rounded-2xl p-5">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <h2 className="text-lg font-semibold text-white">{client.businessName}</h2>
-                  <p className="text-sm text-slate-300">{client.industry}</p>
-                  <p className="text-xs text-slate-400">{client.location}</p>
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="bg-card border border-border rounded-lg p-4">
+          <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1"><Users size={16} /> Total Clients</div>
+          <div className="text-2xl font-bold">{clients.length}</div>
+        </div>
+        <div className="bg-card border border-border rounded-lg p-4">
+          <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1"><DollarSign size={16} /> Total MRR</div>
+          <div className="text-2xl font-bold">${totalMRR.toLocaleString()}</div>
+        </div>
+        <div className="bg-card border border-border rounded-lg p-4">
+          <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1"><TrendingUp size={16} /> Avg Revenue/Client</div>
+          <div className="text-2xl font-bold">${avgRevenue.toLocaleString()}</div>
+        </div>
+      </div>
+
+      <div className="bg-card border border-border rounded-lg overflow-hidden">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-border text-muted-foreground">
+              <th className="text-left p-3 font-medium">Name</th>
+              <th className="text-left p-3 font-medium">Type</th>
+              <th className="text-left p-3 font-medium">Revenue</th>
+              <th className="text-left p-3 font-medium">Services</th>
+              <th className="text-left p-3 font-medium">Status</th>
+              <th className="text-left p-3 font-medium">Health</th>
+              <th className="p-3"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map(client => (
+              <>
+                <tr key={client.id} className="border-b border-border/50 hover:bg-accent/50 cursor-pointer" onClick={() => setExpanded(expanded === client.id ? null : client.id)}>
+                  <td className="p-3 font-medium">{client.name}</td>
+                  <td className="p-3 capitalize">{client.type.replace("-", " ")}</td>
+                  <td className="p-3">${client.monthlyRevenue}/mo</td>
+                  <td className="p-3">
+                    <div className="flex gap-1">{client.services.map(s => <span key={s} className="text-xs bg-secondary px-2 py-0.5 rounded-full">{s}</span>)}</div>
+                  </td>
+                  <td className="p-3"><span className={`text-xs px-2 py-0.5 rounded-full ${statusColors[client.status] || ""}`}>{client.status}</span></td>
+                  <td className={`p-3 font-medium ${healthColor(client.healthScore)}`}>{client.healthScore}%</td>
+                  <td className="p-3">
+                    <div className="flex items-center gap-2">
+                      {expanded === client.id ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                      <button onClick={e => { e.stopPropagation(); remove(client.id); }} className="text-muted-foreground hover:text-destructive"><X size={14} /></button>
+                    </div>
+                  </td>
+                </tr>
+                {expanded === client.id && (
+                  <tr key={`${client.id}-detail`} className="border-b border-border/50 bg-secondary/30">
+                    <td colSpan={7} className="p-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-1">Contact</p>
+                          <p className="text-sm">{client.contact.email}</p>
+                          <p className="text-sm">{client.contact.phone}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-1">Last Contact</p>
+                          <p className="text-sm">{client.lastContact}</p>
+                        </div>
+                        <div className="col-span-2">
+                          <p className="text-xs text-muted-foreground mb-1">Notes</p>
+                          <p className="text-sm">{client.notes}</p>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {showForm && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center" onClick={() => setShowForm(false)}>
+          <div className="bg-card border border-border rounded-lg p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold">New Client</h2>
+              <button onClick={() => setShowForm(false)}><X size={18} /></button>
+            </div>
+            <div className="space-y-3">
+              <input placeholder="Business Name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="w-full bg-secondary border border-border rounded px-3 py-2 text-sm" />
+              <select value={form.type} onChange={e => setForm({ ...form, type: e.target.value })} className="w-full bg-secondary border border-border rounded px-3 py-2 text-sm">
+                <option value="restaurant">Restaurant</option>
+                <option value="home-services">Home Services</option>
+                <option value="other">Other</option>
+              </select>
+              <input type="number" placeholder="Monthly Revenue" value={form.monthlyRevenue || ""} onChange={e => setForm({ ...form, monthlyRevenue: Number(e.target.value) })} className="w-full bg-secondary border border-border rounded px-3 py-2 text-sm" />
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">Services</p>
+                <div className="flex gap-2">
+                  {["ads", "website", "software"].map(svc => (
+                    <button key={svc} onClick={() => toggleService(svc)} className={`text-xs px-3 py-1 rounded-full border ${form.services.includes(svc) ? "bg-primary/20 border-primary text-primary" : "border-border text-muted-foreground"}`}>{svc}</button>
+                  ))}
                 </div>
-                <span className={`rounded-full border px-2.5 py-1 text-xs ${statusStyles[client.status]}`}>{client.status}</span>
               </div>
-
-              <div className="mt-4 flex flex-wrap gap-2">
-                {client.services.map((service) => (
-                  <span key={service} className="rounded-full border border-white/15 bg-black/20 px-2.5 py-1 text-xs text-slate-200">
-                    {service}
-                  </span>
-                ))}
-              </div>
-
-              <div className="mt-4 grid grid-cols-2 gap-2 text-sm text-slate-200">
-                <p className="rounded-lg border border-white/10 bg-black/20 px-3 py-2">
-                  <span className="block text-xs text-slate-400">Budget</span>${client.monthlyBudget.toLocaleString()}
-                </p>
-                <p className="rounded-lg border border-white/10 bg-black/20 px-3 py-2">
-                  <span className="block text-xs text-slate-400">Spend</span>${client.monthSpend.toLocaleString()}
-                </p>
-                <p className="rounded-lg border border-white/10 bg-black/20 px-3 py-2">
-                  <span className="block text-xs text-slate-400">Leads</span>{client.monthLeads}
-                </p>
-                <p className="rounded-lg border border-white/10 bg-black/20 px-3 py-2">
-                  <span className="block text-xs text-slate-400">CPL</span>${cpl.toFixed(2)}
-                </p>
-              </div>
-
-              <div className="mt-4 space-y-1 text-xs text-slate-300">
-                <p>
-                  <span className="text-slate-400">Assigned:</span> {client.assignedTeam.join(", ")}
-                </p>
-                <p>
-                  <span className="text-slate-400">Last Report:</span> {client.lastReportDate}
-                </p>
-              </div>
-            </article>
-          );
-        })}
-      </div>
-
-      {isAdding ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 px-4" onClick={() => setIsAdding(false)}>
-          <div className="glass-surface w-full max-w-xl rounded-2xl p-6" onClick={(event) => event.stopPropagation()}>
-            <h3 className="mb-4 text-lg font-semibold text-white">Add Client</h3>
-            <div className="grid gap-3 md:grid-cols-2">
-              <input
-                placeholder="Business name"
-                value={form.businessName}
-                onChange={(event) => setForm((prev) => ({ ...prev, businessName: event.target.value }))}
-                className="rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white outline-none transition focus:border-blue-400/80"
-              />
-              <input
-                placeholder="Industry"
-                value={form.industry}
-                onChange={(event) => setForm((prev) => ({ ...prev, industry: event.target.value }))}
-                className="rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white outline-none transition focus:border-blue-400/80"
-              />
-              <input
-                placeholder="Location"
-                value={form.location}
-                onChange={(event) => setForm((prev) => ({ ...prev, location: event.target.value }))}
-                className="rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white outline-none transition focus:border-blue-400/80"
-              />
-              <input
-                type="number"
-                placeholder="Monthly budget"
-                value={form.monthlyBudget || ""}
-                onChange={(event) => setForm((prev) => ({ ...prev, monthlyBudget: Number(event.target.value) }))}
-                className="rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white outline-none transition focus:border-blue-400/80"
-              />
-              <select
-                value={form.status}
-                onChange={(event) => setForm((prev) => ({ ...prev, status: event.target.value as ClientStatus }))}
-                className="rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white outline-none transition focus:border-blue-400/80"
-              >
-                {statusOptions.map((status) => (
-                  <option key={status} value={status}>
-                    {status}
-                  </option>
-                ))}
-              </select>
-              <select
-                value=""
-                onChange={(event) => {
-                  const memberName = event.target.value;
-                  if (!memberName || form.assignedTeam.includes(memberName)) return;
-                  setForm((prev) => ({ ...prev, assignedTeam: [...prev.assignedTeam, memberName] }));
-                }}
-                className="rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white outline-none transition focus:border-blue-400/80"
-              >
-                <option value="">Assign team member</option>
-                {team.map((member) => (
-                  <option key={member.id} value={member.name}>
-                    {member.name}
-                  </option>
-                ))}
-              </select>
+              <input placeholder="Email" value={form.contact.email} onChange={e => setForm({ ...form, contact: { ...form.contact, email: e.target.value } })} className="w-full bg-secondary border border-border rounded px-3 py-2 text-sm" />
+              <input placeholder="Phone" value={form.contact.phone} onChange={e => setForm({ ...form, contact: { ...form.contact, phone: e.target.value } })} className="w-full bg-secondary border border-border rounded px-3 py-2 text-sm" />
+              <textarea placeholder="Notes" value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} className="w-full bg-secondary border border-border rounded px-3 py-2 text-sm" rows={3} />
+              <button onClick={handleAdd} className="w-full bg-primary text-primary-foreground py-2 rounded-md text-sm font-medium hover:opacity-90">Add Client</button>
             </div>
-
-            <div className="mt-3 flex flex-wrap gap-2">
-              {serviceOptions.map((service) => (
-                <button
-                  key={service}
-                  onClick={() => {
-                    setForm((prev) => ({
-                      ...prev,
-                      services: prev.services.includes(service)
-                        ? prev.services.filter((entry) => entry !== service)
-                        : [...prev.services, service],
-                    }));
-                  }}
-                  className={`rounded-full border px-3 py-1 text-xs transition ${
-                    form.services.includes(service)
-                      ? "border-blue-300/40 bg-blue-500/20 text-blue-100"
-                      : "border-white/15 bg-black/25 text-slate-300"
-                  }`}
-                >
-                  {service}
-                </button>
-              ))}
-            </div>
-
-            {form.assignedTeam.length > 0 ? (
-              <div className="mt-3 flex flex-wrap gap-2 text-xs">
-                {form.assignedTeam.map((member) => (
-                  <button
-                    key={member}
-                    onClick={() => {
-                      setForm((prev) => ({ ...prev, assignedTeam: prev.assignedTeam.filter((entry) => entry !== member) }));
-                    }}
-                    className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-slate-200"
-                  >
-                    {member} ×
-                  </button>
-                ))}
-              </div>
-            ) : null}
-
-            <button
-              onClick={async () => {
-                if (!form.businessName || !form.industry || !form.location) return;
-                await add({
-                  ...form,
-                  monthSpend: 0,
-                  monthLeads: 0,
-                  lastReportDate: new Date().toISOString().slice(0, 10),
-                });
-                setIsAdding(false);
-              }}
-              className="derby-gradient mt-5 w-full rounded-xl py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
-            >
-              <span className="inline-flex items-center gap-2">
-                <Building2 size={15} /> Save Client
-              </span>
-            </button>
           </div>
         </div>
-      ) : null}
-    </section>
+      )}
+    </div>
   );
 }
