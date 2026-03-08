@@ -1,7 +1,9 @@
 import { createCrudHandler } from "@/lib/api-helpers";
-import { seedClients } from "@/lib/seed";
-const h = createCrudHandler("clients.json", seedClients as any);
-export const GET = h.GET;
-export const POST = h.POST;
-export const PUT = h.PUT;
-export const DELETE = h.DELETE;
+import { seedClients, type Client } from "@/lib/mission-control";
+
+const handler = createCrudHandler<Client>("clients.json", seedClients);
+
+export const GET = handler.GET;
+export const POST = handler.POST;
+export const PUT = handler.PUT;
+export const DELETE = handler.DELETE;

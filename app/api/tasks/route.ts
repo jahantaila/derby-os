@@ -1,7 +1,9 @@
 import { createCrudHandler } from "@/lib/api-helpers";
-import { seedTasks } from "@/lib/seed";
-const h = createCrudHandler("tasks.json", seedTasks as any);
-export const GET = h.GET;
-export const POST = h.POST;
-export const PUT = h.PUT;
-export const DELETE = h.DELETE;
+import { seedTasks, type Task } from "@/lib/mission-control";
+
+const handler = createCrudHandler<Task>("tasks.json", seedTasks);
+
+export const GET = handler.GET;
+export const POST = handler.POST;
+export const PUT = handler.PUT;
+export const DELETE = handler.DELETE;

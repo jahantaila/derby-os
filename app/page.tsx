@@ -1,39 +1,108 @@
-import Link from "next/link";
-import { ClipboardList, Calendar, Target, Brain, FileText, Users, User, RefreshCw, DollarSign, Megaphone, Wallet, Search, UtensilsCrossed, Building2 } from "lucide-react";
+"use client";
 
-const cards = [
-  { href: "/tasks", label: "Tasks", icon: ClipboardList, desc: "Kanban board for all tasks", color: "text-blue-400" },
-  { href: "/calendar", label: "Calendar", icon: Calendar, desc: "Scheduled jobs & events", color: "text-green-400" },
-  { href: "/projects", label: "Projects", icon: Target, desc: "Track all projects", color: "text-purple-400" },
-  { href: "/memory", label: "Memory", icon: Brain, desc: "Agent memory & notes", color: "text-pink-400" },
-  { href: "/docs", label: "Docs", icon: FileText, desc: "Documents & templates", color: "text-yellow-400" },
-  { href: "/team", label: "Team", icon: Users, desc: "Org chart & agents", color: "text-cyan-400" },
-  { href: "/clients", label: "Clients", icon: User, desc: "Client management", color: "text-orange-400" },
-  { href: "/pipeline", label: "Pipeline", icon: RefreshCw, desc: "Sales pipeline CRM", color: "text-emerald-400" },
-  { href: "/revenue", label: "Revenue", icon: DollarSign, desc: "Revenue dashboard", color: "text-green-400" },
-  { href: "/ad-templates", label: "Ad Templates", icon: Megaphone, desc: "Ad copy library", color: "text-red-400" },
-  { href: "/finance", label: "Finance", icon: Wallet, desc: "P&L & expenses", color: "text-lime-400" },
-  { href: "/competitors", label: "Competitors", icon: Search, desc: "Competitor intel", color: "text-amber-400" },
-  { href: "/derbyflow", label: "DerbyFlow", icon: UtensilsCrossed, desc: "Platform admin", color: "text-indigo-400" },
-  { href: "/office", label: "Office", icon: Building2, desc: "Virtual office", color: "text-violet-400" },
+import Link from "next/link";
+import { Activity, Bot, CircleDollarSign, DollarSign, TrendingUp, Users } from "lucide-react";
+import { useData } from "@/lib/hooks";
+import type { ActivityItem, Client, CostEntry, TeamMember } from "@/lib/mission-control";
+
+function relativeTime(iso: string): string {
+  const deltaMs = Date.now() - new Date(iso).getTime();
+  const minutes = Math.max(1, Math.floor(deltaMs / 60000));
+  if (minutes < 60) return `${minutes} min ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} hr ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+}
+
+const quickActions = [
+  { href: "/clients", label: "New Client" },
+  { href: "/tasks", label: "Assign Task" },
+  { href: "/reports", label: "View Reports" },
 ];
 
 export default function Home() {
+  const { data: team } = useData<TeamMember[]>("/api/team", []);
+  const { data: clients } = useData<Client[]>("/api/clients", []);
+  const { data: activity } = useData<ActivityItem[]>("/api/activity", []);
+  const { data: costs } = useData<CostEntry[]>("/api/costs", []);
+
+  const activeAgents = team.filter((member) => member.type === "AI" && member.status === "active").length;
+  const adSpend = clients.reduce((sum, client) => sum + client.monthSpend, 0);
+  const totalLeads = clients.reduce((sum, client) => sum + client.monthLeads, 0);
+  const agencyRevenue = clients.reduce((sum, client) => sum + client.monthlyBudget, 0);
+  const agentCosts = costs.reduce((sum, entry) => sum + entry.cost, 0);
+
   return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Welcome to Mission Control</h1>
-        <p className="text-muted-foreground">Derby Digital&apos;s command center. Everything you need in one place.</p>
+    <section className="space-y-7">
+      <div className="glass-surface relative overflow-hidden rounded-3xl px-6 py-7">
+        <div className="pointer-events-none absolute -right-12 -top-24 h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(32,147,255,0.35),rgba(32,147,255,0)_70%)]" />
+        <p className="text-xs uppercase tracking-[0.26em] text-blue-200/75">Command Center</p>
+        <h1 className="mt-2 text-3xl font-semibold text-white md:text-4xl">Derby Digital Mission Control</h1>
+        <p className="mt-2 max-w-3xl text-sm text-slate-300 md:text-base">
+          Real-time agency snapshot for team activity, client performance, and operating costs.
+        </p>
+
+        <div className="mt-5 flex flex-wrap gap-3">
+          {quickActions.map((action) => (
+            <Link
+              key={action.href}
+              href={action.href}
+              className="rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm text-blue-100 transition hover:border-blue-300/40 hover:bg-white/15"
+            >
+              {action.label}
+            </Link>
+          ))}
+        </div>
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {cards.map(c => (
-          <Link key={c.href} href={c.href} className="bg-card border border-border rounded-lg p-5 hover:border-primary/50 hover:bg-accent transition-all group">
-            <c.icon className={`${c.color} mb-3 group-hover:scale-110 transition-transform`} size={28} />
-            <h3 className="font-semibold mb-1">{c.label}</h3>
-            <p className="text-xs text-muted-foreground">{c.desc}</p>
-          </Link>
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {[
+          { label: "Active Agents", value: activeAgents, icon: Bot },
+          { label: "Active Clients", value: clients.length, icon: Users },
+          { label: "Total Ad Spend", value: `$${adSpend.toLocaleString()}`, icon: TrendingUp },
+          { label: "Total Leads", value: totalLeads, icon: Activity },
+          { label: "Agency Revenue", value: `$${agencyRevenue.toLocaleString()}`, icon: DollarSign },
+          { label: "Agent Costs", value: `$${agentCosts.toFixed(2)}`, icon: CircleDollarSign },
+        ].map((item) => (
+          <article
+            key={item.label}
+            className="glass-surface rounded-2xl p-5 transition duration-300 hover:-translate-y-0.5 hover:border-blue-300/35"
+          >
+            <div className="flex items-center justify-between">
+              <p className="text-xs uppercase tracking-[0.18em] text-slate-300">{item.label}</p>
+              <item.icon size={18} className="text-blue-200" />
+            </div>
+            <p className="mt-3 text-3xl font-semibold text-white">{item.value}</p>
+          </article>
         ))}
       </div>
-    </div>
+
+      <article className="glass-surface rounded-2xl p-5">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-white">Activity Feed</h2>
+          <span className="rounded-full border border-blue-300/30 bg-blue-500/10 px-2.5 py-1 text-xs text-blue-100">
+            Live
+          </span>
+        </div>
+
+        <div className="space-y-3">
+          {activity
+            .slice()
+            .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+            .map((item) => (
+              <div
+                key={item.id}
+                className="rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-slate-200 transition hover:border-white/20"
+              >
+                <p>
+                  <span className="font-semibold text-blue-100">{item.agent}</span> {item.action}
+                </p>
+                <p className="mt-1 text-xs text-slate-400">{relativeTime(item.timestamp)}</p>
+              </div>
+            ))}
+        </div>
+      </article>
+    </section>
   );
 }

@@ -1,7 +1,7 @@
 import { createCrudHandler } from "@/lib/api-helpers";
-import { seedTeam, type TeamMember } from "@/lib/mission-control";
+import { seedCosts, type CostEntry } from "@/lib/mission-control";
 
-const handler = createCrudHandler<TeamMember>("team.json", seedTeam);
+const handler = createCrudHandler<CostEntry>("costs.json", seedCosts);
 
 export const GET = handler.GET;
 export const POST = handler.POST;
