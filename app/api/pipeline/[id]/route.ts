@@ -46,7 +46,7 @@ function normalizeEnrichmentStatus(value: unknown): EnrichmentStatus | undefined
 }
 
 export async function GET(_: Request, { params }: { params: { id: string } }) {
-  const deal = getPipelineDeals().find((item) => item.id === params.id);
+  const deal = (await getPipelineDeals()).find((item) => item.id === params.id);
   if (!deal) {
     return NextResponse.json({ error: "Deal not found." }, { status: 404 });
   }
@@ -57,7 +57,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
   try {
     const id = params.id;
     const patch = (await request.json()) as UpdateDealInput;
-    const deals = getPipelineDeals();
+    const deals = await getPipelineDeals();
     const index = deals.findIndex((deal) => deal.id === id);
 
     if (index < 0) {
@@ -92,7 +92,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     };
 
     deals[index] = updated;
-    writePipelineDeals(deals);
+    await writePipelineDeals(deals);
     return NextResponse.json(updated);
   } catch {
     return NextResponse.json({ error: "Unable to update deal." }, { status: 500 });
@@ -102,14 +102,14 @@ export async function PATCH(request: Request, { params }: { params: { id: string
 export async function DELETE(_: Request, { params }: { params: { id: string } }) {
   try {
     const id = params.id;
-    const deals = getPipelineDeals();
+    const deals = await getPipelineDeals();
     const next = deals.filter((deal) => deal.id !== id);
 
     if (next.length === deals.length) {
       return NextResponse.json({ error: "Deal not found." }, { status: 404 });
     }
 
-    writePipelineDeals(next);
+    await writePipelineDeals(next);
     return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json({ error: "Unable to delete deal." }, { status: 500 });

@@ -1,4 +1,4 @@
-import { readData, writeData } from "@/lib/data";
+import { readPersistentData, writePersistentData } from "@/lib/persistence";
 import { INITIAL_TASKS, TaskRecord } from "@/lib/tasks-schema";
 
 const TASKS_FILE = "tasks.json";
@@ -27,19 +27,12 @@ function isTaskArray(value: unknown): value is TaskRecord[] {
   return Array.isArray(value) && value.every(isTaskRecord);
 }
 
-export function getTasks(): TaskRecord[] {
-  const raw = readData<unknown>(TASKS_FILE, INITIAL_TASKS);
+export async function getTasks(): Promise<TaskRecord[]> {
+  const raw = await readPersistentData<unknown>(TASKS_FILE, INITIAL_TASKS);
   if (isTaskArray(raw) && raw.length > 0) return raw;
-
-  try {
-    writeData(TASKS_FILE, INITIAL_TASKS);
-  } catch {
-    // Sandbox-restricted environments may not allow writes outside workspace.
-  }
-
   return INITIAL_TASKS;
 }
 
-export function saveTasks(tasks: TaskRecord[]) {
-  writeData(TASKS_FILE, tasks);
+export async function saveTasks(tasks: TaskRecord[]) {
+  await writePersistentData(TASKS_FILE, tasks);
 }

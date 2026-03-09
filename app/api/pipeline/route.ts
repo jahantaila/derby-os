@@ -48,7 +48,7 @@ function normalizeSource(value: unknown): PipelineSource {
 }
 
 export async function GET() {
-  return NextResponse.json(getPipelineDeals());
+  return NextResponse.json(await getPipelineDeals());
 }
 
 export async function POST(request: Request) {
@@ -80,9 +80,9 @@ export async function POST(request: Request) {
       stageUpdatedAt: today,
     };
 
-    const deals = getPipelineDeals();
+    const deals = await getPipelineDeals();
     deals.push(deal);
-    writePipelineDeals(deals);
+    await writePipelineDeals(deals);
 
     return NextResponse.json(deal, { status: 201 });
   } catch {

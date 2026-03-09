@@ -126,10 +126,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: true, error: "Webhook missing lead email." });
     }
 
-    const deals = getPipelineDeals();
+    const deals = await getPipelineDeals();
     const deal = createWebhookDeal(lead, record);
     deals.push(deal);
-    writePipelineDeals(deals);
+    await writePipelineDeals(deals);
 
     appendInstantlyWebhookLog({
       id: buildLogId(),

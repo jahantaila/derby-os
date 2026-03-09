@@ -15,7 +15,7 @@ function isType(value: unknown): value is CalendarEventType {
 }
 
 export async function GET() {
-  return NextResponse.json(getCalendarEvents());
+  return NextResponse.json(await getCalendarEvents());
 }
 
 export async function POST(request: Request) {
@@ -39,9 +39,9 @@ export async function POST(request: Request) {
       client,
     };
 
-    const events = getCalendarEvents();
+    const events = await getCalendarEvents();
     events.push(event);
-    writeCalendarEvents(events);
+    await writeCalendarEvents(events);
 
     return NextResponse.json(event, { status: 201 });
   } catch {

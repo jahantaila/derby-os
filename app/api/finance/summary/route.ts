@@ -4,6 +4,6 @@ import { buildFinanceSummary, getFinanceData } from "@/lib/finance-store";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const data = getFinanceData();
+  const data = await getFinanceData();
   return NextResponse.json(buildFinanceSummary(data));
 }

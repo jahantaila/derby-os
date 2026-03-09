@@ -19,7 +19,7 @@ export async function PATCH(request: Request, context: { params: { id: string } 
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const data = getFinanceData();
+  const data = await getFinanceData();
   const index = data.entries.findIndex((entry) => entry.id === context.params.id);
 
   if (index === -1) {
@@ -50,13 +50,13 @@ export async function PATCH(request: Request, context: { params: { id: string } 
   };
 
   data.entries[index] = updated;
-  writeFinanceData(data);
+  await writeFinanceData(data);
 
   return NextResponse.json(updated);
 }
 
 export async function DELETE(_request: Request, context: { params: { id: string } }) {
-  const data = getFinanceData();
+  const data = await getFinanceData();
   const exists = data.entries.some((entry) => entry.id === context.params.id);
 
   if (!exists) {
@@ -64,7 +64,7 @@ export async function DELETE(_request: Request, context: { params: { id: string 
   }
 
   data.entries = data.entries.filter((entry) => entry.id !== context.params.id);
-  writeFinanceData(data);
+  await writeFinanceData(data);
 
   return NextResponse.json({ ok: true });
 }

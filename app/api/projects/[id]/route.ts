@@ -48,7 +48,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
   try {
     const id = params.id;
     const patch = (await request.json()) as UpdateProjectInput;
-    const projects = getProjects();
+    const projects = await getProjects();
     const index = projects.findIndex((project) => project.id === id);
 
     if (index < 0) {
@@ -85,7 +85,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     };
 
     projects[index] = updated;
-    writeProjects(projects);
+    await writeProjects(projects);
 
     return NextResponse.json(updated);
   } catch {
@@ -96,14 +96,14 @@ export async function PATCH(request: Request, { params }: { params: { id: string
 export async function DELETE(_: Request, { params }: { params: { id: string } }) {
   try {
     const id = params.id;
-    const projects = getProjects();
+    const projects = await getProjects();
     const next = projects.filter((project) => project.id !== id);
 
     if (next.length === projects.length) {
       return NextResponse.json({ error: "Project not found." }, { status: 404 });
     }
 
-    writeProjects(next);
+    await writeProjects(next);
     return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json({ error: "Unable to delete project." }, { status: 500 });

@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Field 'amount' must be a positive number" }, { status: 400 });
   }
 
-  const data = getFinanceData();
+  const data = await getFinanceData();
   const clientId = typeof body.clientId === "string" && body.clientId.trim() ? body.clientId : null;
 
   if (clientId && !data.clients.some((client) => client.id === clientId)) {
@@ -51,7 +51,7 @@ export async function POST(request: Request) {
   };
 
   data.entries.unshift(entry);
-  writeFinanceData(data);
+  await writeFinanceData(data);
 
   return NextResponse.json(entry, { status: 201 });
 }

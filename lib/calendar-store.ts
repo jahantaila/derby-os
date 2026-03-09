@@ -1,4 +1,4 @@
-import { readData, writeData } from "@/lib/data";
+import { readPersistentData, writePersistentData } from "@/lib/persistence";
 import { CALENDAR_TEAM_MEMBERS, CalendarEventRecord, CalendarEventType, INITIAL_CALENDAR_EVENTS } from "@/lib/calendar-schema";
 
 const CALENDAR_FILE = "calendar.json";
@@ -56,15 +56,15 @@ function normalizeCalendar(value: unknown): CalendarEventRecord[] {
   return normalized.length > 0 ? normalized : INITIAL_CALENDAR_EVENTS;
 }
 
-export function getCalendarEvents(): CalendarEventRecord[] {
-  const raw = readData<unknown>(CALENDAR_FILE, INITIAL_CALENDAR_EVENTS);
+export async function getCalendarEvents(): Promise<CalendarEventRecord[]> {
+  const raw = await readPersistentData<unknown>(CALENDAR_FILE, INITIAL_CALENDAR_EVENTS);
   const normalized = normalizeCalendar(raw);
   if (JSON.stringify(raw) !== JSON.stringify(normalized)) {
-    writeCalendarEvents(normalized);
+    await writeCalendarEvents(normalized);
   }
   return normalized;
 }
 
-export function writeCalendarEvents(events: CalendarEventRecord[]) {
-  writeData(CALENDAR_FILE, normalizeCalendar(events));
+export async function writeCalendarEvents(events: CalendarEventRecord[]) {
+  await writePersistentData(CALENDAR_FILE, normalizeCalendar(events));
 }

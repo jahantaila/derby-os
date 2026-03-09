@@ -51,7 +51,7 @@ function normalizeTasks(value: unknown): string[] {
 }
 
 export async function GET() {
-  return NextResponse.json(getProjects());
+  return NextResponse.json(await getProjects());
 }
 
 export async function POST(request: Request) {
@@ -83,9 +83,9 @@ export async function POST(request: Request) {
       tasks: normalizeTasks(body.tasks),
     };
 
-    const projects = getProjects();
+    const projects = await getProjects();
     projects.push(project);
-    writeProjects(projects);
+    await writeProjects(projects);
 
     return NextResponse.json(project, { status: 201 });
   } catch {

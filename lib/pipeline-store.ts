@@ -1,4 +1,4 @@
-import { readData, writeData } from "@/lib/data";
+import { readPersistentData, writePersistentData } from "@/lib/persistence";
 import {
   EnrichmentData,
   EnrichmentStatus,
@@ -142,25 +142,16 @@ function normalizePipeline(raw: unknown): PipelineDeal[] {
   return deals.length > 0 ? deals : INITIAL_PIPELINE_DEALS;
 }
 
-export function getPipelineDeals(): PipelineDeal[] {
-  const raw = readData<unknown>(PIPELINE_FILE, null);
-  if (raw === null) {
-    try {
-      writeData(PIPELINE_FILE, INITIAL_PIPELINE_DEALS);
-    } catch {
-      // Sandbox-restricted environments may not allow writes outside workspace.
-    }
-    return INITIAL_PIPELINE_DEALS;
-  }
-
+export async function getPipelineDeals(): Promise<PipelineDeal[]> {
+  const raw = await readPersistentData<unknown>(PIPELINE_FILE, INITIAL_PIPELINE_DEALS);
   const normalized = normalizePipeline(raw);
   if (JSON.stringify(raw) !== JSON.stringify(normalized)) {
-    writePipelineDeals(normalized);
+    await writePipelineDeals(normalized);
   }
   return normalized;
 }
 
-export function writePipelineDeals(deals: PipelineDeal[]) {
+export async function writePipelineDeals(deals: PipelineDeal[]) {
   const normalized = normalizePipeline(deals);
-  writeData(PIPELINE_FILE, normalized);
+  await writePersistentData(PIPELINE_FILE, normalized);
 }

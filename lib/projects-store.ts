@@ -1,4 +1,4 @@
-import { readData, writeData } from "@/lib/data";
+import { readPersistentData, writePersistentData } from "@/lib/persistence";
 import {
   INITIAL_PROJECTS,
   PROJECT_ASSIGNEES,
@@ -97,21 +97,12 @@ function normalizeProjects(raw: unknown): ProjectRecord[] {
   return projects.length > 0 ? projects : INITIAL_PROJECTS;
 }
 
-export function getProjects(): ProjectRecord[] {
-  const raw = readData<unknown>(PROJECTS_FILE, null);
-  if (raw === null) {
-    try {
-      writeData(PROJECTS_FILE, INITIAL_PROJECTS);
-    } catch {
-      // Sandbox-restricted environments may not allow writes outside workspace.
-    }
-    return INITIAL_PROJECTS;
-  }
-
+export async function getProjects(): Promise<ProjectRecord[]> {
+  const raw = await readPersistentData<unknown>(PROJECTS_FILE, INITIAL_PROJECTS);
   const normalized = normalizeProjects(raw);
   if (JSON.stringify(raw) !== JSON.stringify(normalized)) {
     try {
-      writeProjects(normalized);
+      await writeProjects(normalized);
     } catch {
       // Sandbox-restricted environments may not allow writes outside workspace.
     }
@@ -119,6 +110,6 @@ export function getProjects(): ProjectRecord[] {
   return normalized;
 }
 
-export function writeProjects(projects: ProjectRecord[]) {
-  writeData(PROJECTS_FILE, normalizeProjects(projects));
+export async function writeProjects(projects: ProjectRecord[]) {
+  await writePersistentData(PROJECTS_FILE, normalizeProjects(projects));
 }

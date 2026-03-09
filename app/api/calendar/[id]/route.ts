@@ -14,7 +14,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
   try {
     const id = params.id;
     const patch = (await request.json()) as UpdateCalendarEventInput;
-    const events = getCalendarEvents();
+    const events = await getCalendarEvents();
     const index = events.findIndex((event) => event.id === id);
 
     if (index < 0) {
@@ -33,7 +33,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     };
 
     events[index] = updated;
-    writeCalendarEvents(events);
+    await writeCalendarEvents(events);
     return NextResponse.json(updated);
   } catch {
     return NextResponse.json({ error: "Unable to update event." }, { status: 500 });
@@ -43,14 +43,14 @@ export async function PATCH(request: Request, { params }: { params: { id: string
 export async function DELETE(_: Request, { params }: { params: { id: string } }) {
   try {
     const id = params.id;
-    const events = getCalendarEvents();
+    const events = await getCalendarEvents();
     const next = events.filter((event) => event.id !== id);
 
     if (next.length === events.length) {
       return NextResponse.json({ error: "Event not found." }, { status: 404 });
     }
 
-    writeCalendarEvents(next);
+    await writeCalendarEvents(next);
     return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json({ error: "Unable to delete event." }, { status: 500 });

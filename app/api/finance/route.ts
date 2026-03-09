@@ -5,7 +5,7 @@ import { FinanceData } from "@/lib/finance-types";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  return NextResponse.json(getFinanceData());
+  return NextResponse.json(await getFinanceData());
 }
 
 export async function PUT(request: Request) {
@@ -17,6 +17,6 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  writeFinanceData(body);
-  return NextResponse.json(getFinanceData());
+  await writeFinanceData(body);
+  return NextResponse.json(await getFinanceData());
 }

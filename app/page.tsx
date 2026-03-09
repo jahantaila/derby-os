@@ -44,6 +44,14 @@ type Workload = {
   completionRate: number;
 };
 
+type ActivityItem = {
+  id: string;
+  message: string;
+  timestamp: string;
+  actor: string;
+  type: string;
+};
+
 const AGENT_DEPARTMENTS: Array<Agent["department"]> = ["Executive", "Marketing", "Development"];
 const EMPLOYEE_DEPARTMENTS: Array<Agent["department"]> = ["Development", "Fulfillment"];
 
@@ -79,14 +87,6 @@ const STATUS_BADGE: Record<TaskStatus, string> = {
   blocked: "text-rose-300 border-rose-500/40 bg-rose-700/20",
   done: "text-emerald-300 border-emerald-500/40 bg-emerald-700/20",
 };
-
-const recentActivity = [
-  { text: "Sabri completed veteran section rewrite", time: "12h ago" },
-  { text: "Kevin deployed Tasks kanban board", time: "1h ago" },
-  { text: "Kimberly sent Bluegrass location targeting", time: "12h ago" },
-  { text: "Jahan started Google Ads campaign setup", time: "12h ago" },
-  { text: "Alex completed Olympus analysis", time: "2d ago" },
-];
 
 const clientFallback = [
   { id: "c1", name: "Bluegrass Garage Door", services: ["Google Ads setup"], status: "active" },
@@ -128,6 +128,16 @@ function formatDateTime(date: Date) {
   });
 }
 
+function relativeTimeFromIso(value: string, now: Date): string {
+  const timestamp = Date.parse(value);
+  if (Number.isNaN(timestamp)) return "unknown";
+  const seconds = Math.max(0, Math.floor((now.getTime() - timestamp) / 1000));
+  if (seconds < 60) return "just now";
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+  return `${Math.floor(seconds / 86400)}d ago`;
+}
+
 function parseDueDate(value: string | null): number {
   if (!value) return Number.MAX_SAFE_INTEGER;
   const timestamp = Date.parse(value);
@@ -150,6 +160,7 @@ export default function DashboardPage() {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
+  const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
@@ -157,24 +168,33 @@ export default function DashboardPage() {
 
     const loadDashboard = async () => {
       try {
-        const [agentRes, taskRes, clientRes] = await Promise.all([
+        const [agentRes, taskRes, clientRes, activityRes] = await Promise.all([
           fetch("/api/agents", { cache: "no-store" }),
           fetch("/api/tasks", { cache: "no-store" }),
           fetch("/api/clients", { cache: "no-store" }),
+          fetch("/api/activity", { cache: "no-store" }),
         ]);
 
-        if (!agentRes.ok || !taskRes.ok || !clientRes.ok) return;
+        if (!agentRes.ok || !taskRes.ok || !clientRes.ok || !activityRes.ok) return;
 
-        const [agentData, taskData, clientData] = await Promise.all([
+        const [agentData, taskData, clientData, activityData] = await Promise.all([
           agentRes.json() as Promise<Agent[]>,
           taskRes.json() as Promise<Task[]>,
           clientRes.json() as Promise<Client[]>,
+          activityRes.json() as Promise<ActivityItem[]>,
         ]);
 
         if (!mounted) return;
         setAgents(Array.isArray(agentData) ? agentData : []);
         setTasks(Array.isArray(taskData) ? taskData : []);
         setClients(Array.isArray(clientData) ? clientData : []);
+        setActivity(
+          Array.isArray(activityData)
+            ? activityData
+                .filter((item) => typeof item?.id === "string" && typeof item?.message === "string")
+                .sort((a, b) => Date.parse(b.timestamp) - Date.parse(a.timestamp))
+            : [],
+        );
       } catch {
         // Keep last known dashboard state on transient fetch failures.
       }
@@ -463,14 +483,17 @@ export default function DashboardPage() {
           <article className="glass-panel rounded-2xl p-4 sm:p-5 lg:col-span-2">
             <h2 className="section-title">Recent Activity Timeline</h2>
             <div className="mt-4 space-y-4">
-              {recentActivity.map((item, index) => (
-                <div key={item.text} className="relative pl-6">
+              {activity.map((item, index) => (
+                <div key={item.id} className="relative pl-6">
                   <span className="absolute left-0 top-1.5 h-2.5 w-2.5 rounded-full bg-gradient-to-br from-[#2093FF] to-[#0026FF]" />
-                  {index < recentActivity.length - 1 && <span className="absolute left-[4px] top-4 h-[calc(100%+8px)] w-px bg-blue-400/25" />}
-                  <p className="text-sm text-slate-200">{item.text}</p>
-                  <p className="mt-1 text-[11px] uppercase tracking-[0.14em] text-slate-500">{item.time}</p>
+                  {index < activity.length - 1 && <span className="absolute left-[4px] top-4 h-[calc(100%+8px)] w-px bg-blue-400/25" />}
+                  <p className="text-sm text-slate-200">{item.message}</p>
+                  <p className="mt-1 text-[11px] uppercase tracking-[0.14em] text-slate-500">
+                    {relativeTimeFromIso(item.timestamp, now)}
+                  </p>
                 </div>
               ))}
+              {activity.length === 0 && <p className="text-sm text-slate-400">No recent activity yet.</p>}
             </div>
           </article>
         </div>

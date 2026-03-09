@@ -1,4 +1,4 @@
-import { readData, writeData } from "@/lib/data";
+import { readPersistentData, writePersistentData } from "@/lib/persistence";
 import {
   FinanceCategory,
   FinanceClient,
@@ -13,16 +13,33 @@ export const FINANCE_FILE = "finance.json";
 
 export const defaultFinanceData: FinanceData = {
   clients: [
-    { id: "bluegrass", name: "Bluegrass Garage Door", monthlyRetainer: 0, adSpend: 0, status: "active" },
-    { id: "palma", name: "Palma Italian Kitchen", monthlyRetainer: 0, adSpend: 0, status: "active" },
-    { id: "olympus", name: "OlympusLou", monthlyRetainer: 0, adSpend: 0, status: "active" },
+    { id: "bluegrass", name: "Bluegrass Garage Door", monthlyRetainer: 4200, adSpend: 1400, status: "active" },
+    { id: "palma", name: "Palma Italian Kitchen", monthlyRetainer: 3600, adSpend: 1200, status: "active" },
+    { id: "olympus", name: "OlympusLou", monthlyRetainer: 5100, adSpend: 1700, status: "active" },
   ],
-  entries: [],
+  entries: [
+    {
+      id: "f1",
+      date: "2026-03-08",
+      description: "Bluegrass creative sprint",
+      category: "expense",
+      clientId: "bluegrass",
+      amount: 480,
+    },
+    {
+      id: "f2",
+      date: "2026-03-07",
+      description: "Olympus strategy upsell",
+      category: "revenue",
+      clientId: "olympus",
+      amount: 1200,
+    },
+  ],
   monthlyOverhead: {
-    aiCosts: 0,
-    software: 0,
-    team: 0,
-    other: 0,
+    aiCosts: 450,
+    software: 980,
+    team: 4200,
+    other: 350,
   },
 };
 
@@ -107,18 +124,18 @@ function normalizeFinanceData(raw: unknown): FinanceData {
   return data;
 }
 
-export function getFinanceData(): FinanceData {
-  const raw = readData<unknown>(FINANCE_FILE, defaultFinanceData);
+export async function getFinanceData(): Promise<FinanceData> {
+  const raw = await readPersistentData<unknown>(FINANCE_FILE, defaultFinanceData);
   const normalized = normalizeFinanceData(raw);
   if (JSON.stringify(raw) !== JSON.stringify(normalized)) {
-    writeFinanceData(normalized);
+    await writeFinanceData(normalized);
   }
   return normalized;
 }
 
-export function writeFinanceData(data: FinanceData) {
+export async function writeFinanceData(data: FinanceData) {
   const normalized = normalizeFinanceData(data);
-  writeData(FINANCE_FILE, normalized);
+  await writePersistentData(FINANCE_FILE, normalized);
 }
 
 export function buildFinanceSummary(data: FinanceData): FinanceSummary {

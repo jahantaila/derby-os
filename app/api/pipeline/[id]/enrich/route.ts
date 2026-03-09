@@ -60,7 +60,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
   try {
     const id = params.id;
     const input = (await request.json()) as EnrichInput;
-    const deals = getPipelineDeals();
+    const deals = await getPipelineDeals();
     const index = deals.findIndex((deal) => deal.id === id);
 
     if (index < 0) {
@@ -75,7 +75,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
     };
 
     deals[index] = enriched;
-    writePipelineDeals(deals);
+    await writePipelineDeals(deals);
     return NextResponse.json(enriched);
   } catch {
     return NextResponse.json({ error: "Unable to enrich deal." }, { status: 500 });

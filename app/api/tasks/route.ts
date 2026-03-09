@@ -20,7 +20,7 @@ function isPriority(value: unknown): value is TaskPriority {
 }
 
 export async function GET() {
-  return NextResponse.json(getTasks());
+  return NextResponse.json(await getTasks());
 }
 
 export async function POST(request: Request) {
@@ -45,9 +45,9 @@ export async function POST(request: Request) {
       dueDate: body.dueDate === null ? null : body.dueDate?.trim() || null,
     };
 
-    const tasks = getTasks();
+    const tasks = await getTasks();
     tasks.push(task);
-    saveTasks(tasks);
+    await saveTasks(tasks);
 
     return NextResponse.json(task, { status: 201 });
   } catch {

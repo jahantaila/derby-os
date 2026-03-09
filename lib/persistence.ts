@@ -1,5 +1,3 @@
-import { readData, writeData } from "@/lib/data";
-
 export const isKvConfigured = Boolean(process.env.KV_REST_API_URL);
 const kvUrl = process.env.KV_REST_API_URL;
 const kvToken = process.env.KV_REST_API_TOKEN;
@@ -37,7 +35,7 @@ async function kvSet(key: string, value: unknown): Promise<void> {
 
 export async function readPersistentData<T>(file: string, fallback: T): Promise<T> {
   if (!isKvConfigured) {
-    return readData<T>(file, fallback);
+    return fallback;
   }
 
   try {
@@ -50,7 +48,6 @@ export async function readPersistentData<T>(file: string, fallback: T): Promise<
 
 export async function writePersistentData(file: string, data: unknown): Promise<void> {
   if (!isKvConfigured) {
-    writeData(file, data);
     return;
   }
 

@@ -19,7 +19,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
   try {
     const id = params.id;
     const patch = (await request.json()) as UpdateTaskInput;
-    const tasks = getTasks();
+    const tasks = await getTasks();
     const index = tasks.findIndex((task) => task.id === id);
 
     if (index < 0) {
@@ -39,7 +39,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     };
 
     tasks[index] = updated;
-    saveTasks(tasks);
+    await saveTasks(tasks);
     return NextResponse.json(updated);
   } catch {
     return NextResponse.json({ error: "Unable to update task." }, { status: 500 });
@@ -49,14 +49,14 @@ export async function PATCH(request: Request, { params }: { params: { id: string
 export async function DELETE(_: Request, { params }: { params: { id: string } }) {
   try {
     const id = params.id;
-    const tasks = getTasks();
+    const tasks = await getTasks();
     const next = tasks.filter((task) => task.id !== id);
 
     if (next.length === tasks.length) {
       return NextResponse.json({ error: "Task not found." }, { status: 404 });
     }
 
-    saveTasks(next);
+    await saveTasks(next);
     return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json({ error: "Unable to delete task." }, { status: 500 });
