@@ -82,7 +82,7 @@ function createWebhookDeal(lead: { email: string; name: string; company: string 
   return {
     id: buildDealId(),
     name: displayName,
-    stage: "lead",
+    stage: "new-lead",
     value: 0,
     client: clientName,
     contact: lead.name,

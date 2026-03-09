@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { Funnel, Plus, Search, Trash2, X } from "lucide-react";
+import { Download, Funnel, LoaderCircle, Plus, Search, Trash2, X } from "lucide-react";
 import { TEAM_MEMBERS } from "@/lib/tasks-schema";
 import { PipelineDeal, PipelineSource, PipelineStage } from "@/lib/pipeline-types";
 
@@ -19,6 +19,10 @@ type DealForm = {
   assignee: string;
   notes: string;
 };
+type ToastState = {
+  message: string;
+  tone: "success" | "error";
+} | null;
 
 const STAGE_COLUMNS: { stage: PipelineStage; title: string; color: string; accent: string }[] = [
   { stage: "new-lead", title: "New Lead", color: "#94A3B8", accent: "rgba(148,163,184,0.18)" },
@@ -151,7 +155,9 @@ export default function PipelinePage() {
   const [deals, setDeals] = useState<PipelineDeal[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [importing, setImporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [toast, setToast] = useState<ToastState>(null);
   const [panelMode, setPanelMode] = useState<PanelMode>(null);
   const [selectedDealId, setSelectedDealId] = useState<string | null>(null);
   const [form, setForm] = useState<DealForm>(EMPTY_FORM);
@@ -225,6 +231,13 @@ export default function PipelinePage() {
   useEffect(() => {
     void loadDeals();
   }, []);
+
+  useEffect(() => {
+    if (!toast) return undefined;
+
+    const timer = window.setTimeout(() => setToast(null), 3000);
+    return () => window.clearTimeout(timer);
+  }, [toast]);
 
   function openCreatePanel() {
     setPanelMode("create");
@@ -354,21 +367,71 @@ export default function PipelinePage() {
     }
   }
 
+  async function handleInstantlyImport() {
+    try {
+      setImporting(true);
+      const response = await fetch("/api/instantly/import", { method: "POST" });
+      const payload = (await response.json()) as { imported?: number; error?: string };
+
+      if (!response.ok) {
+        throw new Error(payload.error || "Import failed");
+      }
+
+      await loadDeals();
+      setError(null);
+      setToast({
+        message: `Imported ${payload.imported ?? 0} new leads from Instantly`,
+        tone: "success",
+      });
+    } catch (caught) {
+      const message = caught instanceof Error ? caught.message : "Could not import from Instantly.";
+      setError(message);
+      setToast({ message, tone: "error" });
+    } finally {
+      setImporting(false);
+    }
+  }
+
   return (
     <section className="animate-enter space-y-6" style={{ animationDelay: "80ms" }}>
+      <div className="pointer-events-none fixed right-4 top-4 z-50">
+        {toast ? (
+          <div
+            className={`pointer-events-auto min-w-[280px] rounded-2xl border px-4 py-3 text-sm text-white shadow-[0_24px_80px_rgba(0,0,0,0.45)] backdrop-blur-2xl animate-[toast-in_220ms_ease-out] ${
+              toast.tone === "success"
+                ? "border-white/20 bg-[linear-gradient(135deg,rgba(108,43,217,0.32),rgba(15,23,42,0.72))]"
+                : "border-red-300/25 bg-[linear-gradient(135deg,rgba(185,28,28,0.28),rgba(15,23,42,0.72))]"
+            }`}
+          >
+            {toast.message}
+          </div>
+        ) : null}
+      </div>
+
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h1 className="page-title">Pipeline</h1>
           <p className="mt-2 text-sm text-slate-300">Sales pipeline and client acquisition tracking.</p>
         </div>
-        <button
-          type="button"
-          onClick={openCreatePanel}
-          className="inline-flex items-center gap-2 rounded-xl border border-blue-300/30 bg-blue-500/20 px-4 py-2 text-sm font-semibold text-blue-100 transition hover:border-blue-300/60 hover:bg-blue-500/30"
-        >
-          <Plus size={16} />
-          Add Lead
-        </button>
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={handleInstantlyImport}
+            disabled={importing}
+            className="inline-flex items-center gap-2 rounded-xl border border-fuchsia-300/35 bg-[linear-gradient(135deg,rgba(139,92,246,0.28),rgba(91,33,182,0.38))] px-4 py-2 text-sm font-semibold text-fuchsia-50 shadow-[0_12px_34px_rgba(91,33,182,0.28)] transition hover:border-fuchsia-200/60 hover:bg-[linear-gradient(135deg,rgba(168,85,247,0.34),rgba(109,40,217,0.42))] disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            {importing ? <LoaderCircle size={16} className="animate-spin" /> : <Download size={16} />}
+            Import from Instantly
+          </button>
+          <button
+            type="button"
+            onClick={openCreatePanel}
+            className="inline-flex items-center gap-2 rounded-xl border border-blue-300/30 bg-blue-500/20 px-4 py-2 text-sm font-semibold text-blue-100 transition hover:border-blue-300/60 hover:bg-blue-500/30"
+          >
+            <Plus size={16} />
+            Add Lead
+          </button>
+        </div>
       </div>
 
       <div className="glass-panel p-3 md:p-4">

@@ -248,6 +248,18 @@ body {
   padding: 0.78rem 0.9rem;
 }
 
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -16px, 0) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
 .department-header {
   border-left: 3px solid;
   padding-left: 0.65rem;
