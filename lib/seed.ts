@@ -99,11 +99,13 @@ export const seedAdTemplates = [
 ];
 
 export const seedFinance = {
-  months: [
-    { month: "Jan 2026", revenue: 13000, expenses: { software: 800, contractors: 2500, ads: 500, hosting: 200, subscriptions: 300 }, profit: 8700 },
-    { month: "Feb 2026", revenue: 14200, expenses: { software: 800, contractors: 2800, ads: 600, hosting: 200, subscriptions: 300 }, profit: 9500 },
-    { month: "Mar 2026", revenue: 15000, expenses: { software: 850, contractors: 2800, ads: 700, hosting: 250, subscriptions: 400 }, profit: 10000 },
+  clients: [
+    { id: "bluegrass", name: "Bluegrass Garage Door", monthlyRetainer: 0, adSpend: 0, status: "active" },
+    { id: "palma", name: "Palma Italian Kitchen", monthlyRetainer: 0, adSpend: 0, status: "active" },
+    { id: "olympus", name: "OlympusLou", monthlyRetainer: 0, adSpend: 0, status: "active" },
   ],
+  entries: [],
+  monthlyOverhead: { aiCosts: 0, software: 0, team: 0, other: 0 },
 };
 
 export const seedCompetitors = [

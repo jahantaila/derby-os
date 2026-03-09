@@ -1,5 +1,22 @@
-import { createSingletonHandler } from "@/lib/api-helpers";
-import { seedFinance } from "@/lib/seed";
-const h = createSingletonHandler("finance.json", seedFinance);
-export const GET = h.GET;
-export const PUT = h.PUT;
+import { NextResponse } from "next/server";
+import { getFinanceData, writeFinanceData } from "@/lib/finance-store";
+import { FinanceData } from "@/lib/finance-types";
+
+export const dynamic = "force-dynamic";
+
+export async function GET() {
+  return NextResponse.json(getFinanceData());
+}
+
+export async function PUT(request: Request) {
+  let body: FinanceData;
+
+  try {
+    body = (await request.json()) as FinanceData;
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
+
+  writeFinanceData(body);
+  return NextResponse.json(getFinanceData());
+}

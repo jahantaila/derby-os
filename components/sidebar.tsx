@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CheckSquare, Users } from "lucide-react";
+import { CheckSquare, DollarSign, Users } from "lucide-react";
 
 export function Sidebar() {
   const pathname = usePathname();
   const isAgents = pathname.startsWith("/agents");
   const isTasks = pathname.startsWith("/tasks");
+  const isFinance = pathname.startsWith("/finance");
 
   return (
     <aside className="sidebar-shell">
@@ -23,6 +24,10 @@ export function Sidebar() {
         <Link href="/tasks" className={`sidebar-item ${isTasks ? "active" : ""}`}>
           <CheckSquare size={16} />
           <span>Tasks</span>
+        </Link>
+        <Link href="/finance" className={`sidebar-item ${isFinance ? "active" : ""}`}>
+          <DollarSign size={16} />
+          <span>Finance</span>
         </Link>
       </nav>
     </aside>
