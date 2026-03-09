@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarDays, CheckSquare, DollarSign, Funnel, Users } from "lucide-react";
+import { CalendarDays, CheckSquare, DollarSign, FolderKanban, Funnel, Users } from "lucide-react";
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -11,6 +11,7 @@ export function Sidebar() {
   const isFinance = pathname.startsWith("/finance");
   const isCalendar = pathname.startsWith("/calendar");
   const isPipeline = pathname.startsWith("/pipeline");
+  const isProjects = pathname.startsWith("/projects");
 
   return (
     <aside className="sidebar-shell">
@@ -38,6 +39,10 @@ export function Sidebar() {
         <Link href="/pipeline" className={`sidebar-item ${isPipeline ? "active" : ""}`}>
           <Funnel size={16} />
           <span>Pipeline</span>
+        </Link>
+        <Link href="/projects" className={`sidebar-item ${isProjects ? "active" : ""}`}>
+          <FolderKanban size={16} />
+          <span>Projects</span>
         </Link>
       </nav>
     </aside>
