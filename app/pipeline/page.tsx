@@ -1,12 +1,15 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { Funnel, Plus, Trash2, X } from "lucide-react";
+import { Funnel, Plus, Search, Trash2, X } from "lucide-react";
 import { TEAM_MEMBERS } from "@/lib/tasks-schema";
 import { PipelineDeal, PipelineSource, PipelineStage } from "@/lib/pipeline-types";
 
 type PanelMode = "create" | "view" | null;
 type SourceFilter = "all" | PipelineSource;
+type StageFilter = "all" | PipelineStage;
+type AssigneeFilter = "all" | (typeof TEAM_MEMBERS)[number]["id"];
+type DateRangeFilter = "7d" | "30d" | "90d" | "all";
 type DealForm = {
   name: string;
   stage: PipelineStage;
@@ -67,6 +70,23 @@ const SOURCE_FILTER_OPTIONS: { value: SourceFilter; label: string }[] = [
   { value: "website", label: "Website" },
 ];
 
+const STAGE_FILTER_OPTIONS: { value: StageFilter; label: string }[] = [
+  { value: "all", label: "All Stages" },
+  ...STAGE_COLUMNS.map((column) => ({ value: column.stage, label: column.title })),
+];
+
+const ASSIGNEE_FILTER_OPTIONS: { value: AssigneeFilter; label: string }[] = [
+  { value: "all", label: "All Assignees" },
+  ...TEAM_MEMBERS.map((member) => ({ value: member.id, label: member.name })),
+];
+
+const DATE_RANGE_OPTIONS: { value: DateRangeFilter; label: string }[] = [
+  { value: "7d", label: "Last 7 days" },
+  { value: "30d", label: "Last 30 days" },
+  { value: "90d", label: "Last 90 days" },
+  { value: "all", label: "All time" },
+];
+
 const ENRICHMENT_META: Record<PipelineDeal["enrichmentStatus"], { label: string; dot: string }> = {
   pending: { label: "Pending", dot: "bg-amber-400" },
   enriched: { label: "Enriched", dot: "bg-emerald-400" },
@@ -110,6 +130,23 @@ function isThisMonth(value: string): boolean {
   return year === now.getFullYear() && month === now.getMonth() + 1;
 }
 
+function isWithinDateRange(value: string, range: DateRangeFilter): boolean {
+  if (range === "all") return true;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+
+  const [year, month, day] = value.split("-").map(Number);
+  const target = new Date(year, month - 1, day);
+  if (Number.isNaN(target.getTime())) return false;
+
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const deltaMs = today.getTime() - target.getTime();
+  if (deltaMs < 0) return false;
+
+  const maxDays = range === "7d" ? 7 : range === "30d" ? 30 : 90;
+  return deltaMs <= maxDays * 24 * 60 * 60 * 1000;
+}
+
 export default function PipelinePage() {
   const [deals, setDeals] = useState<PipelineDeal[]>([]);
   const [loading, setLoading] = useState(true);
@@ -119,7 +156,11 @@ export default function PipelinePage() {
   const [selectedDealId, setSelectedDealId] = useState<string | null>(null);
   const [form, setForm] = useState<DealForm>(EMPTY_FORM);
   const [dragOverStage, setDragOverStage] = useState<PipelineStage | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [stageFilter, setStageFilter] = useState<StageFilter>("all");
+  const [assigneeFilter, setAssigneeFilter] = useState<AssigneeFilter>("all");
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>("all");
+  const [dateRangeFilter, setDateRangeFilter] = useState<DateRangeFilter>("all");
 
   const assigneeNames = useMemo(() => {
     return Object.fromEntries(TEAM_MEMBERS.map((member) => [member.id, member.name]));
@@ -131,8 +172,20 @@ export default function PipelinePage() {
   );
 
   const visibleDeals = useMemo(() => {
-    return sourceFilter === "all" ? deals : deals.filter((deal) => deal.source === sourceFilter);
-  }, [deals, sourceFilter]);
+    const query = searchQuery.trim().toLowerCase();
+
+    return deals.filter((deal) => {
+      const matchesSearch =
+        query.length === 0 ||
+        [deal.name, deal.client, deal.contact, deal.email].some((value) => value.toLowerCase().includes(query));
+      const matchesStage = stageFilter === "all" || deal.stage === stageFilter;
+      const matchesAssignee = assigneeFilter === "all" || deal.assignee === assigneeFilter;
+      const matchesSource = sourceFilter === "all" || deal.source === sourceFilter;
+      const matchesDateRange = isWithinDateRange(deal.createdAt, dateRangeFilter);
+
+      return matchesSearch && matchesStage && matchesAssignee && matchesSource && matchesDateRange;
+    });
+  }, [assigneeFilter, dateRangeFilter, deals, searchQuery, sourceFilter, stageFilter]);
 
   const stats = useMemo(() => {
     const activeLeads = deals.filter((deal) => !CLOSED_STAGES.includes(deal.stage));
@@ -308,29 +361,93 @@ export default function PipelinePage() {
           <h1 className="page-title">Pipeline</h1>
           <p className="mt-2 text-sm text-slate-300">Sales pipeline and client acquisition tracking.</p>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <label className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-slate-900/55 px-3 py-2 text-xs font-semibold uppercase tracking-[0.1em] text-slate-200">
-            Source
-            <select
-              value={sourceFilter}
-              onChange={(event) => setSourceFilter(event.target.value as SourceFilter)}
-              className="rounded-lg border border-white/20 bg-slate-900/70 px-2 py-1 text-[11px] font-medium tracking-normal text-slate-100 outline-none"
-            >
-              {SOURCE_FILTER_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+        <button
+          type="button"
+          onClick={openCreatePanel}
+          className="inline-flex items-center gap-2 rounded-xl border border-blue-300/30 bg-blue-500/20 px-4 py-2 text-sm font-semibold text-blue-100 transition hover:border-blue-300/60 hover:bg-blue-500/30"
+        >
+          <Plus size={16} />
+          Add Lead
+        </button>
+      </div>
+
+      <div className="glass-panel p-3 md:p-4">
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
+          <label className="relative min-w-0 flex-1">
+            <Search
+              size={16}
+              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+            />
+            <input
+              type="search"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="Search leads..."
+              className="w-full rounded-2xl border border-white/14 bg-[linear-gradient(180deg,rgba(15,23,42,0.88),rgba(15,23,42,0.72))] py-3 pl-11 pr-4 text-sm text-slate-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_18px_40px_rgba(2,6,23,0.24)] backdrop-blur-xl outline-none transition placeholder:text-slate-500 focus:border-blue-400/55 focus:bg-slate-900/80"
+            />
           </label>
-          <button
-            type="button"
-            onClick={openCreatePanel}
-            className="inline-flex items-center gap-2 rounded-xl border border-blue-300/30 bg-blue-500/20 px-4 py-2 text-sm font-semibold text-blue-100 transition hover:border-blue-300/60 hover:bg-blue-500/30"
-          >
-            <Plus size={16} />
-            Add Lead
-          </button>
+
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:min-w-[620px] xl:flex-1">
+            <label className="space-y-1">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">Stage</span>
+              <select
+                value={stageFilter}
+                onChange={(event) => setStageFilter(event.target.value as StageFilter)}
+                className="w-full rounded-xl border border-white/12 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
+              >
+                {STAGE_FILTER_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="space-y-1">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">Assignee</span>
+              <select
+                value={assigneeFilter}
+                onChange={(event) => setAssigneeFilter(event.target.value as AssigneeFilter)}
+                className="w-full rounded-xl border border-white/12 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
+              >
+                {ASSIGNEE_FILTER_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="space-y-1">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">Source</span>
+              <select
+                value={sourceFilter}
+                onChange={(event) => setSourceFilter(event.target.value as SourceFilter)}
+                className="w-full rounded-xl border border-white/12 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
+              >
+                {SOURCE_FILTER_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="space-y-1">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">Date Range</span>
+              <select
+                value={dateRangeFilter}
+                onChange={(event) => setDateRangeFilter(event.target.value as DateRangeFilter)}
+                className="w-full rounded-xl border border-white/12 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
+              >
+                {DATE_RANGE_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
         </div>
       </div>
 
@@ -392,9 +509,8 @@ export default function PipelinePage() {
                     style={{ borderColor: `${column.color}66`, background: column.accent }}
                   >
                     <p className="text-sm font-semibold" style={{ color: column.color }}>
-                      {column.title}
+                      {column.title} ({stageDeals.length})
                     </p>
-                    <span className="text-xs text-slate-200">{stageDeals.length}</span>
                   </div>
 
                   <div className="space-y-3">
