@@ -18,22 +18,27 @@ type DealForm = {
 };
 
 const STAGE_COLUMNS: { stage: PipelineStage; title: string; color: string; accent: string }[] = [
-  { stage: "lead", title: "Lead", color: "#94A3B8", accent: "rgba(148,163,184,0.18)" },
-  { stage: "outreach", title: "Outreach", color: "#2093FF", accent: "rgba(32,147,255,0.22)" },
-  { stage: "proposal", title: "Proposal", color: "#FFBD59", accent: "rgba(255,189,89,0.2)" },
-  { stage: "negotiation", title: "Negotiation", color: "#A855F7", accent: "rgba(168,85,247,0.2)" },
-  { stage: "won", title: "Won", color: "#22C55E", accent: "rgba(34,197,94,0.2)" },
+  { stage: "new-lead", title: "New Lead", color: "#94A3B8", accent: "rgba(148,163,184,0.18)" },
+  { stage: "contacted", title: "Contacted", color: "#2093FF", accent: "rgba(32,147,255,0.22)" },
+  { stage: "interested", title: "Interested", color: "#FFBD59", accent: "rgba(255,189,89,0.2)" },
+  { stage: "scheduled-meeting", title: "Scheduled Meeting", color: "#A855F7", accent: "rgba(168,85,247,0.2)" },
+  { stage: "attended-meeting", title: "Attended Meeting", color: "#22D3EE", accent: "rgba(34,211,238,0.2)" },
+  { stage: "negotiating", title: "Negotiating", color: "#F97316", accent: "rgba(249,115,22,0.2)" },
+  { stage: "closed-won", title: "Closed Won", color: "#22C55E", accent: "rgba(34,197,94,0.2)" },
+  { stage: "closed-lost", title: "Closed Lost", color: "#F93C3C", accent: "rgba(249,60,60,0.2)" },
 ];
 
 const EMPTY_FORM: DealForm = {
   name: "",
-  stage: "lead",
+  stage: "new-lead",
   value: "0",
   client: "",
   contact: "",
   assignee: TEAM_MEMBERS[0].id,
   notes: "",
 };
+
+const CLOSED_STAGES: PipelineStage[] = ["closed-won", "closed-lost"];
 
 const SOURCE_META: Record<PipelineSource, { label: string; className: string }> = {
   instantly: {
@@ -86,7 +91,7 @@ function toInitials(value: string) {
     .join("");
 }
 
-function dealDaysInStage(deal: PipelineDeal): number {
+function leadDaysInStage(deal: PipelineDeal): number {
   const source = deal.stageUpdatedAt ?? deal.createdAt;
   const date = new Date(`${source}T00:00:00`);
   if (Number.isNaN(date.getTime())) return 0;
@@ -130,20 +135,22 @@ export default function PipelinePage() {
   }, [deals, sourceFilter]);
 
   const stats = useMemo(() => {
-    const wonDeals = deals.filter((deal) => deal.stage === "won");
-    const activeDeals = deals.filter((deal) => deal.stage !== "won");
-    const wonThisMonthDeals = wonDeals.filter((deal) => isThisMonth(deal.stageUpdatedAt ?? deal.createdAt));
-
-    const totalPipelineValue = activeDeals.reduce((sum, deal) => sum + deal.value, 0);
-    const wonThisMonthValue = wonThisMonthDeals.reduce((sum, deal) => sum + deal.value, 0);
-    const conversionRate = deals.length > 0 ? (wonDeals.length / deals.length) * 100 : 0;
+    const activeLeads = deals.filter((deal) => !CLOSED_STAGES.includes(deal.stage));
+    const newLeads = deals.filter((deal) => deal.stage === "new-lead");
+    const wonThisMonthLeads = deals.filter(
+      (deal) => deal.stage === "closed-won" && isThisMonth(deal.stageUpdatedAt ?? deal.createdAt),
+    );
+    const lostThisMonthLeads = deals.filter(
+      (deal) => deal.stage === "closed-lost" && isThisMonth(deal.stageUpdatedAt ?? deal.createdAt),
+    );
+    const wonThisMonthValue = wonThisMonthLeads.reduce((sum, deal) => sum + deal.value, 0);
 
     return {
-      totalPipelineValue,
-      dealsInPipeline: activeDeals.length,
-      wonThisMonthCount: wonThisMonthDeals.length,
+      totalLeads: activeLeads.length,
+      newThisWeek: newLeads.length,
+      wonThisMonthCount: wonThisMonthLeads.length,
       wonThisMonthValue,
-      conversionRate,
+      lostThisMonthCount: lostThisMonthLeads.length,
     };
   }, [deals]);
 
@@ -156,7 +163,7 @@ export default function PipelinePage() {
       setDeals(data);
       setError(null);
     } catch {
-      setError("Could not load pipeline deals.");
+      setError("Could not load pipeline leads.");
     } finally {
       setLoading(false);
     }
@@ -169,7 +176,7 @@ export default function PipelinePage() {
   function openCreatePanel() {
     setPanelMode("create");
     setSelectedDealId(null);
-    setForm({ ...EMPTY_FORM, client: "Derby Digital", value: "1000" });
+    setForm(EMPTY_FORM);
   }
 
   function openDealPanel(deal: PipelineDeal) {
@@ -194,7 +201,7 @@ export default function PipelinePage() {
   async function handleCreate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!form.name.trim() || !form.client.trim()) {
-      setError("Deal name and client are required.");
+      setError("Lead name and client are required.");
       return;
     }
 
@@ -219,7 +226,7 @@ export default function PipelinePage() {
       closePanel();
       setError(null);
     } catch {
-      setError("Could not create deal.");
+      setError("Could not create lead.");
     } finally {
       setSaving(false);
     }
@@ -250,7 +257,7 @@ export default function PipelinePage() {
       closePanel();
       setError(null);
     } catch {
-      setError("Could not update deal.");
+      setError("Could not update lead.");
     } finally {
       setSaving(false);
     }
@@ -266,7 +273,7 @@ export default function PipelinePage() {
       closePanel();
       setError(null);
     } catch {
-      setError("Could not delete deal.");
+      setError("Could not delete lead.");
     } finally {
       setSaving(false);
     }
@@ -290,7 +297,7 @@ export default function PipelinePage() {
       setError(null);
     } catch {
       setDeals((prev) => prev.map((deal) => (deal.id === dealId ? current : deal)));
-      setError("Could not move deal.");
+      setError("Could not move lead.");
     }
   }
 
@@ -322,7 +329,7 @@ export default function PipelinePage() {
             className="inline-flex items-center gap-2 rounded-xl border border-blue-300/30 bg-blue-500/20 px-4 py-2 text-sm font-semibold text-blue-100 transition hover:border-blue-300/60 hover:bg-blue-500/30"
           >
             <Plus size={16} />
-            Add Deal
+            Add Lead
           </button>
         </div>
       </div>
@@ -333,12 +340,12 @@ export default function PipelinePage() {
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <div className="glass-card p-4">
-          <p className="text-xs uppercase tracking-[0.12em] text-slate-300">Total Pipeline Value</p>
-          <p className="mt-3 text-2xl font-semibold text-blue-100">{toCurrency(stats.totalPipelineValue)}</p>
+          <p className="text-xs uppercase tracking-[0.12em] text-slate-300">Total Leads</p>
+          <p className="mt-3 text-2xl font-semibold text-blue-100">{stats.totalLeads}</p>
         </div>
         <div className="glass-card p-4">
-          <p className="text-xs uppercase tracking-[0.12em] text-slate-300">Deals In Pipeline</p>
-          <p className="mt-3 text-2xl font-semibold text-slate-100">{stats.dealsInPipeline}</p>
+          <p className="text-xs uppercase tracking-[0.12em] text-slate-300">New This Week</p>
+          <p className="mt-3 text-2xl font-semibold text-slate-100">{stats.newThisWeek}</p>
         </div>
         <div className="glass-card p-4">
           <p className="text-xs uppercase tracking-[0.12em] text-slate-300">Won This Month</p>
@@ -347,16 +354,16 @@ export default function PipelinePage() {
           </p>
         </div>
         <div className="glass-card p-4">
-          <p className="text-xs uppercase tracking-[0.12em] text-slate-300">Conversion Rate</p>
-          <p className="mt-3 text-2xl font-semibold text-purple-200">{stats.conversionRate.toFixed(1)}%</p>
+          <p className="text-xs uppercase tracking-[0.12em] text-slate-300">Lost This Month</p>
+          <p className="mt-3 text-2xl font-semibold text-rose-300">{stats.lostThisMonthCount}</p>
         </div>
       </div>
 
       {loading ? (
         <div className="glass-panel p-6 text-sm text-slate-300">Loading pipeline...</div>
       ) : (
-        <div className="glass-panel p-3 md:p-4">
-          <div className="grid gap-3 overflow-x-auto pb-2 xl:grid-cols-5 md:grid-cols-2 grid-cols-1">
+        <div className="glass-panel overflow-x-auto p-3 md:p-4">
+          <div className="grid min-w-max grid-flow-col auto-cols-[260px] gap-3 pb-2 xl:grid-flow-row xl:grid-cols-8 xl:auto-cols-fr">
             {STAGE_COLUMNS.map((column) => {
               const stageDeals = visibleDeals.filter((deal) => deal.stage === column.stage);
 
@@ -370,7 +377,7 @@ export default function PipelinePage() {
                   onDragLeave={() => setDragOverStage(null)}
                   onDrop={(event) => {
                     event.preventDefault();
-                    const dealId = event.dataTransfer.getData("text/pipeline-deal-id");
+                    const dealId = event.dataTransfer.getData("text/pipeline-lead-id");
                     setDragOverStage(null);
                     if (dealId) void moveDeal(dealId, column.stage);
                   }}
@@ -398,9 +405,10 @@ export default function PipelinePage() {
                           key={deal.id}
                           type="button"
                           draggable
-                          onDragStart={(event) => event.dataTransfer.setData("text/pipeline-deal-id", deal.id)}
+                          onDragStart={(event) => event.dataTransfer.setData("text/pipeline-lead-id", deal.id)}
                           onClick={() => openDealPanel(deal)}
                           className="glass-card w-full cursor-pointer p-3 text-left transition hover:-translate-y-1"
+                          aria-label={`Lead ${deal.name}`}
                         >
                           <div className="flex items-start justify-between gap-2">
                             <p className="text-sm font-bold leading-snug text-white">{deal.name}</p>
@@ -422,14 +430,14 @@ export default function PipelinePage() {
                             <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/20 bg-white/10 text-[10px] font-semibold text-slate-100">
                               {toInitials(assignee)}
                             </span>
-                            <span>{dealDaysInStage(deal)}d in stage</span>
+                            <span>{leadDaysInStage(deal)}d in stage</span>
                           </div>
                         </button>
                       );
                     })}
                     {stageDeals.length === 0 ? (
                       <div className="rounded-lg border border-dashed border-white/15 px-3 py-8 text-center text-xs text-slate-400">
-                        No deals
+                        No leads
                       </div>
                     ) : null}
                   </div>
@@ -446,10 +454,10 @@ export default function PipelinePage() {
             <div className="mb-5 flex items-start justify-between gap-3">
               <div>
                 <p className="text-xs uppercase tracking-[0.14em] text-blue-200">
-                  {panelMode === "create" ? "New Deal" : "Deal Details"}
+                  {panelMode === "create" ? "New Lead" : "Lead Details"}
                 </p>
                 <h2 className="mt-1 text-xl font-semibold text-white">
-                  {panelMode === "create" ? "Add Pipeline Deal" : selectedDeal?.name ?? "Deal"}
+                  {panelMode === "create" ? "Add Pipeline Lead" : selectedDeal?.name ?? "Lead"}
                 </h2>
               </div>
               <button
@@ -484,7 +492,7 @@ export default function PipelinePage() {
               ) : null}
 
               <label className="block space-y-1.5">
-                <span className="text-xs uppercase tracking-[0.11em] text-slate-300">Deal Name</span>
+                <span className="text-xs uppercase tracking-[0.11em] text-slate-300">Lead Name</span>
                 <input
                   value={form.name}
                   onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))}
@@ -617,7 +625,7 @@ export default function PipelinePage() {
                   className="inline-flex items-center gap-2 rounded-xl border border-blue-300/35 bg-blue-500/25 px-4 py-2 text-sm font-semibold text-blue-100 transition hover:border-blue-300/70 hover:bg-blue-500/35 disabled:opacity-60"
                 >
                   <Funnel size={15} />
-                  {panelMode === "create" ? "Create Deal" : "Save Changes"}
+                  {panelMode === "create" ? "Create Lead" : "Save Changes"}
                 </button>
               </div>
             </form>

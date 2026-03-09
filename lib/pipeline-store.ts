@@ -12,6 +12,7 @@ import {
 
 const PIPELINE_FILE = "pipeline.json";
 const VALID_STAGES = new Set<PipelineStage>(PIPELINE_STAGES);
+const LEGACY_STAGES = new Set(["lead", "outreach", "proposal", "negotiation", "won"]);
 const VALID_ASSIGNEES = new Set<string>(PIPELINE_ASSIGNEES);
 const VALID_SOURCES = new Set<PipelineSource>(["instantly", "manual", "referral", "website"]);
 const VALID_ENRICHMENT_STATUS = new Set<EnrichmentStatus>(["pending", "enriched", "failed"]);
@@ -33,7 +34,7 @@ function normalizeStage(value: unknown): PipelineStage {
   if (typeof value === "string" && VALID_STAGES.has(value as PipelineStage)) {
     return value as PipelineStage;
   }
-  return "lead";
+  return "new-lead";
 }
 
 function normalizeAssignee(value: unknown): string {
@@ -138,6 +139,10 @@ function normalizeDeal(raw: unknown): PipelineDeal | null {
 
 function normalizePipeline(raw: unknown): PipelineDeal[] {
   if (!Array.isArray(raw)) return INITIAL_PIPELINE_DEALS;
+  const hasLegacyStages = raw.some(
+    (entry) => isRecord(entry) && typeof entry.stage === "string" && LEGACY_STAGES.has(entry.stage),
+  );
+  if (hasLegacyStages) return INITIAL_PIPELINE_DEALS;
   const deals = raw.map(normalizeDeal).filter((deal): deal is PipelineDeal => deal !== null);
   return deals.length > 0 ? deals : INITIAL_PIPELINE_DEALS;
 }

@@ -19,7 +19,7 @@ const VALID_ASSIGNEES = new Set<string>(PIPELINE_ASSIGNEES);
 const VALID_SOURCES = new Set<PipelineSource>(["instantly", "manual", "referral", "website"]);
 
 function buildDealId() {
-  return `d${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+  return `l${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 }
 
 function isStage(value: unknown): value is PipelineStage {
@@ -58,14 +58,14 @@ export async function POST(request: Request) {
     const client = body.client?.trim();
 
     if (!name || !client) {
-      return NextResponse.json({ error: "Deal name and client are required." }, { status: 400 });
+      return NextResponse.json({ error: "Lead name and client are required." }, { status: 400 });
     }
 
     const today = new Date().toISOString().slice(0, 10);
     const deal: PipelineDeal = {
       id: buildDealId(),
       name,
-      stage: isStage(body.stage) ? body.stage : "lead",
+      stage: isStage(body.stage) ? body.stage : "new-lead",
       value: normalizeValue(body.value),
       client,
       contact: body.contact?.trim() ?? "",
@@ -86,6 +86,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json(deal, { status: 201 });
   } catch {
-    return NextResponse.json({ error: "Unable to create deal." }, { status: 500 });
+    return NextResponse.json({ error: "Unable to create lead." }, { status: 500 });
   }
 }

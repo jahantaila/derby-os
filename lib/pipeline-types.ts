@@ -1,4 +1,12 @@
-export type PipelineStage = "lead" | "outreach" | "proposal" | "negotiation" | "won";
+export type PipelineStage =
+  | "new-lead"
+  | "contacted"
+  | "interested"
+  | "scheduled-meeting"
+  | "attended-meeting"
+  | "negotiating"
+  | "closed-won"
+  | "closed-lost";
 export type PipelineSource = "instantly" | "manual" | "referral" | "website";
 export type EnrichmentStatus = "pending" | "enriched" | "failed";
 
@@ -37,63 +45,72 @@ export type PipelineDeal = {
   stageUpdatedAt?: string;
 };
 
-export const PIPELINE_STAGES: PipelineStage[] = ["lead", "outreach", "proposal", "negotiation", "won"];
+export const PIPELINE_STAGES: PipelineStage[] = [
+  "new-lead",
+  "contacted",
+  "interested",
+  "scheduled-meeting",
+  "attended-meeting",
+  "negotiating",
+  "closed-won",
+  "closed-lost",
+];
 
 export const PIPELINE_ASSIGNEES = ["jahan", "kimberly", "alex", "sabri", "kevin", "hamza"] as const;
 
 export const INITIAL_PIPELINE_DEALS: PipelineDeal[] = [
   {
-    id: "d1",
-    name: "Restaurant cold email batch 1",
-    stage: "outreach",
+    id: "l1",
+    name: "Mario's Pizzeria",
+    stage: "new-lead",
     value: 2000,
-    client: "New Restaurants",
-    contact: "",
+    client: "Mario's Pizzeria",
+    contact: "Mario Rossi",
     assignee: "kimberly",
-    createdAt: "2026-03-08",
-    notes: "SpotHopper/BentoBox competitor targets",
+    createdAt: "2026-03-09",
+    notes: "Cold email reply - interested in marketing",
     status: "new",
-    source: "manual",
-    email: "",
+    source: "instantly",
+    email: "mario@mariospizzeria.com",
     enrichmentStatus: "pending",
     enrichmentData: null,
   },
   {
-    id: "d2",
-    name: "Bluegrass Garage Door - PPC",
-    stage: "won",
+    id: "l2",
+    name: "Sakura Sushi Louisville",
+    stage: "contacted",
+    value: 1500,
+    client: "Sakura Sushi",
+    contact: "Yuki Tanaka",
+    assignee: "jahan",
+    createdAt: "2026-03-08",
+    notes: "Replied to cold email, sent intro",
+    status: "new",
+    source: "instantly",
+    email: "yuki@sakurasushi.com",
+    enrichmentStatus: "pending",
+    enrichmentData: null,
+  },
+  {
+    id: "l3",
+    name: "Bluegrass Garage Door",
+    stage: "closed-won",
     value: 1500,
     client: "Bluegrass Garage Door",
-    contact: "Owner",
+    contact: "Mike",
     assignee: "jahan",
     createdAt: "2026-02-15",
-    notes: "Google Ads campaign being set up",
+    notes: "Google Ads + LSA client",
     status: "new",
-    source: "manual",
-    email: "",
+    source: "referral",
+    email: "mike@bluegrassgaragedoor.com",
     enrichmentStatus: "pending",
     enrichmentData: null,
   },
   {
-    id: "d3",
-    name: "Palma Italian - Renewal",
-    stage: "proposal",
-    value: 1000,
-    client: "Palma Italian Kitchen",
-    contact: "Owner",
-    assignee: "alex",
-    createdAt: "2026-03-01",
-    notes: "Needs new proposal with proper analysis",
-    status: "new",
-    source: "manual",
-    email: "",
-    enrichmentStatus: "pending",
-    enrichmentData: null,
-  },
-  {
-    id: "d4",
-    name: "OlympusLou - Expansion",
-    stage: "negotiation",
+    id: "l4",
+    name: "OlympusLou Expansion",
+    stage: "negotiating",
     value: 2500,
     client: "OlympusLou",
     contact: "Owner",
