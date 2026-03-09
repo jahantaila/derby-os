@@ -242,6 +242,88 @@ body {
   padding: 0.78rem 0.9rem;
 }
 
+.department-header {
+  border-left: 3px solid;
+  padding-left: 0.65rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.department-executive {
+  border-color: #2093ff;
+  color: #8ec8ff;
+}
+
+.department-marketing {
+  border-color: #10b981;
+  color: #8ff7d5;
+}
+
+.department-development {
+  border-color: #8b5cf6;
+  color: #ccb4ff;
+}
+
+.agent-card-link {
+  transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+}
+
+.agent-card-link:hover {
+  transform: translateY(-3px) scale(1.015);
+}
+
+.soul-markdown {
+  color: #d6deee;
+  line-height: 1.7;
+  font-size: 0.95rem;
+}
+
+.soul-markdown h1,
+.soul-markdown h2,
+.soul-markdown h3 {
+  color: #fff;
+  margin-top: 1.2rem;
+  margin-bottom: 0.55rem;
+}
+
+.soul-markdown p,
+.soul-markdown li {
+  margin: 0.55rem 0;
+}
+
+.soul-markdown code {
+  border-radius: 0.35rem;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.1rem 0.35rem;
+  font-size: 0.83rem;
+}
+
+.agent-calendar-cell {
+  min-height: 3rem;
+  border-radius: 0.6rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(6, 10, 22, 0.72);
+  color: #d8e1ef;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+}
+
+.agent-calendar-cell.today {
+  border-color: rgba(32, 147, 255, 0.75);
+  background: linear-gradient(135deg, rgba(32, 147, 255, 0.36), rgba(0, 38, 255, 0.26));
+  color: #fff;
+  box-shadow: 0 0 20px rgba(32, 147, 255, 0.24);
+}
+
+.agent-calendar-cell.empty {
+  opacity: 0.3;
+}
+
 .animate-enter {
   opacity: 0;
   transform: translateY(10px) scale(0.995);

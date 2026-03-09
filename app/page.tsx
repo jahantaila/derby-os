@@ -1,11 +1,4 @@
-type Agent = {
-  name: string;
-  role: string;
-  type: "AI" | "Human";
-  model?: string;
-  status: "Active" | "Working" | "Idle";
-  task?: string;
-};
+import { AgentGroups } from "@/components/agents/agent-groups";
 
 type Stat = {
   label: string;
@@ -16,15 +9,6 @@ type Activity = {
   text: string;
   time: string;
 };
-
-const agents: Agent[] = [
-  { name: "Jahan", role: "CEO", type: "Human", status: "Active", task: "Reviewing campaigns" },
-  { name: "Kimberly", role: "Chief of Staff", type: "AI", model: "Opus", status: "Active", task: "Coordinating team" },
-  { name: "Alex", role: "Marketing Analyst", type: "AI", model: "Sonnet", status: "Idle" },
-  { name: "Sabri", role: "Ad Producer", type: "AI", model: "Sonnet", status: "Working", task: "Bluegrass campaign" },
-  { name: "Kevin", role: "Developer", type: "AI", model: "Codex", status: "Working", task: "Mission Control V3" },
-  { name: "Hamza", role: "Landing Pages", type: "Human", status: "Working", task: "Bluegrass landing page" },
-];
 
 const stats: Stat[] = [
   { label: "Active Agents", value: "4" },
@@ -48,37 +32,7 @@ export default function DashboardPage() {
         <p className="mt-2 text-sm text-slate-400">Bird&apos;s-eye view of Derby Digital operations.</p>
       </section>
 
-      <section className="animate-enter" style={{ animationDelay: "120ms" }}>
-        <h2 className="section-title">Agent Status</h2>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {agents.map((agent, index) => {
-            const isLive = agent.status === "Active" || agent.status === "Working";
-            return (
-              <article
-                key={agent.name}
-                className="glass-card p-5 animate-enter"
-                style={{ animationDelay: `${180 + index * 50}ms` }}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-lg font-semibold text-white">{agent.name}</p>
-                    <p className="text-sm text-slate-400">{agent.role}</p>
-                  </div>
-                  <span className={`agent-type ${agent.type === "AI" ? "ai" : "human"}`}>{agent.type}</span>
-                </div>
-
-                <div className="mt-4 flex items-center gap-2 text-sm text-slate-300">
-                  <span className={`status-dot ${isLive ? "live" : "idle"}`} />
-                  <span>{agent.status}</span>
-                  {agent.model ? <span className="ml-2 rounded-full border border-white/15 px-2 py-0.5 text-xs text-slate-300">{agent.model}</span> : null}
-                </div>
-
-                <p className="mt-4 text-sm text-slate-300">{agent.task ? agent.task : "-"}</p>
-              </article>
-            );
-          })}
-        </div>
-      </section>
+      <AgentGroups />
 
       <section className="animate-enter" style={{ animationDelay: "300ms" }}>
         <h2 className="section-title">Quick Stats</h2>
