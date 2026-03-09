@@ -1,9 +1,20 @@
 import { readData, writeData } from "@/lib/data";
-import { INITIAL_PIPELINE_DEALS, PIPELINE_ASSIGNEES, PIPELINE_STAGES, PipelineDeal, PipelineStage } from "@/lib/pipeline-types";
+import {
+  EnrichmentData,
+  EnrichmentStatus,
+  INITIAL_PIPELINE_DEALS,
+  PIPELINE_ASSIGNEES,
+  PIPELINE_STAGES,
+  PipelineDeal,
+  PipelineSource,
+  PipelineStage,
+} from "@/lib/pipeline-types";
 
 const PIPELINE_FILE = "pipeline.json";
 const VALID_STAGES = new Set<PipelineStage>(PIPELINE_STAGES);
 const VALID_ASSIGNEES = new Set<string>(PIPELINE_ASSIGNEES);
+const VALID_SOURCES = new Set<PipelineSource>(["instantly", "manual", "referral", "website"]);
+const VALID_ENRICHMENT_STATUS = new Set<EnrichmentStatus>(["pending", "enriched", "failed"]);
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -32,6 +43,17 @@ function normalizeAssignee(value: unknown): string {
   return "jahan";
 }
 
+function normalizeSource(value: unknown): PipelineSource {
+  return typeof value === "string" && VALID_SOURCES.has(value as PipelineSource) ? (value as PipelineSource) : "manual";
+}
+
+function normalizeEnrichmentStatus(value: unknown): EnrichmentStatus {
+  if (typeof value === "string" && VALID_ENRICHMENT_STATUS.has(value as EnrichmentStatus)) {
+    return value as EnrichmentStatus;
+  }
+  return "pending";
+}
+
 function normalizeNumber(value: unknown): number {
   if (typeof value === "number" && Number.isFinite(value)) return Math.max(0, value);
   if (typeof value === "string") {
@@ -41,11 +63,54 @@ function normalizeNumber(value: unknown): number {
   return 0;
 }
 
+function normalizeString(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function normalizeOptionalNumber(value: unknown): number | undefined {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string") {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) return parsed;
+  }
+  return undefined;
+}
+
+function normalizeEnrichmentData(value: unknown): EnrichmentData | null {
+  if (!isRecord(value)) return null;
+
+  const socialRaw = isRecord(value.socialMedia) ? value.socialMedia : null;
+  const socialMedia =
+    socialRaw && (normalizeString(socialRaw.facebook) || normalizeString(socialRaw.instagram))
+      ? {
+          ...(normalizeString(socialRaw.facebook) ? { facebook: normalizeString(socialRaw.facebook) } : {}),
+          ...(normalizeString(socialRaw.instagram) ? { instagram: normalizeString(socialRaw.instagram) } : {}),
+        }
+      : undefined;
+
+  return {
+    ...(normalizeString(value.phone) ? { phone: normalizeString(value.phone) } : {}),
+    ...(normalizeString(value.ownerName) ? { ownerName: normalizeString(value.ownerName) } : {}),
+    ...(normalizeString(value.address) ? { address: normalizeString(value.address) } : {}),
+    ...(normalizeString(value.website) ? { website: normalizeString(value.website) } : {}),
+    ...(normalizeOptionalNumber(value.googleRating) !== undefined
+      ? { googleRating: normalizeOptionalNumber(value.googleRating) }
+      : {}),
+    ...(normalizeOptionalNumber(value.reviewCount) !== undefined
+      ? { reviewCount: normalizeOptionalNumber(value.reviewCount) }
+      : {}),
+    ...(normalizeString(value.cuisine) ? { cuisine: normalizeString(value.cuisine) } : {}),
+    ...(socialMedia ? { socialMedia } : {}),
+    ...(normalizeString(value.notes) ? { notes: normalizeString(value.notes) } : {}),
+    ...(normalizeString(value.enrichedAt) ? { enrichedAt: normalizeString(value.enrichedAt) } : {}),
+  };
+}
+
 function normalizeDeal(raw: unknown): PipelineDeal | null {
   if (!isRecord(raw)) return null;
   const id = typeof raw.id === "string" ? raw.id.trim() : "";
   const name = typeof raw.name === "string" ? raw.name.trim() : "";
-  const client = typeof raw.client === "string" ? raw.client.trim() : "";
+  const client = normalizeString(raw.client);
   if (!id || !name || !client) return null;
 
   const createdAt = normalizeDate(raw.createdAt);
@@ -57,10 +122,16 @@ function normalizeDeal(raw: unknown): PipelineDeal | null {
     stage,
     value: normalizeNumber(raw.value),
     client,
-    contact: typeof raw.contact === "string" ? raw.contact.trim() : "",
+    contact: normalizeString(raw.contact),
     assignee: normalizeAssignee(raw.assignee),
     createdAt,
-    notes: typeof raw.notes === "string" ? raw.notes.trim() : "",
+    notes: normalizeString(raw.notes),
+    status: normalizeString(raw.status) || "new",
+    source: normalizeSource(raw.source),
+    email: normalizeString(raw.email),
+    enrichmentStatus: normalizeEnrichmentStatus(raw.enrichmentStatus),
+    enrichmentData: normalizeEnrichmentData(raw.enrichmentData),
+    rawWebhookData: raw.rawWebhookData,
     stageUpdatedAt: normalizeDate(raw.stageUpdatedAt ?? createdAt),
   };
 }

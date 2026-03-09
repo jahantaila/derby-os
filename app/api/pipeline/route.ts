@@ -1,11 +1,22 @@
 import { NextResponse } from "next/server";
 import { getPipelineDeals, writePipelineDeals } from "@/lib/pipeline-store";
-import { PIPELINE_ASSIGNEES, PIPELINE_STAGES, PipelineDeal, PipelineStage } from "@/lib/pipeline-types";
+import { PIPELINE_ASSIGNEES, PIPELINE_STAGES, PipelineDeal, PipelineSource, PipelineStage } from "@/lib/pipeline-types";
 
-type CreateDealInput = Partial<Omit<PipelineDeal, "id" | "createdAt" | "stageUpdatedAt">>;
+type CreateDealInput = {
+  name?: string;
+  stage?: PipelineStage;
+  value?: number | string;
+  client?: string;
+  contact?: string;
+  assignee?: string;
+  notes?: string;
+  source?: PipelineSource;
+  email?: string;
+};
 
 const VALID_STAGES = new Set<PipelineStage>(PIPELINE_STAGES);
 const VALID_ASSIGNEES = new Set<string>(PIPELINE_ASSIGNEES);
+const VALID_SOURCES = new Set<PipelineSource>(["instantly", "manual", "referral", "website"]);
 
 function buildDealId() {
   return `d${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
@@ -30,6 +41,10 @@ function normalizeValue(value: unknown): number {
     if (Number.isFinite(parsed)) return Math.max(0, parsed);
   }
   return 0;
+}
+
+function normalizeSource(value: unknown): PipelineSource {
+  return typeof value === "string" && VALID_SOURCES.has(value as PipelineSource) ? (value as PipelineSource) : "manual";
 }
 
 export async function GET() {
@@ -57,6 +72,11 @@ export async function POST(request: Request) {
       assignee: normalizeAssignee(body.assignee),
       createdAt: today,
       notes: body.notes?.trim() ?? "",
+      status: "new",
+      source: normalizeSource(body.source),
+      email: body.email?.trim() ?? "",
+      enrichmentStatus: "pending",
+      enrichmentData: null,
       stageUpdatedAt: today,
     };
 

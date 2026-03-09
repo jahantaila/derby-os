@@ -3,9 +3,10 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Funnel, Plus, Trash2, X } from "lucide-react";
 import { TEAM_MEMBERS } from "@/lib/tasks-schema";
-import { PipelineDeal, PipelineStage } from "@/lib/pipeline-types";
+import { PipelineDeal, PipelineSource, PipelineStage } from "@/lib/pipeline-types";
 
 type PanelMode = "create" | "view" | null;
+type SourceFilter = "all" | PipelineSource;
 type DealForm = {
   name: string;
   stage: PipelineStage;
@@ -32,6 +33,39 @@ const EMPTY_FORM: DealForm = {
   contact: "",
   assignee: TEAM_MEMBERS[0].id,
   notes: "",
+};
+
+const SOURCE_META: Record<PipelineSource, { label: string; className: string }> = {
+  instantly: {
+    label: "Instantly",
+    className: "border-purple-300/35 bg-purple-500/25 text-purple-100",
+  },
+  manual: {
+    label: "Manual",
+    className: "border-slate-300/30 bg-slate-500/20 text-slate-100",
+  },
+  referral: {
+    label: "Referral",
+    className: "border-emerald-300/35 bg-emerald-500/25 text-emerald-100",
+  },
+  website: {
+    label: "Website",
+    className: "border-blue-300/35 bg-blue-500/25 text-blue-100",
+  },
+};
+
+const SOURCE_FILTER_OPTIONS: { value: SourceFilter; label: string }[] = [
+  { value: "all", label: "All Sources" },
+  { value: "instantly", label: "Instantly" },
+  { value: "manual", label: "Manual" },
+  { value: "referral", label: "Referral" },
+  { value: "website", label: "Website" },
+];
+
+const ENRICHMENT_META: Record<PipelineDeal["enrichmentStatus"], { label: string; dot: string }> = {
+  pending: { label: "Pending", dot: "bg-amber-400" },
+  enriched: { label: "Enriched", dot: "bg-emerald-400" },
+  failed: { label: "Failed", dot: "bg-red-400" },
 };
 
 const currency = new Intl.NumberFormat("en-US", {
@@ -80,6 +114,7 @@ export default function PipelinePage() {
   const [selectedDealId, setSelectedDealId] = useState<string | null>(null);
   const [form, setForm] = useState<DealForm>(EMPTY_FORM);
   const [dragOverStage, setDragOverStage] = useState<PipelineStage | null>(null);
+  const [sourceFilter, setSourceFilter] = useState<SourceFilter>("all");
 
   const assigneeNames = useMemo(() => {
     return Object.fromEntries(TEAM_MEMBERS.map((member) => [member.id, member.name]));
@@ -89,6 +124,10 @@ export default function PipelinePage() {
     () => (selectedDealId ? deals.find((deal) => deal.id === selectedDealId) ?? null : null),
     [deals, selectedDealId],
   );
+
+  const visibleDeals = useMemo(() => {
+    return sourceFilter === "all" ? deals : deals.filter((deal) => deal.source === sourceFilter);
+  }, [deals, sourceFilter]);
 
   const stats = useMemo(() => {
     const wonDeals = deals.filter((deal) => deal.stage === "won");
@@ -262,14 +301,30 @@ export default function PipelinePage() {
           <h1 className="page-title">Pipeline</h1>
           <p className="mt-2 text-sm text-slate-300">Sales pipeline and client acquisition tracking.</p>
         </div>
-        <button
-          type="button"
-          onClick={openCreatePanel}
-          className="inline-flex items-center gap-2 rounded-xl border border-blue-300/30 bg-blue-500/20 px-4 py-2 text-sm font-semibold text-blue-100 transition hover:border-blue-300/60 hover:bg-blue-500/30"
-        >
-          <Plus size={16} />
-          Add Deal
-        </button>
+        <div className="flex flex-wrap items-center gap-3">
+          <label className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-slate-900/55 px-3 py-2 text-xs font-semibold uppercase tracking-[0.1em] text-slate-200">
+            Source
+            <select
+              value={sourceFilter}
+              onChange={(event) => setSourceFilter(event.target.value as SourceFilter)}
+              className="rounded-lg border border-white/20 bg-slate-900/70 px-2 py-1 text-[11px] font-medium tracking-normal text-slate-100 outline-none"
+            >
+              {SOURCE_FILTER_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button
+            type="button"
+            onClick={openCreatePanel}
+            className="inline-flex items-center gap-2 rounded-xl border border-blue-300/30 bg-blue-500/20 px-4 py-2 text-sm font-semibold text-blue-100 transition hover:border-blue-300/60 hover:bg-blue-500/30"
+          >
+            <Plus size={16} />
+            Add Deal
+          </button>
+        </div>
       </div>
 
       {error ? (
@@ -303,7 +358,7 @@ export default function PipelinePage() {
         <div className="glass-panel p-3 md:p-4">
           <div className="grid gap-3 overflow-x-auto pb-2 xl:grid-cols-5 md:grid-cols-2 grid-cols-1">
             {STAGE_COLUMNS.map((column) => {
-              const stageDeals = deals.filter((deal) => deal.stage === column.stage);
+              const stageDeals = visibleDeals.filter((deal) => deal.stage === column.stage);
 
               return (
                 <div
@@ -347,8 +402,21 @@ export default function PipelinePage() {
                           onClick={() => openDealPanel(deal)}
                           className="glass-card w-full cursor-pointer p-3 text-left transition hover:-translate-y-1"
                         >
-                          <p className="text-sm font-bold leading-snug text-white">{deal.name}</p>
+                          <div className="flex items-start justify-between gap-2">
+                            <p className="text-sm font-bold leading-snug text-white">{deal.name}</p>
+                            <span
+                              title={ENRICHMENT_META[deal.enrichmentStatus].label}
+                              className={`mt-1 inline-block h-2.5 w-2.5 shrink-0 rounded-full ${ENRICHMENT_META[deal.enrichmentStatus].dot}`}
+                            />
+                          </div>
                           <p className="mt-1 text-xs text-slate-300">{deal.client}</p>
+                          <div className="mt-2">
+                            <span
+                              className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] ${SOURCE_META[deal.source].className}`}
+                            >
+                              {SOURCE_META[deal.source].label}
+                            </span>
+                          </div>
                           <p className="mt-3 text-xl font-semibold text-blue-100">{toCurrency(deal.value)}</p>
                           <div className="mt-3 flex items-center justify-between text-xs text-slate-300">
                             <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/20 bg-white/10 text-[10px] font-semibold text-slate-100">
@@ -394,6 +462,27 @@ export default function PipelinePage() {
             </div>
 
             <form onSubmit={panelMode === "create" ? handleCreate : handleUpdate} className="space-y-4">
+              {panelMode === "view" && selectedDeal ? (
+                <div className="rounded-xl border border-white/10 bg-slate-900/60 p-3">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] ${SOURCE_META[selectedDeal.source].className}`}
+                    >
+                      {SOURCE_META[selectedDeal.source].label}
+                    </span>
+                    <span
+                      className={`inline-block h-2.5 w-2.5 rounded-full ${ENRICHMENT_META[selectedDeal.enrichmentStatus].dot}`}
+                    />
+                    <span className="text-xs text-slate-300">{ENRICHMENT_META[selectedDeal.enrichmentStatus].label}</span>
+                  </div>
+                  {selectedDeal.email ? (
+                    <p className="mt-2 text-xs text-slate-300">
+                      Email: <span className="text-slate-100">{selectedDeal.email}</span>
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
+
               <label className="block space-y-1.5">
                 <span className="text-xs uppercase tracking-[0.11em] text-slate-300">Deal Name</span>
                 <input
@@ -475,6 +564,38 @@ export default function PipelinePage() {
                   className="w-full rounded-xl border border-white/15 bg-slate-900/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-blue-400/70"
                 />
               </label>
+
+              {panelMode === "view" && selectedDeal ? (
+                <div className="space-y-2 rounded-xl border border-white/10 bg-slate-900/50 p-3">
+                  <p className="text-xs uppercase tracking-[0.11em] text-slate-300">Enrichment Data</p>
+                  {selectedDeal.enrichmentStatus === "pending" ? (
+                    <p className="text-sm text-amber-300">Awaiting research...</p>
+                  ) : selectedDeal.enrichmentStatus === "failed" ? (
+                    <p className="text-sm text-red-300">Enrichment failed. Retry research.</p>
+                  ) : (
+                    <div className="space-y-1.5 text-sm text-slate-200">
+                      <p>Phone: {selectedDeal.enrichmentData?.phone || "N/A"}</p>
+                      <p>Owner Name: {selectedDeal.enrichmentData?.ownerName || "N/A"}</p>
+                      <p>Address: {selectedDeal.enrichmentData?.address || "N/A"}</p>
+                      <p>Website: {selectedDeal.enrichmentData?.website || "N/A"}</p>
+                      <p>
+                        Google Rating:{" "}
+                        {selectedDeal.enrichmentData?.googleRating !== undefined
+                          ? selectedDeal.enrichmentData.googleRating
+                          : "N/A"}
+                      </p>
+                      <p>
+                        Review Count:{" "}
+                        {selectedDeal.enrichmentData?.reviewCount !== undefined
+                          ? selectedDeal.enrichmentData.reviewCount
+                          : "N/A"}
+                      </p>
+                      {selectedDeal.enrichmentData?.cuisine ? <p>Cuisine: {selectedDeal.enrichmentData.cuisine}</p> : null}
+                      {selectedDeal.enrichmentData?.notes ? <p>Notes: {selectedDeal.enrichmentData.notes}</p> : null}
+                    </div>
+                  )}
+                </div>
+              ) : null}
 
               <div className="flex items-center justify-between gap-3 pt-2">
                 {panelMode === "view" ? (

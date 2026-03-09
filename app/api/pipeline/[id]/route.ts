@@ -1,11 +1,20 @@
 import { NextResponse } from "next/server";
 import { getPipelineDeals, writePipelineDeals } from "@/lib/pipeline-store";
-import { PIPELINE_ASSIGNEES, PIPELINE_STAGES, PipelineDeal, PipelineStage } from "@/lib/pipeline-types";
+import {
+  EnrichmentStatus,
+  PIPELINE_ASSIGNEES,
+  PIPELINE_STAGES,
+  PipelineDeal,
+  PipelineSource,
+  PipelineStage,
+} from "@/lib/pipeline-types";
 
 type UpdateDealInput = Partial<Omit<PipelineDeal, "id" | "createdAt">>;
 
 const VALID_STAGES = new Set<PipelineStage>(PIPELINE_STAGES);
 const VALID_ASSIGNEES = new Set<string>(PIPELINE_ASSIGNEES);
+const VALID_SOURCES = new Set<PipelineSource>(["instantly", "manual", "referral", "website"]);
+const VALID_ENRICHMENT_STATUS = new Set<EnrichmentStatus>(["pending", "enriched", "failed"]);
 
 function isStage(value: unknown): value is PipelineStage {
   return typeof value === "string" && VALID_STAGES.has(value as PipelineStage);
@@ -26,6 +35,24 @@ function normalizeValue(value: unknown): number | undefined {
   return undefined;
 }
 
+function normalizeSource(value: unknown): PipelineSource | undefined {
+  if (typeof value !== "string") return undefined;
+  return VALID_SOURCES.has(value as PipelineSource) ? (value as PipelineSource) : undefined;
+}
+
+function normalizeEnrichmentStatus(value: unknown): EnrichmentStatus | undefined {
+  if (typeof value !== "string") return undefined;
+  return VALID_ENRICHMENT_STATUS.has(value as EnrichmentStatus) ? (value as EnrichmentStatus) : undefined;
+}
+
+export async function GET(_: Request, { params }: { params: { id: string } }) {
+  const deal = getPipelineDeals().find((item) => item.id === params.id);
+  if (!deal) {
+    return NextResponse.json({ error: "Deal not found." }, { status: 404 });
+  }
+  return NextResponse.json(deal);
+}
+
 export async function PATCH(request: Request, { params }: { params: { id: string } }) {
   try {
     const id = params.id;
@@ -43,6 +70,8 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     const today = new Date().toISOString().slice(0, 10);
     const assignee = normalizeAssignee(patch.assignee);
     const nextValue = normalizeValue(patch.value);
+    const source = normalizeSource(patch.source);
+    const enrichmentStatus = normalizeEnrichmentStatus(patch.enrichmentStatus);
 
     const updated: PipelineDeal = {
       ...current,
@@ -53,6 +82,12 @@ export async function PATCH(request: Request, { params }: { params: { id: string
       contact: patch.contact === undefined ? current.contact : patch.contact.trim(),
       assignee: assignee ?? current.assignee,
       notes: patch.notes === undefined ? current.notes : patch.notes.trim(),
+      source: source ?? current.source,
+      email: patch.email === undefined ? current.email : patch.email.trim(),
+      status: patch.status === undefined ? current.status : patch.status.trim(),
+      enrichmentStatus: enrichmentStatus ?? current.enrichmentStatus,
+      enrichmentData: patch.enrichmentData === undefined ? current.enrichmentData : patch.enrichmentData,
+      rawWebhookData: patch.rawWebhookData === undefined ? current.rawWebhookData : patch.rawWebhookData,
       stageUpdatedAt: stageChanged ? today : current.stageUpdatedAt ?? current.createdAt,
     };
 
