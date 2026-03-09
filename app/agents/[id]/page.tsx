@@ -48,7 +48,7 @@ export default function AgentDetailPage({ params }: AgentDetailPageProps) {
     const load = async () => {
       try {
         const [agentRes, soulRes] = await Promise.all([
-          fetch("/api/agents", { cache: "no-store" }),
+          fetch("/api/agents?type=agent", { cache: "no-store" }),
           fetch(`/api/agents/${params.id}/soul`, { cache: "no-store" }),
         ]);
 
@@ -128,8 +128,8 @@ export default function AgentDetailPage({ params }: AgentDetailPageProps) {
             <p className="mt-2 text-base text-slate-300">{agent.role}</p>
             <p className="mt-1 text-sm uppercase tracking-[0.16em] text-slate-400">{agent.department}</p>
           </div>
-          <span className={`agent-type ${agent.type === "agent" ? "ai" : "human"}`}>
-            {agent.type === "agent" ? "AI Agent" : "Human"}
+          <span className={`agent-type ${agent.type === "agent" ? "ai" : agent.type === "ceo" ? "ceo" : "employee"}`}>
+            {agent.type === "agent" ? "AI Agent" : agent.type === "ceo" ? "CEO" : "Employee"}
           </span>
         </div>
 

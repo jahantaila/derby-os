@@ -1,13 +1,14 @@
-import { readData, writeData } from "@/lib/data";
+import { readPersistentData, writePersistentData } from "@/lib/persistence";
 
-export type AgentStatus = "active" | "working" | "idle";
+export type AgentStatus = "active" | "working" | "idle" | "offline";
+export type TeamMemberType = "ceo" | "agent" | "employee";
 
 export type AgentRecord = {
   id: string;
   name: string;
   role: string;
   department: "Executive" | "Marketing" | "Development" | "Fulfillment";
-  type: "human" | "agent";
+  type: TeamMemberType;
   model: string | null;
   status: AgentStatus;
   currentTask: string;
@@ -17,7 +18,7 @@ export type AgentRecord = {
 export const TEAM_FILE = "team.json";
 
 export const TEAM_SEED: AgentRecord[] = [
-  { id: "jahan", name: "Jahan", role: "CEO", department: "Executive", type: "human", model: null, status: "active", currentTask: "Reviewing campaigns", skills: [] },
+  { id: "jahan", name: "Jahan", role: "CEO", department: "Executive", type: "ceo", model: null, status: "active", currentTask: "Managing agency", skills: [] },
   { id: "kimberly", name: "Kimberly", role: "Chief of Staff", department: "Executive", type: "agent", model: "Opus", status: "active", currentTask: "Coordinating team", skills: [] },
   {
     id: "alex",
@@ -50,8 +51,8 @@ export const TEAM_SEED: AgentRecord[] = [
     department: "Marketing",
     type: "agent",
     model: "Sonnet",
-    status: "working",
-    currentTask: "Bluegrass campaign",
+    status: "idle",
+    currentTask: "",
     skills: [
       "google-ads-campaign-builder",
       "lsa-setup-manager",
@@ -71,8 +72,8 @@ export const TEAM_SEED: AgentRecord[] = [
     department: "Development",
     type: "agent",
     model: "Codex",
-    status: "working",
-    currentTask: "Mission Control V3",
+    status: "idle",
+    currentTask: "",
     skills: [
       "frontend-design",
       "derby-design-system",
@@ -83,16 +84,16 @@ export const TEAM_SEED: AgentRecord[] = [
       "corrections-protocol",
     ],
   },
-  { id: "hamza", name: "Hamza", role: "Landing Pages", department: "Development", type: "human", model: null, status: "working", currentTask: "Bluegrass landing page", skills: [] },
+  { id: "hamza", name: "Hamza", role: "Landing Pages", department: "Development", type: "employee", model: null, status: "offline", currentTask: "", skills: [] },
   {
     id: "abdul",
     name: "Abdul",
     role: "Fulfillment",
     department: "Fulfillment",
-    type: "human",
+    type: "employee",
     model: null,
-    status: "active",
-    currentTask: "Client deliverables",
+    status: "offline",
+    currentTask: "",
     skills: [],
   },
   {
@@ -100,42 +101,77 @@ export const TEAM_SEED: AgentRecord[] = [
     name: "Elang",
     role: "Fulfillment",
     department: "Fulfillment",
-    type: "human",
+    type: "employee",
     model: null,
-    status: "active",
-    currentTask: "Client deliverables",
+    status: "offline",
+    currentTask: "",
     skills: [],
   },
 ];
 
 function hasExpectedBaseline(data: AgentRecord[]): boolean {
   if (data.length !== TEAM_SEED.length) return false;
-  const ids = new Set(data.map((agent) => agent.id));
-  return TEAM_SEED.every((agent) => ids.has(agent.id));
+  const byId = new Map(data.map((member) => [member.id, member]));
+  return TEAM_SEED.every((seedMember) => {
+    const existing = byId.get(seedMember.id);
+    return existing && existing.type === seedMember.type;
+  });
 }
 
-export function getAgents(): AgentRecord[] {
-  let data = readData<AgentRecord[]>(TEAM_FILE, []);
-  if (!hasExpectedBaseline(data)) {
+function normalizeMemberType(type: string | undefined, id: string): TeamMemberType {
+  if (type === "agent" || type === "employee" || type === "ceo") return type;
+  if (id === "jahan") return "ceo";
+  return "employee";
+}
+
+function normalizeMemberRecord(member: Partial<AgentRecord>): AgentRecord | null {
+  if (!member.id || !member.name || !member.role || !member.department) return null;
+  const seed = TEAM_SEED.find((candidate) => candidate.id === member.id);
+  if (!seed) return null;
+
+  return {
+    ...seed,
+    ...member,
+    type: normalizeMemberType(typeof member.type === "string" ? member.type : undefined, member.id),
+    status: (member.status as AgentStatus) || seed.status,
+    currentTask: typeof member.currentTask === "string" ? member.currentTask : seed.currentTask,
+    skills: Array.isArray(member.skills) ? member.skills : seed.skills,
+    model: member.model ?? seed.model,
+  };
+}
+
+async function loadTeam(): Promise<AgentRecord[]> {
+  const data = await readPersistentData<Partial<AgentRecord>[]>(TEAM_FILE, []);
+  const normalized = data.map(normalizeMemberRecord).filter(Boolean) as AgentRecord[];
+
+  if (!hasExpectedBaseline(normalized)) {
     try {
-      writeData(TEAM_FILE, TEAM_SEED);
+      await writePersistentData(TEAM_FILE, TEAM_SEED);
     } catch {
       // In sandbox-restricted environments we can still serve seed data.
     }
-    data = TEAM_SEED;
+    return TEAM_SEED;
   }
-  return data;
+
+  return normalized;
 }
 
-export function getAgentById(id: string): AgentRecord | null {
-  return getAgents().find((agent) => agent.id === id) ?? null;
+export async function getAgents(type?: TeamMemberType): Promise<AgentRecord[]> {
+  const data = await loadTeam();
+  if (!type) return data;
+  return data.filter((member) => member.type === type);
 }
 
-export function patchAgentById(
+export async function getAgentById(id: string): Promise<AgentRecord | null> {
+  const data = await loadTeam();
+  return data.find((agent) => agent.id === id) ?? null;
+}
+
+export async function patchAgentById(
   id: string,
   patch: Partial<Pick<AgentRecord, "status" | "currentTask">>,
-): AgentRecord | null {
-  const data = getAgents();
+): Promise<AgentRecord | null> {
+  const data = await loadTeam();
   const idx = data.findIndex((agent) => agent.id === id);
 
   if (idx === -1) return null;
@@ -146,11 +182,16 @@ export function patchAgentById(
     ...(typeof patch.currentTask === "string" ? { currentTask: patch.currentTask } : {}),
   };
 
+  if (!hasExpectedBaseline(data)) {
+    return null;
+  }
+
   try {
-    writeData(TEAM_FILE, data);
+    await writePersistentData(TEAM_FILE, data);
   } catch {
     // Ignore write failure in restricted environments; return updated in-memory shape.
   }
+
   return data[idx];
 }
 

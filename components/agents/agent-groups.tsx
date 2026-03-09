@@ -7,17 +7,20 @@ import { AgentCard } from "@/components/agents/agent-card";
 type AgentGroupsProps = {
   title?: string;
   largeCards?: boolean;
+  type?: "agent" | "employee";
+  hrefBase?: "/agents" | "/employees";
 };
 
-type Department = "Executive" | "Marketing" | "Development";
+type Department = "Executive" | "Marketing" | "Development" | "Fulfillment";
 
 const DEPARTMENTS: Array<{ id: Department; accentClass: string }> = [
   { id: "Executive", accentClass: "department-executive" },
   { id: "Marketing", accentClass: "department-marketing" },
   { id: "Development", accentClass: "department-development" },
+  { id: "Fulfillment", accentClass: "department-fulfillment" },
 ];
 
-export function AgentGroups({ title = "Agent Status", largeCards = false }: AgentGroupsProps) {
+export function AgentGroups({ title = "Agent Status", largeCards = false, type = "agent", hrefBase = "/agents" }: AgentGroupsProps) {
   const [agents, setAgents] = useState<AgentRecord[]>([]);
 
   useEffect(() => {
@@ -25,7 +28,7 @@ export function AgentGroups({ title = "Agent Status", largeCards = false }: Agen
 
     const refresh = async () => {
       try {
-        const res = await fetch("/api/agents", { cache: "no-store" });
+        const res = await fetch(`/api/agents?type=${type}`, { cache: "no-store" });
         if (!res.ok) return;
         const data = (await res.json()) as AgentRecord[];
         if (active) setAgents(data);
@@ -41,13 +44,13 @@ export function AgentGroups({ title = "Agent Status", largeCards = false }: Agen
       active = false;
       clearInterval(interval);
     };
-  }, []);
+  }, [type]);
 
   const grouped = useMemo(() => {
     return DEPARTMENTS.map((dept) => ({
       ...dept,
       agents: agents.filter((agent) => agent.department === dept.id),
-    }));
+    })).filter((group) => group.agents.length > 0);
   }, [agents]);
 
   return (
@@ -60,7 +63,7 @@ export function AgentGroups({ title = "Agent Status", largeCards = false }: Agen
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               {group.agents.map((agent, index) => (
                 <div key={agent.id} style={{ animationDelay: `${220 + index * 50}ms` }}>
-                  <AgentCard agent={agent} large={largeCards} />
+                  <AgentCard agent={agent} large={largeCards} hrefBase={hrefBase} />
                 </div>
               ))}
             </div>

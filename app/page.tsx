@@ -10,7 +10,7 @@ type Agent = {
   name: string;
   role: string;
   department: "Executive" | "Marketing" | "Development" | "Fulfillment";
-  type: "human" | "agent";
+  type: "ceo" | "agent" | "employee";
   model: string | null;
   status: string;
   currentTask: string;
@@ -44,7 +44,8 @@ type Workload = {
   completionRate: number;
 };
 
-const DEPARTMENTS: Array<Agent["department"]> = ["Executive", "Marketing", "Development", "Fulfillment"];
+const AGENT_DEPARTMENTS: Array<Agent["department"]> = ["Executive", "Marketing", "Development"];
+const EMPLOYEE_DEPARTMENTS: Array<Agent["department"]> = ["Development", "Fulfillment"];
 
 const DEPT_STYLES: Record<Agent["department"], { avatar: string; ring: string }> = {
   Executive: { avatar: "from-sky-500/70 to-blue-700/90", ring: "ring-sky-400/40" },
@@ -210,16 +211,27 @@ export default function DashboardPage() {
         agent,
         status,
         activeTasks,
-        currentTask: status === "working" ? agent.currentTask || activeWorkingTask || "No current task" : "Not actively working",
+        currentTask: agent.currentTask || activeWorkingTask || "",
         completionRate,
       };
     });
   }, [agents, tasks]);
 
-  const groupedWorkload = useMemo(() => {
-    return DEPARTMENTS.map((department) => ({
+  const ceoWorkload = useMemo(() => {
+    return workloads.find((entry) => entry.agent.type === "ceo") ?? null;
+  }, [workloads]);
+
+  const groupedAgentWorkload = useMemo(() => {
+    return AGENT_DEPARTMENTS.map((department) => ({
       department,
-      members: workloads.filter((entry) => entry.agent.department === department),
+      members: workloads.filter((entry) => entry.agent.type === "agent" && entry.agent.department === department),
+    })).filter((group) => group.members.length > 0);
+  }, [workloads]);
+
+  const groupedEmployeeWorkload = useMemo(() => {
+    return EMPLOYEE_DEPARTMENTS.map((department) => ({
+      department,
+      members: workloads.filter((entry) => entry.agent.type === "employee" && entry.agent.department === department),
     })).filter((group) => group.members.length > 0);
   }, [workloads]);
 
@@ -272,41 +284,40 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      <section className="animate-enter space-y-4" style={{ animationDelay: "100ms" }}>
-        <h2 className="section-title">Team Workload Overview</h2>
+      {ceoWorkload ? (
+        <section className="animate-enter space-y-4" style={{ animationDelay: "100ms" }}>
+          <h2 className="section-title">CEO</h2>
+          <article className="glass-card card-accent-ceo animate-enter rounded-2xl p-5 sm:p-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="flex min-w-0 items-center gap-3">
+                <div
+                  className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${DEPT_STYLES[ceoWorkload.agent.department].avatar} text-sm font-bold text-white ring-2 ${DEPT_STYLES[ceoWorkload.agent.department].ring}`}
+                >
+                  {getInitials(ceoWorkload.agent.name)}
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-lg font-semibold text-white">{ceoWorkload.agent.name}</p>
+                  <p className="truncate text-sm text-slate-300">{ceoWorkload.agent.role}</p>
+                </div>
+              </div>
+              <span className={`rounded-full px-2 py-1 text-[11px] font-semibold ${STATUS_STYLES[ceoWorkload.status]}`}>
+                {formatStatus(ceoWorkload.status)}
+              </span>
+            </div>
+            <p className="mt-4 text-sm text-slate-300">{ceoWorkload.currentTask || "No current task"}</p>
+          </article>
+        </section>
+      ) : null}
+
+      <section className="animate-enter space-y-4" style={{ animationDelay: "120ms" }}>
+        <h2 className="section-title">Agent Workload</h2>
         <div className="space-y-5">
-          {groupedWorkload.map((group) => (
+          {groupedAgentWorkload.map((group) => (
             <div key={group.department} className="space-y-3">
-              <p
-                className="department-header"
-                style={{
-                  borderColor:
-                    group.department === "Executive"
-                      ? "#2093ff"
-                      : group.department === "Marketing"
-                        ? "#22c55e"
-                        : group.department === "Development"
-                          ? "#a855f7"
-                          : "#f97316",
-                  color:
-                    group.department === "Executive"
-                      ? "#9bd2ff"
-                      : group.department === "Marketing"
-                        ? "#9ff8b8"
-                        : group.department === "Development"
-                          ? "#d4b9ff"
-                          : "#ffc58d",
-                }}
-              >
-                {group.department}
-              </p>
+              <p className="department-header">{group.department}</p>
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 {group.members.map(({ agent, activeTasks, currentTask, completionRate, status }) => (
-                  <article
-                    key={agent.id}
-                    className="glass-card animate-enter rounded-2xl p-4"
-                    style={{ animationDelay: "140ms" }}
-                  >
+                  <article key={agent.id} className="glass-card card-accent-agent animate-enter rounded-2xl p-4" style={{ animationDelay: "140ms" }}>
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex min-w-0 items-center gap-3">
                         <div
@@ -319,9 +330,7 @@ export default function DashboardPage() {
                           <p className="truncate text-xs text-slate-400">{agent.role}</p>
                         </div>
                       </div>
-                      <span className={`rounded-full px-2 py-1 text-[11px] font-semibold ${STATUS_STYLES[status]}`}>
-                        {formatStatus(status)}
-                      </span>
+                      <span className={`rounded-full px-2 py-1 text-[11px] font-semibold ${STATUS_STYLES[status]}`}>{formatStatus(status)}</span>
                     </div>
 
                     <div className="mt-4 space-y-2">
@@ -329,7 +338,7 @@ export default function DashboardPage() {
                         <span>Active Tasks</span>
                         <span className="font-semibold text-white">{activeTasks}</span>
                       </div>
-                      <p className="truncate text-xs text-slate-400">{currentTask}</p>
+                      <p className="truncate text-xs text-slate-400">{currentTask || "No current task"}</p>
                       <div className="h-1.5 overflow-hidden rounded-full bg-slate-800/80">
                         <div
                           className="h-full rounded-full bg-gradient-to-r from-[#2093FF] to-[#0026FF] transition-all duration-700"
@@ -337,6 +346,44 @@ export default function DashboardPage() {
                         />
                       </div>
                       <p className="text-[11px] text-slate-500">{completionRate}% completed</p>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="animate-enter space-y-4" style={{ animationDelay: "140ms" }}>
+        <h2 className="section-title">Employees</h2>
+        <div className="space-y-5">
+          {groupedEmployeeWorkload.map((group) => (
+            <div key={group.department} className="space-y-3">
+              <p className="department-header">{group.department}</p>
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                {group.members.map(({ agent, activeTasks, currentTask, status }) => (
+                  <article key={agent.id} className="glass-card card-accent-employee animate-enter rounded-2xl p-4" style={{ animationDelay: "160ms" }}>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex min-w-0 items-center gap-3">
+                        <div
+                          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${DEPT_STYLES[agent.department].avatar} text-sm font-bold text-white ring-2 ${DEPT_STYLES[agent.department].ring}`}
+                        >
+                          {getInitials(agent.name)}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-white">{agent.name}</p>
+                          <p className="truncate text-xs text-slate-400">{agent.role}</p>
+                        </div>
+                      </div>
+                      <span className={`rounded-full px-2 py-1 text-[11px] font-semibold ${STATUS_STYLES[status]}`}>{formatStatus(status)}</span>
+                    </div>
+                    <div className="mt-4 space-y-2 text-xs text-slate-300">
+                      <div className="flex items-center justify-between">
+                        <span>Active Tasks</span>
+                        <span className="font-semibold text-white">{activeTasks}</span>
+                      </div>
+                      <p className="truncate text-xs text-slate-400">{currentTask || "No current task"}</p>
                     </div>
                   </article>
                 ))}

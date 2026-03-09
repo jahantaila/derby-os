@@ -6,15 +6,17 @@ import { AgentRecord } from "@/lib/agents";
 type AgentCardProps = {
   agent: AgentRecord;
   large?: boolean;
+  hrefBase?: "/agents" | "/employees";
 };
 
-export function AgentCard({ agent, large = false }: AgentCardProps) {
+export function AgentCard({ agent, large = false, hrefBase = "/agents" }: AgentCardProps) {
   const isLive = agent.status === "active" || agent.status === "working";
+  const accentClass = agent.type === "ceo" ? "card-accent-ceo" : agent.type === "employee" ? "card-accent-employee" : "card-accent-agent";
 
   return (
     <Link
-      href={`/agents/${agent.id}`}
-      className={`glass-card block animate-enter ${large ? "p-6 sm:p-7" : "p-5"} agent-card-link`}
+      href={`${hrefBase}/${agent.id}`}
+      className={`glass-card block animate-enter ${large ? "p-6 sm:p-7" : "p-5"} agent-card-link ${accentClass}`}
       aria-label={`Open ${agent.name} details`}
     >
       <div className="flex items-start justify-between gap-3">
@@ -22,8 +24,8 @@ export function AgentCard({ agent, large = false }: AgentCardProps) {
           <p className={`${large ? "text-xl" : "text-lg"} font-semibold text-white`}>{agent.name}</p>
           <p className="text-sm text-slate-400">{agent.role}</p>
         </div>
-        <span className={`agent-type ${agent.type === "agent" ? "ai" : "human"}`}>
-          {agent.type === "agent" ? "AI" : "Human"}
+        <span className={`agent-type ${agent.type === "agent" ? "ai" : agent.type === "ceo" ? "ceo" : "employee"}`}>
+          {agent.type === "agent" ? "AI" : agent.type === "ceo" ? "CEO" : "Employee"}
         </span>
       </div>
 

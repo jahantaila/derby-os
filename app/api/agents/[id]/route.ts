@@ -2,11 +2,11 @@ import { NextResponse } from "next/server";
 import { patchAgentById } from "@/lib/agents";
 
 type PatchBody = {
-  status?: "active" | "working" | "idle";
+  status?: "active" | "working" | "idle" | "offline";
   currentTask?: string;
 };
 
-const ALLOWED_STATUS = new Set(["active", "working", "idle"]);
+const ALLOWED_STATUS = new Set(["active", "working", "idle", "offline"]);
 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   let body: PatchBody;
@@ -25,10 +25,10 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   }
 
   if (hasStatus && !ALLOWED_STATUS.has(body.status as string)) {
-    return NextResponse.json({ error: "status must be one of active|working|idle" }, { status: 400 });
+    return NextResponse.json({ error: "status must be one of active|working|idle|offline" }, { status: 400 });
   }
 
-  const updated = patchAgentById(params.id, body);
+  const updated = await patchAgentById(params.id, body);
   if (!updated) {
     return NextResponse.json({ error: "Agent not found" }, { status: 404 });
   }

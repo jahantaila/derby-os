@@ -208,10 +208,16 @@ body {
   border: 1px solid rgba(32, 147, 255, 0.5);
 }
 
-.agent-type.human {
+.agent-type.employee {
   background: rgba(16, 185, 129, 0.18);
   color: #7ef8cb;
   border: 1px solid rgba(16, 185, 129, 0.42);
+}
+
+.agent-type.ceo {
+  background: rgba(245, 158, 11, 0.18);
+  color: #ffd78f;
+  border: 1px solid rgba(245, 158, 11, 0.45);
 }
 
 .status-dot {
@@ -266,12 +272,29 @@ body {
   color: #ccb4ff;
 }
 
+.department-fulfillment {
+  border-color: #f59e0b;
+  color: #ffd19a;
+}
+
 .agent-card-link {
   transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
 }
 
 .agent-card-link:hover {
   transform: translateY(-3px) scale(1.015);
+}
+
+.card-accent-agent {
+  border-color: rgba(32, 147, 255, 0.45);
+}
+
+.card-accent-employee {
+  border-color: rgba(16, 185, 129, 0.45);
+}
+
+.card-accent-ceo {
+  border-color: rgba(245, 158, 11, 0.5);
 }
 
 .soul-markdown {
