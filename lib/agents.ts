@@ -6,7 +6,7 @@ export type AgentRecord = {
   id: string;
   name: string;
   role: string;
-  department: "Executive" | "Marketing" | "Development";
+  department: "Executive" | "Marketing" | "Development" | "Fulfillment";
   type: "human" | "agent";
   model: string | null;
   status: AgentStatus;
@@ -84,6 +84,28 @@ export const TEAM_SEED: AgentRecord[] = [
     ],
   },
   { id: "hamza", name: "Hamza", role: "Landing Pages", department: "Development", type: "human", model: null, status: "working", currentTask: "Bluegrass landing page", skills: [] },
+  {
+    id: "abdul",
+    name: "Abdul",
+    role: "Fulfillment",
+    department: "Fulfillment",
+    type: "human",
+    model: null,
+    status: "active",
+    currentTask: "Client deliverables",
+    skills: [],
+  },
+  {
+    id: "elang",
+    name: "Elang",
+    role: "Fulfillment",
+    department: "Fulfillment",
+    type: "human",
+    model: null,
+    status: "active",
+    currentTask: "Client deliverables",
+    skills: [],
+  },
 ];
 
 function hasExpectedBaseline(data: AgentRecord[]): boolean {
