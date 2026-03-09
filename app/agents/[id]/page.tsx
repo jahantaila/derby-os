@@ -4,10 +4,10 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import ReactMarkdown from "react-markdown";
-import { AgentRecord } from "@/lib/agents";
+import { AgentHistoryEntry, AgentRecord } from "@/lib/agents";
 
 type SoulResponse = {
-  content?: string;
+  content: string | null;
   error?: string;
 };
 
@@ -17,29 +17,13 @@ type AgentDetailPageProps = {
   };
 };
 
-function buildCalendar(now: Date) {
-  const year = now.getFullYear();
-  const month = now.getMonth();
-  const first = new Date(year, month, 1);
-  const last = new Date(year, month + 1, 0);
-  const daysInMonth = last.getDate();
-  const leading = first.getDay();
-  const totalCells = Math.ceil((leading + daysInMonth) / 7) * 7;
-  const today = now.getDate();
-
-  return {
-    monthLabel: now.toLocaleString("en-US", { month: "long", year: "numeric" }),
-    cells: Array.from({ length: totalCells }, (_, index) => {
-      const day = index - leading + 1;
-      if (day < 1 || day > daysInMonth) return null;
-      return { day, isToday: day === today };
-    }),
-  };
+function sortHistory(history: AgentHistoryEntry[]) {
+  return [...history].sort((a, b) => b.timestamp.localeCompare(a.timestamp));
 }
 
 export default function AgentDetailPage({ params }: AgentDetailPageProps) {
   const [agent, setAgent] = useState<AgentRecord | null>(null);
-  const [soul, setSoul] = useState("Loading SOUL...");
+  const [soul, setSoul] = useState<string | null>("Loading SOUL...");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -63,9 +47,9 @@ export default function AgentDetailPage({ params }: AgentDetailPageProps) {
 
         if (soulRes.ok) {
           const soulData = (await soulRes.json()) as SoulResponse;
-          setSoul(soulData.content || "No SOUL content found.");
+          setSoul(soulData.content);
         } else {
-          setSoul("SOUL file unavailable.");
+          setSoul("SOUL content unavailable.");
         }
       } catch {
         if (!active) return;
@@ -83,7 +67,9 @@ export default function AgentDetailPage({ params }: AgentDetailPageProps) {
     };
   }, [params.id]);
 
-  const calendar = useMemo(() => buildCalendar(new Date()), []);
+  const history = useMemo(() => sortHistory(agent?.history ?? []), [agent?.history]);
+  const sessionLog = history.slice(0, 4);
+  const lastActive = history[0]?.timestamp ?? "No activity recorded";
 
   if (loading) {
     return (
@@ -121,10 +107,11 @@ export default function AgentDetailPage({ params }: AgentDetailPageProps) {
         Back to dashboard
       </Link>
 
-      <section className="glass-panel p-6 sm:p-8">
+      <section className={`glass-panel p-6 sm:p-8 ${isLive ? "live-view-active" : ""}`}>
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h1 className="page-title">{agent.name}</h1>
+            <p className="section-title">Live View</p>
+            <h1 className="mt-3 page-title">{agent.name}</h1>
             <p className="mt-2 text-base text-slate-300">{agent.role}</p>
             <p className="mt-1 text-sm uppercase tracking-[0.16em] text-slate-400">{agent.department}</p>
           </div>
@@ -133,22 +120,56 @@ export default function AgentDetailPage({ params }: AgentDetailPageProps) {
           </span>
         </div>
 
-        <div className="mt-5 flex flex-wrap items-center gap-3 text-sm text-slate-300">
-          <span className={`status-dot ${isLive ? "live" : "idle"}`} />
-          <span className="capitalize">{agent.status}</span>
-          <span className="rounded-full border border-white/15 px-2.5 py-1 text-xs text-slate-300">
-            Model: {agent.model ?? "N/A"}
-          </span>
-          <span className="rounded-full border border-white/15 px-2.5 py-1 text-xs text-slate-300">
-            Current Task: {agent.currentTask || "-"}
-          </span>
+        <div className="mt-6 grid gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
+          <div className="space-y-4 rounded-2xl border border-white/10 bg-black/20 p-4 sm:p-5">
+            <div className="flex flex-wrap items-center gap-3 text-sm text-slate-300">
+              <span className={`status-dot ${isLive ? "live" : "idle"}`} />
+              <span className="capitalize">{agent.status}</span>
+              <span className="rounded-full border border-white/15 px-2.5 py-1 text-xs text-slate-300">
+                Model: {agent.model ?? "N/A"}
+              </span>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="live-stat-card">
+                <p className="live-stat-label">Current Task</p>
+                <p className="live-stat-value">{agent.currentTask || (isLive ? "Waiting on next step" : "Agent is idle - no active session")}</p>
+              </div>
+              <div className="live-stat-card">
+                <p className="live-stat-label">Last Active</p>
+                <p className="live-stat-value">{lastActive}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="live-log-panel">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="section-title">Session Log</h2>
+              <span className="text-[11px] uppercase tracking-[0.16em] text-slate-500">Recent output</span>
+            </div>
+            <div className="mt-4 space-y-2 font-mono text-xs text-slate-300">
+              {isLive ? (
+                sessionLog.length > 0 ? (
+                  sessionLog.map((entry) => (
+                    <div key={`${entry.timestamp}-${entry.action}`} className="live-log-line">
+                      <span className="text-blue-200">[{entry.timestamp}]</span> {entry.action}
+                    </div>
+                  ))
+                ) : (
+                  <div className="live-log-line">No session output yet.</div>
+                )
+              ) : (
+                <div className="live-log-line">Agent is idle - no active session</div>
+              )}
+            </div>
+          </div>
         </div>
       </section>
 
       <section className="glass-panel p-6 sm:p-8">
         <h2 className="section-title">SOUL</h2>
         <div className="soul-markdown mt-4 rounded-xl border border-white/10 bg-black/20 p-4 sm:p-5">
-          <ReactMarkdown>{soul}</ReactMarkdown>
+          <ReactMarkdown>{soul || "No SOUL content found."}</ReactMarkdown>
         </div>
       </section>
 
@@ -169,16 +190,18 @@ export default function AgentDetailPage({ params }: AgentDetailPageProps) {
 
       <section className="glass-panel p-6 sm:p-8">
         <h2 className="section-title">History</h2>
-        <p className="mt-2 text-sm text-slate-400">{calendar.monthLabel}</p>
-        <div className="mt-4 grid grid-cols-7 gap-2">
-          {calendar.cells.map((cell, idx) => (
-            <div
-              key={`${idx}-${cell?.day ?? "blank"}`}
-              className={`agent-calendar-cell ${cell?.isToday ? "today" : ""} ${cell ? "" : "empty"}`}
-            >
-              {cell?.day ?? ""}
-            </div>
-          ))}
+        <div className="agent-timeline mt-6">
+          {history.length === 0 ? (
+            <p className="text-sm text-slate-400">No activity recorded.</p>
+          ) : (
+            history.map((entry) => (
+              <div key={`${entry.timestamp}-${entry.action}`} className="agent-timeline-item">
+                <div className="agent-timeline-time">{entry.timestamp}</div>
+                <div className="agent-timeline-marker" aria-hidden="true" />
+                <div className="agent-timeline-content">{entry.action}</div>
+              </div>
+            ))
+          )}
         </div>
       </section>
     </div>
