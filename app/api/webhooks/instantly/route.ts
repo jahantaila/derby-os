@@ -240,6 +240,7 @@ function createWebhookDeal(
     assignee: "jahan",
     createdAt: today,
     competitor,
+    tags: [competitor],
     notes: `Auto-imported from Instantly. Competitor: ${competitor}`,
     status: "new",
     source: "instantly",

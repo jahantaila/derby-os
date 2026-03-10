@@ -15,6 +15,7 @@ type CreateDealInput = {
   phone?: string;
   website?: string;
   competitor?: string;
+  tags?: string[];
 };
 
 const VALID_STAGES = new Set<PipelineStage>(PIPELINE_STAGES);
@@ -55,6 +56,28 @@ function normalizeString(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
 }
 
+function normalizeTags(value: unknown, competitor?: string): string[] {
+  const tags = Array.isArray(value) ? value : [];
+  const normalized: string[] = [];
+  const seen = new Set<string>();
+
+  tags.forEach((entry) => {
+    const tag = normalizeString(entry);
+    const key = tag.toLowerCase();
+    if (!tag || seen.has(key)) return;
+    seen.add(key);
+    normalized.push(tag);
+  });
+
+  const competitorTag = normalizeString(competitor);
+  const competitorKey = competitorTag.toLowerCase();
+  if (competitorTag && !seen.has(competitorKey)) {
+    normalized.push(competitorTag);
+  }
+
+  return normalized;
+}
+
 export async function GET() {
   return NextResponse.json(await getPipelineDeals());
 }
@@ -70,6 +93,7 @@ export async function POST(request: Request) {
     }
 
     const today = new Date().toISOString().slice(0, 10);
+    const competitor = normalizeString(body.competitor) || undefined;
     const deal: PipelineDeal = {
       id: buildDealId(),
       name,
@@ -92,7 +116,8 @@ export async function POST(request: Request) {
             }
           : null,
       phoneLog: [],
-      competitor: normalizeString(body.competitor) || undefined,
+      tags: normalizeTags(body.tags, competitor),
+      competitor,
       website: normalizeString(body.website) || undefined,
       stageUpdatedAt: today,
     };

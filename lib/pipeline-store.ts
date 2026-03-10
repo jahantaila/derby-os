@@ -70,6 +70,30 @@ function normalizeString(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
 }
 
+function normalizeTags(value: unknown, competitor?: string): string[] {
+  const normalized: string[] = [];
+  const seen = new Set<string>();
+
+  if (Array.isArray(value)) {
+    value.forEach((entry) => {
+      const tag = normalizeString(entry);
+      const key = tag.toLowerCase();
+      if (!tag || seen.has(key)) return;
+      seen.add(key);
+      normalized.push(tag);
+    });
+  }
+
+  const competitorTag = normalizeString(competitor);
+  const competitorKey = competitorTag.toLowerCase();
+  if (competitorTag && !seen.has(competitorKey)) {
+    seen.add(competitorKey);
+    normalized.push(competitorTag);
+  }
+
+  return normalized;
+}
+
 function detectCompetitorFromCampaign(campaignName: string): string {
   const campaign = campaignName.toUpperCase();
   if (campaign.includes("SPOTHOPPER")) return "SpotHopper";
@@ -199,6 +223,7 @@ function normalizeDeal(raw: unknown): PipelineDeal | null {
 
   const createdAt = normalizeDate(raw.createdAt);
   const stage = normalizeStage(raw.stage);
+  const competitor = normalizeCompetitor(raw.competitor, raw.rawWebhookData, normalizeString(raw.notes));
 
   return {
     id,
@@ -216,7 +241,8 @@ function normalizeDeal(raw: unknown): PipelineDeal | null {
     enrichmentStatus: normalizeEnrichmentStatus(raw.enrichmentStatus),
     enrichmentData: normalizeEnrichmentData(raw.enrichmentData),
     phoneLog: normalizePhoneLog(raw.phoneLog),
-    competitor: normalizeCompetitor(raw.competitor, raw.rawWebhookData, normalizeString(raw.notes)),
+    tags: normalizeTags(raw.tags, competitor),
+    competitor,
     conversationHistory: normalizeConversationHistory(raw.conversationHistory),
     messagedFrom: normalizeString(raw.messagedFrom) || undefined,
     website: normalizeString(raw.website) || undefined,

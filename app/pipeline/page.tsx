@@ -51,6 +51,7 @@ type AddContactForm = {
   source: string;
   stage: PipelineStage;
   notes: string;
+  tags: string[];
 };
 
 type CsvImportRow = {
@@ -113,7 +114,17 @@ const EMPTY_ADD_FORM: AddContactForm = {
   source: "manual",
   stage: "new-lead",
   notes: "",
+  tags: [],
 };
+const TAG_SUGGESTIONS = ["SpotHopper", "BentoBox", "Owner.com", "Popmenu", "Fisherman", "Hot Lead", "Follow Up", "VIP"] as const;
+const TAG_PILL_STYLES = [
+  "border-blue-300/30 bg-blue-500/15 text-blue-100",
+  "border-emerald-300/30 bg-emerald-500/15 text-emerald-100",
+  "border-amber-300/30 bg-amber-500/15 text-amber-100",
+  "border-violet-300/30 bg-violet-500/15 text-violet-100",
+  "border-cyan-300/30 bg-cyan-500/15 text-cyan-100",
+  "border-rose-300/30 bg-rose-500/15 text-rose-100",
+] as const;
 
 const STAGE_META: Record<PipelineStage, { label: string; color: string; pill: string }> = {
   "new-lead": {
@@ -372,12 +383,53 @@ function getSearchableText(deal: PipelineDeal) {
     getPhone(deal),
     getWebsite(deal),
     deal.competitor ?? "",
+    ...deal.tags,
     notes.rolodex,
     ...notes.quickNotes.map((entry) => entry.text),
     ...deal.phoneLog.map((entry) => entry.notes),
   ]
     .join(" ")
     .toLowerCase();
+}
+
+function normalizeTagValue(value: string) {
+  return value.trim().replace(/\s+/g, " ");
+}
+
+function hasTag(tags: string[], value: string) {
+  const normalized = normalizeTagValue(value).toLowerCase();
+  return tags.some((tag) => tag.toLowerCase() === normalized);
+}
+
+function addTag(tags: string[], value: string) {
+  const normalized = normalizeTagValue(value);
+  if (!normalized || hasTag(tags, normalized)) return tags;
+  return [...tags, normalized];
+}
+
+function removeTag(tags: string[], value: string) {
+  const normalized = value.toLowerCase();
+  return tags.filter((tag) => tag.toLowerCase() !== normalized);
+}
+
+function getUniqueTags(deals: PipelineDeal[]) {
+  const unique: string[] = [];
+  const seen = new Set<string>();
+
+  deals.forEach((deal) => {
+    deal.tags.forEach((tag) => {
+      const key = tag.toLowerCase();
+      if (seen.has(key)) return;
+      seen.add(key);
+      unique.push(tag);
+    });
+  });
+
+  return unique.sort((a, b) => a.localeCompare(b));
+}
+
+function getTagPillClass(index: number) {
+  return TAG_PILL_STYLES[index % TAG_PILL_STYLES.length];
 }
 
 function normalizeStageValue(value: string): PipelineStage {
@@ -428,6 +480,104 @@ function SelectOptions({ values, getLabel }: { values: readonly string[]; getLab
         </option>
       ))}
     </>
+  );
+}
+
+function TagInput({
+  tags,
+  onAdd,
+  onRemove,
+  placeholder,
+  suggestions = TAG_SUGGESTIONS,
+}: {
+  tags: string[];
+  onAdd: (value: string) => void;
+  onRemove: (value: string) => void;
+  placeholder: string;
+  suggestions?: readonly string[];
+}) {
+  const [draft, setDraft] = useState("");
+  const [focused, setFocused] = useState(false);
+
+  const visibleSuggestions = suggestions.filter((suggestion) => !hasTag(tags, suggestion));
+
+  function submitTag() {
+    const next = normalizeTagValue(draft);
+    if (!next) return;
+    onAdd(next);
+    setDraft("");
+  }
+
+  return (
+    <div className="space-y-3">
+      {tags.length ? (
+        <div className="flex flex-wrap gap-2">
+          {tags.map((tag, index) => (
+            <span
+              key={`${tag}-${index}`}
+              className={cn(
+                "inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs uppercase tracking-[0.16em]",
+                getTagPillClass(index),
+              )}
+            >
+              <span>{tag}</span>
+              <button
+                type="button"
+                onClick={() => onRemove(tag)}
+                className="inline-flex h-4 w-4 items-center justify-center rounded-full text-current/80 transition hover:text-current"
+                aria-label={`Remove ${tag}`}
+              >
+                <X size={12} />
+              </button>
+            </span>
+          ))}
+        </div>
+      ) : null}
+
+      <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_48px]">
+        <input
+          value={draft}
+          onChange={(event) => setDraft(event.target.value)}
+          onFocus={() => setFocused(true)}
+          onBlur={() => window.setTimeout(() => setFocused(false), 120)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              event.preventDefault();
+              submitTag();
+            }
+          }}
+          placeholder={placeholder}
+          className="w-full rounded-2xl border border-white/10 bg-[#0a0a0f] px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-blue-400/40"
+        />
+        <button
+          type="button"
+          onClick={submitTag}
+          className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-blue-300/30 bg-[linear-gradient(135deg,#2093FF,#0026FF)] text-white"
+          aria-label="Add tag"
+        >
+          <Plus size={16} />
+        </button>
+      </div>
+
+      {focused && visibleSuggestions.length ? (
+        <div className="flex flex-wrap gap-2">
+          {visibleSuggestions.map((suggestion, index) => (
+            <button
+              key={suggestion}
+              type="button"
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => onAdd(suggestion)}
+              className={cn(
+                "rounded-full border px-3 py-1 text-xs uppercase tracking-[0.16em] transition hover:brightness-110",
+                getTagPillClass(index),
+              )}
+            >
+              {suggestion}
+            </button>
+          ))}
+        </div>
+      ) : null}
+    </div>
   );
 }
 
@@ -555,6 +705,7 @@ export default function PipelinePage() {
   const [error, setError] = useState("");
   const [activeSubview, setActiveSubview] = useState<PipelineSubview>("dashboard");
   const [activeSource, setActiveSource] = useState("all");
+  const [activeTagFilter, setActiveTagFilter] = useState("");
   const [search, setSearch] = useState("");
   const [sortMode, setSortMode] = useState<SortMode>("newest");
   const [selectedId, setSelectedId] = useState("");
@@ -601,17 +752,25 @@ export default function PipelinePage() {
   }, []);
 
   const sourceTabs = useMemo(() => getSourceTabs(deals), [deals]);
+  const availableTags = useMemo(() => getUniqueTags(deals), [deals]);
 
   const filteredDeals = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
     const filtered = deals.filter((deal) => {
       const sourceMatch = activeSource === "all" || normalizeSourceValue(deal.source) === activeSource;
+      const tagMatch = !activeTagFilter || hasTag(deal.tags, activeTagFilter);
       const searchMatch = !normalizedSearch || getSearchableText(deal).includes(normalizedSearch);
-      return sourceMatch && searchMatch;
+      return sourceMatch && tagMatch && searchMatch;
     });
 
     return sortDeals(filtered, sortMode);
-  }, [activeSource, deals, search, sortMode]);
+  }, [activeSource, activeTagFilter, deals, search, sortMode]);
+
+  useEffect(() => {
+    if (activeTagFilter && !availableTags.some((tag) => tag.toLowerCase() === activeTagFilter.toLowerCase())) {
+      setActiveTagFilter("");
+    }
+  }, [activeTagFilter, availableTags]);
 
   useEffect(() => {
     if (!filteredDeals.length) {
@@ -875,6 +1034,7 @@ export default function PipelinePage() {
           source: addForm.source,
           stage: addForm.stage,
           notes: serializeNotes({ rolodex: addForm.notes, quickNotes: [] }),
+          tags: addForm.tags,
         }),
       });
 
@@ -1410,6 +1570,32 @@ export default function PipelinePage() {
                 </div>
               </div>
 
+              {availableTags.length ? (
+                <div className="glass-card rounded-2xl p-3">
+                  <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Tag Filter</p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {availableTags.map((tag, index) => {
+                      const active = activeTagFilter.toLowerCase() === tag.toLowerCase();
+                      return (
+                        <button
+                          key={tag}
+                          type="button"
+                          onClick={() => setActiveTagFilter((current) => (current && current.toLowerCase() === tag.toLowerCase() ? "" : tag))}
+                          className={cn(
+                            "rounded-full border px-3 py-1 text-[10px] uppercase tracking-[0.16em] transition",
+                            active
+                              ? "border-blue-300/40 bg-[linear-gradient(135deg,rgba(32,147,255,0.24),rgba(0,38,255,0.22))] text-blue-50"
+                              : getTagPillClass(index),
+                          )}
+                        >
+                          {tag}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : null}
+
               <div className="max-h-[calc(100vh-24rem)] space-y-2 overflow-y-auto pr-1">
                 {filteredDeals.length ? (
                   filteredDeals.map((deal) => {
@@ -1443,12 +1629,20 @@ export default function PipelinePage() {
                               {deal.competitor}
                             </span>
                           ) : null}
+                          {deal.tags.slice(0, 2).map((tag, index) => (
+                            <span
+                              key={tag}
+                              className={cn("rounded-full border px-2.5 py-1 text-[10px] uppercase tracking-[0.16em]", getTagPillClass(index))}
+                            >
+                              {tag}
+                            </span>
+                          ))}
                         </div>
                       </button>
                     );
                   })
                 ) : (
-                  <div className="glass-card rounded-2xl p-5 text-sm text-slate-400">No contacts match this source filter.</div>
+                  <div className="glass-card rounded-2xl p-5 text-sm text-slate-400">No contacts match the current filters.</div>
                 )}
               </div>
 
@@ -1528,6 +1722,31 @@ export default function PipelinePage() {
                       </div>
                       <p className="mt-2 break-all text-sm text-white">{getWebsite(detailDeal) || "No website"}</p>
                     </div>
+                  </div>
+                </section>
+
+                <section className="glass-panel p-5 sm:p-6">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="section-title">Tags</p>
+                      <p className="mt-1 text-sm text-slate-400">Add fast labels for source, urgency, and follow-up status.</p>
+                    </div>
+                    {workingDealId === detailDeal.id ? <span className="text-xs uppercase tracking-[0.16em] text-blue-200">Saving</span> : null}
+                  </div>
+                  <div className="mt-4">
+                    <TagInput
+                      key={detailDeal.id}
+                      tags={detailDeal.tags}
+                      placeholder="Add tag..."
+                      onAdd={(value) => {
+                        const nextTags = addTag(detailDeal.tags, value);
+                        if (nextTags === detailDeal.tags) return;
+                        void patchDeal(detailDeal.id, { tags: nextTags });
+                      }}
+                      onRemove={(value) => {
+                        void patchDeal(detailDeal.id, { tags: removeTag(detailDeal.tags, value) });
+                      }}
+                    />
                   </div>
                 </section>
 
@@ -1815,6 +2034,15 @@ export default function PipelinePage() {
                 className="min-h-[140px] w-full rounded-2xl border border-white/10 bg-[#0a0a0f] px-4 py-3 text-sm text-white outline-none focus:border-blue-400/40"
               />
             </label>
+            <div className="space-y-2 md:col-span-2">
+              <span className="text-xs uppercase tracking-[0.16em] text-slate-400">Tags</span>
+              <TagInput
+                tags={addForm.tags}
+                placeholder="Add tag..."
+                onAdd={(value) => setAddForm((current) => ({ ...current, tags: addTag(current.tags, value) }))}
+                onRemove={(value) => setAddForm((current) => ({ ...current, tags: removeTag(current.tags, value) }))}
+              />
+            </div>
             <div className="md:col-span-2 flex justify-end">
               <button
                 type="submit"

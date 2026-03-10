@@ -44,6 +44,33 @@ function normalizeEnrichmentStatus(value: unknown): EnrichmentStatus | undefined
   return VALID_ENRICHMENT_STATUS.has(value as EnrichmentStatus) ? (value as EnrichmentStatus) : undefined;
 }
 
+function normalizeTag(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function normalizeTags(value: unknown, competitor?: string): string[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+
+  const normalized: string[] = [];
+  const seen = new Set<string>();
+
+  value.forEach((entry) => {
+    const tag = normalizeTag(entry);
+    const key = tag.toLowerCase();
+    if (!tag || seen.has(key)) return;
+    seen.add(key);
+    normalized.push(tag);
+  });
+
+  const competitorTag = normalizeTag(competitor);
+  const competitorKey = competitorTag.toLowerCase();
+  if (competitorTag && !seen.has(competitorKey)) {
+    normalized.push(competitorTag);
+  }
+
+  return normalized;
+}
+
 export async function GET(_: Request, { params }: { params: { id: string } }) {
   const deal = (await getPipelineDeals()).find((item) => item.id === params.id);
   if (!deal) {
@@ -71,6 +98,8 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     const nextValue = normalizeValue(patch.value);
     const source = normalizeSource(patch.source);
     const enrichmentStatus = normalizeEnrichmentStatus(patch.enrichmentStatus);
+    const competitor = patch.competitor === undefined ? current.competitor : patch.competitor?.trim() || undefined;
+    const tags = normalizeTags(patch.tags, competitor);
 
     const updated: PipelineDeal = {
       ...current,
@@ -87,7 +116,8 @@ export async function PATCH(request: Request, { params }: { params: { id: string
       enrichmentStatus: enrichmentStatus ?? current.enrichmentStatus,
       enrichmentData: patch.enrichmentData === undefined ? current.enrichmentData : patch.enrichmentData,
       phoneLog: patch.phoneLog === undefined ? current.phoneLog : patch.phoneLog,
-      competitor: patch.competitor === undefined ? current.competitor : patch.competitor?.trim() || undefined,
+      tags: tags ?? current.tags,
+      competitor,
       conversationHistory: patch.conversationHistory === undefined ? current.conversationHistory : patch.conversationHistory,
       messagedFrom: patch.messagedFrom === undefined ? current.messagedFrom : patch.messagedFrom?.trim() || undefined,
       website: patch.website === undefined ? current.website : patch.website?.trim() || undefined,

@@ -55,6 +55,7 @@ export type PipelineDeal = {
   enrichmentStatus: EnrichmentStatus;
   enrichmentData: EnrichmentData | null;
   phoneLog: PhoneLogEntry[];
+  tags: string[];
   competitor?: string;
   conversationHistory?: ConversationHistoryItem[];
   messagedFrom?: string;
