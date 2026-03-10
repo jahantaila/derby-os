@@ -116,12 +116,13 @@ function monthLabel(month: string) {
 }
 
 function currentMonth() {
-  const easternDate = new Date().toLocaleDateString("en-US", {
+  const parts = new Intl.DateTimeFormat("en-US", {
     timeZone: "America/New_York",
     year: "numeric",
     month: "2-digit",
-  });
-  const [month, , year] = easternDate.split("/");
+  }).formatToParts(new Date());
+  const year = parts.find((p) => p.type === "year")!.value;
+  const month = parts.find((p) => p.type === "month")!.value;
   return `${year}-${month}`;
 }
 
@@ -765,59 +766,15 @@ function scaleRows(rows: FinanceLedgerRow[], factor: number, month: string): Fin
     }));
 }
 
-function ensureHistoricalPlaceholders(data: FinanceData): FinanceData {
-  const placeholders: Array<{ month: string; factor: number }> = [
-    { month: "2026-01", factor: 0.78 },
-    { month: "2026-02", factor: 0.9 },
-  ];
-
-  const next: FinanceData = {
-    clients: data.clients.map((client) => ({ ...client, months: { ...client.months } })),
-    generalData: {
-      months: { ...data.generalData.months },
-    },
-  };
-
-  const baseGeneral = next.generalData.months[MARCH_2026];
-
-  for (const item of placeholders) {
-    if (!next.generalData.months[item.month]) {
-      next.generalData.months[item.month] = baseGeneral
-        ? {
-            month: item.month,
-            goalAmount: baseGeneral.goalAmount,
-            recurringExpenses: scaleRows(baseGeneral.recurringExpenses, item.factor, item.month),
-            employeeExpenses: scaleRows(baseGeneral.employeeExpenses, item.factor, item.month),
-            oneTimeExpenses: [],
-          }
-        : emptyGeneralMonth(item.month);
-    }
-
-    for (const client of next.clients) {
-      if (client.months[item.month]) continue;
-      const baseMonth = client.months[MARCH_2026];
-      client.months[item.month] = baseMonth
-        ? {
-            month: item.month,
-            goalAmount: baseMonth.goalAmount,
-            stripeFeeOverride: null,
-            income: scaleRows(baseMonth.income, item.factor, item.month),
-            expenses: scaleRows(baseMonth.expenses, item.factor, item.month),
-          }
-        : emptyClientMonth(item.month);
-    }
-  }
-
-  return next;
-}
+// Historical placeholder generation removed — real data only
 
 function normalizeFinanceData(raw: unknown): FinanceData {
   if (!isRecord(raw)) {
-    return ensureHistoricalPlaceholders(seedMarch2026Data());
+    return seedMarch2026Data();
   }
 
   if (!Array.isArray(raw.clients) || !isRecord(raw.generalData)) {
-    return ensureHistoricalPlaceholders(migrateLegacyData(raw));
+    return migrateLegacyData(raw);
   }
 
   const clients = raw.clients.map(normalizeClient).filter((client): client is FinanceClient => client !== null);
@@ -828,10 +785,10 @@ function normalizeFinanceData(raw: unknown): FinanceData {
     generalData.months[MARCH_2026] = emptyGeneralMonth(MARCH_2026);
   }
 
-  return ensureHistoricalPlaceholders({
+  return {
     clients: normalizedClients,
     generalData,
-  });
+  };
 }
 
 export function buildFinanceSummary(data: FinanceData, requestedMonth?: string): FinanceSummary {
