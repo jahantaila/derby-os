@@ -1,83 +1,68 @@
-export type FinanceRecordType = "income" | "expense";
+export type ExpenseCategory = "other" | "fulfillment" | "marketing" | "hosting";
 
-export type FinanceRecordCategory = "retainer" | "ad spend" | "tool cost" | "freelancer" | "other";
+export type RevenueCategory = "retainer" | "project" | "ad management" | "other";
 
-export type FinanceClient = {
+export type FinanceRecurringExpense = {
   id: string;
   name: string;
-  status: "active" | "paused";
+  date: string;
+  type: ExpenseCategory;
+  recurring: string;
+  notes: string;
+  price: number;
 };
 
-export type FinanceRecord = {
+export type FinanceEmployeeExpense = {
   id: string;
-  type: FinanceRecordType;
-  client: string | null;
-  amount: number;
-  category: FinanceRecordCategory;
+  name: string;
   date: string;
   notes: string;
-  recurring: boolean;
+  price: number;
+  extraNotes: string;
 };
 
-export type MonthlyClientBreakdown = {
-  clientId: string;
+export type FinanceOneTimeExpense = {
+  id: string;
+  name: string;
+  date: string;
+  notes: string;
+  price: number;
+};
+
+export type FinanceRevenue = {
+  id: string;
   clientName: string;
-  revenue: number;
-  costs: number;
-  monthlyRetainer: number;
-  adSpendManaged: number;
-  additionalCosts: number;
+  amount: number;
+  date: string;
+  type: RevenueCategory;
+  notes: string;
+  stripeFee: number | null;
 };
 
-export type MonthlySnapshot = {
+export type FinanceMonthData = {
   month: string;
-  totalRevenue: number;
-  totalCosts: number;
-  netProfit: number;
-  clientBreakdown: Record<string, MonthlyClientBreakdown>;
+  goalAmount: number;
+  recurringExpenses: FinanceRecurringExpense[];
+  employeeExpenses: FinanceEmployeeExpense[];
+  oneTimeExpenses: FinanceOneTimeExpense[];
+  revenues: FinanceRevenue[];
 };
 
 export type FinanceData = {
-  clients: FinanceClient[];
-  records: FinanceRecord[];
-  monthlySnapshots: Record<string, MonthlySnapshot>;
-};
-
-export type FinanceOverallSummary = {
-  month: string;
-  monthLabel: string;
-  monthlyRevenue: number;
-  monthlyCosts: number;
-  netProfit: number;
-  mrr: number;
-  activeClients: number;
-};
-
-export type FinanceClientSummary = {
-  clientId: string;
-  name: string;
-  status: FinanceClient["status"];
-  monthlyRetainer: number;
-  adSpendManaged: number;
-  additionalCosts: number;
-  revenue: number;
-  costs: number;
-  netProfit: number;
-  marginPercent: number;
-};
-
-export type FinanceMonthlyPoint = {
-  month: string;
-  label: string;
-  revenue: number;
-  costs: number;
-  profit: number;
+  months: Record<string, FinanceMonthData>;
 };
 
 export type FinanceSummary = {
-  overall: FinanceOverallSummary;
-  clients: FinanceClientSummary[];
-  trend: FinanceMonthlyPoint[];
-  transactions: FinanceRecord[];
-  availableMonths: string[];
+  month: string;
+  monthLabel: string;
+  grossRevenue: number;
+  totalStripeFee: number;
+  totalRecurringExpenditure: number;
+  totalEmployeeExpenditure: number;
+  totalOneTimeExpenditure: number;
+  totalExpenditure: number;
+  totalProfit: number;
+  profitMargin: number;
+  goalAmount: number;
+  goalPercent: number;
 };

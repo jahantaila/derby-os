@@ -1,49 +1,34 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { ArrowLeft, ArrowRight, DollarSign, Plus, Target, Trash2, TrendingUp } from "lucide-react";
 import {
-  ArrowLeft,
-  ArrowRight,
-  DollarSign,
-  Landmark,
-  Pencil,
-  Plus,
-  Receipt,
-  Trash2,
-  TrendingUp,
-  Wallet,
-  X,
-} from "lucide-react";
-import { FinanceClient, FinanceData, FinanceRecord, FinanceRecordCategory, FinanceRecordType, FinanceSummary } from "@/lib/finance-types";
+  ExpenseCategory,
+  FinanceData,
+  FinanceMonthData,
+  RevenueCategory,
+} from "@/lib/finance-types";
 
-type TransactionForm = {
-  type: FinanceRecordType;
-  client: string;
-  amount: string;
-  category: FinanceRecordCategory;
-  date: string;
-  notes: string;
-  recurring: boolean;
-};
+const DEFAULT_GOAL = 15000;
 
-const currency = new Intl.NumberFormat("en-US", {
+const money = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
-  maximumFractionDigits: 0,
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
 });
 
 const percent = new Intl.NumberFormat("en-US", {
+  minimumFractionDigits: 1,
   maximumFractionDigits: 1,
 });
 
-const CATEGORY_OPTIONS: FinanceRecordCategory[] = ["retainer", "ad spend", "tool cost", "freelancer", "other"];
-
-function formatCurrency(value: number) {
-  return currency.format(value);
+function formatMoney(value: number) {
+  return money.format(Number.isFinite(value) ? value : 0);
 }
 
 function formatPercent(value: number) {
-  return `${percent.format(value)}%`;
+  return `${percent.format(Number.isFinite(value) ? value : 0)}%`;
 }
 
 function monthKey(date = new Date()) {
@@ -52,43 +37,192 @@ function monthKey(date = new Date()) {
 
 function shiftMonth(value: string, delta: number) {
   const [year, month] = value.split("-").map(Number);
-  const next = new Date(year, month - 1 + delta, 1);
-  return `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, "0")}`;
+  const next = new Date(Date.UTC(year, month - 1 + delta, 1));
+  return `${next.getUTCFullYear()}-${String(next.getUTCMonth() + 1).padStart(2, "0")}`;
 }
 
-function emptyTransactionForm(selectedMonth: string): TransactionForm {
+function monthLabel(value: string) {
+  const [year, month] = value.split("-").map(Number);
+  return new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" }).format(new Date(Date.UTC(year, month - 1, 1)));
+}
+
+function monthTitle(value: string) {
+  const [year, month] = value.split("-").map(Number);
+  const label = new Intl.DateTimeFormat("en-US", { month: "long" }).format(new Date(Date.UTC(year, month - 1, 1)));
+  return `${label.toUpperCase()} FINANCES`;
+}
+
+function emptyMonth(month: string): FinanceMonthData {
   return {
-    type: "income",
-    client: "",
-    amount: "",
-    category: "retainer",
-    date: `${selectedMonth}-01`,
-    notes: "",
-    recurring: false,
+    month,
+    goalAmount: DEFAULT_GOAL,
+    recurringExpenses: [],
+    employeeExpenses: [],
+    oneTimeExpenses: [],
+    revenues: [],
   };
 }
 
-function StatCard({
-  icon: Icon,
-  label,
+function cellBaseClassName() {
+  return "w-full rounded-lg border border-white/10 bg-[#0d111d] px-2.5 py-2 text-sm text-slate-100 outline-none transition focus:border-blue-300/50";
+}
+
+function EditableTextCell({
   value,
+  onSave,
+  placeholder,
+}: {
+  value: string;
+  onSave: (next: string) => void;
+  placeholder?: string;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value);
+
+  useEffect(() => {
+    setDraft(value);
+  }, [value]);
+
+  if (!editing) {
+    return (
+      <button
+        type="button"
+        onClick={() => setEditing(true)}
+        className="w-full rounded-lg px-2.5 py-2 text-left text-sm text-slate-100 transition hover:bg-white/5"
+      >
+        {value || <span className="text-slate-500">{placeholder ?? "Click to edit"}</span>}
+      </button>
+    );
+  }
+
+  return (
+    <input
+      autoFocus
+      value={draft}
+      onChange={(event) => setDraft(event.target.value)}
+      onBlur={() => {
+        setEditing(false);
+        if (draft !== value) onSave(draft);
+      }}
+      onKeyDown={(event) => {
+        if (event.key === "Enter") event.currentTarget.blur();
+        if (event.key === "Escape") {
+          setDraft(value);
+          setEditing(false);
+        }
+      }}
+      placeholder={placeholder}
+      className={cellBaseClassName()}
+    />
+  );
+}
+
+function EditableNumberCell({
+  value,
+  onSave,
+  nullable,
+}: {
+  value: number | null;
+  onSave: (next: number | null) => void;
+  nullable?: boolean;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value === null ? "" : String(value));
+
+  useEffect(() => {
+    setDraft(value === null ? "" : String(value));
+  }, [value]);
+
+  if (!editing) {
+    const shown = value === null ? "auto (3%)" : formatMoney(value);
+    return (
+      <button
+        type="button"
+        onClick={() => setEditing(true)}
+        className="w-full rounded-lg px-2.5 py-2 text-right text-sm font-semibold text-slate-100 transition hover:bg-white/5"
+      >
+        {shown}
+      </button>
+    );
+  }
+
+  return (
+    <input
+      autoFocus
+      inputMode="decimal"
+      value={draft}
+      onChange={(event) => setDraft(event.target.value)}
+      onBlur={() => {
+        setEditing(false);
+        if (!draft.trim()) {
+          onSave(nullable ? null : 0);
+          return;
+        }
+
+        const parsed = Number(draft);
+        if (!Number.isFinite(parsed) || parsed < 0) {
+          setDraft(value === null ? "" : String(value));
+          return;
+        }
+
+        onSave(parsed);
+      }}
+      onKeyDown={(event) => {
+        if (event.key === "Enter") event.currentTarget.blur();
+        if (event.key === "Escape") {
+          setDraft(value === null ? "" : String(value));
+          setEditing(false);
+        }
+      }}
+      placeholder={nullable ? "auto" : "0.00"}
+      className={`${cellBaseClassName()} text-right font-semibold`}
+    />
+  );
+}
+
+function TypeBadge({ type }: { type: ExpenseCategory }) {
+  const className =
+    type === "marketing"
+      ? "border-blue-400/35 bg-blue-500/15 text-blue-200"
+      : type === "fulfillment"
+        ? "border-emerald-400/35 bg-emerald-500/15 text-emerald-200"
+        : type === "hosting"
+          ? "border-violet-400/35 bg-violet-500/15 text-violet-200"
+          : "border-slate-400/35 bg-slate-500/15 text-slate-200";
+
+  return <span className={`inline-flex rounded-full border px-2 py-0.5 text-[11px] font-semibold capitalize ${className}`}>{type}</span>;
+}
+
+function SectionHeader({ title }: { title: string }) {
+  return (
+    <div className="mb-3">
+      <h2 className="text-sm font-bold uppercase tracking-[0.18em] text-white">{title}</h2>
+      <div className="mt-2 h-[2px] w-40 bg-[linear-gradient(90deg,#2093FF,#0026FF)]" />
+    </div>
+  );
+}
+
+function SummaryCard({
+  title,
+  value,
+  icon: Icon,
   tone,
 }: {
-  icon: typeof DollarSign;
-  label: string;
+  title: string;
   value: string;
-  tone: string;
+  icon: typeof DollarSign;
+  tone?: string;
 }) {
   return (
     <article className="glass-card relative overflow-hidden p-4">
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-[#2093FF]/0 via-[#2093FF] to-[#0026FF]/0" />
+      <div className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,rgba(32,147,255,0),#2093FF,rgba(0,38,255,0))]" />
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400">{label}</p>
-          <p className={`mt-3 text-2xl font-semibold tracking-[-0.03em] ${tone}`}>{value}</p>
+          <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400">{title}</p>
+          <p className={`mt-2 text-2xl font-semibold tracking-[-0.02em] ${tone ?? "text-white"}`}>{value}</p>
         </div>
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-2.5 text-blue-100">
-          <Icon size={18} />
+        <div className="rounded-xl border border-white/10 bg-white/5 p-2 text-blue-100">
+          <Icon size={16} />
         </div>
       </div>
     </article>
@@ -97,41 +231,28 @@ function StatCard({
 
 export default function FinancePage() {
   const [data, setData] = useState<FinanceData | null>(null);
-  const [summary, setSummary] = useState<FinanceSummary | null>(null);
-  const [selectedMonth, setSelectedMonth] = useState(monthKey());
-  const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
+  const [selectedMonth, setSelectedMonth] = useState("2026-03");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [transactionFormOpen, setTransactionFormOpen] = useState(false);
-  const [editingRecordId, setEditingRecordId] = useState<string | null>(null);
-  const [transactionForm, setTransactionForm] = useState<TransactionForm>(emptyTransactionForm(monthKey()));
-
-  async function loadFinance(month = selectedMonth) {
+  async function loadFinance() {
     try {
       setLoading(true);
-      const [financeResponse, summaryResponse] = await Promise.all([
-        fetch("/api/finance", { cache: "no-store" }),
-        fetch(`/api/finance/summary?month=${month}`, { cache: "no-store" }),
-      ]);
+      const response = await fetch("/api/finance", { cache: "no-store" });
+      if (!response.ok) throw new Error("Failed to load finance");
+      const nextData = (await response.json()) as FinanceData;
+      setData(nextData);
 
-      if (!financeResponse.ok || !summaryResponse.ok) {
-        throw new Error("Failed to load finance data");
+      if (nextData.months[selectedMonth]) {
+        setSelectedMonth(selectedMonth);
+      } else if (nextData.months["2026-03"]) {
+        setSelectedMonth("2026-03");
+      } else {
+        const fallback = Object.keys(nextData.months).sort().at(-1) ?? monthKey();
+        setSelectedMonth(fallback);
       }
 
-      const financeData = (await financeResponse.json()) as FinanceData;
-      const financeSummary = (await summaryResponse.json()) as FinanceSummary;
-
-      setData(financeData);
-      setSummary(financeSummary);
-      setSelectedMonth(financeSummary.overall.month);
-      setSelectedClientId((previous) => {
-        if (previous && financeSummary.clients.some((client) => client.clientId === previous)) {
-          return previous;
-        }
-        return financeSummary.clients[0]?.clientId ?? null;
-      });
       setError(null);
     } catch {
       setError("Could not load finance data.");
@@ -140,599 +261,685 @@ export default function FinancePage() {
     }
   }
 
+  async function persist(nextData: FinanceData) {
+    try {
+      setSaving(true);
+      const response = await fetch("/api/finance", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(nextData),
+      });
+      if (!response.ok) throw new Error("Failed to save finance");
+      const saved = (await response.json()) as FinanceData;
+      setData(saved);
+      setError(null);
+    } catch {
+      setError("Could not save finance changes.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   useEffect(() => {
-    void loadFinance(selectedMonth);
-  }, [selectedMonth]);
+    void loadFinance();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const chartMax = useMemo(() => {
-    if (!summary) return 1;
-    return Math.max(1, ...summary.trend.flatMap((point) => [point.revenue, point.costs]));
-  }, [summary]);
+  const monthData = useMemo(() => {
+    if (!data) return emptyMonth(selectedMonth);
+    return data.months[selectedMonth] ?? emptyMonth(selectedMonth);
+  }, [data, selectedMonth]);
 
-  const selectedClient = useMemo(
-    () => summary?.clients.find((client) => client.clientId === selectedClientId) ?? null,
-    [selectedClientId, summary],
-  );
+  const summary = useMemo(() => {
+    const grossRevenue = monthData.revenues.reduce((sum, row) => sum + row.amount, 0);
+    const totalStripeFee = monthData.revenues.reduce((sum, row) => sum + (row.stripeFee ?? row.amount * 0.03), 0);
+    const recurringTotal = monthData.recurringExpenses.reduce((sum, row) => sum + row.price, 0);
+    const employeeTotal = monthData.employeeExpenses.reduce((sum, row) => sum + row.price, 0);
+    const oneTimeTotal = monthData.oneTimeExpenses.reduce((sum, row) => sum + row.price, 0);
+    const totalExpenditure = recurringTotal + employeeTotal + oneTimeTotal;
+    const totalProfit = grossRevenue - totalExpenditure;
+    const profitMargin = grossRevenue > 0 ? (totalProfit / grossRevenue) * 100 : 0;
+    const goalPercent = monthData.goalAmount > 0 ? (totalProfit / monthData.goalAmount) * 100 : 0;
 
-  const clientTransactions = useMemo(() => {
-    if (!summary || !selectedClientId) return [];
-    return summary.transactions.filter((record) => record.client === selectedClientId);
-  }, [selectedClientId, summary]);
+    return {
+      grossRevenue,
+      totalStripeFee,
+      recurringTotal,
+      employeeTotal,
+      oneTimeTotal,
+      totalExpenditure,
+      totalProfit,
+      profitMargin,
+      goalPercent,
+    };
+  }, [monthData]);
 
-  function openCreateTransaction() {
-    setEditingRecordId(null);
-    setTransactionForm(emptyTransactionForm(selectedMonth));
-    setTransactionFormOpen(true);
+  function commitMonth(nextMonthData: FinanceMonthData) {
+    if (!data) return;
+    const nextData: FinanceData = {
+      months: {
+        ...data.months,
+        [selectedMonth]: nextMonthData,
+      },
+    };
+    setData(nextData);
+    void persist(nextData);
   }
 
-  function openEditTransaction(record: FinanceRecord) {
-    setEditingRecordId(record.id);
-    setTransactionForm({
-      type: record.type,
-      client: record.client ?? "",
-      amount: String(record.amount),
-      category: record.category,
-      date: record.date,
-      notes: record.notes,
-      recurring: record.recurring,
-    });
-    setTransactionFormOpen(true);
+  function updateMonth(updater: (monthData: FinanceMonthData) => FinanceMonthData) {
+    const current = monthData;
+    commitMonth(updater(current));
   }
 
-  async function handleSubmitTransaction(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  function addRecurringRow() {
+    updateMonth((current) => ({
+      ...current,
+      recurringExpenses: [
+        ...current.recurringExpenses,
+        { id: crypto.randomUUID(), name: "", date: "", type: "other", recurring: "M", notes: "", price: 0 },
+      ],
+    }));
+  }
 
-    const amount = Number(transactionForm.amount);
-    if (!Number.isFinite(amount) || amount < 0) {
-      setError("Transaction amount must be a positive number.");
-      return;
-    }
+  function addEmployeeRow() {
+    updateMonth((current) => ({
+      ...current,
+      employeeExpenses: [...current.employeeExpenses, { id: crypto.randomUUID(), name: "", date: "", notes: "", price: 0, extraNotes: "" }],
+    }));
+  }
 
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(transactionForm.date)) {
-      setError("Transaction date must be YYYY-MM-DD.");
-      return;
-    }
+  function addOneTimeRow() {
+    updateMonth((current) => ({
+      ...current,
+      oneTimeExpenses: [...current.oneTimeExpenses, { id: crypto.randomUUID(), name: "", date: "", notes: "", price: 0 }],
+    }));
+  }
 
-    try {
-      setSaving(true);
-      const response = await fetch(
-        editingRecordId ? `/api/finance/entries/${editingRecordId}` : "/api/finance/entries",
-        {
-          method: editingRecordId ? "PATCH" : "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            type: transactionForm.type,
-            client: transactionForm.client || null,
-            amount,
-            category: transactionForm.category,
-            date: transactionForm.date,
-            notes: transactionForm.notes,
-            recurring: transactionForm.recurring,
-          }),
+  function addRevenueRow() {
+    updateMonth((current) => ({
+      ...current,
+      revenues: [
+        ...current.revenues,
+        { id: crypto.randomUUID(), clientName: "", amount: 0, date: "", type: "retainer", notes: "", stripeFee: null },
+      ],
+    }));
+  }
+
+  function changeMonth(delta: number) {
+    const next = shiftMonth(selectedMonth, delta);
+    setSelectedMonth(next);
+
+    if (data && !data.months[next]) {
+      const nextData: FinanceData = {
+        months: {
+          ...data.months,
+          [next]: emptyMonth(next),
         },
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to save transaction");
-      }
-
-      setTransactionFormOpen(false);
-      setEditingRecordId(null);
-      setError(null);
-      await loadFinance(selectedMonth);
-    } catch {
-      setError("Could not save transaction.");
-    } finally {
-      setSaving(false);
+      };
+      setData(nextData);
+      void persist(nextData);
     }
   }
 
-  async function handleDeleteTransaction(recordId: string) {
-    if (!window.confirm("Delete this transaction? This cannot be undone.")) return;
+  function deleteWithConfirm(section: "recurring" | "employee" | "one-time" | "revenue", id: string) {
+    const confirmed = window.confirm("Delete this row? This cannot be undone.");
+    if (!confirmed) return;
 
-    try {
-      setSaving(true);
-      const response = await fetch(`/api/finance/entries/${recordId}`, { method: "DELETE" });
-      if (!response.ok) {
-        throw new Error("Failed to delete transaction");
-      }
-      setError(null);
-      await loadFinance(selectedMonth);
-    } catch {
-      setError("Could not delete transaction.");
-    } finally {
-      setSaving(false);
+    if (section === "recurring") {
+      updateMonth((current) => ({ ...current, recurringExpenses: current.recurringExpenses.filter((row) => row.id !== id) }));
+      return;
     }
+
+    if (section === "employee") {
+      updateMonth((current) => ({ ...current, employeeExpenses: current.employeeExpenses.filter((row) => row.id !== id) }));
+      return;
+    }
+
+    if (section === "one-time") {
+      updateMonth((current) => ({ ...current, oneTimeExpenses: current.oneTimeExpenses.filter((row) => row.id !== id) }));
+      return;
+    }
+
+    updateMonth((current) => ({ ...current, revenues: current.revenues.filter((row) => row.id !== id) }));
   }
 
-  const currentMonth = monthKey();
-
-  if (loading && !summary) {
-    return <section className="glass-panel p-6 text-sm text-slate-300">Loading finance dashboard...</section>;
+  if (loading && !data) {
+    return <section className="glass-panel p-6 text-sm text-slate-300">Loading finance manager...</section>;
   }
 
-  if (!data || !summary) {
+  if (!data) {
     return <section className="glass-panel p-6 text-sm text-red-200">Finance data unavailable.</section>;
   }
 
   return (
     <section className="animate-enter space-y-6" style={{ animationDelay: "80ms" }}>
-      <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+      <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <h1 className="page-title">Finance</h1>
-          <p className="mt-2 max-w-2xl text-sm text-slate-300">
-            Month-based revenue tracking, client profitability, and transaction history in one view.
-          </p>
+          <h1 className="page-title">{monthTitle(selectedMonth)}</h1>
+          <p className="mt-2 text-sm text-slate-300">Monthly summary dashboard and spreadsheet tracking for Derby Digital.</p>
         </div>
 
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="flex items-center gap-3">
           <div className="glass-card inline-flex items-center gap-2 px-2 py-2">
             <button
               type="button"
-              onClick={() => setSelectedMonth((value) => shiftMonth(value, -1))}
-              className="rounded-xl border border-white/10 bg-white/5 p-2 text-slate-100 transition hover:border-blue-300/40 hover:bg-blue-500/15"
+              onClick={() => changeMonth(-1)}
+              className="rounded-lg border border-white/10 bg-white/5 p-2 text-slate-100 transition hover:border-blue-300/40 hover:bg-blue-500/15"
               aria-label="Previous month"
             >
               <ArrowLeft size={16} />
             </button>
-            <div className="min-w-[10.5rem] px-2 text-center">
-              <p className="text-[10px] uppercase tracking-[0.22em] text-slate-500">Selected Month</p>
-              <p className="mt-1 text-base font-semibold text-white">{summary.overall.monthLabel}</p>
+            <div className="min-w-[10rem] text-center">
+              <p className="text-sm font-semibold text-white">{monthLabel(selectedMonth)}</p>
             </div>
             <button
               type="button"
-              onClick={() => setSelectedMonth((value) => shiftMonth(value, 1))}
-              disabled={selectedMonth >= currentMonth}
-              className="rounded-xl border border-white/10 bg-white/5 p-2 text-slate-100 transition hover:border-blue-300/40 hover:bg-blue-500/15 disabled:cursor-not-allowed disabled:opacity-40"
+              onClick={() => changeMonth(1)}
+              className="rounded-lg border border-white/10 bg-white/5 p-2 text-slate-100 transition hover:border-blue-300/40 hover:bg-blue-500/15"
               aria-label="Next month"
             >
               <ArrowRight size={16} />
             </button>
           </div>
-
-          <button
-            type="button"
-            onClick={openCreateTransaction}
-            className="inline-flex items-center justify-center gap-2 rounded-2xl border border-blue-300/30 bg-[linear-gradient(135deg,rgba(32,147,255,0.26),rgba(0,38,255,0.28))] px-4 py-3 text-sm font-semibold text-blue-50 shadow-[0_18px_35px_rgba(0,38,255,0.18)] transition hover:-translate-y-0.5 hover:border-blue-200/50"
-          >
-            <Plus size={16} />
-            Add Transaction
-          </button>
         </div>
-      </div>
+      </header>
 
-      {error ? (
-        <div className="rounded-2xl border border-red-500/35 bg-red-500/10 px-4 py-3 text-sm text-red-200">{error}</div>
-      ) : null}
+      {error ? <div className="rounded-xl border border-red-500/35 bg-red-500/10 px-4 py-2 text-sm text-red-200">{error}</div> : null}
+      {saving ? <div className="text-xs uppercase tracking-[0.2em] text-blue-200/80">Saving to Redis...</div> : null}
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-        <StatCard icon={DollarSign} label="Monthly Revenue" value={formatCurrency(summary.overall.monthlyRevenue)} tone="text-emerald-300" />
-        <StatCard icon={Receipt} label="Monthly Costs" value={formatCurrency(summary.overall.monthlyCosts)} tone="text-rose-300" />
-        <StatCard icon={Wallet} label="Net Profit" value={formatCurrency(summary.overall.netProfit)} tone={summary.overall.netProfit >= 0 ? "text-blue-100" : "text-rose-300"} />
-        <StatCard icon={TrendingUp} label="MRR" value={formatCurrency(summary.overall.mrr)} tone="text-cyan-200" />
-        <StatCard icon={Landmark} label="Active Clients" value={String(summary.overall.activeClients)} tone="text-white" />
-      </div>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <SummaryCard title="Gross Revenue (Derby Digital)" value={formatMoney(summary.grossRevenue)} icon={DollarSign} tone="text-emerald-300" />
+        <SummaryCard title="Total Stripe Fee" value={formatMoney(summary.totalStripeFee)} icon={DollarSign} tone="text-amber-200" />
+        <SummaryCard title="Total Expenditure" value={formatMoney(summary.totalExpenditure)} icon={DollarSign} tone="text-rose-300" />
+        <SummaryCard
+          title="Total Profit (Derby Digital)"
+          value={formatMoney(summary.totalProfit)}
+          icon={TrendingUp}
+          tone={summary.totalProfit >= 0 ? "text-blue-100" : "text-rose-300"}
+        />
+        <SummaryCard title="Profit Margin" value={formatPercent(summary.profitMargin)} icon={Target} tone={summary.profitMargin >= 0 ? "text-cyan-200" : "text-rose-300"} />
 
-      <div className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
-        <section className="glass-panel overflow-hidden p-5">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <h2 className="section-title">Revenue vs Costs</h2>
-              <p className="mt-2 text-sm text-slate-400">Last six months ending {summary.overall.monthLabel}.</p>
-            </div>
-            <div className="flex items-center gap-3 text-xs text-slate-400">
-              <span className="inline-flex items-center gap-2">
-                <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
-                Revenue
-              </span>
-              <span className="inline-flex items-center gap-2">
-                <span className="h-2.5 w-2.5 rounded-full bg-rose-400" />
-                Costs
-              </span>
-            </div>
+        <article className="glass-card relative overflow-hidden p-4">
+          <div className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,rgba(32,147,255,0),#2093FF,rgba(0,38,255,0))]" />
+          <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400">Goal Tracking</p>
+          <p className="mt-2 text-2xl font-semibold text-blue-100">{formatPercent(summary.goalPercent)}</p>
+          <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-white/10">
+            <div
+              className="h-full bg-[linear-gradient(90deg,#2093FF,#0026FF)]"
+              style={{ width: `${Math.max(0, Math.min(100, summary.goalPercent))}%` }}
+            />
           </div>
-
-          <div className="mt-6 grid grid-cols-6 gap-3">
-            {summary.trend.map((point) => (
-              <div key={point.month} className="flex flex-col items-center gap-3">
-                <div className="flex h-52 w-full items-end justify-center gap-2 rounded-[1.4rem] border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] px-2 py-3">
-                  <div
-                    className="w-full rounded-full bg-[linear-gradient(180deg,#6ee7b7,#10b981)] shadow-[0_8px_24px_rgba(16,185,129,0.28)]"
-                    style={{ height: `${Math.max(10, (point.revenue / chartMax) * 100)}%` }}
-                    title={`Revenue ${formatCurrency(point.revenue)}`}
-                  />
-                  <div
-                    className="w-full rounded-full bg-[linear-gradient(180deg,#fb7185,#e11d48)] shadow-[0_8px_24px_rgba(225,29,72,0.24)]"
-                    style={{ height: `${Math.max(10, (point.costs / chartMax) * 100)}%` }}
-                    title={`Costs ${formatCurrency(point.costs)}`}
-                  />
-                </div>
-                <div className="text-center">
-                  <p className="text-xs font-semibold text-slate-200">{point.label}</p>
-                  <p className={`mt-1 text-[11px] ${point.profit >= 0 ? "text-emerald-300" : "text-rose-300"}`}>
-                    {formatCurrency(point.profit)}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="glass-panel overflow-hidden p-5">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <h2 className="section-title">Month Snapshot</h2>
-              <p className="mt-2 text-sm text-slate-400">{summary.availableMonths.length} tracked month(s) persisted in Redis.</p>
-            </div>
-            <div className="rounded-2xl border border-blue-300/20 bg-blue-500/10 px-3 py-2 text-right">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-blue-200/70">Net Profit</p>
-              <p className={`mt-1 text-lg font-semibold ${summary.overall.netProfit >= 0 ? "text-blue-100" : "text-rose-300"}`}>
-                {formatCurrency(summary.overall.netProfit)}
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-5 space-y-3">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Revenue</p>
-              <p className="mt-2 text-2xl font-semibold text-emerald-300">{formatCurrency(summary.overall.monthlyRevenue)}</p>
-            </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Costs</p>
-              <p className="mt-2 text-2xl font-semibold text-rose-300">{formatCurrency(summary.overall.monthlyCosts)}</p>
-            </div>
-            <div className="rounded-2xl border border-white/10 bg-[linear-gradient(135deg,rgba(32,147,255,0.18),rgba(0,38,255,0.16))] p-4">
-              <p className="text-[11px] uppercase tracking-[0.2em] text-blue-100/70">Selected Window</p>
-              <p className="mt-2 text-lg font-semibold text-white">{summary.overall.monthLabel}</p>
-            </div>
-          </div>
-        </section>
-      </div>
-
-      <div className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
-        <section className="space-y-4">
-          <div className="flex items-end justify-between gap-3">
-            <div>
-              <h2 className="section-title">Clients</h2>
-              <p className="mt-2 text-sm text-slate-400">Tap a client to inspect their monthly contribution and transaction history.</p>
-            </div>
-            <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300">
-              {summary.clients.length} client{summary.clients.length === 1 ? "" : "s"}
-            </div>
-          </div>
-
-          {summary.clients.length === 0 ? (
-            <div className="glass-panel p-6 text-sm text-slate-300">No clients are stored yet. Add transactions once client records exist in persistence.</div>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-2">
-              {summary.clients.map((client, index) => (
-                <button
-                  key={client.clientId}
-                  type="button"
-                  onClick={() => setSelectedClientId(client.clientId)}
-                  className={`glass-card group relative overflow-hidden p-5 text-left transition hover:-translate-y-1 ${
-                    selectedClientId === client.clientId ? "border-blue-300/60 shadow-[0_22px_40px_rgba(0,38,255,0.22)]" : ""
-                  }`}
-                  style={{ animationDelay: `${100 + index * 40}ms` }}
-                >
-                  <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-[#2093FF]/0 via-[#2093FF] to-[#0026FF]/0 opacity-80" />
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <h3 className="text-lg font-semibold tracking-[-0.02em] text-white">{client.name}</h3>
-                      <p className="mt-2 text-xs uppercase tracking-[0.18em] text-slate-400">{client.status}</p>
-                    </div>
-                    <div className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${client.netProfit >= 0 ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-200" : "border-rose-400/30 bg-rose-500/10 text-rose-200"}`}>
-                      {formatCurrency(client.netProfit)}
-                    </div>
-                  </div>
-
-                  <div className="mt-5 grid grid-cols-2 gap-3 text-sm">
-                    <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
-                      <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Revenue</p>
-                      <p className="mt-2 font-semibold text-emerald-300">{formatCurrency(client.revenue)}</p>
-                    </div>
-                    <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
-                      <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Costs</p>
-                      <p className="mt-2 font-semibold text-rose-300">{formatCurrency(client.costs)}</p>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 flex items-center justify-between text-xs text-slate-300">
-                    <span>Retainer {formatCurrency(client.monthlyRetainer)}</span>
-                    <span>Ad Spend {formatCurrency(client.adSpendManaged)}</span>
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
-        </section>
-
-        <section className="glass-panel overflow-hidden">
-          <div className="border-b border-white/10 px-5 py-4">
-            <h2 className="section-title">Client Detail</h2>
-            <p className="mt-2 text-sm text-slate-400">
-              {selectedClient ? `Focused on ${selectedClient.name} for ${summary.overall.monthLabel}.` : "Select a client to inspect their month."}
-            </p>
-          </div>
-
-          {selectedClient ? (
-            <div className="space-y-5 p-5">
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                  <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Monthly Retainer</p>
-                  <p className="mt-2 text-2xl font-semibold text-emerald-300">{formatCurrency(selectedClient.monthlyRetainer)}</p>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                  <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Ad Spend Managed</p>
-                  <p className="mt-2 text-2xl font-semibold text-blue-100">{formatCurrency(selectedClient.adSpendManaged)}</p>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                  <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Additional Costs</p>
-                  <p className="mt-2 text-2xl font-semibold text-rose-300">{formatCurrency(selectedClient.additionalCosts)}</p>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-[linear-gradient(135deg,rgba(32,147,255,0.18),rgba(0,38,255,0.14))] p-4">
-                  <p className="text-[10px] uppercase tracking-[0.18em] text-blue-100/70">Profit Margin</p>
-                  <p className={`mt-2 text-2xl font-semibold ${selectedClient.netProfit >= 0 ? "text-white" : "text-rose-200"}`}>
-                    {formatCurrency(selectedClient.netProfit)}
-                  </p>
-                  <p className="mt-1 text-xs text-blue-100/70">{formatPercent(selectedClient.marginPercent)}</p>
-                </div>
-              </div>
-
-              <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">Revenue from Client</p>
-                    <p className="mt-2 text-3xl font-semibold text-white">{formatCurrency(selectedClient.revenue)}</p>
-                  </div>
-                  <div className="rounded-2xl border border-white/10 bg-slate-950/40 px-3 py-2 text-right">
-                    <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Total Costs</p>
-                    <p className="mt-1 text-lg font-semibold text-rose-300">{formatCurrency(selectedClient.costs)}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between gap-3">
-                  <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-300">Transaction History</h3>
-                  <span className="text-xs text-slate-400">{clientTransactions.length} item(s)</span>
-                </div>
-
-                <div className="mt-3 space-y-3">
-                  {clientTransactions.length === 0 ? (
-                    <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-400">
-                      No transactions for this client in {summary.overall.monthLabel}.
-                    </div>
-                  ) : (
-                    clientTransactions.map((record) => (
-                      <div key={record.id} className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <p className="text-sm font-semibold text-white">{record.notes || "Untitled transaction"}</p>
-                            <p className="mt-1 text-xs text-slate-400">
-                              {record.date} · {record.category} {record.recurring ? "· recurring" : ""}
-                            </p>
-                          </div>
-                          <p className={`text-sm font-semibold ${record.type === "income" ? "text-emerald-300" : "text-rose-300"}`}>
-                            {formatCurrency(record.amount)}
-                          </p>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="p-5 text-sm text-slate-300">No client selected.</div>
-          )}
-        </section>
-      </div>
-
-      <section className="glass-panel overflow-hidden">
-        <div className="flex flex-col gap-3 border-b border-white/10 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h2 className="section-title">Transactions</h2>
-            <p className="mt-2 text-sm text-slate-400">Income and expenses active in {summary.overall.monthLabel}.</p>
-          </div>
-          <button
-            type="button"
-            onClick={openCreateTransaction}
-            className="inline-flex items-center justify-center gap-2 rounded-2xl border border-blue-300/30 bg-blue-500/15 px-4 py-2 text-sm font-semibold text-blue-100 transition hover:border-blue-200/50 hover:bg-blue-500/25"
-          >
-            <Plus size={16} />
-            New Transaction
-          </button>
-        </div>
-
-        {transactionFormOpen ? (
-          <form onSubmit={handleSubmitTransaction} className="grid gap-4 border-b border-white/10 bg-white/5 p-5 md:grid-cols-2 xl:grid-cols-3">
-            <label className="text-xs text-slate-300">
-              Type
-              <select
-                value={transactionForm.type}
-                onChange={(event) =>
-                  setTransactionForm((previous) => ({
-                    ...previous,
-                    type: event.target.value as FinanceRecordType,
-                    category: event.target.value === "income" ? "retainer" : previous.category === "retainer" ? "ad spend" : previous.category,
-                  }))
-                }
-                className="mt-1.5 w-full rounded-xl border border-white/15 bg-[#0f1422] px-3 py-2 text-sm text-white outline-none transition focus:border-blue-300/50"
-              >
-                <option value="income">Income</option>
-                <option value="expense">Expense</option>
-              </select>
-            </label>
-
-            <label className="text-xs text-slate-300">
-              Client
-              <select
-                value={transactionForm.client}
-                onChange={(event) => setTransactionForm((previous) => ({ ...previous, client: event.target.value }))}
-                className="mt-1.5 w-full rounded-xl border border-white/15 bg-[#0f1422] px-3 py-2 text-sm text-white outline-none transition focus:border-blue-300/50"
-              >
-                <option value="">No client</option>
-                {data.clients.map((client: FinanceClient) => (
-                  <option key={client.id} value={client.id}>
-                    {client.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label className="text-xs text-slate-300">
-              Amount
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                value={transactionForm.amount}
-                onChange={(event) => setTransactionForm((previous) => ({ ...previous, amount: event.target.value }))}
-                className="mt-1.5 w-full rounded-xl border border-white/15 bg-[#0f1422] px-3 py-2 text-sm text-white outline-none transition focus:border-blue-300/50"
-              />
-            </label>
-
-            <label className="text-xs text-slate-300">
-              Category
-              <select
-                value={transactionForm.category}
-                onChange={(event) => setTransactionForm((previous) => ({ ...previous, category: event.target.value as FinanceRecordCategory }))}
-                className="mt-1.5 w-full rounded-xl border border-white/15 bg-[#0f1422] px-3 py-2 text-sm text-white outline-none transition focus:border-blue-300/50"
-              >
-                {CATEGORY_OPTIONS.filter((category) => transactionForm.type === "income" || category !== "retainer").map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label className="text-xs text-slate-300">
-              Date
-              <input
-                type="date"
-                value={transactionForm.date}
-                onChange={(event) => setTransactionForm((previous) => ({ ...previous, date: event.target.value }))}
-                className="mt-1.5 w-full rounded-xl border border-white/15 bg-[#0f1422] px-3 py-2 text-sm text-white outline-none transition focus:border-blue-300/50"
-              />
-            </label>
-
-            <label className="text-xs text-slate-300">
-              Notes
-              <input
-                type="text"
-                value={transactionForm.notes}
-                onChange={(event) => setTransactionForm((previous) => ({ ...previous, notes: event.target.value }))}
-                placeholder="Meta reimbursement, freelancer invoice, monthly retainer"
-                className="mt-1.5 w-full rounded-xl border border-white/15 bg-[#0f1422] px-3 py-2 text-sm text-white outline-none transition focus:border-blue-300/50"
-              />
-            </label>
-
-            <label className="inline-flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 md:col-span-2 xl:col-span-1">
-              <input
-                type="checkbox"
-                checked={transactionForm.recurring}
-                onChange={(event) => setTransactionForm((previous) => ({ ...previous, recurring: event.target.checked }))}
-                className="h-4 w-4 rounded border-white/20 bg-[#0f1422]"
-              />
-              Repeat every month from this date
-            </label>
-
-            <div className="flex flex-wrap gap-2 md:col-span-2 xl:col-span-3">
-              <button
-                type="submit"
-                disabled={saving}
-                className="rounded-2xl border border-blue-300/30 bg-[linear-gradient(135deg,rgba(32,147,255,0.22),rgba(0,38,255,0.24))] px-4 py-2 text-sm font-semibold text-blue-50 transition hover:border-blue-200/50 disabled:opacity-50"
-              >
-                {editingRecordId ? "Update Transaction" : "Create Transaction"}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setTransactionFormOpen(false);
-                  setEditingRecordId(null);
+          <div className="mt-3 flex items-center justify-between gap-2 text-xs text-slate-300">
+            <span>Goal</span>
+            <div className="w-28">
+              <EditableNumberCell
+                value={monthData.goalAmount}
+                onSave={(next) => {
+                  updateMonth((current) => ({ ...current, goalAmount: Math.max(0, Number(next ?? 0)) }));
                 }}
-                className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-white/10"
-              >
-                <X size={14} />
-                Cancel
-              </button>
+              />
             </div>
-          </form>
-        ) : null}
+          </div>
+        </article>
+      </div>
 
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-white/10 text-sm">
+      <section className="glass-panel p-4">
+        <SectionHeader title="Recurring Expenses" />
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <p className="text-sm text-slate-400">Gross Recurring Expenditure: <span className="font-semibold text-white">{formatMoney(summary.recurringTotal)}</span></p>
+          <button
+            type="button"
+            onClick={addRecurringRow}
+            className="inline-flex items-center gap-1 rounded-xl border border-blue-300/30 bg-blue-500/15 px-3 py-1.5 text-xs font-semibold text-blue-100 transition hover:bg-blue-500/25"
+          >
+            <Plus size={14} />
+            Add Row
+          </button>
+        </div>
+
+        <div className="overflow-x-auto rounded-xl border border-white/10">
+          <table className="min-w-[980px] w-full divide-y divide-white/10 text-sm">
             <thead className="bg-white/5 text-left text-[11px] uppercase tracking-[0.18em] text-slate-400">
               <tr>
-                <th className="px-5 py-3">Date</th>
-                <th className="px-5 py-3">Type</th>
-                <th className="px-5 py-3">Client</th>
-                <th className="px-5 py-3">Category</th>
-                <th className="px-5 py-3">Notes</th>
-                <th className="px-5 py-3">Amount</th>
-                <th className="px-5 py-3">Actions</th>
+                <th className="px-3 py-2">Name</th>
+                <th className="px-3 py-2">Date</th>
+                <th className="px-3 py-2">Type</th>
+                <th className="px-3 py-2">Recurring?</th>
+                <th className="px-3 py-2">Notes</th>
+                <th className="px-3 py-2 text-right">Price</th>
+                <th className="px-3 py-2">Delete</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {summary.transactions.length === 0 ? (
+              {monthData.recurringExpenses.length === 0 ? (
                 <tr>
-                  <td className="px-5 py-5 text-slate-400" colSpan={7}>
-                    No transactions in {summary.overall.monthLabel}.
-                  </td>
+                  <td className="px-3 py-4 text-slate-400" colSpan={7}>No recurring expenses yet.</td>
                 </tr>
               ) : (
-                summary.transactions.map((record) => {
-                  const clientName = data.clients.find((client) => client.id === record.client)?.name ?? "No client";
-                  return (
-                    <tr key={record.id} className="hover:bg-white/[0.03]">
-                      <td className="px-5 py-4 text-slate-200">{record.date}</td>
-                      <td className="px-5 py-4">
-                        <span className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase ${record.type === "income" ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-200" : "border-rose-400/30 bg-rose-500/10 text-rose-200"}`}>
-                          {record.type}
-                        </span>
-                      </td>
-                      <td className="px-5 py-4 text-white">{clientName}</td>
-                      <td className="px-5 py-4 text-slate-200">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span>{record.category}</span>
-                          {record.recurring ? (
-                            <span className="rounded-full border border-blue-300/25 bg-blue-500/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.18em] text-blue-100">
-                              recurring
-                            </span>
-                          ) : null}
-                        </div>
-                      </td>
-                      <td className="px-5 py-4 text-slate-300">{record.notes || "—"}</td>
-                      <td className={`px-5 py-4 font-semibold ${record.type === "income" ? "text-emerald-300" : "text-rose-300"}`}>
-                        {formatCurrency(record.amount)}
-                      </td>
-                      <td className="px-5 py-4">
-                        <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={() => openEditTransaction(record)}
-                            className="inline-flex items-center gap-1 rounded-xl border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-semibold text-slate-200 transition hover:border-blue-300/40 hover:bg-blue-500/10"
-                          >
-                            <Pencil size={12} />
-                            Edit
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              void handleDeleteTransaction(record.id);
-                            }}
-                            className="inline-flex items-center gap-1 rounded-xl border border-rose-400/30 bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-rose-200 transition hover:bg-rose-500/20"
-                          >
-                            <Trash2 size={12} />
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
+                monthData.recurringExpenses.map((row) => (
+                  <tr key={row.id} className="transition hover:bg-white/[0.03]">
+                    <td className="px-2 py-1">
+                      <EditableTextCell
+                        value={row.name}
+                        onSave={(next) =>
+                          updateMonth((current) => ({
+                            ...current,
+                            recurringExpenses: current.recurringExpenses.map((item) => (item.id === row.id ? { ...item, name: next } : item)),
+                          }))
+                        }
+                        placeholder="Expense name"
+                      />
+                    </td>
+                    <td className="px-2 py-1">
+                      <EditableTextCell
+                        value={row.date}
+                        onSave={(next) =>
+                          updateMonth((current) => ({
+                            ...current,
+                            recurringExpenses: current.recurringExpenses.map((item) => (item.id === row.id ? { ...item, date: next } : item)),
+                          }))
+                        }
+                        placeholder="first of every month"
+                      />
+                    </td>
+                    <td className="px-2 py-1">
+                      <div className="flex items-center gap-2">
+                        <TypeBadge type={row.type} />
+                        <select
+                          value={row.type}
+                          onChange={(event) => {
+                            const next = event.target.value as ExpenseCategory;
+                            updateMonth((current) => ({
+                              ...current,
+                              recurringExpenses: current.recurringExpenses.map((item) => (item.id === row.id ? { ...item, type: next } : item)),
+                            }));
+                          }}
+                          className="rounded-lg border border-white/10 bg-[#0d111d] px-2 py-1 text-xs text-slate-200"
+                        >
+                          <option value="other">other</option>
+                          <option value="fulfillment">fulfillment</option>
+                          <option value="marketing">marketing</option>
+                          <option value="hosting">hosting</option>
+                        </select>
+                      </div>
+                    </td>
+                    <td className="px-2 py-1">
+                      <EditableTextCell
+                        value={row.recurring}
+                        onSave={(next) =>
+                          updateMonth((current) => ({
+                            ...current,
+                            recurringExpenses: current.recurringExpenses.map((item) => (item.id === row.id ? { ...item, recurring: next } : item)),
+                          }))
+                        }
+                        placeholder="M"
+                      />
+                    </td>
+                    <td className="px-2 py-1">
+                      <EditableTextCell
+                        value={row.notes}
+                        onSave={(next) =>
+                          updateMonth((current) => ({
+                            ...current,
+                            recurringExpenses: current.recurringExpenses.map((item) => (item.id === row.id ? { ...item, notes: next } : item)),
+                          }))
+                        }
+                      />
+                    </td>
+                    <td className="px-2 py-1">
+                      <EditableNumberCell
+                        value={row.price}
+                        onSave={(next) =>
+                          updateMonth((current) => ({
+                            ...current,
+                            recurringExpenses: current.recurringExpenses.map((item) => (item.id === row.id ? { ...item, price: Number(next ?? 0) } : item)),
+                          }))
+                        }
+                      />
+                    </td>
+                    <td className="px-2 py-1">
+                      <button
+                        type="button"
+                        onClick={() => deleteWithConfirm("recurring", row.id)}
+                        className="rounded-lg border border-rose-400/30 bg-rose-500/10 p-2 text-rose-200 transition hover:bg-rose-500/20"
+                        aria-label="Delete recurring row"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="glass-panel p-4">
+        <SectionHeader title="Employee Expenses" />
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <p className="text-sm text-slate-400">Gross Employee Expenditure: <span className="font-semibold text-white">{formatMoney(summary.employeeTotal)}</span></p>
+          <button
+            type="button"
+            onClick={addEmployeeRow}
+            className="inline-flex items-center gap-1 rounded-xl border border-blue-300/30 bg-blue-500/15 px-3 py-1.5 text-xs font-semibold text-blue-100 transition hover:bg-blue-500/25"
+          >
+            <Plus size={14} />
+            Add Row
+          </button>
+        </div>
+
+        <div className="overflow-x-auto rounded-xl border border-white/10">
+          <table className="min-w-[920px] w-full divide-y divide-white/10 text-sm">
+            <thead className="bg-white/5 text-left text-[11px] uppercase tracking-[0.18em] text-slate-400">
+              <tr>
+                <th className="px-3 py-2">Name</th>
+                <th className="px-3 py-2">Date</th>
+                <th className="px-3 py-2">Notes</th>
+                <th className="px-3 py-2 text-right">Price</th>
+                <th className="px-3 py-2">Extra Notes</th>
+                <th className="px-3 py-2">Delete</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {monthData.employeeExpenses.length === 0 ? (
+                <tr>
+                  <td className="px-3 py-4 text-slate-400" colSpan={6}>No employee expenses yet.</td>
+                </tr>
+              ) : (
+                monthData.employeeExpenses.map((row) => (
+                  <tr key={row.id} className="transition hover:bg-white/[0.03]">
+                    <td className="px-2 py-1">
+                      <EditableTextCell
+                        value={row.name}
+                        onSave={(next) =>
+                          updateMonth((current) => ({
+                            ...current,
+                            employeeExpenses: current.employeeExpenses.map((item) => (item.id === row.id ? { ...item, name: next } : item)),
+                          }))
+                        }
+                      />
+                    </td>
+                    <td className="px-2 py-1">
+                      <EditableTextCell
+                        value={row.date}
+                        onSave={(next) =>
+                          updateMonth((current) => ({
+                            ...current,
+                            employeeExpenses: current.employeeExpenses.map((item) => (item.id === row.id ? { ...item, date: next } : item)),
+                          }))
+                        }
+                      />
+                    </td>
+                    <td className="px-2 py-1">
+                      <EditableTextCell
+                        value={row.notes}
+                        onSave={(next) =>
+                          updateMonth((current) => ({
+                            ...current,
+                            employeeExpenses: current.employeeExpenses.map((item) => (item.id === row.id ? { ...item, notes: next } : item)),
+                          }))
+                        }
+                      />
+                    </td>
+                    <td className="px-2 py-1">
+                      <EditableNumberCell
+                        value={row.price}
+                        onSave={(next) =>
+                          updateMonth((current) => ({
+                            ...current,
+                            employeeExpenses: current.employeeExpenses.map((item) => (item.id === row.id ? { ...item, price: Number(next ?? 0) } : item)),
+                          }))
+                        }
+                      />
+                    </td>
+                    <td className="px-2 py-1">
+                      <EditableTextCell
+                        value={row.extraNotes}
+                        onSave={(next) =>
+                          updateMonth((current) => ({
+                            ...current,
+                            employeeExpenses: current.employeeExpenses.map((item) => (item.id === row.id ? { ...item, extraNotes: next } : item)),
+                          }))
+                        }
+                      />
+                    </td>
+                    <td className="px-2 py-1">
+                      <button
+                        type="button"
+                        onClick={() => deleteWithConfirm("employee", row.id)}
+                        className="rounded-lg border border-rose-400/30 bg-rose-500/10 p-2 text-rose-200 transition hover:bg-rose-500/20"
+                        aria-label="Delete employee row"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="glass-panel p-4">
+        <SectionHeader title="One-Time Expenses" />
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <p className="text-sm text-slate-400">Gross One Time Expenditure: <span className="font-semibold text-white">{formatMoney(summary.oneTimeTotal)}</span></p>
+          <button
+            type="button"
+            onClick={addOneTimeRow}
+            className="inline-flex items-center gap-1 rounded-xl border border-blue-300/30 bg-blue-500/15 px-3 py-1.5 text-xs font-semibold text-blue-100 transition hover:bg-blue-500/25"
+          >
+            <Plus size={14} />
+            Add Row
+          </button>
+        </div>
+
+        <div className="overflow-x-auto rounded-xl border border-white/10">
+          <table className="min-w-[760px] w-full divide-y divide-white/10 text-sm">
+            <thead className="bg-white/5 text-left text-[11px] uppercase tracking-[0.18em] text-slate-400">
+              <tr>
+                <th className="px-3 py-2">Name</th>
+                <th className="px-3 py-2">Date</th>
+                <th className="px-3 py-2">Notes</th>
+                <th className="px-3 py-2 text-right">Price</th>
+                <th className="px-3 py-2">Delete</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {monthData.oneTimeExpenses.length === 0 ? (
+                <tr>
+                  <td className="px-3 py-4 text-slate-400" colSpan={5}>No one-time expenses yet.</td>
+                </tr>
+              ) : (
+                monthData.oneTimeExpenses.map((row) => (
+                  <tr key={row.id} className="transition hover:bg-white/[0.03]">
+                    <td className="px-2 py-1">
+                      <EditableTextCell
+                        value={row.name}
+                        onSave={(next) =>
+                          updateMonth((current) => ({
+                            ...current,
+                            oneTimeExpenses: current.oneTimeExpenses.map((item) => (item.id === row.id ? { ...item, name: next } : item)),
+                          }))
+                        }
+                      />
+                    </td>
+                    <td className="px-2 py-1">
+                      <EditableTextCell
+                        value={row.date}
+                        onSave={(next) =>
+                          updateMonth((current) => ({
+                            ...current,
+                            oneTimeExpenses: current.oneTimeExpenses.map((item) => (item.id === row.id ? { ...item, date: next } : item)),
+                          }))
+                        }
+                      />
+                    </td>
+                    <td className="px-2 py-1">
+                      <EditableTextCell
+                        value={row.notes}
+                        onSave={(next) =>
+                          updateMonth((current) => ({
+                            ...current,
+                            oneTimeExpenses: current.oneTimeExpenses.map((item) => (item.id === row.id ? { ...item, notes: next } : item)),
+                          }))
+                        }
+                      />
+                    </td>
+                    <td className="px-2 py-1">
+                      <EditableNumberCell
+                        value={row.price}
+                        onSave={(next) =>
+                          updateMonth((current) => ({
+                            ...current,
+                            oneTimeExpenses: current.oneTimeExpenses.map((item) => (item.id === row.id ? { ...item, price: Number(next ?? 0) } : item)),
+                          }))
+                        }
+                      />
+                    </td>
+                    <td className="px-2 py-1">
+                      <button
+                        type="button"
+                        onClick={() => deleteWithConfirm("one-time", row.id)}
+                        className="rounded-lg border border-rose-400/30 bg-rose-500/10 p-2 text-rose-200 transition hover:bg-rose-500/20"
+                        aria-label="Delete one-time row"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="glass-panel p-4">
+        <SectionHeader title="Revenue" />
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <p className="text-sm text-slate-400">Gross Revenue: <span className="font-semibold text-white">{formatMoney(summary.grossRevenue)}</span></p>
+          <button
+            type="button"
+            onClick={addRevenueRow}
+            className="inline-flex items-center gap-1 rounded-xl border border-blue-300/30 bg-blue-500/15 px-3 py-1.5 text-xs font-semibold text-blue-100 transition hover:bg-blue-500/25"
+          >
+            <Plus size={14} />
+            Add Row
+          </button>
+        </div>
+
+        <div className="overflow-x-auto rounded-xl border border-white/10">
+          <table className="min-w-[980px] w-full divide-y divide-white/10 text-sm">
+            <thead className="bg-white/5 text-left text-[11px] uppercase tracking-[0.18em] text-slate-400">
+              <tr>
+                <th className="px-3 py-2">Client Name</th>
+                <th className="px-3 py-2 text-right">Amount</th>
+                <th className="px-3 py-2">Date Received</th>
+                <th className="px-3 py-2">Type</th>
+                <th className="px-3 py-2">Notes</th>
+                <th className="px-3 py-2 text-right">Stripe Fee</th>
+                <th className="px-3 py-2">Delete</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {monthData.revenues.length === 0 ? (
+                <tr>
+                  <td className="px-3 py-4 text-slate-400" colSpan={7}>No revenue entries yet.</td>
+                </tr>
+              ) : (
+                monthData.revenues.map((row) => (
+                  <tr key={row.id} className="transition hover:bg-white/[0.03]">
+                    <td className="px-2 py-1">
+                      <EditableTextCell
+                        value={row.clientName}
+                        onSave={(next) =>
+                          updateMonth((current) => ({
+                            ...current,
+                            revenues: current.revenues.map((item) => (item.id === row.id ? { ...item, clientName: next } : item)),
+                          }))
+                        }
+                        placeholder="Client"
+                      />
+                    </td>
+                    <td className="px-2 py-1">
+                      <EditableNumberCell
+                        value={row.amount}
+                        onSave={(next) =>
+                          updateMonth((current) => ({
+                            ...current,
+                            revenues: current.revenues.map((item) => (item.id === row.id ? { ...item, amount: Number(next ?? 0) } : item)),
+                          }))
+                        }
+                      />
+                    </td>
+                    <td className="px-2 py-1">
+                      <EditableTextCell
+                        value={row.date}
+                        onSave={(next) =>
+                          updateMonth((current) => ({
+                            ...current,
+                            revenues: current.revenues.map((item) => (item.id === row.id ? { ...item, date: next } : item)),
+                          }))
+                        }
+                        placeholder="2026-03-01"
+                      />
+                    </td>
+                    <td className="px-2 py-1">
+                      <select
+                        value={row.type}
+                        onChange={(event) => {
+                          const next = event.target.value as RevenueCategory;
+                          updateMonth((current) => ({
+                            ...current,
+                            revenues: current.revenues.map((item) => (item.id === row.id ? { ...item, type: next } : item)),
+                          }));
+                        }}
+                        className="w-full rounded-lg border border-white/10 bg-[#0d111d] px-2.5 py-2 text-sm text-slate-100 outline-none"
+                      >
+                        <option value="retainer">retainer</option>
+                        <option value="project">project</option>
+                        <option value="ad management">ad management</option>
+                        <option value="other">other</option>
+                      </select>
+                    </td>
+                    <td className="px-2 py-1">
+                      <EditableTextCell
+                        value={row.notes}
+                        onSave={(next) =>
+                          updateMonth((current) => ({
+                            ...current,
+                            revenues: current.revenues.map((item) => (item.id === row.id ? { ...item, notes: next } : item)),
+                          }))
+                        }
+                      />
+                    </td>
+                    <td className="px-2 py-1">
+                      <EditableNumberCell
+                        value={row.stripeFee}
+                        nullable
+                        onSave={(next) =>
+                          updateMonth((current) => ({
+                            ...current,
+                            revenues: current.revenues.map((item) => (item.id === row.id ? { ...item, stripeFee: next } : item)),
+                          }))
+                        }
+                      />
+                    </td>
+                    <td className="px-2 py-1">
+                      <button
+                        type="button"
+                        onClick={() => deleteWithConfirm("revenue", row.id)}
+                        className="rounded-lg border border-rose-400/30 bg-rose-500/10 p-2 text-rose-200 transition hover:bg-rose-500/20"
+                        aria-label="Delete revenue row"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </td>
+                  </tr>
+                ))
               )}
             </tbody>
           </table>

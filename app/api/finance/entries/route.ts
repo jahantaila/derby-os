@@ -1,71 +1,130 @@
 import { NextResponse } from "next/server";
 import { getFinanceData, writeFinanceData } from "@/lib/finance-store";
-import { FinanceRecord, FinanceRecordCategory, FinanceRecordType } from "@/lib/finance-types";
+import { ExpenseCategory, RevenueCategory } from "@/lib/finance-types";
 
-type CreateRecordBody = {
-  type?: FinanceRecordType;
-  client?: string | null;
-  amount?: number;
-  category?: FinanceRecordCategory;
-  date?: string;
-  notes?: string;
-  recurring?: boolean;
+type SectionKey = "recurringExpenses" | "employeeExpenses" | "oneTimeExpenses" | "revenues";
+
+type CreateEntryBody = {
+  month?: string;
+  section?: SectionKey;
+  row?: Record<string, unknown>;
 };
 
-function isValidType(value: unknown): value is FinanceRecordType {
-  return value === "income" || value === "expense";
+function isSection(value: unknown): value is SectionKey {
+  return value === "recurringExpenses" || value === "employeeExpenses" || value === "oneTimeExpenses" || value === "revenues";
 }
 
-function isValidCategory(value: unknown): value is FinanceRecordCategory {
-  return value === "retainer" || value === "ad spend" || value === "tool cost" || value === "freelancer" || value === "other";
+function isExpenseCategory(value: unknown): value is ExpenseCategory {
+  return value === "other" || value === "fulfillment" || value === "marketing" || value === "hosting";
+}
+
+function isRevenueCategory(value: unknown): value is RevenueCategory {
+  return value === "retainer" || value === "project" || value === "ad management" || value === "other";
+}
+
+function toString(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function toNumber(value: unknown): number {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string") {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) return parsed;
+  }
+  return 0;
+}
+
+function emptyMonth(month: string) {
+  return {
+    month,
+    goalAmount: 15000,
+    recurringExpenses: [],
+    employeeExpenses: [],
+    oneTimeExpenses: [],
+    revenues: [],
+  };
 }
 
 export async function POST(request: Request) {
-  let body: CreateRecordBody;
+  let body: CreateEntryBody;
 
   try {
-    body = (await request.json()) as CreateRecordBody;
+    body = (await request.json()) as CreateEntryBody;
   } catch {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  if (!isValidType(body.type)) {
-    return NextResponse.json({ error: "Field 'type' must be income or expense" }, { status: 400 });
+  if (!body.month || !/^\d{4}-\d{2}$/.test(body.month)) {
+    return NextResponse.json({ error: "Field 'month' must be YYYY-MM" }, { status: 400 });
   }
 
-  if (!isValidCategory(body.category)) {
-    return NextResponse.json({ error: "Field 'category' is invalid" }, { status: 400 });
+  if (!isSection(body.section)) {
+    return NextResponse.json({ error: "Field 'section' is invalid" }, { status: 400 });
   }
 
-  const amount = typeof body.amount === "number" ? body.amount : Number(body.amount ?? 0);
-  if (!Number.isFinite(amount) || amount < 0) {
-    return NextResponse.json({ error: "Field 'amount' must be a positive number" }, { status: 400 });
-  }
-
-  if (typeof body.date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(body.date)) {
-    return NextResponse.json({ error: "Field 'date' must be YYYY-MM-DD" }, { status: 400 });
-  }
-
+  const row = typeof body.row === "object" && body.row !== null ? body.row : {};
   const data = await getFinanceData();
-  const client = typeof body.client === "string" && body.client.trim() ? body.client.trim() : null;
+  const monthData = data.months[body.month] ?? emptyMonth(body.month);
 
-  if (client && !data.clients.some((item) => item.id === client)) {
-    return NextResponse.json({ error: "Client not found" }, { status: 404 });
+  if (body.section === "recurringExpenses") {
+    const created = {
+      id: crypto.randomUUID(),
+      name: toString(row.name),
+      date: toString(row.date),
+      type: isExpenseCategory(row.type) ? row.type : "other",
+      recurring: toString(row.recurring) || "M",
+      notes: toString(row.notes),
+      price: Math.max(0, toNumber(row.price)),
+    };
+    monthData.recurringExpenses.push(created);
+    data.months[body.month] = monthData;
+    await writeFinanceData(data);
+    return NextResponse.json(created, { status: 201 });
   }
 
-  const record: FinanceRecord = {
+  if (body.section === "employeeExpenses") {
+    const created = {
+      id: crypto.randomUUID(),
+      name: toString(row.name),
+      date: toString(row.date),
+      notes: toString(row.notes),
+      price: Math.max(0, toNumber(row.price)),
+      extraNotes: toString(row.extraNotes),
+    };
+    monthData.employeeExpenses.push(created);
+    data.months[body.month] = monthData;
+    await writeFinanceData(data);
+    return NextResponse.json(created, { status: 201 });
+  }
+
+  if (body.section === "oneTimeExpenses") {
+    const created = {
+      id: crypto.randomUUID(),
+      name: toString(row.name),
+      date: toString(row.date),
+      notes: toString(row.notes),
+      price: Math.max(0, toNumber(row.price)),
+    };
+    monthData.oneTimeExpenses.push(created);
+    data.months[body.month] = monthData;
+    await writeFinanceData(data);
+    return NextResponse.json(created, { status: 201 });
+  }
+
+  const stripeFeeRaw = row.stripeFee;
+  const created = {
     id: crypto.randomUUID(),
-    type: body.type,
-    client,
-    amount,
-    category: body.category,
-    date: body.date,
-    notes: typeof body.notes === "string" ? body.notes.trim() : "",
-    recurring: Boolean(body.recurring),
+    clientName: toString(row.clientName),
+    amount: Math.max(0, toNumber(row.amount)),
+    date: toString(row.date),
+    type: isRevenueCategory(row.type) ? row.type : "other",
+    notes: toString(row.notes),
+    stripeFee: stripeFeeRaw === null || stripeFeeRaw === "" ? null : Math.max(0, toNumber(stripeFeeRaw)),
   };
 
-  data.records.unshift(record);
+  monthData.revenues.push(created);
+  data.months[body.month] = monthData;
   await writeFinanceData(data);
-
-  return NextResponse.json(record, { status: 201 });
+  return NextResponse.json(created, { status: 201 });
 }
