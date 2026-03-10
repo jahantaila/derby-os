@@ -2,9 +2,11 @@
 
 import { type ReactNode, ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import ReactMarkdown from "react-markdown";
 import {
   ArrowLeft,
   BarChart3,
+  Brain,
   Building2,
   Download,
   FileSpreadsheet,
@@ -14,6 +16,7 @@ import {
   PhoneCall,
   Plus,
   Search,
+  SendHorizontal,
   Upload,
   UserRound,
   X,
@@ -61,8 +64,21 @@ type SourceTab = {
   count: number;
 };
 
+type InsightResponse = {
+  response: string;
+  contacts?: string[];
+};
+
 const EASTERN_TIME_ZONE = "America/New_York";
-const SOURCE_TAB_ORDER = ["instantly", "allgood", "referral", "manual"];
+const SOURCE_TABS_CONFIG = [
+  { value: "all", label: "ALL" },
+  { value: "instantly", label: "INSTANTLY" },
+] as const;
+const INSIGHT_PROMPTS = [
+  "Meeting prep for [contact name]",
+  "Summary of all interested leads",
+  "Which leads need follow-up?",
+] as const;
 const EMPTY_NOTES: DealNotesState = { rolodex: "", quickNotes: [] };
 const EMPTY_ADD_FORM: AddContactForm = {
   name: "",
@@ -173,22 +189,11 @@ function getSourceTabs(deals: PipelineDeal[]): SourceTab[] {
     counts.set(key, (counts.get(key) ?? 0) + 1);
   });
 
-  const ordered = SOURCE_TAB_ORDER.map((source) => ({
-    value: source,
-    label: formatSourceLabel(source),
-    count: counts.get(source) ?? 0,
+  return SOURCE_TABS_CONFIG.map((tab) => ({
+    value: tab.value,
+    label: tab.label,
+    count: tab.value === "all" ? deals.length : counts.get(tab.value) ?? 0,
   }));
-
-  const dynamic = Array.from(counts.keys())
-    .filter((source) => !SOURCE_TAB_ORDER.includes(source))
-    .sort((a, b) => a.localeCompare(b))
-    .map((source) => ({
-      value: source,
-      label: formatSourceLabel(source),
-      count: counts.get(source) ?? 0,
-    }));
-
-  return [{ value: "all", label: "ALL", count: deals.length }, ...ordered, ...dynamic];
 }
 
 function formatCreatedAt(value?: string) {
@@ -346,6 +351,93 @@ function normalizeStageValue(value: string): PipelineStage {
   return PIPELINE_STAGES.includes(value as PipelineStage) ? (value as PipelineStage) : "new-lead";
 }
 
+function SelectOptions({ values, getLabel }: { values: readonly string[]; getLabel: (value: string) => string }) {
+  return (
+    <>
+      {values.map((value) => (
+        <option key={value} value={value} className="text-black" style={{ color: "black" }}>
+          {getLabel(value)}
+        </option>
+      ))}
+    </>
+  );
+}
+
+function AIInsightsPanel({
+  query,
+  onQueryChange,
+  onSubmit,
+  onPromptSelect,
+  loading,
+  response,
+}: {
+  query: string;
+  onQueryChange: (value: string) => void;
+  onSubmit: () => void;
+  onPromptSelect: (value: string) => void;
+  loading: boolean;
+  response: string;
+}) {
+  return (
+    <section className="glass-card rounded-2xl p-4">
+      <div className="flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-slate-400">
+        <Brain size={14} className="text-blue-200" />
+        <span>AI INSIGHTS</span>
+      </div>
+
+      <div className="mt-4 flex gap-2">
+        <input
+          value={query}
+          onChange={(event) => onQueryChange(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              event.preventDefault();
+              onSubmit();
+            }
+          }}
+          placeholder="Ask about any contact..."
+          className="w-full rounded-2xl border border-white/10 bg-[#0a0a0f] px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-blue-400/40"
+        />
+        <button
+          type="button"
+          onClick={onSubmit}
+          disabled={loading || !query.trim()}
+          className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-2xl border border-blue-300/30 bg-[linear-gradient(135deg,#2093FF,#0026FF)] px-4 py-2 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          <SendHorizontal size={16} />
+          Send
+        </button>
+      </div>
+
+      <div className="mt-3 flex flex-wrap gap-2">
+        {INSIGHT_PROMPTS.map((prompt) => (
+          <button
+            key={prompt}
+            type="button"
+            onClick={() => onPromptSelect(prompt)}
+            className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-200 transition hover:border-blue-300/30 hover:text-white"
+          >
+            {prompt}
+          </button>
+        ))}
+      </div>
+
+      <div className="glass-card mt-4 min-h-[180px] rounded-2xl p-4">
+        {loading ? (
+          <div className="flex items-center gap-2 text-sm text-blue-100">
+            <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-blue-300" />
+            <span className="animate-pulse">Thinking...</span>
+          </div>
+        ) : (
+          <div className="prose prose-invert prose-sm max-w-none text-slate-200">
+            <ReactMarkdown>{response}</ReactMarkdown>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
 function parseCsv(text: string) {
   const rows: string[][] = [];
   let current = "";
@@ -449,6 +541,11 @@ export default function PipelinePage() {
   const [importing, setImporting] = useState(false);
   const [workingDealId, setWorkingDealId] = useState("");
   const [convertingDealId, setConvertingDealId] = useState("");
+  const [insightsQuery, setInsightsQuery] = useState("");
+  const [insightsLoading, setInsightsLoading] = useState(false);
+  const [insightsResponse, setInsightsResponse] = useState(
+    "I can help with meeting prep, lead summaries, and follow-up recommendations. Try asking about a specific contact!",
+  );
 
   async function loadDeals() {
     setLoading(true);
@@ -541,6 +638,33 @@ export default function PipelinePage() {
   );
 
   const wonThisMonth = deals.filter((deal) => deal.stage === "closed-won" && isCurrentEasternMonth(deal.stageUpdatedAt ?? deal.createdAt)).length;
+
+  async function submitInsightsQuery(nextQuery?: string) {
+    const query = (nextQuery ?? insightsQuery).trim();
+    if (!query) return;
+
+    setInsightsQuery(query);
+    setInsightsLoading(true);
+
+    try {
+      const response = await fetch("/api/pipeline/insights", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query, contacts: deals }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Unable to generate insights.");
+      }
+
+      const data = (await response.json()) as InsightResponse;
+      setInsightsResponse(data.response);
+    } catch (caughtError) {
+      setInsightsResponse(caughtError instanceof Error ? caughtError.message : "Unable to generate insights.");
+    } finally {
+      setInsightsLoading(false);
+    }
+  }
 
   async function patchDeal(id: string, patch: Partial<PipelineDeal>) {
     setWorkingDealId(id);
@@ -868,9 +992,15 @@ export default function PipelinePage() {
                 onChange={(event) => setSortMode(event.target.value as SortMode)}
                 className="glass-card rounded-2xl px-3 py-3 text-sm text-white outline-none"
               >
-                <option value="newest">Newest</option>
-                <option value="alphabetical">A-Z</option>
-                <option value="stage">Stage</option>
+                <option value="newest" className="text-black" style={{ color: "black" }}>
+                  Newest
+                </option>
+                <option value="alphabetical" className="text-black" style={{ color: "black" }}>
+                  A-Z
+                </option>
+                <option value="stage" className="text-black" style={{ color: "black" }}>
+                  Stage
+                </option>
               </select>
               <button
                 type="button"
@@ -962,11 +1092,7 @@ export default function PipelinePage() {
                         onChange={(event) => void patchDeal(detailDeal.id, { stage: event.target.value as PipelineStage })}
                         className={cn("rounded-full border px-3 py-2 text-xs uppercase tracking-[0.16em] outline-none", STAGE_META[detailDeal.stage].pill)}
                       >
-                        {PIPELINE_STAGES.map((stage) => (
-                          <option key={stage} value={stage}>
-                            {STAGE_META[stage].label}
-                          </option>
-                        ))}
+                        <SelectOptions values={PIPELINE_STAGES} getLabel={(stage) => STAGE_META[stage as PipelineStage].label} />
                       </select>
                       <span className="rounded-full border border-blue-300/25 bg-blue-500/10 px-3 py-2 text-xs uppercase tracking-[0.16em] text-blue-100">
                         {formatSourceLabel(detailDeal.source)}
@@ -1201,6 +1327,18 @@ export default function PipelinePage() {
               </div>
             </div>
 
+            <AIInsightsPanel
+              query={insightsQuery}
+              onQueryChange={setInsightsQuery}
+              onSubmit={() => void submitInsightsQuery()}
+              onPromptSelect={(prompt) => {
+                setInsightsQuery(prompt);
+                void submitInsightsQuery(prompt);
+              }}
+              loading={insightsLoading}
+              response={insightsResponse}
+            />
+
             <button
               type="button"
               onClick={() => setShowImportModal(true)}
@@ -1211,6 +1349,20 @@ export default function PipelinePage() {
             </button>
           </div>
         </aside>
+      </div>
+
+      <div className="glass-panel p-4 lg:hidden">
+        <AIInsightsPanel
+          query={insightsQuery}
+          onQueryChange={setInsightsQuery}
+          onSubmit={() => void submitInsightsQuery()}
+          onPromptSelect={(prompt) => {
+            setInsightsQuery(prompt);
+            void submitInsightsQuery(prompt);
+          }}
+          loading={insightsLoading}
+          response={insightsResponse}
+        />
       </div>
 
       {showAddContact ? (
@@ -1265,11 +1417,7 @@ export default function PipelinePage() {
                 onChange={(event) => setAddForm((current) => ({ ...current, stage: event.target.value as PipelineStage }))}
                 className="w-full rounded-2xl border border-white/10 bg-[#0a0a0f] px-4 py-3 text-sm text-white outline-none focus:border-blue-400/40"
               >
-                {PIPELINE_STAGES.map((stage) => (
-                  <option key={stage} value={stage}>
-                    {STAGE_META[stage].label}
-                  </option>
-                ))}
+                <SelectOptions values={PIPELINE_STAGES} getLabel={(stage) => STAGE_META[stage as PipelineStage].label} />
               </select>
             </label>
             <label className="space-y-2 md:col-span-2">
