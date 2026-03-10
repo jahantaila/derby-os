@@ -11,20 +11,24 @@ import {
   Download,
   FileSpreadsheet,
   Globe,
+  KanbanSquare,
   Mail,
   Phone,
   PhoneCall,
   Plus,
   Search,
   SendHorizontal,
+  Sparkles,
   Upload,
   UserRound,
+  Users,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PhoneLogEntry, PIPELINE_STAGES, PipelineDeal, PipelineStage } from "@/lib/pipeline-types";
 
 type SortMode = "newest" | "alphabetical" | "stage";
+type PipelineSubview = "dashboard" | "kanban" | "contacts";
 
 type QuickNoteEntry = {
   id: string;
@@ -64,9 +68,23 @@ type SourceTab = {
   count: number;
 };
 
+type SubviewTab = {
+  value: PipelineSubview;
+  label: string;
+  icon: typeof BarChart3;
+};
+
 type InsightResponse = {
   response: string;
   contacts?: string[];
+};
+
+type ActivityEntry = {
+  id: string;
+  type: "created" | "stage-change";
+  name: string;
+  stage?: PipelineStage;
+  timestamp: string;
 };
 
 const EASTERN_TIME_ZONE = "America/New_York";
@@ -74,6 +92,11 @@ const SOURCE_TABS_CONFIG = [
   { value: "all", label: "ALL" },
   { value: "instantly", label: "INSTANTLY" },
 ] as const;
+const SUBVIEW_TABS: SubviewTab[] = [
+  { value: "dashboard", label: "DASHBOARD", icon: BarChart3 },
+  { value: "kanban", label: "KANBAN", icon: KanbanSquare },
+  { value: "contacts", label: "CONTACTS", icon: Users },
+];
 const INSIGHT_PROMPTS = [
   "Meeting prep for [contact name]",
   "Summary of all interested leads",
@@ -231,6 +254,13 @@ function isCurrentEasternMonth(value?: string) {
   return nowFormatter.format(parsed) === nowFormatter.format(new Date());
 }
 
+function isWithinLastSevenDays(value?: string) {
+  if (!value) return false;
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return false;
+  return Date.now() - parsed.getTime() <= 7 * 24 * 60 * 60 * 1000;
+}
+
 function parseNotes(raw: string, fallbackDate?: string): DealNotesState {
   const trimmed = raw.trim();
   const fallbackTimestamp = fallbackDate ? `${fallbackDate}T12:00:00.000Z` : new Date().toISOString();
@@ -323,11 +353,7 @@ function sortDeals(deals: PipelineDeal[], sortMode: SortMode) {
     });
   }
 
-  return next.sort((a, b) => {
-    const aTime = new Date(a.createdAt).getTime();
-    const bTime = new Date(b.createdAt).getTime();
-    return bTime - aTime;
-  });
+  return next.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
 function getSearchableText(deal: PipelineDeal) {
@@ -351,6 +377,41 @@ function normalizeStageValue(value: string): PipelineStage {
   return PIPELINE_STAGES.includes(value as PipelineStage) ? (value as PipelineStage) : "new-lead";
 }
 
+function getActivityTimestamp(value?: string) {
+  if (!value) return 0;
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? 0 : parsed.getTime();
+}
+
+function buildRecentActivity(deals: PipelineDeal[]) {
+  return deals
+    .flatMap((deal) => {
+      const createdTimestamp = /^\d{4}-\d{2}-\d{2}$/.test(deal.createdAt) ? `${deal.createdAt}T12:00:00.000Z` : deal.createdAt;
+      const entries: ActivityEntry[] = [
+        {
+          id: `${deal.id}-created`,
+          type: "created",
+          name: getPrimaryName(deal),
+          timestamp: createdTimestamp,
+        },
+      ];
+
+      if (deal.stageUpdatedAt && deal.stageUpdatedAt !== deal.createdAt) {
+        entries.push({
+          id: `${deal.id}-stage`,
+          type: "stage-change",
+          name: getPrimaryName(deal),
+          stage: deal.stage,
+          timestamp: /^\d{4}-\d{2}-\d{2}$/.test(deal.stageUpdatedAt) ? `${deal.stageUpdatedAt}T12:00:00.000Z` : deal.stageUpdatedAt,
+        });
+      }
+
+      return entries;
+    })
+    .sort((a, b) => getActivityTimestamp(b.timestamp) - getActivityTimestamp(a.timestamp))
+    .slice(0, 10);
+}
+
 function SelectOptions({ values, getLabel }: { values: readonly string[]; getLabel: (value: string) => string }) {
   return (
     <>
@@ -370,6 +431,8 @@ function AIInsightsPanel({
   onPromptSelect,
   loading,
   response,
+  className,
+  responseClassName,
 }: {
   query: string;
   onQueryChange: (value: string) => void;
@@ -377,15 +440,17 @@ function AIInsightsPanel({
   onPromptSelect: (value: string) => void;
   loading: boolean;
   response: string;
+  className?: string;
+  responseClassName?: string;
 }) {
   return (
-    <section className="glass-card rounded-2xl p-4">
+    <section className={cn("glass-card rounded-2xl p-4", className)}>
       <div className="flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-slate-400">
         <Brain size={14} className="text-blue-200" />
         <span>AI INSIGHTS</span>
       </div>
 
-      <div className="mt-4 flex gap-2">
+      <div className="mt-4 flex flex-col gap-2 sm:flex-row">
         <input
           value={query}
           onChange={(event) => onQueryChange(event.target.value)}
@@ -422,7 +487,7 @@ function AIInsightsPanel({
         ))}
       </div>
 
-      <div className="glass-card mt-4 min-h-[180px] rounded-2xl p-4">
+      <div className={cn("glass-card mt-4 min-h-[180px] rounded-2xl p-4", responseClassName)}>
         {loading ? (
           <div className="flex items-center gap-2 text-sm text-blue-100">
             <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-blue-300" />
@@ -436,50 +501,6 @@ function AIInsightsPanel({
       </div>
     </section>
   );
-}
-
-function parseCsv(text: string) {
-  const rows: string[][] = [];
-  let current = "";
-  let row: string[] = [];
-  let inQuotes = false;
-
-  for (let index = 0; index < text.length; index += 1) {
-    const character = text[index];
-    const next = text[index + 1];
-
-    if (character === '"') {
-      if (inQuotes && next === '"') {
-        current += '"';
-        index += 1;
-      } else {
-        inQuotes = !inQuotes;
-      }
-      continue;
-    }
-
-    if (character === "," && !inQuotes) {
-      row.push(current);
-      current = "";
-      continue;
-    }
-
-    if ((character === "\n" || character === "\r") && !inQuotes) {
-      if (character === "\r" && next === "\n") index += 1;
-      row.push(current);
-      if (row.some((cell) => cell.trim().length > 0)) rows.push(row);
-      row = [];
-      current = "";
-      continue;
-    }
-
-    current += character;
-  }
-
-  row.push(current);
-  if (row.some((cell) => cell.trim().length > 0)) rows.push(row);
-
-  return rows;
 }
 
 function ModalShell({
@@ -522,6 +543,7 @@ export default function PipelinePage() {
   const [deals, setDeals] = useState<PipelineDeal[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [activeSubview, setActiveSubview] = useState<PipelineSubview>("dashboard");
   const [activeSource, setActiveSource] = useState("all");
   const [search, setSearch] = useState("");
   const [sortMode, setSortMode] = useState<SortMode>("newest");
@@ -546,6 +568,8 @@ export default function PipelinePage() {
   const [insightsResponse, setInsightsResponse] = useState(
     "I can help with meeting prep, lead summaries, and follow-up recommendations. Try asking about a specific contact!",
   );
+  const [draggedDealId, setDraggedDealId] = useState("");
+  const [dropStage, setDropStage] = useState<PipelineStage | "">("");
 
   async function loadDeals() {
     setLoading(true);
@@ -554,8 +578,7 @@ export default function PipelinePage() {
     try {
       const response = await fetch("/api/pipeline", { cache: "no-store" });
       if (!response.ok) throw new Error("Unable to load pipeline.");
-      const data = (await response.json()) as PipelineDeal[];
-      setDeals(data);
+      setDeals((await response.json()) as PipelineDeal[]);
     } catch (caughtError) {
       setError(caughtError instanceof Error ? caughtError.message : "Unable to load pipeline.");
     } finally {
@@ -637,7 +660,28 @@ export default function PipelinePage() {
     [deals],
   );
 
-  const wonThisMonth = deals.filter((deal) => deal.stage === "closed-won" && isCurrentEasternMonth(deal.stageUpdatedAt ?? deal.createdAt)).length;
+  const sourceBreakdown = useMemo(() => {
+    const counts = new Map<string, number>();
+    deals.forEach((deal) => {
+      const key = normalizeSourceValue(deal.source);
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    });
+
+    return [...counts.entries()]
+      .map(([source, count]) => ({ source, count }))
+      .sort((a, b) => b.count - a.count || a.source.localeCompare(b.source));
+  }, [deals]);
+
+  const recentActivity = useMemo(() => buildRecentActivity(deals), [deals]);
+  const totalContacts = deals.length;
+  const newThisWeek = useMemo(() => deals.filter((deal) => isWithinLastSevenDays(deal.createdAt)).length, [deals]);
+  const wonThisMonth = useMemo(
+    () => deals.filter((deal) => deal.stage === "closed-won" && isCurrentEasternMonth(deal.stageUpdatedAt ?? deal.createdAt)).length,
+    [deals],
+  );
+  const conversionRate = totalContacts ? Math.round((wonThisMonth / totalContacts) * 100) : 0;
+  const maxStageCount = Math.max(...stageDistribution.map((entry) => entry.count), 0);
+  const maxSourceCount = Math.max(...sourceBreakdown.map((entry) => entry.count), 0);
 
   async function submitInsightsQuery(nextQuery?: string) {
     const query = (nextQuery ?? insightsQuery).trim();
@@ -683,6 +727,9 @@ export default function PipelinePage() {
       const updated = (await response.json()) as PipelineDeal;
       setDeals((current) => current.map((deal) => (deal.id === id ? updated : deal)));
       return updated;
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : "Unable to update contact.");
+      return null;
     } finally {
       setWorkingDealId("");
     }
@@ -802,6 +849,7 @@ export default function PipelinePage() {
       setDeals((current) => [created, ...current]);
       setSelectedId(created.id);
       setMobileOpenId(created.id);
+      setActiveSubview("contacts");
       setShowAddContact(false);
       setAddForm(EMPTY_ADD_FORM);
     } catch (caughtError) {
@@ -909,6 +957,66 @@ export default function PipelinePage() {
     URL.revokeObjectURL(url);
   }
 
+  function openContact(dealId: string) {
+    setSelectedId(dealId);
+    setMobileOpenId(dealId);
+    setActiveSubview("contacts");
+  }
+
+  async function handleKanbanDrop(stage: PipelineStage) {
+    if (!draggedDealId) return;
+    const deal = deals.find((entry) => entry.id === draggedDealId);
+    setDropStage("");
+    setDraggedDealId("");
+
+    if (!deal || deal.stage === stage) return;
+    await patchDeal(deal.id, { stage });
+  }
+
+  function parseCsv(text: string) {
+    const rows: string[][] = [];
+    let current = "";
+    let row: string[] = [];
+    let inQuotes = false;
+
+    for (let index = 0; index < text.length; index += 1) {
+      const character = text[index];
+      const next = text[index + 1];
+
+      if (character === '"') {
+        if (inQuotes && next === '"') {
+          current += '"';
+          index += 1;
+        } else {
+          inQuotes = !inQuotes;
+        }
+        continue;
+      }
+
+      if (character === "," && !inQuotes) {
+        row.push(current);
+        current = "";
+        continue;
+      }
+
+      if ((character === "\n" || character === "\r") && !inQuotes) {
+        if (character === "\r" && next === "\n") index += 1;
+        row.push(current);
+        if (row.some((cell) => cell.trim().length > 0)) rows.push(row);
+        row = [];
+        current = "";
+        continue;
+      }
+
+      current += character;
+    }
+
+    row.push(current);
+    if (row.some((cell) => cell.trim().length > 0)) rows.push(row);
+
+    return rows;
+  }
+
   const showMobileDetail = Boolean(mobileOpenId);
   const detailDeal = activeDetailDeal;
 
@@ -928,12 +1036,30 @@ export default function PipelinePage() {
             <p className="text-[11px] uppercase tracking-[0.24em] text-blue-200/70">Relationships</p>
             <h1 className="page-title mt-2">Pipeline</h1>
             <p className="mt-2 max-w-3xl text-sm text-slate-300">
-              CRM pipeline with source tabs, call tracking, quick notes, and direct client conversion.
+              CRM analytics, stage movement, and contact management in a single pipeline workspace.
             </p>
           </div>
-          <div className="glass-card inline-flex items-center gap-3 self-start rounded-2xl px-4 py-3 text-sm text-slate-200">
-            <BarChart3 size={16} className="text-blue-200" />
-            <span>{deals.length} active contacts</span>
+          <div className="flex flex-wrap gap-2">
+            <div className="glass-card inline-flex items-center gap-3 rounded-2xl px-4 py-3 text-sm text-slate-200">
+              <BarChart3 size={16} className="text-blue-200" />
+              <span>{deals.length} total contacts</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowAddContact(true)}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-blue-300/30 bg-[linear-gradient(135deg,#2093FF,#0026FF)] px-4 py-2 text-sm font-semibold text-white transition hover:shadow-[0_0_24px_rgba(32,147,255,0.24)]"
+            >
+              <Plus size={16} />
+              Add Contact
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowImportModal(true)}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-blue-300/30 bg-[linear-gradient(135deg,rgba(32,147,255,0.2),rgba(0,38,255,0.18))] px-4 py-2 text-sm font-semibold text-blue-50 transition hover:border-blue-300/60"
+            >
+              <Upload size={16} />
+              Import CSV
+            </button>
           </div>
         </div>
       </header>
@@ -941,29 +1067,21 @@ export default function PipelinePage() {
       <div className="glass-panel overflow-hidden p-0">
         <div className="overflow-x-auto">
           <div className="flex min-w-max gap-1 px-3 pt-3">
-            {sourceTabs.map((tab) => {
-              const active = activeSource === tab.value;
+            {SUBVIEW_TABS.map((tab) => {
+              const active = activeSubview === tab.value;
+              const Icon = tab.icon;
               return (
                 <button
                   key={tab.value}
                   type="button"
-                  onClick={() => setActiveSource(tab.value)}
+                  onClick={() => setActiveSubview(tab.value)}
                   className={cn(
                     "relative inline-flex items-center gap-2 whitespace-nowrap rounded-t-2xl border-b-2 px-4 py-3 text-xs font-semibold tracking-[0.18em] transition",
-                    active
-                      ? "border-[#2093FF] text-[#7FC2FF]"
-                      : "border-transparent text-slate-400 hover:text-slate-200",
+                    active ? "border-[#2093FF] text-[#7FC2FF]" : "border-transparent text-slate-400 hover:text-slate-200",
                   )}
                 >
+                  <Icon size={14} />
                   <span>{tab.label}</span>
-                  <span
-                    className={cn(
-                      "rounded-full border px-2 py-0.5 text-[10px]",
-                      active ? "border-blue-300/35 bg-blue-500/10 text-blue-100" : "border-white/10 bg-white/5 text-slate-300",
-                    )}
-                  >
-                    {tab.count}
-                  </span>
                 </button>
               );
             })}
@@ -973,360 +1091,33 @@ export default function PipelinePage() {
 
       {error ? <div className="glass-card rounded-2xl border border-red-400/25 bg-red-500/10 px-4 py-3 text-sm text-red-100">{error}</div> : null}
 
-      <div className="grid gap-4 lg:grid-cols-[280px_minmax(0,1fr)_240px]">
-        <aside className={cn("glass-panel p-4", showMobileDetail ? "hidden lg:block" : "block")}>
-          <div className="space-y-4">
-            <div className="glass-card flex items-center gap-3 rounded-2xl px-4 py-3">
-              <Search size={16} className="text-blue-200" />
-              <input
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search contacts"
-                className="w-full bg-transparent text-sm text-white outline-none placeholder:text-slate-500"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              <select
-                value={sortMode}
-                onChange={(event) => setSortMode(event.target.value as SortMode)}
-                className="glass-card rounded-2xl px-3 py-3 text-sm text-white outline-none"
-              >
-                <option value="newest" className="text-black" style={{ color: "black" }}>
-                  Newest
-                </option>
-                <option value="alphabetical" className="text-black" style={{ color: "black" }}>
-                  A-Z
-                </option>
-                <option value="stage" className="text-black" style={{ color: "black" }}>
-                  Stage
-                </option>
-              </select>
-              <button
-                type="button"
-                onClick={() => setShowAddContact(true)}
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-blue-300/30 bg-[linear-gradient(135deg,#2093FF,#0026FF)] px-4 py-2 text-sm font-semibold text-white transition hover:shadow-[0_0_24px_rgba(32,147,255,0.24)]"
-              >
-                <Plus size={16} />
-                Add Contact
-              </button>
-            </div>
-
-            <div className="max-h-[calc(100vh-24rem)] space-y-2 overflow-y-auto pr-1">
-              {filteredDeals.length ? (
-                filteredDeals.map((deal) => {
-                  const active = deal.id === activeDetailId;
-                  return (
-                    <button
-                      key={deal.id}
-                      type="button"
-                      onClick={() => {
-                        setSelectedId(deal.id);
-                        setMobileOpenId(deal.id);
-                      }}
-                      className={cn(
-                        "glass-card w-full rounded-2xl p-4 text-left transition",
-                        active && "border-blue-400/40 bg-[linear-gradient(135deg,rgba(32,147,255,0.18),rgba(0,38,255,0.14))]",
-                      )}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-semibold text-white">{getPrimaryName(deal)}</p>
-                          <p className="mt-1 truncate text-xs uppercase tracking-[0.14em] text-slate-400">{getCompanyName(deal)}</p>
-                        </div>
-                        <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: STAGE_META[deal.stage].color }} />
-                      </div>
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        <span className={cn("rounded-full border px-2.5 py-1 text-[10px] uppercase tracking-[0.16em]", STAGE_META[deal.stage].pill)}>
-                          {STAGE_META[deal.stage].label}
-                        </span>
-                        {deal.competitor ? (
-                          <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-slate-200">
-                            {deal.competitor}
-                          </span>
-                        ) : null}
-                      </div>
-                    </button>
-                  );
-                })
-              ) : (
-                <div className="glass-card rounded-2xl p-5 text-sm text-slate-400">No contacts match this source filter.</div>
-              )}
-            </div>
-
-            <div className="flex items-center justify-between border-t border-white/8 pt-3 text-xs uppercase tracking-[0.16em] text-slate-400">
-              <span>Total</span>
-              <span>{filteredDeals.length}</span>
-            </div>
-          </div>
-        </aside>
-
-        <main className={cn(showMobileDetail ? "block" : "hidden lg:block")}>
-          {detailDeal ? (
-            <div className="space-y-4">
-              <section className="glass-panel page-header p-5 sm:p-6">
-                <div className="flex flex-col gap-4">
-                  <div className="flex items-center justify-between gap-3 lg:hidden">
-                    <button
-                      type="button"
-                      onClick={() => setMobileOpenId("")}
-                      className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs uppercase tracking-[0.16em] text-slate-200"
-                    >
-                      <ArrowLeft size={14} />
-                      Back
-                    </button>
-                  </div>
-
-                  <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-                    <div>
-                      <p className="text-[11px] uppercase tracking-[0.24em] text-blue-200/70">Contact Profile</p>
-                      <h2 className="heading-font mt-2 text-3xl font-normal uppercase tracking-[0.04em] text-white sm:text-4xl">
-                        {getPrimaryName(detailDeal)}
-                      </h2>
-                      <p className="mt-2 text-sm text-slate-300">{getCompanyName(detailDeal)}</p>
-                    </div>
-
-                    <div className="flex flex-wrap gap-2">
-                      <select
-                        value={detailDeal.stage}
-                        onChange={(event) => void patchDeal(detailDeal.id, { stage: event.target.value as PipelineStage })}
-                        className={cn("rounded-full border px-3 py-2 text-xs uppercase tracking-[0.16em] outline-none", STAGE_META[detailDeal.stage].pill)}
-                      >
-                        <SelectOptions values={PIPELINE_STAGES} getLabel={(stage) => STAGE_META[stage as PipelineStage].label} />
-                      </select>
-                      <span className="rounded-full border border-blue-300/25 bg-blue-500/10 px-3 py-2 text-xs uppercase tracking-[0.16em] text-blue-100">
-                        {formatSourceLabel(detailDeal.source)}
-                      </span>
-                      {detailDeal.competitor ? (
-                        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs uppercase tracking-[0.16em] text-slate-200">
-                          {detailDeal.competitor}
-                        </span>
-                      ) : null}
-                    </div>
-                  </div>
-                </div>
-              </section>
-
-              <section className="glass-panel p-5 sm:p-6">
-                <div className="grid gap-3 md:grid-cols-3">
-                  <div className="glass-card rounded-2xl p-4">
-                    <div className="flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-slate-400">
-                      <Mail size={14} className="text-blue-200" />
-                      Email
-                    </div>
-                    <p className="mt-2 break-all text-sm text-white">{detailDeal.email || "No email"}</p>
-                  </div>
-                  <div className="glass-card rounded-2xl p-4">
-                    <div className="flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-slate-400">
-                      <Phone size={14} className="text-blue-200" />
-                      Phone
-                    </div>
-                    <p className="mt-2 text-sm text-white">{getPhone(detailDeal) || "No phone"}</p>
-                  </div>
-                  <div className="glass-card rounded-2xl p-4">
-                    <div className="flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-slate-400">
-                      <Globe size={14} className="text-blue-200" />
-                      Website
-                    </div>
-                    <p className="mt-2 break-all text-sm text-white">{getWebsite(detailDeal) || "No website"}</p>
-                  </div>
-                </div>
-              </section>
-
-              <section className="glass-panel p-5 sm:p-6">
+      {activeSubview === "dashboard" ? (
+        <div className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {[
+              { label: "Total Contacts", value: `${totalContacts}`, icon: Users },
+              { label: "New This Week", value: `${newThisWeek}`, icon: Sparkles },
+              { label: "Won This Month", value: `${wonThisMonth}`, icon: Building2 },
+              { label: "Conversion Rate", value: `${conversionRate}%`, icon: BarChart3 },
+            ].map(({ label, value, icon: Icon }) => (
+              <article key={label} className="glass-card rounded-2xl p-5">
                 <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="section-title">Rolodex Notes</p>
-                    <p className="mt-1 text-sm text-slate-400">Auto-saves when focus leaves the note field.</p>
-                  </div>
-                  {workingDealId === detailDeal.id ? <span className="text-xs uppercase tracking-[0.16em] text-blue-200">Saving</span> : null}
-                </div>
-                <textarea
-                  value={rolodexDraft}
-                  onChange={(event) => setRolodexDraft(event.target.value)}
-                  onBlur={() => void saveRolodexNotes()}
-                  placeholder="Track family details, objections, deal context, and what matters before the next touch."
-                  className="mt-4 min-h-[180px] w-full rounded-2xl border border-white/10 bg-[#0a0a0f] px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-blue-400/40"
-                />
-              </section>
-
-              <section className="glass-panel p-5 sm:p-6">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="section-title">Phone Call Log</p>
-                    <p className="mt-1 text-sm text-slate-400">Store every call with an Eastern time date stamp.</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowPhoneComposer((current) => !current);
-                      setPhoneDateDraft(formatPhoneLogDate());
-                    }}
-                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-blue-300/30 bg-[linear-gradient(135deg,rgba(32,147,255,0.2),rgba(0,38,255,0.18))] px-4 py-2 text-sm font-semibold text-blue-50 transition hover:border-blue-300/60"
-                  >
-                    <PhoneCall size={16} />
-                    Add Phone Call
-                  </button>
-                </div>
-
-                {showPhoneComposer ? (
-                  <div className="glass-card mt-4 grid gap-3 rounded-2xl p-4 md:grid-cols-[160px_minmax(0,1fr)_120px]">
-                    <input
-                      value={phoneDateDraft}
-                      onChange={(event) => setPhoneDateDraft(event.target.value)}
-                      className="rounded-2xl border border-white/10 bg-[#0a0a0f] px-3 py-3 text-sm text-white outline-none focus:border-blue-400/40"
-                    />
-                    <input
-                      value={phoneNotesDraft}
-                      onChange={(event) => setPhoneNotesDraft(event.target.value)}
-                      placeholder="Call notes"
-                      className="rounded-2xl border border-white/10 bg-[#0a0a0f] px-3 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-blue-400/40"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => void addPhoneCall()}
-                      className="inline-flex items-center justify-center rounded-2xl border border-blue-300/30 bg-[linear-gradient(135deg,#2093FF,#0026FF)] px-4 py-2 text-sm font-semibold text-white"
-                    >
-                      Save
-                    </button>
-                  </div>
-                ) : null}
-
-                <div className="mt-4 space-y-3">
-                  {phoneLog.length ? (
-                    phoneLog.map((entry) => (
-                      <div key={entry.id} className="glass-card flex items-start justify-between gap-3 rounded-2xl p-4">
-                        <div>
-                          <p className="text-xs uppercase tracking-[0.16em] text-blue-100">{entry.date}</p>
-                          <p className="mt-2 text-sm text-white">{entry.notes}</p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => void deletePhoneCall(detailDeal, entry.id)}
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-300 transition hover:border-red-400/40 hover:text-red-200"
-                        >
-                          <X size={14} />
-                        </button>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="glass-card rounded-2xl p-5 text-sm text-slate-400">No phone calls logged yet.</div>
-                  )}
-                </div>
-              </section>
-
-              <section className="glass-panel p-5 sm:p-6">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="section-title">Quick Notes Timeline</p>
-                    <p className="mt-1 text-sm text-slate-400">Timestamped updates for each touchpoint.</p>
+                  <p className="text-xs uppercase tracking-[0.16em] text-slate-400">{label}</p>
+                  <div className="rounded-full border border-blue-300/20 bg-blue-500/10 p-2 text-blue-100">
+                    <Icon size={16} />
                   </div>
                 </div>
+                <p className="heading-font mt-5 text-4xl font-normal uppercase tracking-[0.04em] text-white">{value}</p>
+              </article>
+            ))}
+          </div>
 
-                <div className="mt-4 grid gap-3 md:grid-cols-[minmax(0,1fr)_160px]">
-                  <input
-                    value={quickNoteDraft}
-                    onChange={(event) => setQuickNoteDraft(event.target.value)}
-                    placeholder="Add a quick update"
-                    className="rounded-2xl border border-white/10 bg-[#0a0a0f] px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-blue-400/40"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => void addQuickNote()}
-                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-blue-300/30 bg-[linear-gradient(135deg,#2093FF,#0026FF)] px-4 py-2 text-sm font-semibold text-white"
-                  >
-                    <Plus size={16} />
-                    Add Note
-                  </button>
-                </div>
-
-                <div className="mt-4 space-y-3">
-                  {selectedNotes.quickNotes.length ? (
-                    selectedNotes.quickNotes
-                      .slice()
-                      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-                      .map((note) => (
-                        <div key={note.id} className="glass-card rounded-2xl p-4">
-                          <p className="text-xs uppercase tracking-[0.16em] text-blue-100">{formatCreatedAt(note.timestamp)}</p>
-                          <p className="mt-2 text-sm text-white">{note.text}</p>
-                        </div>
-                      ))
-                  ) : (
-                    <div className="glass-card rounded-2xl p-5 text-sm text-slate-400">No quick notes yet.</div>
-                  )}
-                </div>
-              </section>
-
-              <section className="glass-panel p-5 sm:p-6">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="section-title">Convert</p>
-                    <p className="mt-1 text-sm text-slate-400">Create a client profile from this contact and open it immediately.</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => void convertToClient(detailDeal)}
-                    disabled={convertingDealId === detailDeal.id}
-                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-blue-300/30 bg-[linear-gradient(135deg,#2093FF,#0026FF)] px-5 py-2 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    <Building2 size={16} />
-                    {convertingDealId === detailDeal.id ? "Converting..." : "Convert to Client"}
-                  </button>
-                </div>
-              </section>
+          <section className="glass-panel p-5 sm:p-6">
+            <div className="flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-blue-200">
+              <Brain size={14} />
+              <span>AI Pipeline Assistant</span>
             </div>
-          ) : (
-            <section className="glass-panel flex min-h-[420px] items-center justify-center p-8 text-center">
-              <div>
-                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-blue-400/20 bg-blue-500/10 text-blue-100">
-                  <UserRound size={24} />
-                </div>
-                <h2 className="heading-font mt-5 text-3xl font-normal uppercase tracking-[0.04em] text-white">Select a Contact</h2>
-                <p className="mt-2 text-sm text-slate-400">Choose a lead from the left panel to open the CRM profile.</p>
-              </div>
-            </section>
-          )}
-        </main>
-
-        <aside className="glass-panel hidden p-4 lg:block">
-          <div className="space-y-4">
-            <div>
-              <p className="section-title">Stage Distribution</p>
-              <div className="mt-4 space-y-3">
-                {stageDistribution.map(({ stage, count }) => {
-                  const width = deals.length ? `${(count / deals.length) * 100}%` : "0%";
-                  return (
-                    <div key={stage} className="glass-card rounded-2xl p-3">
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-slate-300">
-                          <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: STAGE_META[stage].color }} />
-                          <span>{STAGE_META[stage].label}</span>
-                        </div>
-                        <span className="text-sm text-white">{count}</span>
-                      </div>
-                      <div className="mt-3 h-2 rounded-full bg-white/5">
-                        <div className="h-2 rounded-full" style={{ width, backgroundColor: STAGE_META[stage].color }} />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div>
-              <p className="section-title">Quick Stats</p>
-              <div className="mt-4 grid gap-3">
-                <div className="glass-card rounded-2xl p-4">
-                  <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Total Contacts</p>
-                  <p className="heading-font mt-2 text-3xl font-normal uppercase tracking-[0.04em] text-white">{deals.length}</p>
-                </div>
-                <div className="glass-card rounded-2xl p-4">
-                  <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Won This Month</p>
-                  <p className="heading-font mt-2 text-3xl font-normal uppercase tracking-[0.04em] text-white">{wonThisMonth}</p>
-                </div>
-              </div>
-            </div>
-
+            <p className="mt-2 text-sm text-slate-300">Ask for deal summaries, meeting prep, or follow-up priorities across the full pipeline.</p>
             <AIInsightsPanel
               query={insightsQuery}
               onQueryChange={setInsightsQuery}
@@ -1337,33 +1128,594 @@ export default function PipelinePage() {
               }}
               loading={insightsLoading}
               response={insightsResponse}
+              className="mt-5 border border-blue-400/15 bg-[linear-gradient(135deg,rgba(32,147,255,0.08),rgba(0,38,255,0.06))]"
+              responseClassName="min-h-[240px]"
             />
+          </section>
 
-            <button
-              type="button"
-              onClick={() => setShowImportModal(true)}
-              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-blue-300/30 bg-[linear-gradient(135deg,rgba(32,147,255,0.2),rgba(0,38,255,0.18))] px-4 py-2 text-sm font-semibold text-blue-50 transition hover:border-blue-300/60"
-            >
-              <Upload size={16} />
-              Import CSV
-            </button>
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
+            <section className="glass-panel p-5 sm:p-6">
+              <div className="flex items-center gap-2">
+                <BarChart3 size={16} className="text-blue-200" />
+                <div>
+                  <p className="section-title">Stage Funnel</p>
+                  <p className="mt-1 text-sm text-slate-400">Counts by pipeline stage with proportional bars.</p>
+                </div>
+              </div>
+              <div className="mt-5 space-y-3">
+                {stageDistribution.map(({ stage, count }) => {
+                  const width = maxStageCount ? `${Math.max((count / maxStageCount) * 100, count > 0 ? 8 : 0)}%` : "0%";
+                  return (
+                    <div key={stage} className="grid grid-cols-[120px_minmax(0,1fr)_32px] items-center gap-3">
+                      <p className="text-xs uppercase tracking-[0.12em] text-slate-300">{STAGE_META[stage].label}</p>
+                      <div className="h-3 rounded-full bg-white/5">
+                        <div className="h-3 rounded-full transition-all" style={{ width, backgroundColor: STAGE_META[stage].color }} />
+                      </div>
+                      <p className="text-right text-sm text-white">{count}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+
+            <section className="glass-panel p-5 sm:p-6">
+              <div className="flex items-center gap-2">
+                <Upload size={16} className="text-blue-200" />
+                <div>
+                  <p className="section-title">Source Breakdown</p>
+                  <p className="mt-1 text-sm text-slate-400">Where contacts are entering the pipeline.</p>
+                </div>
+              </div>
+              <div className="mt-5 grid gap-3">
+                {sourceBreakdown.length ? (
+                  sourceBreakdown.map(({ source, count }) => (
+                    <div key={source} className="glass-card rounded-2xl p-4">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-xs uppercase tracking-[0.16em] text-slate-300">{formatSourceLabel(source)}</p>
+                        <p className="text-sm text-white">{count}</p>
+                      </div>
+                      <div className="mt-3 h-2 rounded-full bg-white/5">
+                        <div
+                          className="h-2 rounded-full bg-[linear-gradient(135deg,#2093FF,#0026FF)]"
+                          style={{ width: maxSourceCount ? `${(count / maxSourceCount) * 100}%` : "0%" }}
+                        />
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="glass-card rounded-2xl p-5 text-sm text-slate-400">No contact sources yet.</div>
+                )}
+              </div>
+            </section>
           </div>
-        </aside>
-      </div>
 
-      <div className="glass-panel p-4 lg:hidden">
-        <AIInsightsPanel
-          query={insightsQuery}
-          onQueryChange={setInsightsQuery}
-          onSubmit={() => void submitInsightsQuery()}
-          onPromptSelect={(prompt) => {
-            setInsightsQuery(prompt);
-            void submitInsightsQuery(prompt);
-          }}
-          loading={insightsLoading}
-          response={insightsResponse}
-        />
-      </div>
+          <section className="glass-panel p-5 sm:p-6">
+            <div className="flex items-center gap-2">
+              <Sparkles size={16} className="text-blue-200" />
+              <div>
+                <p className="section-title">Recent Activity</p>
+                <p className="mt-1 text-sm text-slate-400">Latest contact creation and stage movement across the pipeline.</p>
+              </div>
+            </div>
+            <div className="mt-5 space-y-3">
+              {recentActivity.length ? (
+                recentActivity.map((entry) => (
+                  <div key={entry.id} className="glass-card flex flex-col gap-2 rounded-2xl p-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-sm font-semibold text-white">{entry.name}</p>
+                      <p className="mt-1 text-xs uppercase tracking-[0.16em] text-slate-400">
+                        {entry.type === "created"
+                          ? "Created contact"
+                          : `Moved to ${entry.stage ? STAGE_META[entry.stage].label : "another stage"}`}
+                      </p>
+                    </div>
+                    <p className="text-xs uppercase tracking-[0.16em] text-blue-100">{formatCreatedAt(entry.timestamp)}</p>
+                  </div>
+                ))
+              ) : (
+                <div className="glass-card rounded-2xl p-5 text-sm text-slate-400">No recent activity yet.</div>
+              )}
+            </div>
+          </section>
+        </div>
+      ) : null}
+
+      {activeSubview === "kanban" ? (
+        <section className="glass-panel p-4 sm:p-5">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="section-title">Kanban Board</p>
+              <p className="mt-1 text-sm text-slate-400">Drag contacts between stages to update the pipeline.</p>
+            </div>
+            {draggedDealId ? <p className="text-xs uppercase tracking-[0.16em] text-blue-200">Drop on a stage to move</p> : null}
+          </div>
+
+          <div className="mt-5 overflow-x-auto pb-2">
+            <div className="flex min-w-max gap-4">
+              {stageDistribution.map(({ stage, count }) => {
+                const stageDeals = deals.filter((deal) => deal.stage === stage);
+                const isDropTarget = dropStage === stage;
+
+                return (
+                  <div
+                    key={stage}
+                    onDragOver={(event) => {
+                      event.preventDefault();
+                      if (dropStage !== stage) setDropStage(stage);
+                    }}
+                    onDragLeave={(event) => {
+                      if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+                        setDropStage((current) => (current === stage ? "" : current));
+                      }
+                    }}
+                    onDrop={(event) => {
+                      event.preventDefault();
+                      void handleKanbanDrop(stage);
+                    }}
+                    className={cn(
+                      "glass-card w-[290px] shrink-0 rounded-2xl border border-white/10 bg-white/[0.04] p-4 transition",
+                      isDropTarget && "border-blue-400/50 shadow-[0_0_28px_rgba(32,147,255,0.24)]",
+                    )}
+                    style={{ borderTopWidth: "3px", borderTopColor: STAGE_META[stage].color }}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-xs uppercase tracking-[0.16em] text-slate-400">{STAGE_META[stage].label}</p>
+                        <p className="heading-font mt-2 text-3xl font-normal uppercase tracking-[0.04em] text-white">{count}</p>
+                      </div>
+                      <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-slate-200">
+                        {count} cards
+                      </span>
+                    </div>
+
+                    <div className="mt-4 space-y-3">
+                      {stageDeals.length ? (
+                        stageDeals.map((deal) => (
+                          <button
+                            key={deal.id}
+                            type="button"
+                            draggable
+                            onDragStart={() => {
+                              setDraggedDealId(deal.id);
+                              setDropStage(stage);
+                            }}
+                            onDragEnd={() => {
+                              setDraggedDealId("");
+                              setDropStage("");
+                            }}
+                            onClick={() => openContact(deal.id)}
+                            className={cn(
+                              "glass-card block w-full rounded-2xl p-4 text-left transition hover:-translate-y-0.5",
+                              draggedDealId === deal.id && "opacity-50",
+                            )}
+                          >
+                            <p className="text-sm font-semibold text-white">{getPrimaryName(deal)}</p>
+                            <p className="mt-1 text-xs uppercase tracking-[0.14em] text-slate-400">{getCompanyName(deal)}</p>
+                            <div className="mt-3 flex items-center justify-between gap-2">
+                              <span className="rounded-full border border-blue-300/25 bg-blue-500/10 px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-blue-100">
+                                {formatSourceLabel(deal.source)}
+                              </span>
+                              {workingDealId === deal.id ? <span className="text-[10px] uppercase tracking-[0.16em] text-blue-200">Saving</span> : null}
+                            </div>
+                          </button>
+                        ))
+                      ) : (
+                        <div className="rounded-2xl border border-dashed border-white/10 bg-[#0a0a0f] px-4 py-8 text-center text-sm text-slate-500">
+                          Drop contacts here.
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      {activeSubview === "contacts" ? (
+        <div className="grid gap-4 lg:grid-cols-[280px_minmax(0,1fr)_240px]">
+          <aside className={cn("glass-panel p-4", showMobileDetail ? "hidden lg:block" : "block")}>
+            <div className="space-y-4">
+              <div className="glass-card flex items-center gap-3 rounded-2xl px-4 py-3">
+                <Search size={16} className="text-blue-200" />
+                <input
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder="Search contacts"
+                  className="w-full bg-transparent text-sm text-white outline-none placeholder:text-slate-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <select
+                  value={sortMode}
+                  onChange={(event) => setSortMode(event.target.value as SortMode)}
+                  className="glass-card rounded-2xl px-3 py-3 text-sm text-white outline-none"
+                >
+                  <option value="newest" className="text-black" style={{ color: "black" }}>
+                    Newest
+                  </option>
+                  <option value="alphabetical" className="text-black" style={{ color: "black" }}>
+                    A-Z
+                  </option>
+                  <option value="stage" className="text-black" style={{ color: "black" }}>
+                    Stage
+                  </option>
+                </select>
+                <button
+                  type="button"
+                  onClick={() => setShowAddContact(true)}
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-blue-300/30 bg-[linear-gradient(135deg,#2093FF,#0026FF)] px-4 py-2 text-sm font-semibold text-white transition hover:shadow-[0_0_24px_rgba(32,147,255,0.24)]"
+                >
+                  <Plus size={16} />
+                  Add Contact
+                </button>
+              </div>
+
+              <div className="glass-panel overflow-hidden p-0">
+                <div className="overflow-x-auto">
+                  <div className="flex min-w-max gap-1 px-3 pt-3">
+                    {sourceTabs.map((tab) => {
+                      const active = activeSource === tab.value;
+                      return (
+                        <button
+                          key={tab.value}
+                          type="button"
+                          onClick={() => setActiveSource(tab.value)}
+                          className={cn(
+                            "relative inline-flex items-center gap-2 whitespace-nowrap rounded-t-2xl border-b-2 px-4 py-3 text-xs font-semibold tracking-[0.18em] transition",
+                            active
+                              ? "border-[#2093FF] text-[#7FC2FF]"
+                              : "border-transparent text-slate-400 hover:text-slate-200",
+                          )}
+                        >
+                          <span>{tab.label}</span>
+                          <span
+                            className={cn(
+                              "rounded-full border px-2 py-0.5 text-[10px]",
+                              active ? "border-blue-300/35 bg-blue-500/10 text-blue-100" : "border-white/10 bg-white/5 text-slate-300",
+                            )}
+                          >
+                            {tab.count}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              <div className="max-h-[calc(100vh-24rem)] space-y-2 overflow-y-auto pr-1">
+                {filteredDeals.length ? (
+                  filteredDeals.map((deal) => {
+                    const active = deal.id === activeDetailId;
+                    return (
+                      <button
+                        key={deal.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedId(deal.id);
+                          setMobileOpenId(deal.id);
+                        }}
+                        className={cn(
+                          "glass-card w-full rounded-2xl p-4 text-left transition",
+                          active && "border-blue-400/40 bg-[linear-gradient(135deg,rgba(32,147,255,0.18),rgba(0,38,255,0.14))]",
+                        )}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-semibold text-white">{getPrimaryName(deal)}</p>
+                            <p className="mt-1 truncate text-xs uppercase tracking-[0.14em] text-slate-400">{getCompanyName(deal)}</p>
+                          </div>
+                          <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: STAGE_META[deal.stage].color }} />
+                        </div>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          <span className={cn("rounded-full border px-2.5 py-1 text-[10px] uppercase tracking-[0.16em]", STAGE_META[deal.stage].pill)}>
+                            {STAGE_META[deal.stage].label}
+                          </span>
+                          {deal.competitor ? (
+                            <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-slate-200">
+                              {deal.competitor}
+                            </span>
+                          ) : null}
+                        </div>
+                      </button>
+                    );
+                  })
+                ) : (
+                  <div className="glass-card rounded-2xl p-5 text-sm text-slate-400">No contacts match this source filter.</div>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between border-t border-white/8 pt-3 text-xs uppercase tracking-[0.16em] text-slate-400">
+                <span>Total</span>
+                <span>{filteredDeals.length}</span>
+              </div>
+            </div>
+          </aside>
+
+          <main className={cn(showMobileDetail ? "block" : "hidden lg:block")}>
+            {detailDeal ? (
+              <div className="space-y-4">
+                <section className="glass-panel page-header p-5 sm:p-6">
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center justify-between gap-3 lg:hidden">
+                      <button
+                        type="button"
+                        onClick={() => setMobileOpenId("")}
+                        className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs uppercase tracking-[0.16em] text-slate-200"
+                      >
+                        <ArrowLeft size={14} />
+                        Back
+                      </button>
+                    </div>
+
+                    <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                      <div>
+                        <p className="text-[11px] uppercase tracking-[0.24em] text-blue-200/70">Contact Profile</p>
+                        <h2 className="heading-font mt-2 text-3xl font-normal uppercase tracking-[0.04em] text-white sm:text-4xl">
+                          {getPrimaryName(detailDeal)}
+                        </h2>
+                        <p className="mt-2 text-sm text-slate-300">{getCompanyName(detailDeal)}</p>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2">
+                        <select
+                          value={detailDeal.stage}
+                          onChange={(event) => void patchDeal(detailDeal.id, { stage: event.target.value as PipelineStage })}
+                          className={cn("rounded-full border px-3 py-2 text-xs uppercase tracking-[0.16em] outline-none", STAGE_META[detailDeal.stage].pill)}
+                        >
+                          <SelectOptions values={PIPELINE_STAGES} getLabel={(stage) => STAGE_META[stage as PipelineStage].label} />
+                        </select>
+                        <span className="rounded-full border border-blue-300/25 bg-blue-500/10 px-3 py-2 text-xs uppercase tracking-[0.16em] text-blue-100">
+                          {formatSourceLabel(detailDeal.source)}
+                        </span>
+                        {detailDeal.competitor ? (
+                          <span className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs uppercase tracking-[0.16em] text-slate-200">
+                            {detailDeal.competitor}
+                          </span>
+                        ) : null}
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                <section className="glass-panel p-5 sm:p-6">
+                  <div className="grid gap-3 md:grid-cols-3">
+                    <div className="glass-card rounded-2xl p-4">
+                      <div className="flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-slate-400">
+                        <Mail size={14} className="text-blue-200" />
+                        Email
+                      </div>
+                      <p className="mt-2 break-all text-sm text-white">{detailDeal.email || "No email"}</p>
+                    </div>
+                    <div className="glass-card rounded-2xl p-4">
+                      <div className="flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-slate-400">
+                        <Phone size={14} className="text-blue-200" />
+                        Phone
+                      </div>
+                      <p className="mt-2 text-sm text-white">{getPhone(detailDeal) || "No phone"}</p>
+                    </div>
+                    <div className="glass-card rounded-2xl p-4">
+                      <div className="flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-slate-400">
+                        <Globe size={14} className="text-blue-200" />
+                        Website
+                      </div>
+                      <p className="mt-2 break-all text-sm text-white">{getWebsite(detailDeal) || "No website"}</p>
+                    </div>
+                  </div>
+                </section>
+
+                <section className="glass-panel p-5 sm:p-6">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="section-title">Rolodex Notes</p>
+                      <p className="mt-1 text-sm text-slate-400">Auto-saves when focus leaves the note field.</p>
+                    </div>
+                    {workingDealId === detailDeal.id ? <span className="text-xs uppercase tracking-[0.16em] text-blue-200">Saving</span> : null}
+                  </div>
+                  <textarea
+                    value={rolodexDraft}
+                    onChange={(event) => setRolodexDraft(event.target.value)}
+                    onBlur={() => void saveRolodexNotes()}
+                    placeholder="Track family details, objections, deal context, and what matters before the next touch."
+                    className="mt-4 min-h-[180px] w-full rounded-2xl border border-white/10 bg-[#0a0a0f] px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-blue-400/40"
+                  />
+                </section>
+
+                <section className="glass-panel p-5 sm:p-6">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="section-title">Phone Call Log</p>
+                      <p className="mt-1 text-sm text-slate-400">Store every call with an Eastern time date stamp.</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowPhoneComposer((current) => !current);
+                        setPhoneDateDraft(formatPhoneLogDate());
+                      }}
+                      className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-blue-300/30 bg-[linear-gradient(135deg,rgba(32,147,255,0.2),rgba(0,38,255,0.18))] px-4 py-2 text-sm font-semibold text-blue-50 transition hover:border-blue-300/60"
+                    >
+                      <PhoneCall size={16} />
+                      Add Phone Call
+                    </button>
+                  </div>
+
+                  {showPhoneComposer ? (
+                    <div className="glass-card mt-4 grid gap-3 rounded-2xl p-4 md:grid-cols-[160px_minmax(0,1fr)_120px]">
+                      <input
+                        value={phoneDateDraft}
+                        onChange={(event) => setPhoneDateDraft(event.target.value)}
+                        className="rounded-2xl border border-white/10 bg-[#0a0a0f] px-3 py-3 text-sm text-white outline-none focus:border-blue-400/40"
+                      />
+                      <input
+                        value={phoneNotesDraft}
+                        onChange={(event) => setPhoneNotesDraft(event.target.value)}
+                        placeholder="Call notes"
+                        className="rounded-2xl border border-white/10 bg-[#0a0a0f] px-3 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-blue-400/40"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => void addPhoneCall()}
+                        className="inline-flex items-center justify-center rounded-2xl border border-blue-300/30 bg-[linear-gradient(135deg,#2093FF,#0026FF)] px-4 py-2 text-sm font-semibold text-white"
+                      >
+                        Save
+                      </button>
+                    </div>
+                  ) : null}
+
+                  <div className="mt-4 space-y-3">
+                    {phoneLog.length ? (
+                      phoneLog.map((entry) => (
+                        <div key={entry.id} className="glass-card flex items-start justify-between gap-3 rounded-2xl p-4">
+                          <div>
+                            <p className="text-xs uppercase tracking-[0.16em] text-blue-100">{entry.date}</p>
+                            <p className="mt-2 text-sm text-white">{entry.notes}</p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => void deletePhoneCall(detailDeal, entry.id)}
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-300 transition hover:border-red-400/40 hover:text-red-200"
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="glass-card rounded-2xl p-5 text-sm text-slate-400">No phone calls logged yet.</div>
+                    )}
+                  </div>
+                </section>
+
+                <section className="glass-panel p-5 sm:p-6">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="section-title">Quick Notes Timeline</p>
+                      <p className="mt-1 text-sm text-slate-400">Timestamped updates for each touchpoint.</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 grid gap-3 md:grid-cols-[minmax(0,1fr)_160px]">
+                    <input
+                      value={quickNoteDraft}
+                      onChange={(event) => setQuickNoteDraft(event.target.value)}
+                      placeholder="Add a quick update"
+                      className="rounded-2xl border border-white/10 bg-[#0a0a0f] px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-blue-400/40"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => void addQuickNote()}
+                      className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-blue-300/30 bg-[linear-gradient(135deg,#2093FF,#0026FF)] px-4 py-2 text-sm font-semibold text-white"
+                    >
+                      <Plus size={16} />
+                      Add Note
+                    </button>
+                  </div>
+
+                  <div className="mt-4 space-y-3">
+                    {selectedNotes.quickNotes.length ? (
+                      selectedNotes.quickNotes
+                        .slice()
+                        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+                        .map((note) => (
+                          <div key={note.id} className="glass-card rounded-2xl p-4">
+                            <p className="text-xs uppercase tracking-[0.16em] text-blue-100">{formatCreatedAt(note.timestamp)}</p>
+                            <p className="mt-2 text-sm text-white">{note.text}</p>
+                          </div>
+                        ))
+                    ) : (
+                      <div className="glass-card rounded-2xl p-5 text-sm text-slate-400">No quick notes yet.</div>
+                    )}
+                  </div>
+                </section>
+
+                <section className="glass-panel p-5 sm:p-6">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="section-title">Convert</p>
+                      <p className="mt-1 text-sm text-slate-400">Create a client profile from this contact and open it immediately.</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => void convertToClient(detailDeal)}
+                      disabled={convertingDealId === detailDeal.id}
+                      className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-blue-300/30 bg-[linear-gradient(135deg,#2093FF,#0026FF)] px-5 py-2 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      <Building2 size={16} />
+                      {convertingDealId === detailDeal.id ? "Converting..." : "Convert to Client"}
+                    </button>
+                  </div>
+                </section>
+              </div>
+            ) : (
+              <section className="glass-panel flex min-h-[420px] items-center justify-center p-8 text-center">
+                <div>
+                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-blue-400/20 bg-blue-500/10 text-blue-100">
+                    <UserRound size={24} />
+                  </div>
+                  <h2 className="heading-font mt-5 text-3xl font-normal uppercase tracking-[0.04em] text-white">Select a Contact</h2>
+                  <p className="mt-2 text-sm text-slate-400">Choose a lead from the left panel to open the CRM profile.</p>
+                </div>
+              </section>
+            )}
+          </main>
+
+          <aside className="glass-panel hidden p-4 lg:block">
+            <div className="space-y-4">
+              <div>
+                <p className="section-title">Stage Distribution</p>
+                <div className="mt-4 space-y-3">
+                  {stageDistribution.map(({ stage, count }) => {
+                    const width = deals.length ? `${(count / deals.length) * 100}%` : "0%";
+                    return (
+                      <div key={stage} className="glass-card rounded-2xl p-3">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-slate-300">
+                            <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: STAGE_META[stage].color }} />
+                            <span>{STAGE_META[stage].label}</span>
+                          </div>
+                          <span className="text-sm text-white">{count}</span>
+                        </div>
+                        <div className="mt-3 h-2 rounded-full bg-white/5">
+                          <div className="h-2 rounded-full" style={{ width, backgroundColor: STAGE_META[stage].color }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <p className="section-title">Quick Stats</p>
+                <div className="mt-4 grid gap-3">
+                  <div className="glass-card rounded-2xl p-4">
+                    <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Total Contacts</p>
+                    <p className="heading-font mt-2 text-3xl font-normal uppercase tracking-[0.04em] text-white">{deals.length}</p>
+                  </div>
+                  <div className="glass-card rounded-2xl p-4">
+                    <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Won This Month</p>
+                    <p className="heading-font mt-2 text-3xl font-normal uppercase tracking-[0.04em] text-white">{wonThisMonth}</p>
+                  </div>
+                </div>
+              </div>
+
+              <AIInsightsPanel
+                query={insightsQuery}
+                onQueryChange={setInsightsQuery}
+                onSubmit={() => void submitInsightsQuery()}
+                onPromptSelect={(prompt) => {
+                  setInsightsQuery(prompt);
+                  void submitInsightsQuery(prompt);
+                }}
+                loading={insightsLoading}
+                response={insightsResponse}
+              />
+            </div>
+          </aside>
+        </div>
+      ) : null}
 
       {showAddContact ? (
         <ModalShell title="Add Contact" icon={<Plus size={16} className="text-blue-200" />} onClose={() => setShowAddContact(false)}>
