@@ -1,55 +1,44 @@
-export const isKvConfigured = Boolean(process.env.KV_REST_API_URL);
-const kvUrl = process.env.KV_REST_API_URL;
-const kvToken = process.env.KV_REST_API_TOKEN;
+import { createClient, type RedisClientType } from "redis";
+
+export const isKvConfigured = Boolean(process.env.REDIS_URL);
+
+let _client: RedisClientType | null = null;
+
+async function getClient(): Promise<RedisClientType | null> {
+  if (!process.env.REDIS_URL) return null;
+  if (_client?.isOpen) return _client;
+
+  try {
+    _client = createClient({ url: process.env.REDIS_URL }) as RedisClientType;
+    _client.on("error", () => {});
+    await _client.connect();
+    return _client;
+  } catch {
+    _client = null;
+    return null;
+  }
+}
 
 function keyFor(file: string) {
   return `mission-control:${file}`;
 }
 
-async function kvGet<T>(key: string): Promise<T | null> {
-  if (!kvUrl || !kvToken) return null;
-
-  const res = await fetch(`${kvUrl}/get/${encodeURIComponent(key)}`, {
-    headers: { Authorization: `Bearer ${kvToken}` },
-    cache: "no-store",
-  });
-  if (!res.ok) return null;
-
-  const body = (await res.json()) as { result?: T | null };
-  return body.result ?? null;
-}
-
-async function kvSet(key: string, value: unknown): Promise<void> {
-  if (!kvUrl || !kvToken) return;
-
-  await fetch(`${kvUrl}/set/${encodeURIComponent(key)}`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${kvToken}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ value }),
-    cache: "no-store",
-  });
-}
-
 export async function readPersistentData<T>(file: string, fallback: T): Promise<T> {
-  if (!isKvConfigured) {
-    return fallback;
-  }
+  const client = await getClient();
+  if (!client) return fallback;
 
   try {
-    const value = await kvGet<T>(keyFor(file));
-    return value ?? fallback;
+    const raw = await client.get(keyFor(file));
+    if (!raw) return fallback;
+    return JSON.parse(raw) as T;
   } catch {
     return fallback;
   }
 }
 
 export async function writePersistentData(file: string, data: unknown): Promise<void> {
-  if (!isKvConfigured) {
-    return;
-  }
+  const client = await getClient();
+  if (!client) return;
 
-  await kvSet(keyFor(file), data);
+  await client.set(keyFor(file), JSON.stringify(data));
 }
