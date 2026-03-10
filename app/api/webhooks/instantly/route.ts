@@ -74,6 +74,21 @@ function extractLead(payload: AnyRecord) {
   return { email, name, company };
 }
 
+function detectCompetitor(payload: AnyRecord): string {
+  const campaign = (
+    asString(payload.campaign_name) ||
+    asString(readPath(payload, ["campaign", "name"])) ||
+    asString(payload.campaign) ||
+    ""
+  ).toUpperCase();
+  if (campaign.includes("SPOTHOPPER")) return "SpotHopper";
+  if (campaign.includes("OWNER")) return "Owner.com";
+  if (campaign.includes("FISHERMAN")) return "Fisherman";
+  if (campaign.includes("BENTOBOX")) return "BentoBox";
+  if (campaign.includes("POPMENU")) return "Popmenu";
+  return "DONT KNOW";
+}
+
 function createWebhookDeal(lead: { email: string; name: string; company: string }, payload: AnyRecord): PipelineDeal {
   const today = new Date().toISOString().slice(0, 10);
   const displayName = lead.name || lead.company || lead.email || "Instantly Lead";
@@ -88,7 +103,8 @@ function createWebhookDeal(lead: { email: string; name: string; company: string 
     contact: lead.name,
     assignee: "jahan",
     createdAt: today,
-    notes: "Auto-created from Instantly webhook.",
+    competitor: detectCompetitor(payload),
+    notes: `Auto-imported from Instantly. Competitor: ${detectCompetitor(payload)}`,
     status: "new",
     source: "instantly",
     email: lead.email,
@@ -101,10 +117,11 @@ function createWebhookDeal(lead: { email: string; name: string; company: string 
 
 export async function POST(request: Request) {
   const secret = process.env.INSTANTLY_WEBHOOK_SECRET;
-  const incoming = request.headers.get("x-webhook-secret");
-
-  if (!secret || incoming !== secret) {
-    return NextResponse.json({ error: "Unauthorized webhook request." }, { status: 401 });
+  if (secret) {
+    const incoming = request.headers.get("x-webhook-secret");
+    if (incoming !== secret) {
+      return NextResponse.json({ error: "Unauthorized webhook request." }, { status: 401 });
+    }
   }
 
   const timestamp = new Date().toISOString();

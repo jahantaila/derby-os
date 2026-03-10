@@ -41,6 +41,7 @@ export type PipelineDeal = {
   email: string;
   enrichmentStatus: EnrichmentStatus;
   enrichmentData: EnrichmentData | null;
+  competitor?: string;
   rawWebhookData?: unknown;
   stageUpdatedAt?: string;
 };
