@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { CalendarEventRecord, CalendarEventType, CALENDAR_TEAM_MEMBERS } from "@/lib/calendar-schema";
-import { ChevronLeft, ChevronRight, Clock3, Plus, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock3, Plus, Trash2, UserRound, X } from "lucide-react";
 
 type EventForm = {
   title: string;
@@ -15,16 +15,36 @@ type EventForm = {
 
 type FilterType = CalendarEventType | "all";
 
-const TYPE_COLORS: Record<CalendarEventType, string> = {
-  deadline: "border-red-300/50 bg-red-500/20 text-red-100",
-  milestone: "border-blue-300/50 bg-blue-500/20 text-blue-100",
-  meeting: "border-emerald-300/50 bg-emerald-500/20 text-emerald-100",
-  task: "border-slate-300/40 bg-slate-500/20 text-slate-100",
+const TYPE_META: Record<CalendarEventType, { label: string; dot: string; badge: string; pill: string }> = {
+  meeting: {
+    label: "Meeting",
+    dot: "bg-blue-400",
+    badge: "border-blue-300/35 bg-blue-500/15 text-blue-100",
+    pill: "border-blue-300/25 bg-blue-500/12 text-blue-100",
+  },
+  deadline: {
+    label: "Deadline",
+    dot: "bg-red-400",
+    badge: "border-red-300/35 bg-red-500/15 text-red-100",
+    pill: "border-red-300/25 bg-red-500/12 text-red-100",
+  },
+  task: {
+    label: "Reminder",
+    dot: "bg-amber-400",
+    badge: "border-amber-300/35 bg-amber-500/15 text-amber-100",
+    pill: "border-amber-300/25 bg-amber-500/12 text-amber-100",
+  },
+  milestone: {
+    label: "Event",
+    dot: "bg-emerald-400",
+    badge: "border-emerald-300/35 bg-emerald-500/15 text-emerald-100",
+    pill: "border-emerald-300/25 bg-emerald-500/12 text-emerald-100",
+  },
 };
 
 const MONTH_FORMAT = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" });
-const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const DAY_TITLE_FORMAT = new Intl.DateTimeFormat("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+const DAY_NUMBER_FORMAT = new Intl.DateTimeFormat("en-US", { day: "numeric" });
 const TIME_FORMAT = new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
 
 function dateToKey(date: Date): string {
@@ -68,6 +88,7 @@ function buildMonthGrid(monthDate: Date): Date[] {
 }
 
 const TODAY_KEY = dateToKey(new Date());
+const DAY_SEQUENCE = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
 
 export default function CalendarPage() {
   const [events, setEvents] = useState<CalendarEventRecord[]>([]);
@@ -80,6 +101,7 @@ export default function CalendarPage() {
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [assigneeFilter, setAssigneeFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<FilterType>("all");
+  const [detailOpen, setDetailOpen] = useState(false);
 
   const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState<EventForm>({
@@ -135,21 +157,17 @@ export default function CalendarPage() {
   const monthDays = useMemo(() => buildMonthGrid(monthDate), [monthDate]);
   const selectedDayEvents = eventsByDate.get(selectedDate) ?? [];
   const selectedEvent =
-    selectedEventId ? selectedDayEvents.find((event) => event.id === selectedEventId) ?? null : null;
+    selectedEventId ? selectedDayEvents.find((event) => event.id === selectedEventId) ?? null : selectedDayEvents[0] ?? null;
 
-  function jumpToToday() {
-    const today = new Date();
-    setMonthDate(new Date(today.getFullYear(), today.getMonth(), 1));
-    setSelectedDate(TODAY_KEY);
+  function openDay(dateKey: string, nextMonth?: Date) {
+    setSelectedDate(dateKey);
     setSelectedEventId(null);
-  }
-
-  function openCreateForm() {
+    setDetailOpen(true);
     setIsEditing(false);
-    setSelectedEventId(null);
+    if (nextMonth) setMonthDate(new Date(nextMonth.getFullYear(), nextMonth.getMonth(), 1));
     setForm({
       title: "",
-      date: selectedDate,
+      date: dateKey,
       time: "",
       assignee: CALENDAR_TEAM_MEMBERS[0].id,
       type: "task",
@@ -157,9 +175,39 @@ export default function CalendarPage() {
     });
   }
 
+  function jumpToToday() {
+    const today = new Date();
+    const firstOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    setMonthDate(firstOfMonth);
+    setSelectedDate(TODAY_KEY);
+    setSelectedEventId(null);
+    setDetailOpen(true);
+    resetCreateForm(TODAY_KEY);
+  }
+
+  function resetCreateForm(dateKey = selectedDate) {
+    setIsEditing(false);
+    setSelectedEventId(null);
+    setForm({
+      title: "",
+      date: dateKey,
+      time: "",
+      assignee: CALENDAR_TEAM_MEMBERS[0].id,
+      type: "task",
+      client: "Derby Digital",
+    });
+  }
+
+  function openCreateForm() {
+    resetCreateForm(selectedDate);
+    setDetailOpen(true);
+  }
+
   function openEditForm(event: CalendarEventRecord) {
     setIsEditing(true);
+    setSelectedDate(event.date);
     setSelectedEventId(event.id);
+    setDetailOpen(true);
     setForm({
       title: event.title,
       date: event.date,
@@ -203,8 +251,10 @@ export default function CalendarPage() {
         setEvents((prev) => [...prev, saved]);
       }
 
+      const savedDate = parseDateKey(saved.date);
       setSelectedDate(saved.date);
       setSelectedEventId(saved.id);
+      setMonthDate(new Date(savedDate.getFullYear(), savedDate.getMonth(), 1));
       openEditForm(saved);
       setError(null);
     } catch {
@@ -221,9 +271,8 @@ export default function CalendarPage() {
       const response = await fetch(`/api/calendar/${selectedEventId}`, { method: "DELETE" });
       if (!response.ok) throw new Error("Delete failed");
       setEvents((prev) => prev.filter((event) => event.id !== selectedEventId));
-      setSelectedEventId(null);
-      openCreateForm();
       setError(null);
+      resetCreateForm(selectedDate);
     } catch {
       setError("Could not delete event.");
     } finally {
@@ -232,90 +281,111 @@ export default function CalendarPage() {
   }
 
   return (
-    <section className="animate-enter space-y-5" style={{ animationDelay: "80ms" }}>
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div>
-          <h1 className="page-title">Calendar</h1>
-          <p className="mt-2 text-sm text-slate-300">Team scheduling and event tracking.</p>
-        </div>
+    <section className="animate-enter space-y-6" style={{ animationDelay: "80ms" }}>
+      <div className="glass-panel page-header p-5 sm:p-6">
+        <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.24em] text-blue-200/70">Scheduling</p>
+            <h1 className="page-title mt-2">Calendar</h1>
+            <p className="mt-2 max-w-2xl text-sm text-slate-300">Monthly scheduling for client deadlines, team meetings, reminders, and delivery milestones.</p>
+          </div>
 
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <select
-            value={assigneeFilter}
-            onChange={(event) => setAssigneeFilter(event.target.value)}
-            className="min-h-11 rounded-xl border border-white/15 bg-slate-950/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
-          >
-            <option value="all">All assignees</option>
-            {CALENDAR_TEAM_MEMBERS.map((member) => (
-              <option key={member.id} value={member.id}>
-                {member.name}
-              </option>
-            ))}
-          </select>
-          <select
-            value={typeFilter}
-            onChange={(event) => setTypeFilter(event.target.value as FilterType)}
-            className="min-h-11 rounded-xl border border-white/15 bg-slate-950/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
-          >
-            <option value="all">All types</option>
-            <option value="deadline">Deadline</option>
-            <option value="milestone">Milestone</option>
-            <option value="meeting">Meeting</option>
-            <option value="task">Task</option>
-          </select>
-        </div>
-      </div>
-
-      {error ? (
-        <div className="rounded-xl border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-200">{error}</div>
-      ) : null}
-
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,2.1fr)_minmax(18rem,1fr)]">
-        <div className="glass-panel p-4 md:p-5">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="glass-card inline-flex items-center gap-2 rounded-2xl px-2 py-2">
               <button
                 type="button"
                 onClick={() => setMonthDate((prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1))}
-                className="min-h-11 rounded-lg border border-white/15 bg-white/5 p-2.5 text-slate-100 transition hover:border-blue-300/50 hover:bg-blue-500/20"
+                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/10 bg-white/5 px-3 text-slate-100 transition hover:border-blue-300/45 hover:bg-blue-500/15"
                 aria-label="Previous month"
               >
                 <ChevronLeft size={16} />
               </button>
+              <div className="min-w-[10rem] px-2 text-center text-sm font-semibold uppercase tracking-[0.12em] text-blue-50">
+                {MONTH_FORMAT.format(monthDate)}
+              </div>
               <button
                 type="button"
                 onClick={() => setMonthDate((prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1))}
-                className="min-h-11 rounded-lg border border-white/15 bg-white/5 p-2.5 text-slate-100 transition hover:border-blue-300/50 hover:bg-blue-500/20"
+                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/10 bg-white/5 px-3 text-slate-100 transition hover:border-blue-300/45 hover:bg-blue-500/15"
                 aria-label="Next month"
               >
                 <ChevronRight size={16} />
               </button>
-              <button
-                type="button"
-                onClick={jumpToToday}
-                className="min-h-11 rounded-lg border border-blue-300/30 bg-blue-500/20 px-3 py-2.5 text-sm font-semibold uppercase tracking-[0.08em] text-blue-100 transition hover:border-blue-300/60 hover:bg-blue-500/30"
-              >
-                Today
-              </button>
             </div>
-            <p className="text-lg font-semibold tracking-tight text-blue-50">{MONTH_FORMAT.format(monthDate)}</p>
+
+            <button
+              type="button"
+              onClick={openCreateForm}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-blue-300/30 bg-[linear-gradient(135deg,rgba(32,147,255,0.2),rgba(0,38,255,0.18))] px-4 py-2 text-sm font-semibold text-blue-50 transition hover:border-blue-300/60 hover:shadow-[0_0_24px_rgba(32,147,255,0.24)]"
+            >
+              <Plus size={16} />
+              Add Event
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {error ? <div className="rounded-xl border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-200">{error}</div> : null}
+
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_18rem]">
+        <div className="glass-panel p-4 sm:p-5">
+          <div className="mb-4 grid gap-3 lg:grid-cols-[repeat(3,minmax(0,1fr))_auto]">
+            <select
+              value={assigneeFilter}
+              onChange={(event) => setAssigneeFilter(event.target.value)}
+              className="min-h-11 rounded-xl border border-white/15 bg-slate-950/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
+            >
+              <option value="all">All assignees</option>
+              {CALENDAR_TEAM_MEMBERS.map((member) => (
+                <option key={member.id} value={member.id}>
+                  {member.name}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={typeFilter}
+              onChange={(event) => setTypeFilter(event.target.value as FilterType)}
+              className="min-h-11 rounded-xl border border-white/15 bg-slate-950/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
+            >
+              <option value="all">All event types</option>
+              <option value="meeting">Meetings</option>
+              <option value="deadline">Deadlines</option>
+              <option value="task">Reminders</option>
+              <option value="milestone">Events</option>
+            </select>
+
+            <div className="flex flex-wrap items-center gap-2 rounded-xl border border-white/10 bg-slate-950/35 px-3 py-2.5 text-xs text-slate-300">
+              {(["meeting", "deadline", "task", "milestone"] as CalendarEventType[]).map((type) => (
+                <span key={type} className="inline-flex items-center gap-2">
+                  <span className={`h-2.5 w-2.5 rounded-full ${TYPE_META[type].dot}`} />
+                  {TYPE_META[type].label}
+                </span>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={jumpToToday}
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-blue-300/30 bg-blue-500/15 px-4 py-2 text-sm font-semibold text-blue-100 transition hover:border-blue-300/60 hover:bg-blue-500/25"
+            >
+              Today
+            </button>
           </div>
 
-          <div className="-mx-1 overflow-x-auto px-1 pb-1">
-            <div className="min-w-[42rem]">
-              <div className="mb-2 grid grid-cols-7 gap-2">
-                {DAY_LABELS.map((day) => (
-                  <div key={day} className="px-2 py-1 text-center text-sm font-semibold uppercase tracking-[0.08em] text-slate-400">
-                    {day}
-                  </div>
-                ))}
+          <div className="grid grid-cols-7 gap-2">
+            {DAY_SEQUENCE.map((day) => (
+              <div key={day} className="px-2 py-1 text-center text-[11px] font-semibold uppercase tracking-[0.26em] text-slate-500">
+                {day}
               </div>
+            ))}
+          </div>
 
-              {loading ? (
-                <div className="rounded-xl border border-white/10 bg-slate-950/35 px-4 py-8 text-sm text-slate-300">Loading calendar...</div>
-              ) : (
-                <div className="grid grid-cols-7 gap-2">
-                  {monthDays.map((day) => {
+          {loading ? (
+            <div className="mt-3 rounded-2xl border border-white/10 bg-slate-950/35 px-4 py-10 text-sm text-slate-300">Loading calendar...</div>
+          ) : (
+            <div className="mt-3 grid grid-cols-7 gap-2">
+              {monthDays.map((day) => {
                 const dayKey = dateToKey(day);
                 const dayEvents = eventsByDate.get(dayKey) ?? [];
                 const isToday = dayKey === TODAY_KEY;
@@ -323,181 +393,313 @@ export default function CalendarPage() {
                 const isSelected = dayKey === selectedDate;
 
                 return (
-                  <div
+                  <button
                     key={dayKey}
-                    onClick={() => {
-                      setSelectedDate(dayKey);
-                      setSelectedEventId(null);
-                    }}
-                    className={`group min-h-[108px] cursor-pointer rounded-xl border p-2 text-left transition md:min-h-[124px] ${
+                    type="button"
+                    onClick={() => openDay(dayKey, day)}
+                    className={`min-h-[8.5rem] rounded-2xl border p-2.5 text-left transition sm:min-h-[9.75rem] ${
                       isSelected
-                        ? "border-blue-300/70 bg-blue-500/20 shadow-[0_0_24px_rgba(32,147,255,0.22)]"
-                        : "border-white/10 bg-slate-950/35 hover:border-blue-200/35 hover:bg-slate-900/55"
-                    } ${isToday ? "ring-1 ring-blue-400/80 shadow-[0_0_18px_rgba(32,147,255,0.38)]" : ""}`}
+                        ? "border-blue-300/50 bg-[linear-gradient(180deg,rgba(32,147,255,0.16),rgba(8,14,30,0.78))] shadow-[0_0_28px_rgba(32,147,255,0.18)]"
+                        : "border-white/10 bg-[linear-gradient(180deg,rgba(12,18,34,0.86),rgba(5,8,18,0.7))] hover:border-blue-300/30 hover:bg-slate-900/80"
+                    }`}
                   >
-                    <div className={`mb-2 text-xs font-semibold ${isCurrentMonth ? "text-slate-100" : "text-slate-500"}`}>
-                      {day.getDate()}
+                    <div className="flex items-start justify-between gap-2">
+                      <span
+                        className={`inline-flex h-8 min-w-8 items-center justify-center rounded-full px-2 text-sm font-semibold ${
+                          isToday
+                            ? "ring-2 ring-blue-300 bg-blue-500/20 text-white shadow-[0_0_18px_rgba(32,147,255,0.28)]"
+                            : isCurrentMonth
+                              ? "text-slate-100"
+                              : "text-slate-500"
+                        }`}
+                      >
+                        {DAY_NUMBER_FORMAT.format(day)}
+                      </span>
+                      {dayEvents.length ? <span className="text-[10px] uppercase tracking-[0.18em] text-slate-500">{dayEvents.length}</span> : null}
                     </div>
-                    <div className="space-y-1">
+
+                    <div className="mt-3 hidden space-y-1.5 sm:block">
                       {dayEvents.slice(0, 3).map((calendarEvent) => (
-                        <button
+                        <div
                           key={calendarEvent.id}
-                          type="button"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            setSelectedDate(dayKey);
-                            setSelectedEventId(calendarEvent.id);
-                            openEditForm(calendarEvent);
-                          }}
-                          className={`block min-h-8 w-full truncate rounded-md border px-2 py-1.5 text-left text-xs font-medium ${TYPE_COLORS[calendarEvent.type]}`}
-                          title={calendarEvent.title}
+                          className={`inline-flex max-w-full items-center gap-2 rounded-full border px-2 py-1 text-[11px] ${TYPE_META[calendarEvent.type].pill}`}
                         >
-                          {calendarEvent.title}
-                        </button>
+                          <span className={`h-2 w-2 rounded-full ${TYPE_META[calendarEvent.type].dot}`} />
+                          <span className="truncate">{calendarEvent.title}</span>
+                        </div>
                       ))}
-                      {dayEvents.length > 3 ? (
-                        <p className="px-1 text-xs text-slate-400">+{dayEvents.length - 3} more</p>
-                      ) : null}
+                      {dayEvents.length > 3 ? <p className="text-[11px] text-slate-500">+{dayEvents.length - 3} more</p> : null}
                     </div>
-                  </div>
-                  );
-                })}
-                </div>
+
+                    <div className="mt-3 flex flex-wrap gap-1 sm:hidden">
+                      {dayEvents.slice(0, 4).map((calendarEvent) => (
+                        <span key={calendarEvent.id} className={`h-2.5 w-2.5 rounded-full ${TYPE_META[calendarEvent.type].dot}`} />
+                      ))}
+                      {dayEvents.length > 4 ? <span className="text-[11px] text-slate-500">+{dayEvents.length - 4}</span> : null}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          <div className="mt-6 xl:hidden">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Selected day</p>
+                <h2 className="mt-2 text-base font-semibold text-white">{DAY_TITLE_FORMAT.format(parseDateKey(selectedDate))}</h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setDetailOpen(true)}
+                className="inline-flex min-h-10 items-center justify-center rounded-xl border border-blue-300/25 bg-blue-500/10 px-3 text-xs font-semibold uppercase tracking-[0.14em] text-blue-100 transition hover:border-blue-300/55 hover:bg-blue-500/20"
+              >
+                Open Panel
+              </button>
+            </div>
+
+            <div className="mt-4 space-y-3">
+              {selectedDayEvents.length === 0 ? (
+                <div className="rounded-2xl border border-white/10 bg-slate-950/35 px-4 py-4 text-sm text-slate-400">No events scheduled.</div>
+              ) : (
+                selectedDayEvents.map((event) => (
+                  <button
+                    key={event.id}
+                    type="button"
+                    onClick={() => openEditForm(event)}
+                    className="w-full rounded-2xl border border-white/10 bg-slate-950/40 p-4 text-left transition hover:border-blue-300/35 hover:bg-slate-900/70"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-semibold text-white">{event.title}</p>
+                        <p className="mt-1 text-sm text-slate-300">{event.client}</p>
+                      </div>
+                      <span className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] ${TYPE_META[event.type].badge}`}>
+                        {TYPE_META[event.type].label}
+                      </span>
+                    </div>
+                    <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-slate-400">
+                      <span className="inline-flex items-center gap-1.5">
+                        <Clock3 size={13} />
+                        {formatTime(event.time)}
+                      </span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <UserRound size={13} />
+                        {assigneeName(event.assignee)}
+                      </span>
+                    </div>
+                  </button>
+                ))
               )}
             </div>
           </div>
         </div>
 
-        <aside className="glass-panel p-4 md:p-5">
-          <div className="mb-4 flex items-center justify-between gap-3">
-            <div>
-              <p className="text-xs uppercase tracking-[0.12em] text-slate-400">Selected Day</p>
-              <h2 className="mt-1 text-base font-semibold text-blue-50">{DAY_TITLE_FORMAT.format(parseDateKey(selectedDate))}</h2>
-            </div>
-            <button
-              type="button"
-              onClick={openCreateForm}
-              className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-blue-300/30 bg-blue-500/20 px-3 py-2.5 text-sm font-semibold uppercase tracking-[0.06em] text-blue-100 transition hover:border-blue-300/60 hover:bg-blue-500/30"
-            >
-              <Plus size={14} />
-              Add Event
-            </button>
-          </div>
+        <aside className="glass-panel hidden p-4 xl:block">
+          <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Selected day</p>
+          <h2 className="mt-2 text-lg font-semibold text-white">{DAY_TITLE_FORMAT.format(parseDateKey(selectedDate))}</h2>
+          <p className="mt-2 text-sm text-slate-400">{selectedDayEvents.length} event{selectedDayEvents.length === 1 ? "" : "s"} visible</p>
 
-          <div className="mb-4 max-h-[280px] space-y-2 overflow-y-auto pr-1">
+          <div className="mt-5 space-y-3">
             {selectedDayEvents.length === 0 ? (
-              <div className="rounded-lg border border-white/10 bg-slate-950/40 px-3 py-3 text-sm text-slate-400">
-                No events for this day.
-              </div>
+              <div className="rounded-2xl border border-white/10 bg-slate-950/35 px-4 py-4 text-sm text-slate-400">Select a day or add a new event.</div>
             ) : (
               selectedDayEvents.map((event) => (
                 <button
                   key={event.id}
                   type="button"
-                  onClick={() => {
-                    setSelectedEventId(event.id);
-                    openEditForm(event);
-                  }}
-                  className={`w-full rounded-xl border px-3 py-2 text-left transition ${selectedEventId === event.id ? "border-blue-300/60 bg-blue-500/20" : "border-white/10 bg-slate-950/45 hover:border-blue-200/35"} `}
+                  onClick={() => openEditForm(event)}
+                  className={`w-full rounded-2xl border p-4 text-left transition ${
+                    selectedEvent?.id === event.id ? "border-blue-300/45 bg-blue-500/12" : "border-white/10 bg-slate-950/40 hover:border-blue-300/30"
+                  }`}
                 >
-                  <p className="truncate text-sm font-semibold text-slate-100">{event.title}</p>
-                  <p className="mt-1 text-xs text-slate-300">
-                    {event.client} • {assigneeName(event.assignee)}
-                  </p>
-                  <p className="mt-1 inline-flex items-center gap-1 text-xs text-slate-400">
-                    <Clock3 size={12} />
-                    {formatTime(event.time)}
-                  </p>
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="text-sm font-semibold text-white">{event.title}</p>
+                    <span className={`rounded-full border px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] ${TYPE_META[event.type].badge}`}>
+                      {TYPE_META[event.type].label}
+                    </span>
+                  </div>
+                  <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-slate-400">
+                    <span className="inline-flex items-center gap-1.5">
+                      <Clock3 size={13} />
+                      {formatTime(event.time)}
+                    </span>
+                    <span>{event.client}</span>
+                  </div>
                 </button>
               ))
             )}
           </div>
+        </aside>
+      </div>
 
-          {selectedEvent ? (
-            <div className="mb-4 rounded-xl border border-blue-300/35 bg-blue-500/15 p-3">
-              <p className="text-xs uppercase tracking-[0.1em] text-blue-100/80">Event Details</p>
-              <p className="mt-2 text-sm font-semibold text-blue-50">{selectedEvent.title}</p>
-              <p className="mt-1 text-xs text-blue-100/90">{selectedEvent.client}</p>
-              <p className="mt-1 text-xs text-blue-100/90">
-                {selectedEvent.type} • {assigneeName(selectedEvent.assignee)} • {formatTime(selectedEvent.time)}
-              </p>
-            </div>
-          ) : null}
+      <div className={`fixed inset-0 z-40 transition ${detailOpen ? "pointer-events-auto" : "pointer-events-none"}`} aria-hidden={!detailOpen}>
+        <button
+          type="button"
+          onClick={() => setDetailOpen(false)}
+          className={`absolute inset-0 bg-[#05070f]/72 backdrop-blur-sm transition ${detailOpen ? "opacity-100" : "opacity-0"}`}
+        />
 
-          <form onSubmit={submitForm} className="space-y-3">
-            <input
-              value={form.title}
-              onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
-              placeholder="Event title"
-              className="min-h-11 w-full rounded-xl border border-white/15 bg-slate-950/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-blue-400/60"
-            />
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <input
-                type="date"
-                value={form.date}
-                onChange={(event) => setForm((prev) => ({ ...prev, date: event.target.value }))}
-                className="min-h-11 w-full rounded-xl border border-white/15 bg-slate-950/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
-              />
-              <input
-                type="time"
-                value={form.time}
-                onChange={(event) => setForm((prev) => ({ ...prev, time: event.target.value }))}
-                className="min-h-11 w-full rounded-xl border border-white/15 bg-slate-950/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
-              />
+        <aside
+          className={`absolute inset-y-0 right-0 flex w-full max-w-[28rem] flex-col border-l border-white/10 bg-[linear-gradient(180deg,rgba(9,12,22,0.98),rgba(6,8,16,0.98))] p-5 shadow-[-24px_0_60px_rgba(0,0,0,0.45)] transition duration-300 sm:p-6 ${
+            detailOpen ? "translate-x-0" : "translate-x-full"
+          }`}
+        >
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.24em] text-blue-200/70">Day Details</p>
+              <h2 className="mt-2 heading-font text-3xl font-normal uppercase tracking-[0.03em] text-white">
+                {DAY_TITLE_FORMAT.format(parseDateKey(selectedDate))}
+              </h2>
+              <p className="mt-2 text-sm text-slate-400">{selectedDayEvents.length} scheduled event{selectedDayEvents.length === 1 ? "" : "s"}</p>
             </div>
 
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <select
-                value={form.assignee}
-                onChange={(event) => setForm((prev) => ({ ...prev, assignee: event.target.value }))}
-                className="min-h-11 w-full rounded-xl border border-white/15 bg-slate-950/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
-              >
-                {CALENDAR_TEAM_MEMBERS.map((member) => (
-                  <option key={member.id} value={member.id}>
-                    {member.name}
-                  </option>
-                ))}
-              </select>
-              <select
-                value={form.type}
-                onChange={(event) => setForm((prev) => ({ ...prev, type: event.target.value as CalendarEventType }))}
-                className="min-h-11 w-full rounded-xl border border-white/15 bg-slate-950/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
-              >
-                <option value="deadline">Deadline</option>
-                <option value="milestone">Milestone</option>
-                <option value="meeting">Meeting</option>
-                <option value="task">Task</option>
-              </select>
-            </div>
+            <button
+              type="button"
+              onClick={() => setDetailOpen(false)}
+              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-slate-200 transition hover:border-blue-300/40 hover:bg-blue-500/15"
+              aria-label="Close details panel"
+            >
+              <X size={16} />
+            </button>
+          </div>
 
-            <input
-              value={form.client}
-              onChange={(event) => setForm((prev) => ({ ...prev, client: event.target.value }))}
-              placeholder="Client"
-              className="min-h-11 w-full rounded-xl border border-white/15 bg-slate-950/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-blue-400/60"
-            />
-
-            <div className="flex gap-2 pt-1">
-              <button
-                type="submit"
-                disabled={saving}
-                className="min-h-11 rounded-xl border border-blue-300/35 bg-blue-500/25 px-4 py-2.5 text-sm font-semibold text-blue-50 transition hover:border-blue-300/60 hover:bg-blue-500/35 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {isEditing ? "Save Changes" : "Create Event"}
-              </button>
-              {isEditing ? (
+          <div className="mt-6 flex-1 space-y-6 overflow-y-auto pr-1">
+            <div>
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Events</p>
                 <button
                   type="button"
-                  onClick={handleDelete}
-                  disabled={saving}
-                  className="inline-flex min-h-11 items-center gap-1 rounded-xl border border-red-300/40 bg-red-500/20 px-3 py-2.5 text-sm font-semibold text-red-100 transition hover:border-red-300/60 hover:bg-red-500/30 disabled:cursor-not-allowed disabled:opacity-60"
+                  onClick={() => resetCreateForm(selectedDate)}
+                  className="text-xs font-semibold uppercase tracking-[0.14em] text-blue-100 transition hover:text-white"
                 >
-                  <Trash2 size={14} />
-                  Delete
+                  New event
                 </button>
-              ) : null}
+              </div>
+
+              <div className="space-y-3">
+                {selectedDayEvents.length === 0 ? (
+                  <div className="rounded-2xl border border-white/10 bg-slate-950/35 px-4 py-4 text-sm text-slate-400">No events scheduled for this day.</div>
+                ) : (
+                  selectedDayEvents.map((event) => (
+                    <button
+                      key={event.id}
+                      type="button"
+                      onClick={() => openEditForm(event)}
+                      className={`w-full rounded-2xl border p-4 text-left transition ${
+                        selectedEvent?.id === event.id ? "border-blue-300/45 bg-blue-500/12" : "border-white/10 bg-slate-950/40 hover:border-blue-300/30"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-semibold text-white">{event.title}</p>
+                          <p className="mt-1 text-sm text-slate-300">{event.client}</p>
+                        </div>
+                        <span className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] ${TYPE_META[event.type].badge}`}>
+                          {TYPE_META[event.type].label}
+                        </span>
+                      </div>
+                      <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-slate-400">
+                        <span className="inline-flex items-center gap-1.5">
+                          <Clock3 size={13} />
+                          {formatTime(event.time)}
+                        </span>
+                        <span className="inline-flex items-center gap-1.5">
+                          <UserRound size={13} />
+                          {assigneeName(event.assignee)}
+                        </span>
+                      </div>
+                    </button>
+                  ))
+                )}
+              </div>
             </div>
-          </form>
+
+            <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">{isEditing ? "Edit event" : "Add event"}</p>
+                  <p className="mt-1 text-sm text-slate-300">{isEditing ? "Update or remove the selected event." : "Create a new event for the selected day."}</p>
+                </div>
+                {isEditing ? (
+                  <button
+                    type="button"
+                    onClick={handleDelete}
+                    disabled={saving}
+                    className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-red-300/35 bg-red-500/12 px-3 text-sm font-semibold text-red-100 transition hover:border-red-300/60 hover:bg-red-500/22 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    <Trash2 size={14} />
+                    Delete
+                  </button>
+                ) : null}
+              </div>
+
+              <form onSubmit={submitForm} className="mt-4 space-y-3">
+                <input
+                  value={form.title}
+                  onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
+                  placeholder="Event title"
+                  className="min-h-11 w-full rounded-xl border border-white/15 bg-slate-950/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-blue-400/60"
+                />
+
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <input
+                    type="date"
+                    value={form.date}
+                    onChange={(event) => setForm((prev) => ({ ...prev, date: event.target.value }))}
+                    className="min-h-11 w-full rounded-xl border border-white/15 bg-slate-950/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
+                  />
+                  <input
+                    type="time"
+                    value={form.time}
+                    onChange={(event) => setForm((prev) => ({ ...prev, time: event.target.value }))}
+                    className="min-h-11 w-full rounded-xl border border-white/15 bg-slate-950/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <select
+                    value={form.assignee}
+                    onChange={(event) => setForm((prev) => ({ ...prev, assignee: event.target.value }))}
+                    className="min-h-11 w-full rounded-xl border border-white/15 bg-slate-950/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
+                  >
+                    {CALENDAR_TEAM_MEMBERS.map((member) => (
+                      <option key={member.id} value={member.id}>
+                        {member.name}
+                      </option>
+                    ))}
+                  </select>
+
+                  <select
+                    value={form.type}
+                    onChange={(event) => setForm((prev) => ({ ...prev, type: event.target.value as CalendarEventType }))}
+                    className="min-h-11 w-full rounded-xl border border-white/15 bg-slate-950/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
+                  >
+                    <option value="meeting">Meeting</option>
+                    <option value="deadline">Deadline</option>
+                    <option value="task">Reminder</option>
+                    <option value="milestone">Event</option>
+                  </select>
+                </div>
+
+                <input
+                  value={form.client}
+                  onChange={(event) => setForm((prev) => ({ ...prev, client: event.target.value }))}
+                  placeholder="Client"
+                  className="min-h-11 w-full rounded-xl border border-white/15 bg-slate-950/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-blue-400/60"
+                />
+
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-blue-300/30 bg-[linear-gradient(135deg,rgba(32,147,255,0.22),rgba(0,38,255,0.22))] px-4 py-2 text-sm font-semibold text-blue-50 transition hover:border-blue-300/60 hover:shadow-[0_0_24px_rgba(32,147,255,0.22)] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <Plus size={15} />
+                  {isEditing ? "Save Changes" : "Create Event"}
+                </button>
+              </form>
+            </div>
+          </div>
         </aside>
       </div>
     </section>

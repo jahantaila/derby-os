@@ -162,7 +162,7 @@ export default function AgentDetailPage({ params }: AgentDetailPageProps) {
         Back to dashboard
       </Link>
 
-      <section className={`glass-panel p-5 sm:p-8 ${isLive ? "live-view-active" : ""}`}>
+      <section className={`glass-panel page-header p-5 sm:p-8 ${isLive ? "live-view-active" : ""}`}>
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <p className="section-title">Live View</p>

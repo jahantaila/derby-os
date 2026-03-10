@@ -505,29 +505,31 @@ export default function PipelinePage() {
         ) : null}
       </div>
 
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div>
-          <h1 className="page-title">Pipeline</h1>
-          <p className="mt-2 text-sm text-slate-300">Sales pipeline and client acquisition tracking.</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <button
-            type="button"
-            onClick={handleInstantlyImport}
-            disabled={importing}
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-fuchsia-300/35 bg-[linear-gradient(135deg,rgba(139,92,246,0.28),rgba(91,33,182,0.38))] px-4 py-2.5 text-sm font-semibold text-fuchsia-50 shadow-[0_12px_34px_rgba(91,33,182,0.28)] transition hover:border-fuchsia-200/60 hover:bg-[linear-gradient(135deg,rgba(168,85,247,0.34),rgba(109,40,217,0.42))] disabled:cursor-not-allowed disabled:opacity-70"
-          >
-            {importing ? <LoaderCircle size={16} className="animate-spin" /> : <Download size={16} />}
-            Import from Instantly
-          </button>
-          <button
-            type="button"
-            onClick={openCreatePanel}
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-blue-300/30 bg-blue-500/20 px-4 py-2.5 text-sm font-semibold text-blue-100 transition hover:border-blue-300/60 hover:bg-blue-500/30"
-          >
-            <Plus size={16} />
-            Add Lead
-          </button>
+      <div className="glass-panel page-header p-5 sm:p-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <h1 className="page-title">Pipeline</h1>
+            <p className="mt-2 text-sm text-slate-300">Sales pipeline and client acquisition tracking.</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={handleInstantlyImport}
+              disabled={importing}
+              className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-fuchsia-300/35 bg-[linear-gradient(135deg,rgba(139,92,246,0.28),rgba(91,33,182,0.38))] px-4 py-2.5 text-sm font-semibold text-fuchsia-50 shadow-[0_12px_34px_rgba(91,33,182,0.28)] transition hover:border-fuchsia-200/60 hover:bg-[linear-gradient(135deg,rgba(168,85,247,0.34),rgba(109,40,217,0.42))] disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              {importing ? <LoaderCircle size={16} className="animate-spin" /> : <Download size={16} />}
+              Import from Instantly
+            </button>
+            <button
+              type="button"
+              onClick={openCreatePanel}
+              className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-blue-300/30 bg-blue-500/20 px-4 py-2.5 text-sm font-semibold text-blue-100 transition hover:border-blue-300/60 hover:bg-blue-500/30"
+            >
+              <Plus size={16} />
+              Add Lead
+            </button>
+          </div>
         </div>
       </div>
 

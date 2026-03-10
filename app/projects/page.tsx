@@ -289,44 +289,46 @@ export default function ProjectsPage() {
 
   return (
     <section className="animate-enter space-y-6" style={{ animationDelay: "80ms" }}>
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <h1 className="page-title">Projects</h1>
-          <p className="mt-2 text-sm text-slate-300">Track client projects, ownership, and delivery timelines.</p>
-        </div>
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <select
-            value={clientFilter}
-            onChange={(event) => setClientFilter(event.target.value)}
-            className="rounded-xl border border-white/15 bg-[#101625] px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-blue-300/50"
-          >
-            <option value="all">All clients</option>
-            {clientOptions.map((client) => (
-              <option key={client} value={client}>
-                {client}
-              </option>
-            ))}
-          </select>
-          <select
-            value={statusFilter}
-            onChange={(event) => setStatusFilter(event.target.value as "all" | ProjectStatus)}
-            className="rounded-xl border border-white/15 bg-[#101625] px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-blue-300/50"
-          >
-            <option value="all">All statuses</option>
-            {PROJECT_STATUSES.map((status) => (
-              <option key={status} value={status}>
-                {STATUS_STYLES[status].label}
-              </option>
-            ))}
-          </select>
-          <button
-            type="button"
-            onClick={openCreateForm}
-            className="inline-flex items-center justify-center gap-2 rounded-xl border border-blue-300/30 bg-blue-500/20 px-4 py-2 text-sm font-semibold text-blue-100 transition hover:border-blue-300/60 hover:bg-blue-500/30"
-          >
-            <Plus size={16} />
-            Add Project
-          </button>
+      <div className="glass-panel page-header p-5 sm:p-6">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <h1 className="page-title">Projects</h1>
+            <p className="mt-2 text-sm text-slate-300">Track client projects, ownership, and delivery timelines.</p>
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <select
+              value={clientFilter}
+              onChange={(event) => setClientFilter(event.target.value)}
+              className="rounded-xl border border-white/15 bg-[#101625] px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-blue-300/50"
+            >
+              <option value="all">All clients</option>
+              {clientOptions.map((client) => (
+                <option key={client} value={client}>
+                  {client}
+                </option>
+              ))}
+            </select>
+            <select
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value as "all" | ProjectStatus)}
+              className="rounded-xl border border-white/15 bg-[#101625] px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-blue-300/50"
+            >
+              <option value="all">All statuses</option>
+              {PROJECT_STATUSES.map((status) => (
+                <option key={status} value={status}>
+                  {STATUS_STYLES[status].label}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              onClick={openCreateForm}
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-blue-300/30 bg-blue-500/20 px-4 py-2 text-sm font-semibold text-blue-100 transition hover:border-blue-300/60 hover:bg-blue-500/30"
+            >
+              <Plus size={16} />
+              Add Project
+            </button>
+          </div>
         </div>
       </div>
 

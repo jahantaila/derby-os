@@ -54,8 +54,7 @@ export default function NotificationsPage() {
 
   return (
     <section className="animate-enter space-y-6" style={{ animationDelay: "80ms" }}>
-      <div className="glass-panel relative overflow-hidden p-5 sm:p-6">
-        <div className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,rgba(32,147,255,0),#2093FF,rgba(0,38,255,0))]" />
+      <div className="glass-panel page-header p-5 sm:p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-[11px] uppercase tracking-[0.24em] text-blue-200/70">Inbox</p>

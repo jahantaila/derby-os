@@ -484,10 +484,11 @@ export default function TasksPage() {
 
   return (
     <section className="animate-enter space-y-5 sm:space-y-6" style={{ animationDelay: "80ms" }}>
-      <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-        <div className="space-y-3">
-          <div>
-            <h1 className="page-title">Tasks</h1>
+      <div className="glass-panel page-header p-5 sm:p-6">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+          <div className="space-y-3">
+            <div>
+              <h1 className="page-title">Tasks</h1>
             <p className="mt-2 text-sm text-slate-300">Execution board with list controls, quick add, and task details.</p>
           </div>
 
@@ -548,6 +549,7 @@ export default function TasksPage() {
             <Plus size={16} />
             Add Task
           </button>
+        </div>
         </div>
       </div>
 

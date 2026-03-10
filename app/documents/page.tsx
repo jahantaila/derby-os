@@ -191,20 +191,22 @@ export default function DocumentsPage() {
 
   return (
     <section className="animate-enter space-y-6" style={{ animationDelay: "80ms" }}>
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <h1 className="page-title">Documents</h1>
-          <p className="mt-2 text-sm text-slate-300">Store agent outputs, briefs, analysis, and campaign documents in one place.</p>
-        </div>
+      <div className="glass-panel page-header p-5 sm:p-6">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <h1 className="page-title">Documents</h1>
+            <p className="mt-2 text-sm text-slate-300">Store agent outputs, briefs, analysis, and campaign documents in one place.</p>
+          </div>
 
-        <button
-          type="button"
-          onClick={openCreate}
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-blue-300/30 bg-[linear-gradient(135deg,rgba(32,147,255,0.2),rgba(0,38,255,0.18))] px-4 py-2 text-sm font-semibold text-blue-50 transition hover:border-blue-300/60 hover:shadow-[0_0_24px_rgba(32,147,255,0.24)]"
-        >
-          <FilePlus2 size={16} />
-          Create Document
-        </button>
+          <button
+            type="button"
+            onClick={openCreate}
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-blue-300/30 bg-[linear-gradient(135deg,rgba(32,147,255,0.2),rgba(0,38,255,0.18))] px-4 py-2 text-sm font-semibold text-blue-50 transition hover:border-blue-300/60 hover:shadow-[0_0_24px_rgba(32,147,255,0.24)]"
+          >
+            <FilePlus2 size={16} />
+            Create Document
+          </button>
+        </div>
       </div>
 
       {error ? <div className="rounded-xl border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-200">{error}</div> : null}

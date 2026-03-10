@@ -102,7 +102,7 @@ export default function EmployeeDetailPage({ params }: EmployeeDetailPageProps) 
         Back to employees
       </Link>
 
-      <section className="glass-panel card-accent-employee p-5 sm:p-8">
+      <section className="glass-panel page-header card-accent-employee p-5 sm:p-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="page-title">{employee.name}</h1>

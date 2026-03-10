@@ -695,29 +695,31 @@ export default function FinancePage() {
 
   return (
     <section className="animate-enter space-y-5 sm:space-y-6" style={{ animationDelay: "80ms", backgroundColor: "#0a0a0f" }}>
-      <header className="mb-4 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div>
-          <h1 className="page-title">Finance Dashboard</h1>
-          <p className="mt-2 text-sm text-slate-300">QuickBooks-style financial intelligence across revenue, expenses, clients, and reports.</p>
-        </div>
-        <div className="glass-card inline-flex items-center gap-2 self-start rounded-xl px-2 py-2 md:self-auto">
-          <button
-            type="button"
-            onClick={() => changeMonth(-1)}
-            className="min-h-11 rounded-lg border border-white/10 bg-white/5 p-2.5 text-slate-100 transition hover:border-blue-300/40 hover:bg-blue-500/15"
-            aria-label="Previous month"
-          >
-            <ArrowLeft size={16} />
-          </button>
-          <div className="min-w-[8.5rem] text-center text-sm font-semibold text-white sm:min-w-[9rem]">{`< ${monthLabel(selectedMonth)} >`}</div>
-          <button
-            type="button"
-            onClick={() => changeMonth(1)}
-            className="min-h-11 rounded-lg border border-white/10 bg-white/5 p-2.5 text-slate-100 transition hover:border-blue-300/40 hover:bg-blue-500/15"
-            aria-label="Next month"
-          >
-            <ArrowRight size={16} />
-          </button>
+      <header className="glass-panel page-header mb-4 p-5 sm:p-6">
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <h1 className="page-title">Finance Dashboard</h1>
+            <p className="mt-2 text-sm text-slate-300">QuickBooks-style financial intelligence across revenue, expenses, clients, and reports.</p>
+          </div>
+          <div className="glass-card inline-flex items-center gap-2 self-start rounded-xl px-2 py-2 md:self-auto">
+            <button
+              type="button"
+              onClick={() => changeMonth(-1)}
+              className="min-h-11 rounded-lg border border-white/10 bg-white/5 p-2.5 text-slate-100 transition hover:border-blue-300/40 hover:bg-blue-500/15"
+              aria-label="Previous month"
+            >
+              <ArrowLeft size={16} />
+            </button>
+            <div className="min-w-[8.5rem] text-center text-sm font-semibold text-white sm:min-w-[9rem]">{`< ${monthLabel(selectedMonth)} >`}</div>
+            <button
+              type="button"
+              onClick={() => changeMonth(1)}
+              className="min-h-11 rounded-lg border border-white/10 bg-white/5 p-2.5 text-slate-100 transition hover:border-blue-300/40 hover:bg-blue-500/15"
+              aria-label="Next month"
+            >
+              <ArrowRight size={16} />
+            </button>
+          </div>
         </div>
       </header>
 

@@ -28,7 +28,7 @@ export function Sidebar() {
   return (
     <aside className="sidebar-shell">
       <div className="flex items-center justify-between gap-3 md:block">
-        <Link href="/" className="sidebar-logo" aria-label="Derby Digital home">
+        <Link href="/" className="sidebar-logo bg-[linear-gradient(132deg,#ffffff_0%,#9FD2FF_24%,#2093FF_58%,#0026FF_100%)]" aria-label="Derby Digital home">
           Derby Digital
         </Link>
 
@@ -55,7 +55,7 @@ export function Sidebar() {
           const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
 
           return (
-            <Link key={item.href} href={item.href} className={`sidebar-item ${isActive ? "active" : ""}`}>
+            <Link key={item.href} href={item.href} className={`sidebar-item overflow-hidden ${isActive ? "active" : ""}`}>
               <Icon size={16} />
               <span>{item.label}</span>
             </Link>
@@ -67,7 +67,7 @@ export function Sidebar() {
           const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
 
           return (
-            <Link key={item.href} href={item.href} className={`sidebar-item ${isActive ? "active" : ""}`}>
+            <Link key={item.href} href={item.href} className={`sidebar-item overflow-hidden ${isActive ? "active" : ""}`}>
               <Icon size={16} />
               <span>{item.label}</span>
             </Link>
