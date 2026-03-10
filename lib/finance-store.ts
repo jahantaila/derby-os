@@ -116,8 +116,13 @@ function monthLabel(month: string) {
 }
 
 function currentMonth() {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  const easternDate = new Date().toLocaleDateString("en-US", {
+    timeZone: "America/New_York",
+    year: "numeric",
+    month: "2-digit",
+  });
+  const [month, , year] = easternDate.split("/");
+  return `${year}-${month}`;
 }
 
 function previousMonth(value: string) {

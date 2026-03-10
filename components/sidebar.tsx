@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { CalendarDays, CheckSquare, DollarSign, FileText, FolderKanban, Funnel, UserRound, Users } from "lucide-react";
+import { CalendarDays, CheckSquare, DollarSign, FileText, FolderKanban, Funnel, Settings, UserRound, Users } from "lucide-react";
 
-const NAV_ITEMS = [
+const PRIMARY_NAV_ITEMS = [
   { href: "/agents", label: "Agents", icon: Users },
   { href: "/employees", label: "Employees", icon: UserRound },
   { href: "/tasks", label: "Tasks", icon: CheckSquare },
@@ -14,6 +14,9 @@ const NAV_ITEMS = [
   { href: "/projects", label: "Projects", icon: FolderKanban },
   { href: "/documents", label: "Documents", icon: FileText },
 ] as const;
+
+const SECONDARY_NAV_ITEMS = [{ href: "/settings", label: "Settings", icon: Settings }] as const;
+const NAV_ITEMS = [...PRIMARY_NAV_ITEMS, ...SECONDARY_NAV_ITEMS] as const;
 
 export function Sidebar() {
   const router = useRouter();
@@ -46,7 +49,19 @@ export function Sidebar() {
       </div>
 
       <nav className="sidebar-nav hidden md:grid" aria-label="Primary">
-        {NAV_ITEMS.map((item) => {
+        {PRIMARY_NAV_ITEMS.map((item) => {
+          const Icon = item.icon;
+          const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+
+          return (
+            <Link key={item.href} href={item.href} className={`sidebar-item ${isActive ? "active" : ""}`}>
+              <Icon size={16} />
+              <span>{item.label}</span>
+            </Link>
+          );
+        })}
+        <div className="mx-1 my-2 h-px bg-white/10" aria-hidden="true" />
+        {SECONDARY_NAV_ITEMS.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
 
