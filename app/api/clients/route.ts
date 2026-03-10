@@ -37,8 +37,17 @@ function toClientPayload(body: unknown): ClientProfile | null {
     email: toString(input.email) || undefined,
     phone: toString(input.phone) || undefined,
     website: toString(input.website) || undefined,
+    address: toString(input.address) || undefined,
     services: Array.isArray(input.services) ? (input.services as string[]) : [],
     monthlyRetainer: Math.max(0, toNumber(input.monthlyRetainer)),
+    monthlyBudgetRange:
+      input.monthlyBudgetRange === "Under $500" ||
+      input.monthlyBudgetRange === "$500-$1k" ||
+      input.monthlyBudgetRange === "$1k-$2k" ||
+      input.monthlyBudgetRange === "$2k-$5k" ||
+      input.monthlyBudgetRange === "$5k+"
+        ? input.monthlyBudgetRange
+        : undefined,
     startDate: toString(input.startDate) || undefined,
     status: input.status === "inactive" || input.status === "paused" ? input.status : "active",
     notes: toString(input.notes) || undefined,

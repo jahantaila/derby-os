@@ -55,8 +55,17 @@ function normalizeClient(raw: unknown): ClientProfile | null {
     email: toString(raw.email) || undefined,
     phone: toString(raw.phone) || undefined,
     website: toString(raw.website) || undefined,
+    address: toString(raw.address) || undefined,
     services: toServices(raw.services),
     monthlyRetainer: Math.max(0, toNumber(raw.monthlyRetainer)),
+    monthlyBudgetRange:
+      raw.monthlyBudgetRange === "Under $500" ||
+      raw.monthlyBudgetRange === "$500-$1k" ||
+      raw.monthlyBudgetRange === "$1k-$2k" ||
+      raw.monthlyBudgetRange === "$2k-$5k" ||
+      raw.monthlyBudgetRange === "$5k+"
+        ? raw.monthlyBudgetRange
+        : undefined,
     startDate: toString(raw.startDate) || undefined,
     status: toStatus(raw.status),
     notes: toString(raw.notes) || undefined,

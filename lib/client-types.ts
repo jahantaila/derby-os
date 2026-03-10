@@ -5,6 +5,8 @@ export const SERVICE_OPTIONS = [
   "Google Ads",
   "Meta Ads",
   "Software",
+  "DerbyFlow",
+  "Email Marketing",
   "Review Automation",
   "Other",
 ] as const;
@@ -23,8 +25,10 @@ export type ClientProfile = {
   email?: string;
   phone?: string;
   website?: string;
+  address?: string;
   services: ClientService[];
   monthlyRetainer: number;
+  monthlyBudgetRange?: "Under $500" | "$500-$1k" | "$1k-$2k" | "$2k-$5k" | "$5k+";
   startDate?: string;
   status: ClientStatus;
   notes?: string;
@@ -38,6 +42,8 @@ export const SERVICE_BADGE_CLASSES: Record<ClientService, string> = {
   "Google Ads": "border-yellow-400/35 bg-yellow-500/20 text-yellow-100",
   "Meta Ads": "border-indigo-400/35 bg-indigo-500/20 text-indigo-100",
   Software: "border-cyan-400/35 bg-cyan-500/20 text-cyan-100",
+  DerbyFlow: "border-blue-400/35 bg-blue-500/20 text-blue-100",
+  "Email Marketing": "border-sky-400/35 bg-sky-500/20 text-sky-100",
   "Review Automation": "border-orange-400/35 bg-orange-500/20 text-orange-100",
   Other: "border-slate-400/35 bg-slate-500/20 text-slate-200",
 };
