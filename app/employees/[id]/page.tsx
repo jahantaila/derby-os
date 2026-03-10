@@ -88,7 +88,7 @@ export default function EmployeeDetailPage({ params }: EmployeeDetailPageProps) 
           Back to employees
         </Link>
         <div className="glass-panel p-8">
-          <h1 className="text-2xl font-semibold text-white">Employee not found</h1>
+          <h1 className="heading-font text-2xl font-normal uppercase tracking-[0.04em] text-white">Employee not found</h1>
           <p className="mt-2 text-sm text-slate-400">No employee found for ID: {params.id}</p>
         </div>
       </div>

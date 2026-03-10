@@ -29,7 +29,7 @@ export function TopBar() {
     <header className="glass-surface soft-ring sticky top-0 z-20 flex min-h-14 items-center justify-between rounded-2xl px-4 py-2 md:px-6">
       <div>
         <p className="text-[10px] uppercase tracking-[0.24em] text-blue-200/70">Derby Digital</p>
-        <h1 className="bg-gradient-to-r from-[#F8FBFF] via-[#A2CCFF] to-[#2093FF] bg-clip-text text-lg font-semibold text-transparent">
+        <h1 className="heading-font bg-gradient-to-r from-[#F8FBFF] via-[#A2CCFF] to-[#2093FF] bg-clip-text text-lg font-normal uppercase tracking-[0.06em] text-transparent">
           Mission Control
         </h1>
       </div>

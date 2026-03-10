@@ -10,6 +10,10 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        heading: ["Anton", "var(--font-geist)", '"Segoe UI"', "sans-serif"],
+        sans: ["var(--font-geist)", '"Segoe UI"', "sans-serif"],
+      },
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",

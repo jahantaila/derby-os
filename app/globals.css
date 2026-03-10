@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Anton&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -28,6 +30,13 @@ body {
   background: var(--bg);
   font-family: var(--font-geist), "Segoe UI", sans-serif;
   overflow-x: hidden;
+}
+
+.heading-font,
+.page-title,
+.section-title,
+.sidebar-logo {
+  font-family: "Anton", var(--font-geist), "Segoe UI", sans-serif;
 }
 
 .app-bg {
@@ -107,7 +116,8 @@ body {
   margin-bottom: 0.8rem;
   padding-bottom: 0.9rem;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
   background: linear-gradient(132deg, var(--blue-start), var(--blue-end));
   -webkit-background-clip: text;
   background-clip: text;
@@ -161,6 +171,8 @@ body {
 
 .page-title {
   margin: 0;
+  font-weight: 400;
+  text-transform: uppercase;
   letter-spacing: -0.03em;
   font-size: clamp(1.8rem, 3vw, 2.4rem);
   line-height: 1.1;
@@ -169,9 +181,9 @@ body {
 .section-title {
   margin: 0;
   font-size: 0.95rem;
-  font-weight: 600;
+  font-weight: 400;
   text-transform: uppercase;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.12em;
   color: #c5d0e3;
 }
 
