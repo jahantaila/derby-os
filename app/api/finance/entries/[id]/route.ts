@@ -1,25 +1,18 @@
 import { NextResponse } from "next/server";
-import { getFinanceData, writeFinanceData } from "@/lib/finance-store";
-import { ExpenseCategory, RevenueCategory } from "@/lib/finance-types";
+import { ensureMonth, getFinanceData, writeFinanceData } from "@/lib/finance-store";
+import { FinanceLedgerRow } from "@/lib/finance-types";
 
-type SectionKey = "recurringExpenses" | "employeeExpenses" | "oneTimeExpenses" | "revenues";
+type SectionKey = "income" | "expenses" | "recurringExpenses" | "employeeExpenses" | "oneTimeExpenses";
 
 type UpdateEntryBody = {
   month?: string;
+  clientId?: string;
   section?: SectionKey;
-  row?: Record<string, unknown>;
+  row?: Partial<FinanceLedgerRow>;
 };
 
 function isSection(value: unknown): value is SectionKey {
-  return value === "recurringExpenses" || value === "employeeExpenses" || value === "oneTimeExpenses" || value === "revenues";
-}
-
-function isExpenseCategory(value: unknown): value is ExpenseCategory {
-  return value === "other" || value === "fulfillment" || value === "marketing" || value === "hosting";
-}
-
-function isRevenueCategory(value: unknown): value is RevenueCategory {
-  return value === "retainer" || value === "project" || value === "ad management" || value === "other";
+  return value === "income" || value === "expenses" || value === "recurringExpenses" || value === "employeeExpenses" || value === "oneTimeExpenses";
 }
 
 function toString(value: unknown): string {
@@ -33,6 +26,36 @@ function toNumber(value: unknown): number {
     if (Number.isFinite(parsed)) return parsed;
   }
   return 0;
+}
+
+function toRecurring(value: unknown): "M" | "1-time" {
+  return value === "M" ? "M" : "1-time";
+}
+
+function updateRow(existing: FinanceLedgerRow, patch: Partial<FinanceLedgerRow> | undefined): FinanceLedgerRow {
+  return {
+    ...existing,
+    name: patch?.name === undefined ? existing.name : toString(patch.name),
+    date: patch?.date === undefined ? existing.date : toString(patch.date),
+    recurring: patch?.recurring === undefined ? existing.recurring : toRecurring(patch.recurring),
+    notes: patch?.notes === undefined ? existing.notes : toString(patch.notes),
+    amount: patch?.amount === undefined ? existing.amount : Math.max(0, toNumber(patch.amount)),
+  };
+}
+
+function updateSectionRows(rows: FinanceLedgerRow[], id: string, patch: Partial<FinanceLedgerRow> | undefined): FinanceLedgerRow | null {
+  const index = rows.findIndex((entry) => entry.id === id);
+  if (index === -1) return null;
+  const updated = updateRow(rows[index], patch);
+  rows[index] = updated;
+  return updated;
+}
+
+function deleteSectionRow(rows: FinanceLedgerRow[], id: string): boolean {
+  const before = rows.length;
+  const filtered = rows.filter((entry) => entry.id !== id);
+  rows.splice(0, rows.length, ...filtered);
+  return filtered.length !== before;
 }
 
 export async function PATCH(request: Request, context: { params: { id: string } }) {
@@ -52,94 +75,40 @@ export async function PATCH(request: Request, context: { params: { id: string } 
     return NextResponse.json({ error: "Field 'section' is invalid" }, { status: 400 });
   }
 
-  const data = await getFinanceData();
-  const monthData = data.months[body.month];
-  if (!monthData) {
-    return NextResponse.json({ error: "Month not found" }, { status: 404 });
-  }
+  let data = await getFinanceData();
+  data = ensureMonth(data, body.month);
 
-  const row = typeof body.row === "object" && body.row !== null ? body.row : {};
   const id = context.params.id;
 
-  if (body.section === "recurringExpenses") {
-    const index = monthData.recurringExpenses.findIndex((entry) => entry.id === id);
-    if (index === -1) return NextResponse.json({ error: "Entry not found" }, { status: 404 });
-    const existing = monthData.recurringExpenses[index];
-    monthData.recurringExpenses[index] = {
-      ...existing,
-      name: row.name === undefined ? existing.name : toString(row.name),
-      date: row.date === undefined ? existing.date : toString(row.date),
-      type: row.type === undefined ? existing.type : isExpenseCategory(row.type) ? row.type : existing.type,
-      recurring: row.recurring === undefined ? existing.recurring : toString(row.recurring),
-      notes: row.notes === undefined ? existing.notes : toString(row.notes),
-      price: row.price === undefined ? existing.price : Math.max(0, toNumber(row.price)),
-    };
-    data.months[body.month] = monthData;
+  if (body.section === "income" || body.section === "expenses") {
+    if (!body.clientId) {
+      return NextResponse.json({ error: "Field 'clientId' is required for client sections" }, { status: 400 });
+    }
+
+    const client = data.clients.find((entry) => entry.id === body.clientId);
+    if (!client) return NextResponse.json({ error: "Client not found" }, { status: 404 });
+
+    const monthData = client.months[body.month];
+    const updated = updateSectionRows(monthData[body.section], id, body.row);
+    if (!updated) return NextResponse.json({ error: "Entry not found" }, { status: 404 });
+
     await writeFinanceData(data);
-    return NextResponse.json(monthData.recurringExpenses[index]);
+    return NextResponse.json(updated);
   }
 
-  if (body.section === "employeeExpenses") {
-    const index = monthData.employeeExpenses.findIndex((entry) => entry.id === id);
-    if (index === -1) return NextResponse.json({ error: "Entry not found" }, { status: 404 });
-    const existing = monthData.employeeExpenses[index];
-    monthData.employeeExpenses[index] = {
-      ...existing,
-      name: row.name === undefined ? existing.name : toString(row.name),
-      date: row.date === undefined ? existing.date : toString(row.date),
-      notes: row.notes === undefined ? existing.notes : toString(row.notes),
-      price: row.price === undefined ? existing.price : Math.max(0, toNumber(row.price)),
-      extraNotes: row.extraNotes === undefined ? existing.extraNotes : toString(row.extraNotes),
-    };
-    data.months[body.month] = monthData;
-    await writeFinanceData(data);
-    return NextResponse.json(monthData.employeeExpenses[index]);
-  }
+  const generalMonth = data.generalData.months[body.month];
+  const updated = updateSectionRows(generalMonth[body.section], id, body.row);
+  if (!updated) return NextResponse.json({ error: "Entry not found" }, { status: 404 });
 
-  if (body.section === "oneTimeExpenses") {
-    const index = monthData.oneTimeExpenses.findIndex((entry) => entry.id === id);
-    if (index === -1) return NextResponse.json({ error: "Entry not found" }, { status: 404 });
-    const existing = monthData.oneTimeExpenses[index];
-    monthData.oneTimeExpenses[index] = {
-      ...existing,
-      name: row.name === undefined ? existing.name : toString(row.name),
-      date: row.date === undefined ? existing.date : toString(row.date),
-      notes: row.notes === undefined ? existing.notes : toString(row.notes),
-      price: row.price === undefined ? existing.price : Math.max(0, toNumber(row.price)),
-    };
-    data.months[body.month] = monthData;
-    await writeFinanceData(data);
-    return NextResponse.json(monthData.oneTimeExpenses[index]);
-  }
-
-  const index = monthData.revenues.findIndex((entry) => entry.id === id);
-  if (index === -1) return NextResponse.json({ error: "Entry not found" }, { status: 404 });
-  const existing = monthData.revenues[index];
-  const stripeFeeRaw = row.stripeFee;
-  monthData.revenues[index] = {
-    ...existing,
-    clientName: row.clientName === undefined ? existing.clientName : toString(row.clientName),
-    amount: row.amount === undefined ? existing.amount : Math.max(0, toNumber(row.amount)),
-    date: row.date === undefined ? existing.date : toString(row.date),
-    type: row.type === undefined ? existing.type : isRevenueCategory(row.type) ? row.type : existing.type,
-    notes: row.notes === undefined ? existing.notes : toString(row.notes),
-    stripeFee:
-      row.stripeFee === undefined
-        ? existing.stripeFee
-        : stripeFeeRaw === null || stripeFeeRaw === ""
-          ? null
-          : Math.max(0, toNumber(stripeFeeRaw)),
-  };
-
-  data.months[body.month] = monthData;
   await writeFinanceData(data);
-  return NextResponse.json(monthData.revenues[index]);
+  return NextResponse.json(updated);
 }
 
 export async function DELETE(request: Request, context: { params: { id: string } }) {
   const { searchParams } = new URL(request.url);
   const month = searchParams.get("month");
   const section = searchParams.get("section");
+  const clientId = searchParams.get("clientId");
 
   if (!month || !/^\d{4}-\d{2}$/.test(month)) {
     return NextResponse.json({ error: "Query 'month' must be YYYY-MM" }, { status: 400 });
@@ -149,44 +118,29 @@ export async function DELETE(request: Request, context: { params: { id: string }
     return NextResponse.json({ error: "Query 'section' is invalid" }, { status: 400 });
   }
 
-  const data = await getFinanceData();
-  const monthData = data.months[month];
-  if (!monthData) return NextResponse.json({ error: "Month not found" }, { status: 404 });
+  let data = await getFinanceData();
+  data = ensureMonth(data, month);
 
   const id = context.params.id;
-  const before =
-    section === "recurringExpenses"
-      ? monthData.recurringExpenses.length
-      : section === "employeeExpenses"
-        ? monthData.employeeExpenses.length
-        : section === "oneTimeExpenses"
-          ? monthData.oneTimeExpenses.length
-          : monthData.revenues.length;
 
-  if (section === "recurringExpenses") {
-    monthData.recurringExpenses = monthData.recurringExpenses.filter((entry) => entry.id !== id);
-  } else if (section === "employeeExpenses") {
-    monthData.employeeExpenses = monthData.employeeExpenses.filter((entry) => entry.id !== id);
-  } else if (section === "oneTimeExpenses") {
-    monthData.oneTimeExpenses = monthData.oneTimeExpenses.filter((entry) => entry.id !== id);
-  } else {
-    monthData.revenues = monthData.revenues.filter((entry) => entry.id !== id);
+  if (section === "income" || section === "expenses") {
+    if (!clientId) {
+      return NextResponse.json({ error: "Query 'clientId' is required for client sections" }, { status: 400 });
+    }
+
+    const client = data.clients.find((entry) => entry.id === clientId);
+    if (!client) return NextResponse.json({ error: "Client not found" }, { status: 404 });
+
+    const removed = deleteSectionRow(client.months[month][section], id);
+    if (!removed) return NextResponse.json({ error: "Entry not found" }, { status: 404 });
+
+    await writeFinanceData(data);
+    return NextResponse.json({ ok: true });
   }
 
-  const after =
-    section === "recurringExpenses"
-      ? monthData.recurringExpenses.length
-      : section === "employeeExpenses"
-        ? monthData.employeeExpenses.length
-        : section === "oneTimeExpenses"
-          ? monthData.oneTimeExpenses.length
-          : monthData.revenues.length;
+  const removed = deleteSectionRow(data.generalData.months[month][section], id);
+  if (!removed) return NextResponse.json({ error: "Entry not found" }, { status: 404 });
 
-  if (before === after) {
-    return NextResponse.json({ error: "Entry not found" }, { status: 404 });
-  }
-
-  data.months[month] = monthData;
   await writeFinanceData(data);
   return NextResponse.json({ ok: true });
 }

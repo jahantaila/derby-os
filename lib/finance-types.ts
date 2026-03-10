@@ -1,55 +1,45 @@
-export type ExpenseCategory = "other" | "fulfillment" | "marketing" | "hosting";
+export type FinanceRecurringFlag = "M" | "1-time";
 
-export type RevenueCategory = "retainer" | "project" | "ad management" | "other";
-
-export type FinanceRecurringExpense = {
+export type FinanceLedgerRow = {
   id: string;
   name: string;
   date: string;
-  type: ExpenseCategory;
-  recurring: string;
+  recurring: FinanceRecurringFlag;
   notes: string;
-  price: number;
-};
-
-export type FinanceEmployeeExpense = {
-  id: string;
-  name: string;
-  date: string;
-  notes: string;
-  price: number;
-  extraNotes: string;
-};
-
-export type FinanceOneTimeExpense = {
-  id: string;
-  name: string;
-  date: string;
-  notes: string;
-  price: number;
-};
-
-export type FinanceRevenue = {
-  id: string;
-  clientName: string;
   amount: number;
-  date: string;
-  type: RevenueCategory;
-  notes: string;
-  stripeFee: number | null;
 };
+
+export type FinanceIncomeRow = FinanceLedgerRow;
 
 export type FinanceMonthData = {
   month: string;
   goalAmount: number;
-  recurringExpenses: FinanceRecurringExpense[];
-  employeeExpenses: FinanceEmployeeExpense[];
-  oneTimeExpenses: FinanceOneTimeExpense[];
-  revenues: FinanceRevenue[];
+  stripeFeeOverride: number | null;
+  income: FinanceIncomeRow[];
+  expenses: FinanceLedgerRow[];
+};
+
+export type FinanceClient = {
+  id: string;
+  name: string;
+  months: Record<string, FinanceMonthData>;
+};
+
+export type FinanceGeneralMonthData = {
+  month: string;
+  goalAmount: number;
+  recurringExpenses: FinanceLedgerRow[];
+  employeeExpenses: FinanceLedgerRow[];
+  oneTimeExpenses: FinanceLedgerRow[];
+};
+
+export type FinanceGeneralData = {
+  months: Record<string, FinanceGeneralMonthData>;
 };
 
 export type FinanceData = {
-  months: Record<string, FinanceMonthData>;
+  clients: FinanceClient[];
+  generalData: FinanceGeneralData;
 };
 
 export type FinanceSummary = {
@@ -57,12 +47,7 @@ export type FinanceSummary = {
   monthLabel: string;
   grossRevenue: number;
   totalStripeFee: number;
-  totalRecurringExpenditure: number;
-  totalEmployeeExpenditure: number;
-  totalOneTimeExpenditure: number;
   totalExpenditure: number;
   totalProfit: number;
   profitMargin: number;
-  goalAmount: number;
-  goalPercent: number;
 };

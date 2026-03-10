@@ -1,25 +1,18 @@
 import { NextResponse } from "next/server";
-import { getFinanceData, writeFinanceData } from "@/lib/finance-store";
-import { ExpenseCategory, RevenueCategory } from "@/lib/finance-types";
+import { ensureMonth, getFinanceData, writeFinanceData } from "@/lib/finance-store";
+import { FinanceLedgerRow } from "@/lib/finance-types";
 
-type SectionKey = "recurringExpenses" | "employeeExpenses" | "oneTimeExpenses" | "revenues";
+type SectionKey = "income" | "expenses" | "recurringExpenses" | "employeeExpenses" | "oneTimeExpenses";
 
 type CreateEntryBody = {
   month?: string;
+  clientId?: string;
   section?: SectionKey;
-  row?: Record<string, unknown>;
+  row?: Partial<FinanceLedgerRow>;
 };
 
 function isSection(value: unknown): value is SectionKey {
-  return value === "recurringExpenses" || value === "employeeExpenses" || value === "oneTimeExpenses" || value === "revenues";
-}
-
-function isExpenseCategory(value: unknown): value is ExpenseCategory {
-  return value === "other" || value === "fulfillment" || value === "marketing" || value === "hosting";
-}
-
-function isRevenueCategory(value: unknown): value is RevenueCategory {
-  return value === "retainer" || value === "project" || value === "ad management" || value === "other";
+  return value === "income" || value === "expenses" || value === "recurringExpenses" || value === "employeeExpenses" || value === "oneTimeExpenses";
 }
 
 function toString(value: unknown): string {
@@ -35,14 +28,18 @@ function toNumber(value: unknown): number {
   return 0;
 }
 
-function emptyMonth(month: string) {
+function toRecurring(value: unknown): "M" | "1-time" {
+  return value === "M" ? "M" : "1-time";
+}
+
+function buildRow(row: Partial<FinanceLedgerRow> | undefined): FinanceLedgerRow {
   return {
-    month,
-    goalAmount: 15000,
-    recurringExpenses: [],
-    employeeExpenses: [],
-    oneTimeExpenses: [],
-    revenues: [],
+    id: crypto.randomUUID(),
+    name: toString(row?.name),
+    date: toString(row?.date),
+    recurring: toRecurring(row?.recurring),
+    notes: toString(row?.notes),
+    amount: Math.max(0, toNumber(row?.amount)),
   };
 }
 
@@ -63,68 +60,28 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Field 'section' is invalid" }, { status: 400 });
   }
 
-  const row = typeof body.row === "object" && body.row !== null ? body.row : {};
-  const data = await getFinanceData();
-  const monthData = data.months[body.month] ?? emptyMonth(body.month);
+  let data = await getFinanceData();
+  data = ensureMonth(data, body.month);
 
-  if (body.section === "recurringExpenses") {
-    const created = {
-      id: crypto.randomUUID(),
-      name: toString(row.name),
-      date: toString(row.date),
-      type: isExpenseCategory(row.type) ? row.type : "other",
-      recurring: toString(row.recurring) || "M",
-      notes: toString(row.notes),
-      price: Math.max(0, toNumber(row.price)),
-    };
-    monthData.recurringExpenses.push(created);
-    data.months[body.month] = monthData;
+  const created = buildRow(body.row);
+
+  if (body.section === "income" || body.section === "expenses") {
+    if (!body.clientId) {
+      return NextResponse.json({ error: "Field 'clientId' is required for client sections" }, { status: 400 });
+    }
+
+    const client = data.clients.find((entry) => entry.id === body.clientId);
+    if (!client) return NextResponse.json({ error: "Client not found" }, { status: 404 });
+
+    const monthData = client.months[body.month];
+    monthData[body.section].push(created);
     await writeFinanceData(data);
     return NextResponse.json(created, { status: 201 });
   }
 
-  if (body.section === "employeeExpenses") {
-    const created = {
-      id: crypto.randomUUID(),
-      name: toString(row.name),
-      date: toString(row.date),
-      notes: toString(row.notes),
-      price: Math.max(0, toNumber(row.price)),
-      extraNotes: toString(row.extraNotes),
-    };
-    monthData.employeeExpenses.push(created);
-    data.months[body.month] = monthData;
-    await writeFinanceData(data);
-    return NextResponse.json(created, { status: 201 });
-  }
+  const generalMonth = data.generalData.months[body.month];
+  generalMonth[body.section].push(created);
 
-  if (body.section === "oneTimeExpenses") {
-    const created = {
-      id: crypto.randomUUID(),
-      name: toString(row.name),
-      date: toString(row.date),
-      notes: toString(row.notes),
-      price: Math.max(0, toNumber(row.price)),
-    };
-    monthData.oneTimeExpenses.push(created);
-    data.months[body.month] = monthData;
-    await writeFinanceData(data);
-    return NextResponse.json(created, { status: 201 });
-  }
-
-  const stripeFeeRaw = row.stripeFee;
-  const created = {
-    id: crypto.randomUUID(),
-    clientName: toString(row.clientName),
-    amount: Math.max(0, toNumber(row.amount)),
-    date: toString(row.date),
-    type: isRevenueCategory(row.type) ? row.type : "other",
-    notes: toString(row.notes),
-    stripeFee: stripeFeeRaw === null || stripeFeeRaw === "" ? null : Math.max(0, toNumber(stripeFeeRaw)),
-  };
-
-  monthData.revenues.push(created);
-  data.months[body.month] = monthData;
   await writeFinanceData(data);
   return NextResponse.json(created, { status: 201 });
 }
