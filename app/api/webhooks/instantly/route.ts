@@ -116,13 +116,7 @@ function createWebhookDeal(lead: { email: string; name: string; company: string 
 }
 
 export async function POST(request: Request) {
-  const secret = process.env.INSTANTLY_WEBHOOK_SECRET;
-  if (secret) {
-    const incoming = request.headers.get("x-webhook-secret");
-    if (incoming !== secret) {
-      return NextResponse.json({ error: "Unauthorized webhook request." }, { status: 401 });
-    }
-  }
+  // No auth check — Instantly webhooks don't support custom headers
 
   const timestamp = new Date().toISOString();
 
