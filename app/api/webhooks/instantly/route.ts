@@ -1,16 +1,11 @@
 import { NextResponse } from "next/server";
-import { appendInstantlyWebhookLog } from "@/lib/webhook-log";
 import { getPipelineDeals, writePipelineDeals } from "@/lib/pipeline-store";
 import { PipelineDeal } from "@/lib/pipeline-types";
 
 type AnyRecord = Record<string, unknown>;
 
 function buildDealId() {
-  return `d${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
-}
-
-function buildLogId() {
-  return `w${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+  return `l${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 }
 
 function isRecord(value: unknown): value is AnyRecord {
@@ -116,51 +111,29 @@ function createWebhookDeal(lead: { email: string; name: string; company: string 
 }
 
 export async function POST(request: Request) {
-  // No auth check — Instantly webhooks don't support custom headers
-
-  const timestamp = new Date().toISOString();
-
   try {
     const payload = (await request.json()) as unknown;
     const record = isRecord(payload) ? payload : {};
     const lead = extractLead(record);
 
     if (!lead.email) {
-      appendInstantlyWebhookLog({
-        id: buildLogId(),
-        timestamp,
-        email: "",
-        company: lead.company,
-        status: "error",
-        dealId: "",
-      });
-      return NextResponse.json({ ok: true, error: "Webhook missing lead email." });
+      return NextResponse.json({ ok: true, skipped: true, reason: "no email" });
     }
 
     const deals = await getPipelineDeals();
+    
+    // Skip if already exists
+    const exists = deals.some((d) => d.email === lead.email);
+    if (exists) {
+      return NextResponse.json({ ok: true, skipped: true, reason: "duplicate" });
+    }
+
     const deal = createWebhookDeal(lead, record);
     deals.push(deal);
     await writePipelineDeals(deals);
 
-    appendInstantlyWebhookLog({
-      id: buildLogId(),
-      timestamp,
-      email: lead.email,
-      company: lead.company,
-      status: "processed",
-      dealId: deal.id,
-    });
-
-    return NextResponse.json({ ok: true, dealId: deal.id });
-  } catch {
-    appendInstantlyWebhookLog({
-      id: buildLogId(),
-      timestamp,
-      email: "",
-      company: "",
-      status: "error",
-      dealId: "",
-    });
-    return NextResponse.json({ ok: true, error: "Unable to process webhook payload." });
+    return NextResponse.json({ ok: true, dealId: deal.id, competitor: deal.competitor });
+  } catch (err) {
+    return NextResponse.json({ ok: false, error: String(err) }, { status: 500 });
   }
 }
