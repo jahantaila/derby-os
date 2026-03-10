@@ -152,6 +152,11 @@ function toInitials(value: string) {
     .join("");
 }
 
+function normalizeWebsiteUrl(value: string): string {
+  if (!value) return "";
+  return /^https?:\/\//i.test(value) ? value : `https://${value}`;
+}
+
 function leadDaysInStage(deal: PipelineDeal): number {
   const source = deal.stageUpdatedAt ?? deal.createdAt;
   const date = new Date(`${source}T00:00:00`);
@@ -746,6 +751,24 @@ export default function PipelinePage() {
                       Email: <span className="text-slate-100">{selectedDeal.email}</span>
                     </p>
                   ) : null}
+                  {selectedDeal.messagedFrom ? (
+                    <p className="mt-2 text-xs text-slate-300">
+                      Messaged from: <span className="text-blue-100">{selectedDeal.messagedFrom}</span>
+                    </p>
+                  ) : null}
+                  {selectedDeal.website ? (
+                    <p className="mt-2 text-xs text-slate-300">
+                      Website:{" "}
+                      <a
+                        href={normalizeWebsiteUrl(selectedDeal.website)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-blue-200 underline decoration-blue-400/50 underline-offset-2 transition hover:text-blue-100"
+                      >
+                        {selectedDeal.website}
+                      </a>
+                    </p>
+                  ) : null}
                 </div>
               ) : null}
 
@@ -832,6 +855,31 @@ export default function PipelinePage() {
               </label>
 
               {panelMode === "view" && selectedDeal ? (
+                <div className="space-y-3 rounded-xl border border-white/10 bg-slate-900/50 p-3">
+                  <p className="text-xs uppercase tracking-[0.11em] text-slate-300">Conversation Timeline</p>
+                  {selectedDeal.conversationHistory?.length ? (
+                    <div className="space-y-2">
+                      {selectedDeal.conversationHistory.map((entry, index) => (
+                        <div
+                          key={`${selectedDeal.id}-${entry.date}-${index}`}
+                          className={`rounded-xl border px-3 py-2 text-sm ${
+                            entry.direction === "outbound"
+                              ? "border-blue-400/25 bg-blue-500/12 text-blue-50"
+                              : "border-emerald-400/25 bg-emerald-500/12 text-emerald-50"
+                          }`}
+                        >
+                          <p className="text-xs font-medium uppercase tracking-[0.08em] text-slate-300">{entry.date}</p>
+                          <p className="mt-1 leading-relaxed">{entry.message}</p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-slate-400">No conversation history yet.</p>
+                  )}
+                </div>
+              ) : null}
+
+              {panelMode === "view" && selectedDeal ? (
                 <div className="space-y-2 rounded-xl border border-white/10 bg-slate-900/50 p-3">
                   <p className="text-xs uppercase tracking-[0.11em] text-slate-300">Enrichment Data</p>
                   {selectedDeal.enrichmentStatus === "pending" ? (
@@ -843,7 +891,7 @@ export default function PipelinePage() {
                       <p>Phone: {selectedDeal.enrichmentData?.phone || "N/A"}</p>
                       <p>Owner Name: {selectedDeal.enrichmentData?.ownerName || "N/A"}</p>
                       <p>Address: {selectedDeal.enrichmentData?.address || "N/A"}</p>
-                      <p>Website: {selectedDeal.enrichmentData?.website || "N/A"}</p>
+                      <p>Website: {selectedDeal.website || selectedDeal.enrichmentData?.website || "N/A"}</p>
                       <p>
                         Google Rating:{" "}
                         {selectedDeal.enrichmentData?.googleRating !== undefined

@@ -87,6 +87,10 @@ export async function PATCH(request: Request, { params }: { params: { id: string
       status: patch.status === undefined ? current.status : patch.status.trim(),
       enrichmentStatus: enrichmentStatus ?? current.enrichmentStatus,
       enrichmentData: patch.enrichmentData === undefined ? current.enrichmentData : patch.enrichmentData,
+      competitor: patch.competitor === undefined ? current.competitor : patch.competitor?.trim() || undefined,
+      conversationHistory: patch.conversationHistory === undefined ? current.conversationHistory : patch.conversationHistory,
+      messagedFrom: patch.messagedFrom === undefined ? current.messagedFrom : patch.messagedFrom?.trim() || undefined,
+      website: patch.website === undefined ? current.website : patch.website?.trim() || undefined,
       rawWebhookData: patch.rawWebhookData === undefined ? current.rawWebhookData : patch.rawWebhookData,
       stageUpdatedAt: stageChanged ? today : current.stageUpdatedAt ?? current.createdAt,
     };

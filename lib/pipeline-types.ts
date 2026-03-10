@@ -9,6 +9,12 @@ export type PipelineStage =
   | "closed-lost";
 export type PipelineSource = "instantly" | "manual" | "referral" | "website";
 export type EnrichmentStatus = "pending" | "enriched" | "failed";
+export type ConversationHistoryItem = {
+  date: string;
+  from: string;
+  message: string;
+  direction: "outbound" | "inbound";
+};
 
 export type EnrichmentData = {
   phone?: string;
@@ -42,6 +48,9 @@ export type PipelineDeal = {
   enrichmentStatus: EnrichmentStatus;
   enrichmentData: EnrichmentData | null;
   competitor?: string;
+  conversationHistory?: ConversationHistoryItem[];
+  messagedFrom?: string;
+  website?: string;
   rawWebhookData?: unknown;
   stageUpdatedAt?: string;
 };

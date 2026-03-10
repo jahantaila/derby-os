@@ -1,5 +1,6 @@
 import { readPersistentData, writePersistentData } from "@/lib/persistence";
 import {
+  ConversationHistoryItem,
   EnrichmentData,
   EnrichmentStatus,
   INITIAL_PIPELINE_DEALS,
@@ -138,6 +139,31 @@ function normalizeEnrichmentData(value: unknown): EnrichmentData | null {
   };
 }
 
+function normalizeConversationDirection(value: unknown): ConversationHistoryItem["direction"] | undefined {
+  return value === "outbound" || value === "inbound" ? value : undefined;
+}
+
+function normalizeConversationHistory(value: unknown): ConversationHistoryItem[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+
+  const items = value
+    .map((entry) => {
+      if (!isRecord(entry)) return null;
+
+      const date = normalizeString(entry.date);
+      const from = normalizeString(entry.from);
+      const message = normalizeString(entry.message);
+      const direction = normalizeConversationDirection(entry.direction);
+
+      if (!date || !from || !message || !direction) return null;
+
+      return { date, from, message, direction };
+    })
+    .filter((entry): entry is ConversationHistoryItem => entry !== null);
+
+  return items.length > 0 ? items : undefined;
+}
+
 function normalizeDeal(raw: unknown): PipelineDeal | null {
   if (!isRecord(raw)) return null;
   const id = typeof raw.id === "string" ? raw.id.trim() : "";
@@ -164,6 +190,9 @@ function normalizeDeal(raw: unknown): PipelineDeal | null {
     enrichmentStatus: normalizeEnrichmentStatus(raw.enrichmentStatus),
     enrichmentData: normalizeEnrichmentData(raw.enrichmentData),
     competitor: normalizeCompetitor(raw.competitor, raw.rawWebhookData, normalizeString(raw.notes)),
+    conversationHistory: normalizeConversationHistory(raw.conversationHistory),
+    messagedFrom: normalizeString(raw.messagedFrom) || undefined,
+    website: normalizeString(raw.website) || undefined,
     rawWebhookData: raw.rawWebhookData,
     stageUpdatedAt: normalizeDate(raw.stageUpdatedAt ?? createdAt),
   };
