@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, DollarSign, Plus, Trash2, TrendingUp, Users } from "lucide-react";
 import { FinanceClient, FinanceData, FinanceGeneralMonthData, FinanceLedgerRow, FinanceMonthData } from "@/lib/finance-types";
 
@@ -29,7 +29,7 @@ function formatPercent(value: number) {
 }
 
 function monthKey(date = new Date()) {
-  return date.toISOString().slice(0, 7);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
 }
 
 function shiftMonth(value: string, delta: number) {
@@ -309,11 +309,12 @@ function hasAnyClientData(client: FinanceClient) {
 
 export default function FinancePage() {
   const [data, setData] = useState<FinanceData | null>(null);
-  const [selectedMonth, setSelectedMonth] = useState("2026-03");
+  const [selectedMonth, setSelectedMonth] = useState(() => monthKey());
   const [activeTab, setActiveTab] = useState<ActiveTab>("home");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const latestSaveRequest = useRef(0);
 
   async function loadFinance() {
     try {
@@ -324,14 +325,8 @@ export default function FinancePage() {
       const nextData = (await response.json()) as FinanceData;
       setData(nextData);
 
-      if (nextData.generalData.months[selectedMonth]) {
-        setSelectedMonth(selectedMonth);
-      } else if (nextData.generalData.months["2026-03"]) {
-        setSelectedMonth("2026-03");
-      } else {
-        const fallback = Object.keys(nextData.generalData.months).sort().at(-1) ?? monthKey();
-        setSelectedMonth(fallback);
-      }
+      const nowMonth = monthKey();
+      setSelectedMonth((current) => (nextData.generalData.months[current] ? current : nowMonth));
 
       setError(null);
     } catch {
@@ -342,6 +337,9 @@ export default function FinancePage() {
   }
 
   async function persist(nextData: FinanceData) {
+    const requestId = latestSaveRequest.current + 1;
+    latestSaveRequest.current = requestId;
+
     try {
       setSaving(true);
       const response = await fetch("/api/finance", {
@@ -351,11 +349,14 @@ export default function FinancePage() {
       });
       if (!response.ok) throw new Error("Failed to save finance");
       const saved = (await response.json()) as FinanceData;
+      if (requestId !== latestSaveRequest.current) return;
       setData(saved);
       setError(null);
     } catch {
+      if (requestId !== latestSaveRequest.current) return;
       setError("Could not save finance changes.");
     } finally {
+      if (requestId !== latestSaveRequest.current) return;
       setSaving(false);
     }
   }

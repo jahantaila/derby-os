@@ -24,7 +24,8 @@ function monthLabel(month: string) {
 }
 
 function currentMonth() {
-  return new Date().toISOString().slice(0, 7);
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 }
 
 function previousMonth(value: string) {
@@ -70,15 +71,24 @@ function toRecurring(value: unknown): "M" | "1-time" {
 function normalizeLedgerRow(raw: unknown, prefix: string): FinanceLedgerRow | null {
   if (!isRecord(raw)) return null;
   const name = toString(raw.name);
-  if (!name) return null;
+  const date = toString(raw.date);
+  const notes = toString(raw.notes);
+  const recurring = toRecurring(raw.recurring);
+  const amount = Math.max(0, toNumber(raw.amount ?? raw.price));
+  const hasRecurringValue = typeof raw.recurring === "string" && raw.recurring.trim().length > 0;
+  const hasMeaningfulContent = name.length > 0 || date.length > 0 || notes.length > 0 || amount > 0 || hasRecurringValue;
+
+  // Keep intentionally blank rows when they already have an id (freshly added UI rows),
+  // but drop fully empty anonymous objects from malformed payloads.
+  if (!hasMeaningfulContent && typeof raw.id !== "string") return null;
 
   return {
     id: toId(raw.id, prefix),
     name,
-    date: toString(raw.date),
-    recurring: toRecurring(raw.recurring),
-    notes: toString(raw.notes),
-    amount: Math.max(0, toNumber(raw.amount ?? raw.price)),
+    date,
+    recurring,
+    notes,
+    amount,
   };
 }
 

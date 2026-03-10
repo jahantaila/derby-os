@@ -18,7 +18,45 @@ type AgentDetailPageProps = {
 };
 
 function sortHistory(history: AgentHistoryEntry[]) {
-  return [...history].sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+  return [...history].sort((a, b) => toTimestampMs(b.timestamp) - toTimestampMs(a.timestamp));
+}
+
+function parseTimestamp(value: string): Date | null {
+  const parsed = Date.parse(value);
+  if (!Number.isNaN(parsed)) return new Date(parsed);
+
+  const localMatch = value.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{1,2}):(\d{2})$/);
+  if (!localMatch) return null;
+
+  const [, yearRaw, monthRaw, dayRaw, hourRaw, minuteRaw] = localMatch;
+  const year = Number(yearRaw);
+  const month = Number(monthRaw);
+  const day = Number(dayRaw);
+  const hour = Number(hourRaw);
+  const minute = Number(minuteRaw);
+
+  const asDate = new Date(year, month - 1, day, hour, minute);
+  return Number.isNaN(asDate.getTime()) ? null : asDate;
+}
+
+function toTimestampMs(value: string): number {
+  const parsed = parseTimestamp(value);
+  return parsed ? parsed.getTime() : Number.NEGATIVE_INFINITY;
+}
+
+function formatTimestamp(value: string): string {
+  const parsed = parseTimestamp(value);
+  if (!parsed) return value;
+
+  return parsed.toLocaleString("en-US", {
+    month: "numeric",
+    day: "numeric",
+    year: "2-digit",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+    timeZoneName: "short",
+  });
 }
 
 export default function AgentDetailPage({ params }: AgentDetailPageProps) {
@@ -69,7 +107,7 @@ export default function AgentDetailPage({ params }: AgentDetailPageProps) {
 
   const history = useMemo(() => sortHistory(agent?.history ?? []), [agent?.history]);
   const sessionLog = history.slice(0, 4);
-  const lastActive = history[0]?.timestamp ?? "No activity recorded";
+  const lastActive = history[0] ? formatTimestamp(history[0].timestamp) : "No activity recorded";
 
   if (loading) {
     return (
@@ -152,7 +190,7 @@ export default function AgentDetailPage({ params }: AgentDetailPageProps) {
                 sessionLog.length > 0 ? (
                   sessionLog.map((entry) => (
                     <div key={`${entry.timestamp}-${entry.action}`} className="live-log-line">
-                      <span className="text-blue-200">[{entry.timestamp}]</span> {entry.action}
+                      <span className="text-blue-200">[{formatTimestamp(entry.timestamp)}]</span> {entry.action}
                     </div>
                   ))
                 ) : (
@@ -196,7 +234,7 @@ export default function AgentDetailPage({ params }: AgentDetailPageProps) {
           ) : (
             history.map((entry) => (
               <div key={`${entry.timestamp}-${entry.action}`} className="agent-timeline-item">
-                <div className="agent-timeline-time">{entry.timestamp}</div>
+                <div className="agent-timeline-time">{formatTimestamp(entry.timestamp)}</div>
                 <div className="agent-timeline-marker" aria-hidden="true" />
                 <div className="agent-timeline-content">{entry.action}</div>
               </div>

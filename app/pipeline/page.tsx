@@ -157,6 +157,41 @@ function normalizeWebsiteUrl(value: string): string {
   return /^https?:\/\//i.test(value) ? value : `https://${value}`;
 }
 
+function formatTimestamp(value: string): string {
+  const trimmed = value.trim();
+  if (!trimmed) return value;
+
+  const direct = Date.parse(trimmed);
+  if (!Number.isNaN(direct)) {
+    return new Date(direct).toLocaleString("en-US", {
+      month: "numeric",
+      day: "numeric",
+      year: "2-digit",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+      timeZoneName: "short",
+    });
+  }
+
+  const localMatch = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{1,2}):(\d{2})$/);
+  if (!localMatch) return value;
+
+  const [, yearRaw, monthRaw, dayRaw, hourRaw, minuteRaw] = localMatch;
+  const localDate = new Date(Number(yearRaw), Number(monthRaw) - 1, Number(dayRaw), Number(hourRaw), Number(minuteRaw));
+  if (Number.isNaN(localDate.getTime())) return value;
+
+  return localDate.toLocaleString("en-US", {
+    month: "numeric",
+    day: "numeric",
+    year: "2-digit",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+    timeZoneName: "short",
+  });
+}
+
 function leadDaysInStage(deal: PipelineDeal): number {
   const source = deal.stageUpdatedAt ?? deal.createdAt;
   const date = new Date(`${source}T00:00:00`);
@@ -868,7 +903,7 @@ export default function PipelinePage() {
                               : "border-emerald-400/25 bg-emerald-500/12 text-emerald-50"
                           }`}
                         >
-                          <p className="text-xs font-medium uppercase tracking-[0.08em] text-slate-300">{entry.date}</p>
+                          <p className="text-xs font-medium uppercase tracking-[0.08em] text-slate-300">{formatTimestamp(entry.date)}</p>
                           <p className="mt-1 leading-relaxed">{entry.message}</p>
                         </div>
                       ))}
