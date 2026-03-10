@@ -490,7 +490,7 @@ export default function PipelinePage() {
   }
 
   return (
-    <section className="animate-enter space-y-6" style={{ animationDelay: "80ms" }}>
+    <section className="animate-enter space-y-5 sm:space-y-6" style={{ animationDelay: "80ms" }}>
       <div className="pointer-events-none fixed right-4 top-4 z-50">
         {toast ? (
           <div
@@ -515,7 +515,7 @@ export default function PipelinePage() {
             type="button"
             onClick={handleInstantlyImport}
             disabled={importing}
-            className="inline-flex items-center gap-2 rounded-xl border border-fuchsia-300/35 bg-[linear-gradient(135deg,rgba(139,92,246,0.28),rgba(91,33,182,0.38))] px-4 py-2 text-sm font-semibold text-fuchsia-50 shadow-[0_12px_34px_rgba(91,33,182,0.28)] transition hover:border-fuchsia-200/60 hover:bg-[linear-gradient(135deg,rgba(168,85,247,0.34),rgba(109,40,217,0.42))] disabled:cursor-not-allowed disabled:opacity-70"
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-fuchsia-300/35 bg-[linear-gradient(135deg,rgba(139,92,246,0.28),rgba(91,33,182,0.38))] px-4 py-2.5 text-sm font-semibold text-fuchsia-50 shadow-[0_12px_34px_rgba(91,33,182,0.28)] transition hover:border-fuchsia-200/60 hover:bg-[linear-gradient(135deg,rgba(168,85,247,0.34),rgba(109,40,217,0.42))] disabled:cursor-not-allowed disabled:opacity-70"
           >
             {importing ? <LoaderCircle size={16} className="animate-spin" /> : <Download size={16} />}
             Import from Instantly
@@ -523,7 +523,7 @@ export default function PipelinePage() {
           <button
             type="button"
             onClick={openCreatePanel}
-            className="inline-flex items-center gap-2 rounded-xl border border-blue-300/30 bg-blue-500/20 px-4 py-2 text-sm font-semibold text-blue-100 transition hover:border-blue-300/60 hover:bg-blue-500/30"
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-blue-300/30 bg-blue-500/20 px-4 py-2.5 text-sm font-semibold text-blue-100 transition hover:border-blue-300/60 hover:bg-blue-500/30"
           >
             <Plus size={16} />
             Add Lead
@@ -543,17 +543,17 @@ export default function PipelinePage() {
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
               placeholder="Search leads..."
-              className="w-full rounded-2xl border border-white/14 bg-[linear-gradient(180deg,rgba(15,23,42,0.88),rgba(15,23,42,0.72))] py-3 pl-11 pr-4 text-sm text-slate-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_18px_40px_rgba(2,6,23,0.24)] backdrop-blur-xl outline-none transition placeholder:text-slate-500 focus:border-blue-400/55 focus:bg-slate-900/80"
+              className="min-h-11 w-full rounded-2xl border border-white/14 bg-[linear-gradient(180deg,rgba(15,23,42,0.88),rgba(15,23,42,0.72))] py-3 pl-11 pr-4 text-sm text-slate-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_18px_40px_rgba(2,6,23,0.24)] backdrop-blur-xl outline-none transition placeholder:text-slate-500 focus:border-blue-400/55 focus:bg-slate-900/80"
             />
           </label>
 
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:min-w-[780px] xl:flex-1 xl:grid-cols-5">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 xl:min-w-[780px] xl:flex-1 xl:grid-cols-5">
             <label className="space-y-1">
               <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">Stage</span>
               <select
                 value={stageFilter}
                 onChange={(event) => setStageFilter(event.target.value as StageFilter)}
-                className="w-full rounded-xl border border-white/12 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
+                className="min-h-11 w-full rounded-xl border border-white/12 bg-slate-950/70 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
               >
                 {STAGE_FILTER_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -568,7 +568,7 @@ export default function PipelinePage() {
               <select
                 value={assigneeFilter}
                 onChange={(event) => setAssigneeFilter(event.target.value as AssigneeFilter)}
-                className="w-full rounded-xl border border-white/12 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
+                className="min-h-11 w-full rounded-xl border border-white/12 bg-slate-950/70 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
               >
                 {ASSIGNEE_FILTER_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -583,7 +583,7 @@ export default function PipelinePage() {
               <select
                 value={sourceFilter}
                 onChange={(event) => setSourceFilter(event.target.value as SourceFilter)}
-                className="w-full rounded-xl border border-white/12 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
+                className="min-h-11 w-full rounded-xl border border-white/12 bg-slate-950/70 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
               >
                 {SOURCE_FILTER_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -598,7 +598,7 @@ export default function PipelinePage() {
               <select
                 value={competitorFilter}
                 onChange={(event) => setCompetitorFilter(event.target.value as CompetitorFilter)}
-                className="w-full rounded-xl border border-white/12 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
+                className="min-h-11 w-full rounded-xl border border-white/12 bg-slate-950/70 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
               >
                 {COMPETITOR_FILTER_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -613,7 +613,7 @@ export default function PipelinePage() {
               <select
                 value={dateRangeFilter}
                 onChange={(event) => setDateRangeFilter(event.target.value as DateRangeFilter)}
-                className="w-full rounded-xl border border-white/12 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
+                className="min-h-11 w-full rounded-xl border border-white/12 bg-slate-950/70 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
               >
                 {DATE_RANGE_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -630,23 +630,23 @@ export default function PipelinePage() {
         <div className="rounded-xl border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-200">{error}</div>
       ) : null}
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-2 xl:grid-cols-4">
         <div className="glass-card p-4">
-          <p className="text-xs uppercase tracking-[0.12em] text-slate-300">Total Leads</p>
+          <p className="text-sm uppercase tracking-[0.12em] text-slate-300">Total Leads</p>
           <p className="mt-3 text-2xl font-semibold text-blue-100">{stats.totalLeads}</p>
         </div>
         <div className="glass-card p-4">
-          <p className="text-xs uppercase tracking-[0.12em] text-slate-300">New This Week</p>
+          <p className="text-sm uppercase tracking-[0.12em] text-slate-300">New This Week</p>
           <p className="mt-3 text-2xl font-semibold text-slate-100">{stats.newThisWeek}</p>
         </div>
         <div className="glass-card p-4">
-          <p className="text-xs uppercase tracking-[0.12em] text-slate-300">Won This Month</p>
+          <p className="text-sm uppercase tracking-[0.12em] text-slate-300">Won This Month</p>
           <p className="mt-3 text-2xl font-semibold text-emerald-300">
             {stats.wonThisMonthCount} <span className="text-base text-emerald-200">({toCurrency(stats.wonThisMonthValue)})</span>
           </p>
         </div>
         <div className="glass-card p-4">
-          <p className="text-xs uppercase tracking-[0.12em] text-slate-300">Lost This Month</p>
+          <p className="text-sm uppercase tracking-[0.12em] text-slate-300">Lost This Month</p>
           <p className="mt-3 text-2xl font-semibold text-rose-300">{stats.lostThisMonthCount}</p>
         </div>
       </div>
@@ -655,7 +655,7 @@ export default function PipelinePage() {
         <div className="glass-panel p-6 text-sm text-slate-300">Loading pipeline...</div>
       ) : (
         <div className="glass-panel overflow-x-auto p-3 md:p-4">
-          <div className="grid min-w-max grid-flow-col auto-cols-[260px] gap-3 pb-2 xl:grid-flow-row xl:grid-cols-8 xl:auto-cols-fr">
+          <div className="grid min-w-max grid-flow-col auto-cols-[240px] gap-3 pb-2 xl:grid-flow-row xl:grid-cols-8 xl:auto-cols-fr">
             {STAGE_COLUMNS.map((column) => {
               const stageDeals = visibleDeals.filter((deal) => deal.stage === column.stage);
 
@@ -673,7 +673,7 @@ export default function PipelinePage() {
                     setDragOverStage(null);
                     if (dealId) void moveDeal(dealId, column.stage);
                   }}
-                  className="min-h-[460px] min-w-[250px] rounded-xl border border-white/10 bg-slate-950/35 p-3"
+                  className="min-h-[460px] min-w-[235px] rounded-xl border border-white/10 bg-slate-950/35 p-3"
                   style={{
                     borderColor: dragOverStage === column.stage ? column.color : undefined,
                     boxShadow: dragOverStage === column.stage ? `0 0 0 1px ${column.color}` : undefined,
@@ -708,7 +708,7 @@ export default function PipelinePage() {
                               className={`mt-1 inline-block h-2.5 w-2.5 shrink-0 rounded-full ${ENRICHMENT_META[deal.enrichmentStatus].dot}`}
                             />
                           </div>
-                          <p className="mt-1 text-xs text-slate-300">{deal.client}</p>
+                          <p className="mt-1 text-sm text-slate-300">{deal.client}</p>
                           <div className="mt-2 flex flex-wrap items-center gap-2">
                             <span
                               className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] ${SOURCE_META[deal.source].className}`}
@@ -718,7 +718,7 @@ export default function PipelinePage() {
                             <CompetitorBadge competitor={deal.competitor} />
                           </div>
                           <p className="mt-3 text-xl font-semibold text-blue-100">{toCurrency(deal.value)}</p>
-                          <div className="mt-3 flex items-center justify-between text-xs text-slate-300">
+                          <div className="mt-3 flex items-center justify-between text-sm text-slate-300">
                             <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/20 bg-white/10 text-[10px] font-semibold text-slate-100">
                               {toInitials(assignee)}
                             </span>
@@ -742,7 +742,7 @@ export default function PipelinePage() {
 
       {panelMode ? (
         <div className="fixed inset-0 z-40 bg-slate-950/70 backdrop-blur-sm">
-          <div className="ml-auto h-full w-full max-w-md overflow-y-auto border-l border-white/15 bg-slate-950/95 p-5 shadow-[0_12px_42px_rgba(0,0,0,0.5)]">
+          <div className="ml-auto h-full w-full overflow-y-auto border-l border-white/15 bg-slate-950/95 p-4 shadow-[0_12px_42px_rgba(0,0,0,0.5)] sm:max-w-md sm:p-5">
             <div className="mb-5 flex items-start justify-between gap-3">
               <div>
                 <p className="text-xs uppercase tracking-[0.14em] text-blue-200">
@@ -755,7 +755,7 @@ export default function PipelinePage() {
               <button
                 type="button"
                 onClick={closePanel}
-                className="rounded-lg border border-white/15 bg-white/5 p-2 text-slate-200 transition hover:border-blue-300/50 hover:bg-blue-500/20"
+                className="min-h-11 rounded-lg border border-white/15 bg-white/5 p-2.5 text-slate-200 transition hover:border-blue-300/50 hover:bg-blue-500/20"
               >
                 <X size={16} />
               </button>
@@ -812,18 +812,18 @@ export default function PipelinePage() {
                 <input
                   value={form.name}
                   onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))}
-                  className="w-full rounded-xl border border-white/15 bg-slate-900/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-blue-400/70"
+                  className="min-h-11 w-full rounded-xl border border-white/15 bg-slate-900/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-400/70"
                   required
                 />
               </label>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <label className="block space-y-1.5">
                   <span className="text-xs uppercase tracking-[0.11em] text-slate-300">Stage</span>
                   <select
                     value={form.stage}
                     onChange={(event) => setForm((prev) => ({ ...prev, stage: event.target.value as PipelineStage }))}
-                    className="w-full rounded-xl border border-white/15 bg-slate-900/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-blue-400/70"
+                    className="min-h-11 w-full rounded-xl border border-white/15 bg-slate-900/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-400/70"
                   >
                     {STAGE_COLUMNS.map((column) => (
                       <option key={column.stage} value={column.stage}>
@@ -840,7 +840,7 @@ export default function PipelinePage() {
                     step={100}
                     value={form.value}
                     onChange={(event) => setForm((prev) => ({ ...prev, value: event.target.value }))}
-                    className="w-full rounded-xl border border-white/15 bg-slate-900/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-blue-400/70"
+                    className="min-h-11 w-full rounded-xl border border-white/15 bg-slate-900/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-400/70"
                   />
                 </label>
               </div>
@@ -850,7 +850,7 @@ export default function PipelinePage() {
                 <input
                   value={form.client}
                   onChange={(event) => setForm((prev) => ({ ...prev, client: event.target.value }))}
-                  className="w-full rounded-xl border border-white/15 bg-slate-900/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-blue-400/70"
+                  className="min-h-11 w-full rounded-xl border border-white/15 bg-slate-900/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-400/70"
                   required
                 />
               </label>
@@ -860,7 +860,7 @@ export default function PipelinePage() {
                 <input
                   value={form.contact}
                   onChange={(event) => setForm((prev) => ({ ...prev, contact: event.target.value }))}
-                  className="w-full rounded-xl border border-white/15 bg-slate-900/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-blue-400/70"
+                  className="min-h-11 w-full rounded-xl border border-white/15 bg-slate-900/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-400/70"
                 />
               </label>
 
@@ -869,7 +869,7 @@ export default function PipelinePage() {
                 <select
                   value={form.assignee}
                   onChange={(event) => setForm((prev) => ({ ...prev, assignee: event.target.value }))}
-                  className="w-full rounded-xl border border-white/15 bg-slate-900/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-blue-400/70"
+                  className="min-h-11 w-full rounded-xl border border-white/15 bg-slate-900/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-400/70"
                 >
                   {TEAM_MEMBERS.map((member) => (
                     <option key={member.id} value={member.id}>
@@ -885,7 +885,7 @@ export default function PipelinePage() {
                   value={form.notes}
                   onChange={(event) => setForm((prev) => ({ ...prev, notes: event.target.value }))}
                   rows={5}
-                  className="w-full rounded-xl border border-white/15 bg-slate-900/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-blue-400/70"
+                  className="min-h-11 w-full rounded-xl border border-white/15 bg-slate-900/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-400/70"
                 />
               </label>
 
@@ -952,7 +952,7 @@ export default function PipelinePage() {
                     type="button"
                     onClick={handleDelete}
                     disabled={saving}
-                    className="inline-flex items-center gap-2 rounded-xl border border-red-400/35 bg-red-500/20 px-3 py-2 text-sm font-semibold text-red-100 transition hover:border-red-300/65 hover:bg-red-500/30 disabled:opacity-60"
+                    className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-red-400/35 bg-red-500/20 px-3 py-2.5 text-sm font-semibold text-red-100 transition hover:border-red-300/65 hover:bg-red-500/30 disabled:opacity-60"
                   >
                     <Trash2 size={15} />
                     Delete
@@ -963,7 +963,7 @@ export default function PipelinePage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="inline-flex items-center gap-2 rounded-xl border border-blue-300/35 bg-blue-500/25 px-4 py-2 text-sm font-semibold text-blue-100 transition hover:border-blue-300/70 hover:bg-blue-500/35 disabled:opacity-60"
+                  className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-blue-300/35 bg-blue-500/25 px-4 py-2.5 text-sm font-semibold text-blue-100 transition hover:border-blue-300/70 hover:bg-blue-500/35 disabled:opacity-60"
                 >
                   <Funnel size={15} />
                   {panelMode === "create" ? "Create Lead" : "Save Changes"}

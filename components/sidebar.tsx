@@ -1,54 +1,61 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { CalendarDays, CheckSquare, DollarSign, FolderKanban, Funnel, UserRound, Users } from "lucide-react";
 
+const NAV_ITEMS = [
+  { href: "/agents", label: "Agents", icon: Users },
+  { href: "/employees", label: "Employees", icon: UserRound },
+  { href: "/tasks", label: "Tasks", icon: CheckSquare },
+  { href: "/finance", label: "Finance", icon: DollarSign },
+  { href: "/calendar", label: "Calendar", icon: CalendarDays },
+  { href: "/pipeline", label: "Pipeline", icon: Funnel },
+  { href: "/projects", label: "Projects", icon: FolderKanban },
+] as const;
+
 export function Sidebar() {
+  const router = useRouter();
   const pathname = usePathname();
-  const isAgents = pathname.startsWith("/agents");
-  const isEmployees = pathname.startsWith("/employees");
-  const isTasks = pathname.startsWith("/tasks");
-  const isFinance = pathname.startsWith("/finance");
-  const isCalendar = pathname.startsWith("/calendar");
-  const isPipeline = pathname.startsWith("/pipeline");
-  const isProjects = pathname.startsWith("/projects");
+  const currentHref =
+    NAV_ITEMS.find((item) => pathname === item.href || pathname.startsWith(`${item.href}/`))?.href ?? "/agents";
 
   return (
     <aside className="sidebar-shell">
-      <Link href="/" className="sidebar-logo" aria-label="Derby Digital home">
-        Derby Digital
-      </Link>
+      <div className="flex items-center justify-between gap-3 md:block">
+        <Link href="/" className="sidebar-logo" aria-label="Derby Digital home">
+          Derby Digital
+        </Link>
 
-      <nav className="sidebar-nav" aria-label="Primary">
-        <Link href="/agents" className={`sidebar-item ${isAgents ? "active" : ""}`}>
-          <Users size={16} />
-          <span>Agents</span>
-        </Link>
-        <Link href="/employees" className={`sidebar-item ${isEmployees ? "active" : ""}`}>
-          <UserRound size={16} />
-          <span>Employees</span>
-        </Link>
-        <Link href="/tasks" className={`sidebar-item ${isTasks ? "active" : ""}`}>
-          <CheckSquare size={16} />
-          <span>Tasks</span>
-        </Link>
-        <Link href="/finance" className={`sidebar-item ${isFinance ? "active" : ""}`}>
-          <DollarSign size={16} />
-          <span>Finance</span>
-        </Link>
-        <Link href="/calendar" className={`sidebar-item ${isCalendar ? "active" : ""}`}>
-          <CalendarDays size={16} />
-          <span>Calendar</span>
-        </Link>
-        <Link href="/pipeline" className={`sidebar-item ${isPipeline ? "active" : ""}`}>
-          <Funnel size={16} />
-          <span>Pipeline</span>
-        </Link>
-        <Link href="/projects" className={`sidebar-item ${isProjects ? "active" : ""}`}>
-          <FolderKanban size={16} />
-          <span>Projects</span>
-        </Link>
+        <label className="block min-w-0 md:hidden">
+          <span className="sr-only">Navigate to page</span>
+          <select
+            value={currentHref}
+            onChange={(event) => router.push(event.target.value)}
+            className="min-h-11 w-full rounded-xl border border-white/15 bg-slate-950/85 px-3 py-2.5 text-sm font-medium text-slate-100 outline-none transition focus:border-blue-400/60"
+            aria-label="Primary navigation"
+          >
+            {NAV_ITEMS.map((item) => (
+              <option key={item.href} value={item.href}>
+                {item.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+
+      <nav className="sidebar-nav hidden md:grid" aria-label="Primary">
+        {NAV_ITEMS.map((item) => {
+          const Icon = item.icon;
+          const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+
+          return (
+            <Link key={item.href} href={item.href} className={`sidebar-item ${isActive ? "active" : ""}`}>
+              <Icon size={16} />
+              <span>{item.label}</span>
+            </Link>
+          );
+        })}
       </nav>
     </aside>
   );

@@ -16,12 +16,12 @@ export function AgentCard({ agent, large = false, hrefBase = "/agents" }: AgentC
   return (
     <Link
       href={`${hrefBase}/${agent.id}`}
-      className={`glass-card block animate-enter ${large ? "p-6 sm:p-7" : "p-5"} agent-card-link ${accentClass}`}
+      className={`glass-card block animate-enter ${large ? "p-5 sm:p-7" : "p-4 sm:p-5"} agent-card-link ${accentClass}`}
       aria-label={`Open ${agent.name} details`}
     >
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className={`${large ? "text-xl" : "text-lg"} font-semibold text-white`}>{agent.name}</p>
+          <p className={`${large ? "text-lg sm:text-xl" : "text-lg"} font-semibold text-white`}>{agent.name}</p>
           <p className="text-sm text-slate-400">{agent.role}</p>
         </div>
         <span className={`agent-type ${agent.type === "agent" ? "ai" : agent.type === "ceo" ? "ceo" : "employee"}`}>
@@ -37,7 +37,7 @@ export function AgentCard({ agent, large = false, hrefBase = "/agents" }: AgentC
         ) : null}
       </div>
 
-      <p className="mt-4 text-sm text-slate-300">{agent.currentTask || "-"}</p>
+      <p className="mt-4 text-sm leading-6 text-slate-300">{agent.currentTask || "-"}</p>
     </Link>
   );
 }

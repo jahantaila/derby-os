@@ -281,7 +281,7 @@ export default function DashboardPage() {
   }, [clients]);
 
   return (
-    <div className="space-y-8 pb-4">
+    <div className="space-y-6 pb-4 sm:space-y-8">
       <section className="glass-panel animate-enter p-5 sm:p-6" style={{ animationDelay: "40ms" }}>
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
@@ -297,7 +297,7 @@ export default function DashboardPage() {
               <Link
                 key={action.label}
                 href={action.href}
-                className="rounded-xl border border-sky-400/30 bg-gradient-to-r from-[#2093ff]/30 to-[#0026ff]/30 px-4 py-2 text-center text-sm font-semibold text-white transition hover:border-sky-300/60 hover:shadow-[0_0_18px_rgba(32,147,255,0.35)]"
+                className="min-h-11 rounded-xl border border-sky-400/30 bg-gradient-to-r from-[#2093ff]/30 to-[#0026ff]/30 px-4 py-2.5 text-center text-sm font-semibold text-white transition hover:border-sky-300/60 hover:shadow-[0_0_18px_rgba(32,147,255,0.35)]"
               >
                 {action.label}
               </Link>
@@ -322,7 +322,7 @@ export default function DashboardPage() {
                   <p className="truncate text-sm text-slate-300">{ceoWorkload.agent.role}</p>
                 </div>
               </div>
-              <span className={`rounded-full px-2 py-1 text-[11px] font-semibold ${STATUS_STYLES[ceoWorkload.status]}`}>
+                      <span className={`rounded-full px-2 py-1 text-xs font-semibold ${STATUS_STYLES[ceoWorkload.status]}`}>
                 {formatStatus(ceoWorkload.status)}
               </span>
             </div>
@@ -348,26 +348,26 @@ export default function DashboardPage() {
                           {getInitials(agent.name)}
                         </div>
                         <div className="min-w-0">
-                          <p className="truncate text-sm font-semibold text-white">{agent.name}</p>
-                          <p className="truncate text-xs text-slate-400">{agent.role}</p>
+                          <p className="truncate text-base font-semibold text-white">{agent.name}</p>
+                          <p className="truncate text-sm text-slate-400">{agent.role}</p>
                         </div>
                       </div>
-                      <span className={`rounded-full px-2 py-1 text-[11px] font-semibold ${STATUS_STYLES[status]}`}>{formatStatus(status)}</span>
+                      <span className={`rounded-full px-2 py-1 text-xs font-semibold ${STATUS_STYLES[status]}`}>{formatStatus(status)}</span>
                     </div>
 
                     <div className="mt-4 space-y-2">
-                      <div className="flex items-center justify-between text-xs text-slate-300">
+                      <div className="flex items-center justify-between text-sm text-slate-300">
                         <span>Active Tasks</span>
                         <span className="font-semibold text-white">{activeTasks}</span>
                       </div>
-                      <p className="truncate text-xs text-slate-400">{currentTask || "No current task"}</p>
+                      <p className="truncate text-sm text-slate-400">{currentTask || "No current task"}</p>
                       <div className="h-1.5 overflow-hidden rounded-full bg-slate-800/80">
                         <div
                           className="h-full rounded-full bg-gradient-to-r from-[#2093FF] to-[#0026FF] transition-all duration-700"
                           style={{ width: `${completionRate}%` }}
                         />
                       </div>
-                      <p className="text-[11px] text-slate-500">{completionRate}% completed</p>
+                      <p className="text-xs text-slate-500">{completionRate}% completed</p>
                     </div>
                   </article>
                 ))}
@@ -394,18 +394,18 @@ export default function DashboardPage() {
                           {getInitials(agent.name)}
                         </div>
                         <div className="min-w-0">
-                          <p className="truncate text-sm font-semibold text-white">{agent.name}</p>
-                          <p className="truncate text-xs text-slate-400">{agent.role}</p>
+                          <p className="truncate text-base font-semibold text-white">{agent.name}</p>
+                          <p className="truncate text-sm text-slate-400">{agent.role}</p>
                         </div>
                       </div>
-                      <span className={`rounded-full px-2 py-1 text-[11px] font-semibold ${STATUS_STYLES[status]}`}>{formatStatus(status)}</span>
+                      <span className={`rounded-full px-2 py-1 text-xs font-semibold ${STATUS_STYLES[status]}`}>{formatStatus(status)}</span>
                     </div>
-                    <div className="mt-4 space-y-2 text-xs text-slate-300">
+                    <div className="mt-4 space-y-2 text-sm text-slate-300">
                       <div className="flex items-center justify-between">
                         <span>Active Tasks</span>
                         <span className="font-semibold text-white">{activeTasks}</span>
                       </div>
-                      <p className="truncate text-xs text-slate-400">{currentTask || "No current task"}</p>
+                      <p className="truncate text-sm text-slate-400">{currentTask || "No current task"}</p>
                     </div>
                   </article>
                 ))}
@@ -428,8 +428,8 @@ export default function DashboardPage() {
               className="glass-card animate-enter rounded-2xl p-5"
               style={{ animationDelay: `${220 + index * 40}ms` }}
             >
-              <p className="text-xs uppercase tracking-[0.16em] text-slate-400">{stat.label}</p>
-              <p className="mt-2 text-3xl font-semibold text-white">{stat.value}</p>
+              <p className="text-sm uppercase tracking-[0.16em] text-slate-400">{stat.label}</p>
+              <p className="mt-2 text-2xl font-semibold text-white sm:text-3xl">{stat.value}</p>
             </article>
           ))}
         </div>
@@ -453,7 +453,7 @@ export default function DashboardPage() {
                     href="/tasks"
                     className="block rounded-xl border border-white/10 bg-white/[0.03] p-3 transition hover:border-sky-400/35 hover:bg-white/[0.06]"
                   >
-                    <div className="grid gap-2 text-xs text-slate-300 sm:grid-cols-[auto_1fr_auto_auto_auto] sm:items-center sm:gap-3">
+                    <div className="grid gap-2 text-sm text-slate-300 sm:grid-cols-[auto_1fr_auto_auto_auto] sm:items-center sm:gap-3">
                       <span className={`h-2.5 w-2.5 rounded-full ${PRIORITY_DOT[task.priority]}`} aria-hidden />
                       <div className="min-w-0">
                         <p className="truncate text-sm font-medium text-white">{task.title}</p>
@@ -465,10 +465,10 @@ export default function DashboardPage() {
                         >
                           {getInitials(assignee?.name ?? task.assignee)}
                         </div>
-                        <span className="hidden text-[11px] text-slate-400 xl:inline">{assignee?.name ?? task.assignee}</span>
+                        <span className="hidden text-xs text-slate-400 xl:inline">{assignee?.name ?? task.assignee}</span>
                       </div>
-                      <span className="text-[11px] text-slate-400">{dueDateLabel(task.dueDate)}</span>
-                      <span className={`rounded-full border px-2 py-1 text-[11px] font-semibold ${STATUS_BADGE[task.status]}`}>
+                      <span className="text-xs text-slate-400">{dueDateLabel(task.dueDate)}</span>
+                      <span className={`rounded-full border px-2 py-1 text-xs font-semibold ${STATUS_BADGE[task.status]}`}>
                         {task.status}
                       </span>
                     </div>
@@ -490,7 +490,7 @@ export default function DashboardPage() {
                   <span className="absolute left-0 top-1.5 h-2.5 w-2.5 rounded-full bg-gradient-to-br from-[#2093FF] to-[#0026FF]" />
                   {index < activity.length - 1 && <span className="absolute left-[4px] top-4 h-[calc(100%+8px)] w-px bg-blue-400/25" />}
                   <p className="text-sm text-slate-200">{item.message}</p>
-                  <p className="mt-1 text-[11px] uppercase tracking-[0.14em] text-slate-500">
+                  <p className="mt-1 text-xs uppercase tracking-[0.14em] text-slate-500">
                     {relativeTimeFromIso(item.timestamp, now)}
                   </p>
                 </div>
@@ -512,11 +512,11 @@ export default function DashboardPage() {
             >
               <div className="flex items-start justify-between gap-3">
                 <p className="text-sm font-semibold text-white">{client.name}</p>
-                <span className="rounded-full border border-emerald-400/35 bg-emerald-500/10 px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-300">
+                <span className="rounded-full border border-emerald-400/35 bg-emerald-500/10 px-2 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-emerald-300">
                   Active
                 </span>
               </div>
-              <p className="mt-3 text-xs text-slate-400">{client.services?.[0] ?? "Campaign setup"}</p>
+              <p className="mt-3 text-sm text-slate-400">{client.services?.[0] ?? "Campaign setup"}</p>
             </article>
           ))}
         </div>

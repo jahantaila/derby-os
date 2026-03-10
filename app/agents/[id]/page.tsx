@@ -145,7 +145,7 @@ export default function AgentDetailPage({ params }: AgentDetailPageProps) {
         Back to dashboard
       </Link>
 
-      <section className={`glass-panel p-6 sm:p-8 ${isLive ? "live-view-active" : ""}`}>
+      <section className={`glass-panel p-5 sm:p-8 ${isLive ? "live-view-active" : ""}`}>
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <p className="section-title">Live View</p>
@@ -163,7 +163,7 @@ export default function AgentDetailPage({ params }: AgentDetailPageProps) {
             <div className="flex flex-wrap items-center gap-3 text-sm text-slate-300">
               <span className={`status-dot ${isLive ? "live" : "idle"}`} />
               <span className="capitalize">{agent.status}</span>
-              <span className="rounded-full border border-white/15 px-2.5 py-1 text-xs text-slate-300">
+              <span className="rounded-full border border-white/15 px-2.5 py-1 text-sm text-slate-300">
                 Model: {agent.model ?? "N/A"}
               </span>
             </div>
@@ -183,9 +183,9 @@ export default function AgentDetailPage({ params }: AgentDetailPageProps) {
           <div className="live-log-panel">
             <div className="flex items-center justify-between gap-3">
               <h2 className="section-title">Session Log</h2>
-              <span className="text-[11px] uppercase tracking-[0.16em] text-slate-500">Recent output</span>
+              <span className="text-xs uppercase tracking-[0.16em] text-slate-500">Recent output</span>
             </div>
-            <div className="mt-4 space-y-2 font-mono text-xs text-slate-300">
+            <div className="mt-4 space-y-2 font-mono text-sm text-slate-300">
               {isLive ? (
                 sessionLog.length > 0 ? (
                   sessionLog.map((entry) => (
@@ -204,21 +204,21 @@ export default function AgentDetailPage({ params }: AgentDetailPageProps) {
         </div>
       </section>
 
-      <section className="glass-panel p-6 sm:p-8">
+      <section className="glass-panel p-5 sm:p-8">
         <h2 className="section-title">SOUL</h2>
         <div className="soul-markdown mt-4 rounded-xl border border-white/10 bg-black/20 p-4 sm:p-5">
           <ReactMarkdown>{soul || "No SOUL content found."}</ReactMarkdown>
         </div>
       </section>
 
-      <section className="glass-panel p-6 sm:p-8">
+      <section className="glass-panel p-5 sm:p-8">
         <h2 className="section-title">Skills</h2>
         <div className="mt-4 flex flex-wrap gap-2">
           {agent.skills.length === 0 ? (
             <span className="text-sm text-slate-400">No listed skills.</span>
           ) : (
             agent.skills.map((skill) => (
-              <span key={skill} className="rounded-full border border-blue-400/40 bg-blue-500/10 px-3 py-1 text-xs text-blue-100">
+              <span key={skill} className="rounded-full border border-blue-400/40 bg-blue-500/10 px-3 py-1 text-sm text-blue-100">
                 {skill}
               </span>
             ))
@@ -226,7 +226,7 @@ export default function AgentDetailPage({ params }: AgentDetailPageProps) {
         </div>
       </section>
 
-      <section className="glass-panel p-6 sm:p-8">
+      <section className="glass-panel p-5 sm:p-8">
         <h2 className="section-title">History</h2>
         <div className="agent-timeline mt-6">
           {history.length === 0 ? (

@@ -126,7 +126,8 @@ body {
   gap: 0.55rem;
   border-radius: 0.75rem;
   color: #d5dbea;
-  padding: 0.6rem 0.68rem;
+  min-height: 2.75rem;
+  padding: 0.72rem 0.75rem;
   text-decoration: none;
   transition: all 260ms ease;
 }
@@ -519,10 +520,13 @@ body {
 @media (max-width: 900px) {
   .app-shell {
     flex-direction: column;
+    gap: 0.7rem;
+    padding: 0.7rem;
   }
 
   .sidebar-shell {
     width: 100%;
+    padding: 0.9rem;
   }
 
   .sidebar-item::before {
@@ -536,5 +540,36 @@ body {
   .activity-row {
     flex-direction: column;
     align-items: flex-start;
+  }
+}
+
+@media (max-width: 640px) {
+  .app-shell {
+    padding: 0.55rem;
+  }
+
+  .app-main {
+    border-radius: 1rem;
+    padding: 0.8rem;
+  }
+
+  .sidebar-shell {
+    border-radius: 0.9rem;
+    padding: 0.8rem;
+  }
+
+  .sidebar-logo {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: 0;
+    font-size: 1rem;
+  }
+
+  .page-title {
+    font-size: clamp(1.55rem, 7vw, 2rem);
+  }
+
+  .section-title {
+    font-size: 0.8rem;
   }
 }

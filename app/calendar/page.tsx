@@ -243,7 +243,7 @@ export default function CalendarPage() {
           <select
             value={assigneeFilter}
             onChange={(event) => setAssigneeFilter(event.target.value)}
-            className="rounded-xl border border-white/15 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
+            className="min-h-11 rounded-xl border border-white/15 bg-slate-950/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
           >
             <option value="all">All assignees</option>
             {CALENDAR_TEAM_MEMBERS.map((member) => (
@@ -255,7 +255,7 @@ export default function CalendarPage() {
           <select
             value={typeFilter}
             onChange={(event) => setTypeFilter(event.target.value as FilterType)}
-            className="rounded-xl border border-white/15 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
+            className="min-h-11 rounded-xl border border-white/15 bg-slate-950/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
           >
             <option value="all">All types</option>
             <option value="deadline">Deadline</option>
@@ -277,7 +277,7 @@ export default function CalendarPage() {
               <button
                 type="button"
                 onClick={() => setMonthDate((prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1))}
-                className="rounded-lg border border-white/15 bg-white/5 p-2 text-slate-100 transition hover:border-blue-300/50 hover:bg-blue-500/20"
+                className="min-h-11 rounded-lg border border-white/15 bg-white/5 p-2.5 text-slate-100 transition hover:border-blue-300/50 hover:bg-blue-500/20"
                 aria-label="Previous month"
               >
                 <ChevronLeft size={16} />
@@ -285,7 +285,7 @@ export default function CalendarPage() {
               <button
                 type="button"
                 onClick={() => setMonthDate((prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1))}
-                className="rounded-lg border border-white/15 bg-white/5 p-2 text-slate-100 transition hover:border-blue-300/50 hover:bg-blue-500/20"
+                className="min-h-11 rounded-lg border border-white/15 bg-white/5 p-2.5 text-slate-100 transition hover:border-blue-300/50 hover:bg-blue-500/20"
                 aria-label="Next month"
               >
                 <ChevronRight size={16} />
@@ -293,7 +293,7 @@ export default function CalendarPage() {
               <button
                 type="button"
                 onClick={jumpToToday}
-                className="rounded-lg border border-blue-300/30 bg-blue-500/20 px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-blue-100 transition hover:border-blue-300/60 hover:bg-blue-500/30"
+                className="min-h-11 rounded-lg border border-blue-300/30 bg-blue-500/20 px-3 py-2.5 text-sm font-semibold uppercase tracking-[0.08em] text-blue-100 transition hover:border-blue-300/60 hover:bg-blue-500/30"
               >
                 Today
               </button>
@@ -301,19 +301,21 @@ export default function CalendarPage() {
             <p className="text-lg font-semibold tracking-tight text-blue-50">{MONTH_FORMAT.format(monthDate)}</p>
           </div>
 
-          <div className="mb-2 grid grid-cols-7 gap-2">
-            {DAY_LABELS.map((day) => (
-              <div key={day} className="px-2 py-1 text-center text-xs font-semibold uppercase tracking-[0.08em] text-slate-400">
-                {day}
+          <div className="-mx-1 overflow-x-auto px-1 pb-1">
+            <div className="min-w-[42rem]">
+              <div className="mb-2 grid grid-cols-7 gap-2">
+                {DAY_LABELS.map((day) => (
+                  <div key={day} className="px-2 py-1 text-center text-sm font-semibold uppercase tracking-[0.08em] text-slate-400">
+                    {day}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
 
-          {loading ? (
-            <div className="rounded-xl border border-white/10 bg-slate-950/35 px-4 py-8 text-sm text-slate-300">Loading calendar...</div>
-          ) : (
-            <div className="grid grid-cols-7 gap-2">
-              {monthDays.map((day) => {
+              {loading ? (
+                <div className="rounded-xl border border-white/10 bg-slate-950/35 px-4 py-8 text-sm text-slate-300">Loading calendar...</div>
+              ) : (
+                <div className="grid grid-cols-7 gap-2">
+                  {monthDays.map((day) => {
                 const dayKey = dateToKey(day);
                 const dayEvents = eventsByDate.get(dayKey) ?? [];
                 const isToday = dayKey === TODAY_KEY;
@@ -347,21 +349,23 @@ export default function CalendarPage() {
                             setSelectedEventId(calendarEvent.id);
                             openEditForm(calendarEvent);
                           }}
-                          className={`block w-full truncate rounded-md border px-2 py-1 text-left text-[11px] font-medium ${TYPE_COLORS[calendarEvent.type]}`}
+                          className={`block min-h-8 w-full truncate rounded-md border px-2 py-1.5 text-left text-xs font-medium ${TYPE_COLORS[calendarEvent.type]}`}
                           title={calendarEvent.title}
                         >
                           {calendarEvent.title}
                         </button>
                       ))}
                       {dayEvents.length > 3 ? (
-                        <p className="px-1 text-[11px] text-slate-400">+{dayEvents.length - 3} more</p>
+                        <p className="px-1 text-xs text-slate-400">+{dayEvents.length - 3} more</p>
                       ) : null}
                     </div>
                   </div>
-                );
-              })}
+                  );
+                })}
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
 
         <aside className="glass-panel p-4 md:p-5">
@@ -373,7 +377,7 @@ export default function CalendarPage() {
             <button
               type="button"
               onClick={openCreateForm}
-              className="inline-flex items-center gap-2 rounded-lg border border-blue-300/30 bg-blue-500/20 px-3 py-2 text-xs font-semibold uppercase tracking-[0.06em] text-blue-100 transition hover:border-blue-300/60 hover:bg-blue-500/30"
+              className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-blue-300/30 bg-blue-500/20 px-3 py-2.5 text-sm font-semibold uppercase tracking-[0.06em] text-blue-100 transition hover:border-blue-300/60 hover:bg-blue-500/30"
             >
               <Plus size={14} />
               Add Event
@@ -425,20 +429,20 @@ export default function CalendarPage() {
               value={form.title}
               onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
               placeholder="Event title"
-              className="w-full rounded-xl border border-white/15 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-blue-400/60"
+              className="min-h-11 w-full rounded-xl border border-white/15 bg-slate-950/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-blue-400/60"
             />
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <input
                 type="date"
                 value={form.date}
                 onChange={(event) => setForm((prev) => ({ ...prev, date: event.target.value }))}
-                className="w-full rounded-xl border border-white/15 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
+                className="min-h-11 w-full rounded-xl border border-white/15 bg-slate-950/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
               />
               <input
                 type="time"
                 value={form.time}
                 onChange={(event) => setForm((prev) => ({ ...prev, time: event.target.value }))}
-                className="w-full rounded-xl border border-white/15 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
+                className="min-h-11 w-full rounded-xl border border-white/15 bg-slate-950/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
               />
             </div>
 
@@ -446,7 +450,7 @@ export default function CalendarPage() {
               <select
                 value={form.assignee}
                 onChange={(event) => setForm((prev) => ({ ...prev, assignee: event.target.value }))}
-                className="w-full rounded-xl border border-white/15 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
+                className="min-h-11 w-full rounded-xl border border-white/15 bg-slate-950/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
               >
                 {CALENDAR_TEAM_MEMBERS.map((member) => (
                   <option key={member.id} value={member.id}>
@@ -457,7 +461,7 @@ export default function CalendarPage() {
               <select
                 value={form.type}
                 onChange={(event) => setForm((prev) => ({ ...prev, type: event.target.value as CalendarEventType }))}
-                className="w-full rounded-xl border border-white/15 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
+                className="min-h-11 w-full rounded-xl border border-white/15 bg-slate-950/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
               >
                 <option value="deadline">Deadline</option>
                 <option value="milestone">Milestone</option>
@@ -470,14 +474,14 @@ export default function CalendarPage() {
               value={form.client}
               onChange={(event) => setForm((prev) => ({ ...prev, client: event.target.value }))}
               placeholder="Client"
-              className="w-full rounded-xl border border-white/15 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-blue-400/60"
+              className="min-h-11 w-full rounded-xl border border-white/15 bg-slate-950/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-blue-400/60"
             />
 
             <div className="flex gap-2 pt-1">
               <button
                 type="submit"
                 disabled={saving}
-                className="rounded-xl border border-blue-300/35 bg-blue-500/25 px-4 py-2 text-sm font-semibold text-blue-50 transition hover:border-blue-300/60 hover:bg-blue-500/35 disabled:cursor-not-allowed disabled:opacity-60"
+                className="min-h-11 rounded-xl border border-blue-300/35 bg-blue-500/25 px-4 py-2.5 text-sm font-semibold text-blue-50 transition hover:border-blue-300/60 hover:bg-blue-500/35 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isEditing ? "Save Changes" : "Create Event"}
               </button>
@@ -486,7 +490,7 @@ export default function CalendarPage() {
                   type="button"
                   onClick={handleDelete}
                   disabled={saving}
-                  className="inline-flex items-center gap-1 rounded-xl border border-red-300/40 bg-red-500/20 px-3 py-2 text-sm font-semibold text-red-100 transition hover:border-red-300/60 hover:bg-red-500/30 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex min-h-11 items-center gap-1 rounded-xl border border-red-300/40 bg-red-500/20 px-3 py-2.5 text-sm font-semibold text-red-100 transition hover:border-red-300/60 hover:bg-red-500/30 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <Trash2 size={14} />
                   Delete

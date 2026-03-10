@@ -254,18 +254,18 @@ function statValueClass(value: number) {
 
 function MetricCard({ title, value, caption }: { title: string; value: string; caption?: string }) {
   return (
-    <article className="glass-card relative overflow-hidden rounded-2xl p-4">
+    <article className="glass-card relative overflow-hidden rounded-2xl p-3 sm:p-4">
       <div className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,rgba(32,147,255,0),#2093FF,rgba(0,38,255,0))]" />
-      <p className="text-[10px] uppercase tracking-[0.16em] text-slate-400">{title}</p>
-      <p className="mt-2 text-2xl font-semibold tracking-[-0.02em] text-white">{value}</p>
-      {caption ? <p className="mt-1 text-xs text-slate-400">{caption}</p> : null}
+      <p className="text-[11px] uppercase tracking-[0.16em] text-slate-400">{title}</p>
+      <p className="mt-2 text-xl font-semibold tracking-[-0.02em] text-white sm:text-2xl">{value}</p>
+      {caption ? <p className="mt-1 text-sm text-slate-400">{caption}</p> : null}
     </article>
   );
 }
 
 function SectionCard({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="glass-panel rounded-2xl p-4">
+    <section className="glass-panel rounded-2xl p-3 sm:p-4">
       <h2 className="text-sm font-semibold uppercase tracking-[0.15em] text-slate-200">{title}</h2>
       <div className="mt-4">{children}</div>
     </section>
@@ -688,26 +688,26 @@ export default function FinancePage() {
   const marginLineColor = sixMonthSeries[sixMonthSeries.length - 1]?.goalMet ? "#10b981" : "#ef4444";
 
   return (
-    <section className="animate-enter" style={{ animationDelay: "80ms", backgroundColor: "#0a0a0f" }}>
+    <section className="animate-enter space-y-5 sm:space-y-6" style={{ animationDelay: "80ms", backgroundColor: "#0a0a0f" }}>
       <header className="mb-4 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <h1 className="page-title">Finance Dashboard</h1>
           <p className="mt-2 text-sm text-slate-300">QuickBooks-style financial intelligence across revenue, expenses, clients, and reports.</p>
         </div>
-        <div className="glass-card inline-flex items-center gap-2 rounded-xl px-2 py-2">
+        <div className="glass-card inline-flex items-center gap-2 self-start rounded-xl px-2 py-2 md:self-auto">
           <button
             type="button"
             onClick={() => changeMonth(-1)}
-            className="rounded-lg border border-white/10 bg-white/5 p-2 text-slate-100 transition hover:border-blue-300/40 hover:bg-blue-500/15"
+            className="min-h-11 rounded-lg border border-white/10 bg-white/5 p-2.5 text-slate-100 transition hover:border-blue-300/40 hover:bg-blue-500/15"
             aria-label="Previous month"
           >
             <ArrowLeft size={16} />
           </button>
-          <div className="min-w-[9rem] text-center text-sm font-semibold text-white">{`< ${monthLabel(selectedMonth)} >`}</div>
+          <div className="min-w-[8.5rem] text-center text-sm font-semibold text-white sm:min-w-[9rem]">{`< ${monthLabel(selectedMonth)} >`}</div>
           <button
             type="button"
             onClick={() => changeMonth(1)}
-            className="rounded-lg border border-white/10 bg-white/5 p-2 text-slate-100 transition hover:border-blue-300/40 hover:bg-blue-500/15"
+            className="min-h-11 rounded-lg border border-white/10 bg-white/5 p-2.5 text-slate-100 transition hover:border-blue-300/40 hover:bg-blue-500/15"
             aria-label="Next month"
           >
             <ArrowRight size={16} />
@@ -719,31 +719,31 @@ export default function FinancePage() {
       {saving ? <div className="mb-3 text-xs uppercase tracking-[0.18em] text-blue-200/80">Saving finance data...</div> : null}
 
       <div className="sticky top-2 z-30 mb-5 rounded-2xl border border-white/10 bg-[#0a0a0f]/70 p-2 backdrop-blur-lg">
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-7">
+        <div className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-7">
           <MetricCard title="Monthly Revenue" value={formatMoney(summary.monthlyRevenue)} />
           <MetricCard title="Monthly Expenses" value={formatMoney(summary.monthlyExpenses)} />
           <MetricCard title="Net Profit" value={formatMoney(summary.netProfit)} caption={summary.netProfit >= 0 ? "Above break-even" : "Under break-even"} />
           <MetricCard title="Profit Margin" value={formatPercent(summary.profitMargin)} caption={summary.profitMargin >= 30 ? "Healthy margin" : "Below target margin"} />
           <MetricCard title="MRR" value={formatMoney(summary.mrr)} />
           <MetricCard title="Active Clients" value={String(summary.activeClients)} />
-          <article className="glass-card relative overflow-hidden rounded-2xl p-4">
+          <article className="glass-card relative overflow-hidden rounded-2xl p-3 sm:p-4">
             <div className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,rgba(32,147,255,0),#2093FF,rgba(0,38,255,0))]" />
-            <p className="text-[10px] uppercase tracking-[0.16em] text-slate-400">Goal Progress</p>
-            <p className={`mt-2 text-2xl font-semibold tracking-[-0.02em] ${statValueClass(summary.netProfit)}`}>{formatPercent(summary.goalProgress)}</p>
+            <p className="text-[11px] uppercase tracking-[0.16em] text-slate-400">Goal Progress</p>
+            <p className={`mt-2 text-xl font-semibold tracking-[-0.02em] sm:text-2xl ${statValueClass(summary.netProfit)}`}>{formatPercent(summary.goalProgress)}</p>
             <div className="mt-2 h-2 rounded-full bg-white/10">
               <div
                 className="h-2 rounded-full bg-[linear-gradient(90deg,#2093FF,#0026FF)] transition-all duration-500"
                 style={{ width: `${Math.max(4, Math.min(100, summary.goalProgress))}%` }}
               />
             </div>
-            <p className="mt-1 text-xs text-slate-400">Target: {formatMoney(DEFAULT_GOAL)} monthly profit</p>
+            <p className="mt-1 text-sm text-slate-400">Target: {formatMoney(DEFAULT_GOAL)} monthly profit</p>
           </article>
         </div>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
         <SectionCard title="Revenue vs Expenses (Last 6 Months)">
-          <div className="h-72">
+          <div className="h-64 sm:h-72">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={sixMonthSeries}>
                 <XAxis dataKey="label" stroke="#94a3b8" tickLine={false} axisLine={false} />
@@ -760,7 +760,7 @@ export default function FinancePage() {
         </SectionCard>
 
         <SectionCard title="Revenue by Service Type">
-          <div className="h-72">
+          <div className="h-64 sm:h-72">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie data={revenueByService} dataKey="value" nameKey="name" innerRadius={55} outerRadius={86} paddingAngle={2}>
@@ -772,7 +772,7 @@ export default function FinancePage() {
               </PieChart>
             </ResponsiveContainer>
           </div>
-          <div className="mt-2 flex flex-wrap gap-2">
+          <div className="mt-2 flex flex-wrap gap-2 text-sm">
             {revenueByService.map((item) => (
               <span key={item.name} className={`rounded-full border px-2 py-1 text-xs ${SERVICE_BADGE_CLASS[item.name as FinanceServiceType]}`}>
                 {item.name}
@@ -782,7 +782,7 @@ export default function FinancePage() {
         </SectionCard>
 
         <SectionCard title="Revenue by Client Type">
-          <div className="h-72">
+          <div className="h-64 sm:h-72">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie data={revenueByClientType} dataKey="value" nameKey="name" innerRadius={55} outerRadius={86} paddingAngle={2}>
@@ -794,7 +794,7 @@ export default function FinancePage() {
               </PieChart>
             </ResponsiveContainer>
           </div>
-          <div className="mt-2 flex flex-wrap gap-2 text-xs text-slate-300">
+          <div className="mt-2 flex flex-wrap gap-2 text-sm text-slate-300">
             {revenueByClientType.map((item) => (
               <span key={item.name} className="rounded-full border border-white/20 px-2 py-1">{item.name}</span>
             ))}
@@ -802,7 +802,7 @@ export default function FinancePage() {
         </SectionCard>
 
         <SectionCard title="Profit Margin Trend (Last 6 Months)">
-          <div className="h-72">
+          <div className="h-64 sm:h-72">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={sixMonthSeries}>
                 <XAxis dataKey="label" stroke="#94a3b8" tickLine={false} axisLine={false} />
@@ -812,18 +812,19 @@ export default function FinancePage() {
               </LineChart>
             </ResponsiveContainer>
           </div>
-          <p className="text-xs text-slate-400">Green when above profit goal, red when below.</p>
+          <p className="text-sm text-slate-400">Green when above profit goal, red when below.</p>
         </SectionCard>
       </div>
 
       <div className="mt-6">
-        <div className="mb-3 flex flex-wrap gap-2">
+        <div className="sticky top-[5.25rem] z-20 -mx-1 mb-3 overflow-x-auto px-1 pb-1 sm:top-2">
+          <div className="flex min-w-max gap-2">
           {(["revenue", "expenses", "clients", "reports"] as DashboardTab[]).map((tab) => (
             <button
               key={tab}
               type="button"
               onClick={() => setActiveTab(tab)}
-              className={`rounded-xl border px-4 py-2 text-sm font-semibold capitalize transition ${
+              className={`min-h-11 rounded-xl border px-4 py-2.5 text-sm font-semibold capitalize transition ${
                 activeTab === tab
                   ? "border-blue-300/35 bg-[linear-gradient(90deg,rgba(32,147,255,0.28),rgba(0,38,255,0.24))] text-white"
                   : "border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/[0.08]"
@@ -832,11 +833,12 @@ export default function FinancePage() {
               {tab}
             </button>
           ))}
+          </div>
         </div>
 
         <div key={activeTab} className="animate-[toast-in_260ms_ease]">
           {activeTab === "revenue" ? (
-            <section className="glass-panel rounded-2xl p-4">
+            <section className="glass-panel rounded-2xl p-3 sm:p-4">
               <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                 <div className="relative w-full lg:max-w-sm">
                   <Search size={16} className="pointer-events-none absolute left-3 top-2.5 text-slate-400" />
@@ -844,23 +846,23 @@ export default function FinancePage() {
                     value={revenueSearch}
                     onChange={(event) => setRevenueSearch(event.target.value)}
                     placeholder="Search client, service, date"
-                    className="w-full rounded-xl border border-white/10 bg-[#0d111d] px-9 py-2 text-sm text-slate-100 outline-none focus:border-blue-300/35"
+                    className="min-h-11 w-full rounded-xl border border-white/10 bg-[#0d111d] px-9 py-2.5 text-sm text-slate-100 outline-none focus:border-blue-300/35"
                   />
                 </div>
                 <div className="grid gap-2 sm:grid-cols-3 lg:w-[44rem]">
-                  <select value={revenueServiceFilter} onChange={(event) => setRevenueServiceFilter(event.target.value as "all" | FinanceServiceType)} className="rounded-xl border border-white/10 bg-[#0d111d] px-3 py-2 text-sm text-slate-100">
+                  <select value={revenueServiceFilter} onChange={(event) => setRevenueServiceFilter(event.target.value as "all" | FinanceServiceType)} className="min-h-11 rounded-xl border border-white/10 bg-[#0d111d] px-3 py-2.5 text-sm text-slate-100">
                     <option value="all">All services</option>
                     {SERVICE_OPTIONS.map((service) => (
                       <option key={service} value={service}>{service}</option>
                     ))}
                   </select>
-                  <select value={revenueClientTypeFilter} onChange={(event) => setRevenueClientTypeFilter(event.target.value as "all" | FinanceClientType)} className="rounded-xl border border-white/10 bg-[#0d111d] px-3 py-2 text-sm text-slate-100">
+                  <select value={revenueClientTypeFilter} onChange={(event) => setRevenueClientTypeFilter(event.target.value as "all" | FinanceClientType)} className="min-h-11 rounded-xl border border-white/10 bg-[#0d111d] px-3 py-2.5 text-sm text-slate-100">
                     <option value="all">All client types</option>
                     {(Object.keys(CLIENT_TYPE_LABEL) as FinanceClientType[]).map((type) => (
                       <option key={type} value={type}>{CLIENT_TYPE_LABEL[type]}</option>
                     ))}
                   </select>
-                  <select value={revenueRecurringFilter} onChange={(event) => setRevenueRecurringFilter(event.target.value as "all" | "M" | "1-time")} className="rounded-xl border border-white/10 bg-[#0d111d] px-3 py-2 text-sm text-slate-100">
+                  <select value={revenueRecurringFilter} onChange={(event) => setRevenueRecurringFilter(event.target.value as "all" | "M" | "1-time")} className="min-h-11 rounded-xl border border-white/10 bg-[#0d111d] px-3 py-2.5 text-sm text-slate-100">
                     <option value="all">All billing types</option>
                     <option value="M">Recurring</option>
                     <option value="1-time">One-time</option>
@@ -870,7 +872,7 @@ export default function FinancePage() {
 
               <div className="mt-4 overflow-x-auto rounded-xl border border-white/10">
                 <table className="min-w-[980px] w-full text-sm">
-                  <thead className="bg-white/[0.04] text-left text-[11px] uppercase tracking-[0.14em] text-slate-400">
+                  <thead className="bg-white/[0.04] text-left text-xs uppercase tracking-[0.14em] text-slate-400">
                     <tr>
                       {[
                         { key: "clientName", label: "Client Name" },
@@ -884,7 +886,7 @@ export default function FinancePage() {
                           <button
                             type="button"
                             onClick={() => setRevenueSort((current) => ({ key: column.key as RevenueSortKey, dir: current.key === column.key && current.dir === "desc" ? "asc" : "desc" }))}
-                            className="inline-flex items-center gap-1"
+                            className="inline-flex min-h-11 items-center gap-1 py-1"
                           >
                             {column.label}
                             <ChevronDown size={12} className={revenueSort.key === column.key && revenueSort.dir === "asc" ? "rotate-180" : ""} />
@@ -937,22 +939,22 @@ export default function FinancePage() {
                 const isOpen = expensesOpen[section.key];
 
                 return (
-                  <div key={section.key} className="glass-panel rounded-2xl p-4">
+                  <div key={section.key} className="glass-panel rounded-2xl p-3 sm:p-4">
                     <button
                       type="button"
                       onClick={() => setExpensesOpen((current) => ({ ...current, [section.key]: !current[section.key] }))}
-                      className="flex w-full items-center justify-between"
+                      className="flex min-h-11 w-full items-center justify-between"
                     >
                       <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-200">{section.title}</h3>
                       <ChevronDown size={16} className={isOpen ? "rotate-180" : ""} />
                     </button>
 
-                    <div className="mt-2 flex items-center justify-between text-sm text-slate-300">
+                    <div className="mt-2 flex flex-col gap-2 text-sm text-slate-300 sm:flex-row sm:items-center sm:justify-between">
                       <span>Total: <span className="font-semibold text-white">{formatMoney(total)}</span></span>
                       <button
                         type="button"
                         onClick={() => addGeneralRow(section.key)}
-                        className="rounded-lg border border-blue-300/30 bg-blue-500/15 px-3 py-1.5 text-xs font-semibold text-blue-100"
+                        className="min-h-11 rounded-lg border border-blue-300/30 bg-blue-500/15 px-3 py-2 text-sm font-semibold text-blue-100"
                       >
                         Add Row
                       </button>
@@ -961,7 +963,7 @@ export default function FinancePage() {
                     {isOpen ? (
                       <div className="mt-3 overflow-x-auto rounded-xl border border-white/10">
                         <table className="min-w-[980px] w-full text-sm">
-                          <thead className="bg-white/[0.04] text-left text-[11px] uppercase tracking-[0.14em] text-slate-400">
+                          <thead className="bg-white/[0.04] text-left text-xs uppercase tracking-[0.14em] text-slate-400">
                             <tr>
                               <th className="px-3 py-2">Name</th>
                               <th className="px-3 py-2">Date</th>
@@ -978,21 +980,21 @@ export default function FinancePage() {
                                   <input
                                     value={row.name}
                                     onChange={(event) => updateGeneralRow(section.key, row.id, (item) => ({ ...item, name: event.target.value }))}
-                                    className="w-full rounded-lg border border-white/10 bg-[#0d111d] px-2 py-1.5"
+                                    className="min-h-11 w-full rounded-lg border border-white/10 bg-[#0d111d] px-2 py-2"
                                   />
                                 </td>
                                 <td className="px-2 py-1">
                                   <input
                                     value={row.date}
                                     onChange={(event) => updateGeneralRow(section.key, row.id, (item) => ({ ...item, date: event.target.value }))}
-                                    className="w-full rounded-lg border border-white/10 bg-[#0d111d] px-2 py-1.5"
+                                    className="min-h-11 w-full rounded-lg border border-white/10 bg-[#0d111d] px-2 py-2"
                                   />
                                 </td>
                                 <td className="px-2 py-1">
                                   <select
                                     value={row.recurring}
                                     onChange={(event) => updateGeneralRow(section.key, row.id, (item) => ({ ...item, recurring: event.target.value as "M" | "1-time" }))}
-                                    className="w-full rounded-lg border border-white/10 bg-[#0d111d] px-2 py-1.5"
+                                    className="min-h-11 w-full rounded-lg border border-white/10 bg-[#0d111d] px-2 py-2"
                                   >
                                     <option value="M">M</option>
                                     <option value="1-time">1-time</option>
@@ -1002,7 +1004,7 @@ export default function FinancePage() {
                                   <input
                                     value={row.notes}
                                     onChange={(event) => updateGeneralRow(section.key, row.id, (item) => ({ ...item, notes: event.target.value }))}
-                                    className="w-full rounded-lg border border-white/10 bg-[#0d111d] px-2 py-1.5"
+                                    className="min-h-11 w-full rounded-lg border border-white/10 bg-[#0d111d] px-2 py-2"
                                   />
                                 </td>
                                 <td className="px-2 py-1">
@@ -1012,14 +1014,14 @@ export default function FinancePage() {
                                     step="0.01"
                                     value={Number.isFinite(row.amount) ? row.amount : 0}
                                     onChange={(event) => updateGeneralRow(section.key, row.id, (item) => ({ ...item, amount: Math.max(0, Number(event.target.value) || 0) }))}
-                                    className="w-full rounded-lg border border-white/10 bg-[#0d111d] px-2 py-1.5"
+                                    className="min-h-11 w-full rounded-lg border border-white/10 bg-[#0d111d] px-2 py-2"
                                   />
                                 </td>
                                 <td className="px-2 py-1">
                                   <button
                                     type="button"
                                     onClick={() => deleteGeneralRow(section.key, row.id)}
-                                    className="rounded-lg border border-rose-400/30 bg-rose-500/10 p-2 text-rose-200"
+                                    className="min-h-11 rounded-lg border border-rose-400/30 bg-rose-500/10 p-2.5 text-rose-200"
                                   >
                                     <Trash2 size={14} />
                                   </button>
@@ -1043,23 +1045,23 @@ export default function FinancePage() {
           {activeTab === "clients" ? (
             <section className="space-y-4">
               <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-                <select value={clientSort} onChange={(event) => setClientSort(event.target.value as ClientSortKey)} className="rounded-xl border border-white/10 bg-[#0d111d] px-3 py-2 text-sm text-slate-100">
+                <select value={clientSort} onChange={(event) => setClientSort(event.target.value as ClientSortKey)} className="min-h-11 rounded-xl border border-white/10 bg-[#0d111d] px-3 py-2.5 text-sm text-slate-100">
                   <option value="revenue">Sort: Revenue</option>
                   <option value="name">Sort: Name</option>
                   <option value="profitMargin">Sort: Profit Margin</option>
                 </select>
-                <select value={clientTypeFilter} onChange={(event) => setClientTypeFilter(event.target.value as "all" | FinanceClientType)} className="rounded-xl border border-white/10 bg-[#0d111d] px-3 py-2 text-sm text-slate-100">
+                <select value={clientTypeFilter} onChange={(event) => setClientTypeFilter(event.target.value as "all" | FinanceClientType)} className="min-h-11 rounded-xl border border-white/10 bg-[#0d111d] px-3 py-2.5 text-sm text-slate-100">
                   <option value="all">All client types</option>
                   {(Object.keys(CLIENT_TYPE_LABEL) as FinanceClientType[]).map((type) => (
                     <option key={type} value={type}>{CLIENT_TYPE_LABEL[type]}</option>
                   ))}
                 </select>
-                <select value={clientStatusFilter} onChange={(event) => setClientStatusFilter(event.target.value as "all" | "active" | "inactive")} className="rounded-xl border border-white/10 bg-[#0d111d] px-3 py-2 text-sm text-slate-100">
+                <select value={clientStatusFilter} onChange={(event) => setClientStatusFilter(event.target.value as "all" | "active" | "inactive")} className="min-h-11 rounded-xl border border-white/10 bg-[#0d111d] px-3 py-2.5 text-sm text-slate-100">
                   <option value="all">All statuses</option>
                   <option value="active">Active</option>
                   <option value="inactive">Inactive</option>
                 </select>
-                <select value={clientServiceFilter} onChange={(event) => setClientServiceFilter(event.target.value as "all" | FinanceServiceType)} className="rounded-xl border border-white/10 bg-[#0d111d] px-3 py-2 text-sm text-slate-100">
+                <select value={clientServiceFilter} onChange={(event) => setClientServiceFilter(event.target.value as "all" | FinanceServiceType)} className="min-h-11 rounded-xl border border-white/10 bg-[#0d111d] px-3 py-2.5 text-sm text-slate-100">
                   <option value="all">All services</option>
                   {SERVICE_OPTIONS.map((service) => (
                     <option key={service} value={service}>{service}</option>
@@ -1067,7 +1069,7 @@ export default function FinancePage() {
                 </select>
               </div>
 
-              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
                 {clientCards.map((entry) => (
                   <Link key={entry.client.id} href={`/clients/${entry.client.id}`} className="glass-card rounded-2xl p-4 transition hover:-translate-y-0.5">
                     <div className="flex items-start justify-between gap-3">
@@ -1076,8 +1078,8 @@ export default function FinancePage() {
                         {entry.client.status === "active" ? "Active" : "Inactive"}
                       </span>
                     </div>
-                    <p className="mt-1 text-xs uppercase tracking-[0.1em] text-slate-400">{CLIENT_TYPE_LABEL[entry.client.clientType]}</p>
-                    <p className="mt-3 text-2xl font-semibold text-white">{formatMoney(entry.revenue)}</p>
+                    <p className="mt-1 text-sm uppercase tracking-[0.1em] text-slate-400">{CLIENT_TYPE_LABEL[entry.client.clientType]}</p>
+                    <p className="mt-3 text-xl font-semibold text-white sm:text-2xl">{formatMoney(entry.revenue)}</p>
                     <p className="mt-1 text-sm text-slate-300">Profit Margin: <span className="font-semibold">{formatPercent(entry.profitMargin)}</span></p>
                     <div className="mt-3 flex flex-wrap gap-2">
                       {entry.client.services.map((service) => (

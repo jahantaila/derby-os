@@ -102,7 +102,7 @@ export default function EmployeeDetailPage({ params }: EmployeeDetailPageProps) 
         Back to employees
       </Link>
 
-      <section className="glass-panel card-accent-employee p-6 sm:p-8">
+      <section className="glass-panel card-accent-employee p-5 sm:p-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="page-title">{employee.name}</h1>
@@ -115,24 +115,26 @@ export default function EmployeeDetailPage({ params }: EmployeeDetailPageProps) 
         <div className="mt-5 flex flex-wrap items-center gap-3 text-sm text-slate-300">
           <span className={`status-dot ${isLive ? "live" : "idle"}`} />
           <span className="capitalize">{employee.status}</span>
-          <span className="rounded-full border border-white/15 px-2.5 py-1 text-xs text-slate-300">
+          <span className="rounded-full border border-white/15 px-2.5 py-1 text-sm text-slate-300">
             Current Task: {employee.currentTask || "-"}
           </span>
         </div>
       </section>
 
-      <section className="glass-panel p-6 sm:p-8">
+      <section className="glass-panel p-5 sm:p-8">
         <h2 className="section-title">Calendar</h2>
         <p className="mt-2 text-sm text-slate-400">{calendar.monthLabel}</p>
-        <div className="mt-4 grid grid-cols-7 gap-2">
-          {calendar.cells.map((cell, idx) => (
-            <div
-              key={`${idx}-${cell?.day ?? "blank"}`}
-              className={`agent-calendar-cell ${cell?.isToday ? "today" : ""} ${cell ? "" : "empty"}`}
-            >
-              {cell?.day ?? ""}
-            </div>
-          ))}
+        <div className="mt-4 overflow-x-auto">
+          <div className="grid min-w-[22rem] grid-cols-7 gap-2">
+            {calendar.cells.map((cell, idx) => (
+              <div
+                key={`${idx}-${cell?.day ?? "blank"}`}
+                className={`agent-calendar-cell ${cell?.isToday ? "today" : ""} ${cell ? "" : "empty"}`}
+              >
+                {cell?.day ?? ""}
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     </div>

@@ -216,7 +216,7 @@ export default function TasksPage() {
   }
 
   return (
-    <section className="animate-enter space-y-6" style={{ animationDelay: "80ms" }}>
+    <section className="animate-enter space-y-5 sm:space-y-6" style={{ animationDelay: "80ms" }}>
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="page-title">Tasks</h1>
@@ -225,7 +225,7 @@ export default function TasksPage() {
         <button
           type="button"
           onClick={openCreatePanel}
-          className="inline-flex items-center gap-2 rounded-xl border border-blue-300/30 bg-blue-500/20 px-4 py-2 text-sm font-semibold text-blue-100 transition hover:border-blue-300/60 hover:bg-blue-500/30"
+          className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-blue-300/30 bg-blue-500/20 px-4 py-2.5 text-sm font-semibold text-blue-100 transition hover:border-blue-300/60 hover:bg-blue-500/30"
         >
           <Plus size={16} />
           Add New Task
@@ -239,7 +239,7 @@ export default function TasksPage() {
       {loading ? (
         <div className="glass-panel p-6 text-sm text-slate-300">Loading tasks...</div>
       ) : (
-        <div className="grid gap-4 xl:grid-cols-4 md:grid-cols-2 grid-cols-1">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
           {COLUMNS.map((column) => {
             const columnTasks = tasks.filter((task) => task.status === column.status);
 
@@ -291,17 +291,17 @@ export default function TasksPage() {
                       >
                         <div className="mb-2 text-sm font-bold leading-snug text-white">{task.title}</div>
                         <div className="mb-3 flex items-center justify-between gap-2">
-                          <span className="rounded-full border border-white/15 bg-white/10 px-2 py-1 text-[11px] text-slate-200">
+                          <span className="rounded-full border border-white/15 bg-white/10 px-2 py-1 text-xs text-slate-200">
                             {task.client}
                           </span>
-                          <div className="inline-flex items-center gap-2 text-xs text-slate-200">
+                          <div className="inline-flex items-center gap-2 text-sm text-slate-200">
                             <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-white/20 bg-white/10 text-[10px] font-semibold">
                               {initialsFromName(assignee)}
                             </span>
                             {assignee}
                           </div>
                         </div>
-                        <div className="flex items-center justify-between text-[11px] text-slate-300">
+                        <div className="flex items-center justify-between text-xs text-slate-300">
                           <span className="inline-flex items-center gap-1.5">
                             <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: priorityColor(task.priority) }} />
                             {task.priority}
@@ -329,7 +329,7 @@ export default function TasksPage() {
       {panelMode ? (
         <div className="fixed inset-0 z-50" role="dialog" aria-modal="true">
           <button type="button" onClick={closePanel} className="absolute inset-0 bg-black/60 backdrop-blur-sm" aria-label="Close panel" />
-          <div className="absolute right-0 top-0 h-full w-full max-w-xl border-l border-white/15 bg-[#0b0d15]/90 p-6 shadow-2xl backdrop-blur-xl">
+          <div className="absolute right-0 top-0 h-full w-full border-l border-white/15 bg-[#0b0d15]/90 p-4 shadow-2xl backdrop-blur-xl sm:max-w-xl sm:p-6">
             <div className="mb-5 flex items-start justify-between gap-3">
               <div>
                 <h2 className="text-xl font-semibold text-white">{panelMode === "create" ? "Create Task" : "Task Details"}</h2>
@@ -342,7 +342,7 @@ export default function TasksPage() {
                   type="button"
                   onClick={handleDelete}
                   disabled={saving}
-                  className="inline-flex items-center gap-2 rounded-lg border border-red-500/40 bg-red-500/15 px-3 py-1.5 text-xs font-semibold text-red-200 transition hover:bg-red-500/25 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-red-500/40 bg-red-500/15 px-3 py-2 text-sm font-semibold text-red-200 transition hover:bg-red-500/25 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <Trash2 size={14} />
                   Delete
@@ -357,7 +357,7 @@ export default function TasksPage() {
                   required
                   value={form.title}
                   onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
-                  className="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-sm text-white outline-none transition focus:border-blue-400/70"
+                  className="min-h-11 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2.5 text-sm text-white outline-none transition focus:border-blue-400/70"
                 />
               </div>
 
@@ -367,7 +367,7 @@ export default function TasksPage() {
                   value={form.description}
                   onChange={(event) => setForm((prev) => ({ ...prev, description: event.target.value }))}
                   rows={4}
-                  className="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-sm text-white outline-none transition focus:border-blue-400/70"
+                  className="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2.5 text-sm text-white outline-none transition focus:border-blue-400/70"
                 />
               </div>
 
@@ -377,7 +377,7 @@ export default function TasksPage() {
                   <select
                     value={form.status}
                     onChange={(event) => setForm((prev) => ({ ...prev, status: event.target.value as TaskStatus }))}
-                    className="w-full rounded-lg border border-white/20 bg-[#0f1222] px-3 py-2 text-sm text-white outline-none transition focus:border-blue-400/70"
+                    className="min-h-11 w-full rounded-lg border border-white/20 bg-[#0f1222] px-3 py-2.5 text-sm text-white outline-none transition focus:border-blue-400/70"
                   >
                     {COLUMNS.map((column) => (
                       <option key={column.status} value={column.status}>
@@ -391,7 +391,7 @@ export default function TasksPage() {
                   <select
                     value={form.priority}
                     onChange={(event) => setForm((prev) => ({ ...prev, priority: event.target.value as TaskPriority }))}
-                    className="w-full rounded-lg border border-white/20 bg-[#0f1222] px-3 py-2 text-sm text-white outline-none transition focus:border-blue-400/70"
+                    className="min-h-11 w-full rounded-lg border border-white/20 bg-[#0f1222] px-3 py-2.5 text-sm text-white outline-none transition focus:border-blue-400/70"
                   >
                     <option value="high">High</option>
                     <option value="medium">Medium</option>
@@ -406,7 +406,7 @@ export default function TasksPage() {
                   <select
                     value={form.assignee}
                     onChange={(event) => setForm((prev) => ({ ...prev, assignee: event.target.value }))}
-                    className="w-full rounded-lg border border-white/20 bg-[#0f1222] px-3 py-2 text-sm text-white outline-none transition focus:border-blue-400/70"
+                    className="min-h-11 w-full rounded-lg border border-white/20 bg-[#0f1222] px-3 py-2.5 text-sm text-white outline-none transition focus:border-blue-400/70"
                   >
                     {TEAM_MEMBERS.map((member) => (
                       <option key={member.id} value={member.id}>
@@ -421,7 +421,7 @@ export default function TasksPage() {
                     type="date"
                     value={form.dueDate}
                     onChange={(event) => setForm((prev) => ({ ...prev, dueDate: event.target.value }))}
-                    className="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-sm text-white outline-none transition focus:border-blue-400/70"
+                    className="min-h-11 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2.5 text-sm text-white outline-none transition focus:border-blue-400/70"
                   />
                 </div>
               </div>
@@ -431,7 +431,7 @@ export default function TasksPage() {
                 <input
                   value={form.client}
                   onChange={(event) => setForm((prev) => ({ ...prev, client: event.target.value }))}
-                  className="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-sm text-white outline-none transition focus:border-blue-400/70"
+                  className="min-h-11 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2.5 text-sm text-white outline-none transition focus:border-blue-400/70"
                 />
               </div>
 
@@ -439,7 +439,7 @@ export default function TasksPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="w-full rounded-xl border border-blue-300/35 bg-gradient-to-r from-[#2093FF]/35 to-[#0026FF]/35 px-4 py-2.5 text-sm font-semibold text-blue-100 transition hover:from-[#2093FF]/45 hover:to-[#0026FF]/45 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="min-h-11 w-full rounded-xl border border-blue-300/35 bg-gradient-to-r from-[#2093FF]/35 to-[#0026FF]/35 px-4 py-2.5 text-sm font-semibold text-blue-100 transition hover:from-[#2093FF]/45 hover:to-[#0026FF]/45 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {saving ? "Saving..." : panelMode === "create" ? "Create Task" : "Save Changes"}
                 </button>
