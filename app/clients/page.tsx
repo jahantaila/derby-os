@@ -76,8 +76,8 @@ export default async function ClientsPage() {
 
               <div className="mt-4 flex items-center justify-between gap-3 border-t border-white/8 pt-4">
                 <p className="text-sm text-slate-400">{client.notes ?? "No notes added yet."}</p>
-                <Link href="/clients/onboard" className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.14em] text-sky-200 transition hover:text-white">
-                  Add another
+                <Link href={`/clients/${client.id}`} className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.14em] text-sky-200 transition hover:text-white">
+                  Open profile
                   <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
               </div>

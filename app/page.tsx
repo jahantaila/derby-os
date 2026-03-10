@@ -16,6 +16,8 @@ import {
   Plus,
   Users,
 } from "lucide-react";
+import { ErrorBoundary } from "@/components/error-boundary";
+import { GridSkeleton, TableSkeleton } from "@/components/loading-skeleton";
 
 type AgentStatus = "online" | "working" | "idle" | "offline";
 type TaskStatus = "todo" | "in-progress" | "blocked" | "done";
@@ -250,6 +252,7 @@ export default function DashboardPage() {
   const [documents, setDocuments] = useState<DocumentRecord[]>([]);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [now, setNow] = useState(() => new Date());
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     let mounted = true;
@@ -297,6 +300,8 @@ export default function DashboardPage() {
         setCalendarEvents(Array.isArray(calendarData) ? calendarData : []);
       } catch {
         // Keep the last successful dashboard snapshot during transient failures.
+      } finally {
+        if (mounted) setIsLoading(false);
       }
     };
 
@@ -384,7 +389,8 @@ export default function DashboardPage() {
   );
 
   return (
-    <div className="space-y-6 pb-4 sm:space-y-8" style={{ backgroundColor: "#0a0a0f" }}>
+    <ErrorBoundary fallbackTitle="Dashboard unavailable" fallbackMessage="The dashboard hit an unexpected rendering error. Retry to re-mount the view.">
+      <div className="space-y-6 pb-4 sm:space-y-8" style={{ backgroundColor: "#0a0a0f" }}>
       <section className="glass-panel animate-enter relative overflow-hidden p-5 sm:p-6" style={{ animationDelay: "40ms" }}>
         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#2093FF] via-[#58B8FF] to-[#0026FF]" />
         <div className="absolute right-0 top-0 h-32 w-32 rounded-full bg-[#2093FF]/12 blur-3xl" />
@@ -416,38 +422,56 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      <section className="animate-enter" style={{ animationDelay: "90ms" }}>
-        <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-          {metrics.map((metric, index) => {
-            const Icon = metric.icon;
+        <section className="animate-enter" style={{ animationDelay: "90ms" }}>
+          {isLoading ? (
+            <GridSkeleton className="grid-cols-2 xl:grid-cols-4" count={4} />
+          ) : (
+            <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+              {metrics.map((metric, index) => {
+                const Icon = metric.icon;
 
-            return (
-              <Link
-                key={metric.label}
-                href={metric.href}
-                className="glass-card animate-enter relative overflow-hidden rounded-2xl p-4 sm:p-5"
-                style={{ animationDelay: `${120 + index * 40}ms` }}
-              >
-                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-[#2093FF]/0 via-[#2093FF] to-[#0026FF]/0" />
-                <div className="flex items-start justify-between gap-3">
-                  <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-2.5">
-                    <Icon className="h-5 w-5 text-sky-200" />
-                  </div>
-                  <div className="inline-flex items-center gap-1 text-xs uppercase tracking-[0.16em] text-slate-400">
-                    <ArrowUpRight className="h-3.5 w-3.5 text-sky-300" />
-                    Stable
-                  </div>
-                </div>
-                <p className="mt-5 text-3xl font-semibold text-white sm:text-4xl">{metric.value}</p>
-                <p className="mt-1 text-xs uppercase tracking-[0.14em] text-slate-400 sm:text-sm">{metric.label}</p>
-              </Link>
-            );
-          })}
-        </div>
-      </section>
+                return (
+                  <Link
+                    key={metric.label}
+                    href={metric.href}
+                    className="glass-card animate-enter relative overflow-hidden rounded-2xl p-4 sm:p-5"
+                    style={{ animationDelay: `${120 + index * 40}ms` }}
+                  >
+                    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-[#2093FF]/0 via-[#2093FF] to-[#0026FF]/0" />
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-2.5">
+                        <Icon className="h-5 w-5 text-sky-200" />
+                      </div>
+                      <div className="inline-flex items-center gap-1 text-xs uppercase tracking-[0.16em] text-slate-400">
+                        <ArrowUpRight className="h-3.5 w-3.5 text-sky-300" />
+                        Stable
+                      </div>
+                    </div>
+                    <p className="mt-5 text-3xl font-semibold text-white sm:text-4xl">{metric.value}</p>
+                    <p className="mt-1 text-xs uppercase tracking-[0.14em] text-slate-400 sm:text-sm">{metric.label}</p>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </section>
 
-      <section className="grid gap-4 xl:grid-cols-[minmax(0,1.6fr)_minmax(320px,1fr)]">
-        <div className="space-y-4">
+        {isLoading ? (
+          <section className="grid gap-4 xl:grid-cols-[minmax(0,1.6fr)_minmax(320px,1fr)]">
+            <div className="space-y-4">
+              <GridSkeleton columns={2} count={4} />
+              <TableSkeleton />
+              <GridSkeleton columns={3} count={3} />
+            </div>
+            <div className="space-y-4">
+              <TableSkeleton />
+              <TableSkeleton />
+              <TableSkeleton rows={3} />
+            </div>
+          </section>
+        ) : (
+          <section className="grid gap-4 xl:grid-cols-[minmax(0,1.6fr)_minmax(320px,1fr)]">
+            <div className="space-y-4">
           <article className="glass-panel animate-enter rounded-2xl p-4 sm:p-5" style={{ animationDelay: "180ms" }}>
             <DashboardSectionHeader title="Agent Status Grid" href="/agents" />
             <div className="mt-4 grid gap-3 md:grid-cols-2">
@@ -550,9 +574,9 @@ export default function DashboardPage() {
               )}
             </div>
           </article>
-        </div>
+            </div>
 
-        <div className="space-y-4">
+            <div className="space-y-4">
           <article className="glass-panel animate-enter rounded-2xl p-4 sm:p-5" style={{ animationDelay: "200ms" }}>
             <DashboardSectionHeader title="Quick Actions" href="/office" />
             <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
@@ -628,8 +652,10 @@ export default function DashboardPage() {
               )}
             </div>
           </article>
-        </div>
-      </section>
-    </div>
+            </div>
+          </section>
+        )}
+      </div>
+    </ErrorBoundary>
   );
 }

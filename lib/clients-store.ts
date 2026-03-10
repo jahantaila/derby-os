@@ -130,6 +130,11 @@ export async function getClients(): Promise<ClientProfile[]> {
   return merged;
 }
 
+export async function getClientById(id: string): Promise<ClientProfile | null> {
+  const clients = await getClients();
+  return clients.find((client) => client.id === id) ?? null;
+}
+
 export async function writeClients(data: ClientProfile[]): Promise<void> {
   const normalized = data.map(normalizeClient).filter((client): client is ClientProfile => client !== null);
   await writePersistentData(CLIENTS_FILE, sortClients(normalized));

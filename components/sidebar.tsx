@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { BriefcaseBusiness, CalendarDays, CheckSquare, DollarSign, FileText, FolderKanban, Funnel, Settings, UserRound, Users } from "lucide-react";
+import { BriefcaseBusiness, CalendarDays, CheckSquare, DollarSign, FileText, FolderKanban, Funnel, ReceiptText, Settings, UserRound, Users } from "lucide-react";
 
 const PRIMARY_NAV_ITEMS = [
   { href: "/agents", label: "Agents", icon: Users },
   { href: "/employees", label: "Employees", icon: UserRound },
   { href: "/tasks", label: "Tasks", icon: CheckSquare },
   { href: "/finance", label: "Finance", icon: DollarSign },
+  { href: "/invoices", label: "Invoices", icon: ReceiptText },
   { href: "/clients", label: "Clients", icon: BriefcaseBusiness },
   { href: "/calendar", label: "Calendar", icon: CalendarDays },
   { href: "/pipeline", label: "Pipeline", icon: Funnel },

@@ -42,3 +42,15 @@ export async function writePersistentData(file: string, data: unknown): Promise<
 
   await client.set(keyFor(file), JSON.stringify(data));
 }
+
+export async function checkRedisConnection(): Promise<boolean> {
+  const client = await getClient();
+  if (!client) return false;
+
+  try {
+    await client.ping();
+    return true;
+  } catch {
+    return false;
+  }
+}

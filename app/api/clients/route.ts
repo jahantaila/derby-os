@@ -22,7 +22,7 @@ function toClientType(value: unknown): ClientProfile["clientType"] {
   return "other";
 }
 
-function toClientPayload(body: unknown): ClientProfile | null {
+export function toClientPayload(body: unknown): ClientProfile | null {
   if (!body || typeof body !== "object") return null;
   const input = body as Record<string, unknown>;
   const id = toString(input.id) || crypto.randomUUID();
