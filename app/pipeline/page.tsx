@@ -20,6 +20,7 @@ import {
   Search,
   SendHorizontal,
   Sparkles,
+  Trash2,
   Upload,
   UserRound,
   Users,
@@ -521,24 +522,27 @@ function ModalShell({
   children: ReactNode;
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#02040a]/80 p-4 backdrop-blur-sm">
-      <div className="glass-panel w-full max-w-4xl p-5 sm:p-6">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <div className="glass-card inline-flex items-center gap-2 rounded-2xl px-4 py-2 text-sm text-blue-100">
-              {icon}
-              <span>{title}</span>
+    <div className="fixed inset-0 z-50 bg-[#02040a]/80 backdrop-blur-sm">
+      <div className="absolute inset-0" onClick={onClose} aria-hidden="true" />
+      <div className="absolute left-1/2 top-1/2 w-[calc(100%-1rem)] max-w-4xl -translate-x-1/2 -translate-y-1/2 px-2 sm:w-full sm:px-4">
+        <div className="glass-panel max-h-[90vh] overflow-y-auto p-5 sm:p-6">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <div className="glass-card inline-flex items-center gap-2 rounded-2xl px-4 py-2 text-sm text-blue-100">
+                {icon}
+                <span>{title}</span>
+              </div>
             </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-300 transition hover:border-blue-300/40 hover:text-white"
+            >
+              <X size={16} />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-300 transition hover:border-blue-300/40 hover:text-white"
-          >
-            <X size={16} />
-          </button>
+          <div className="mt-5">{children}</div>
         </div>
-        <div className="mt-5">{children}</div>
       </div>
     </div>
   );
@@ -825,6 +829,31 @@ export default function PipelinePage() {
       setError(caughtError instanceof Error ? caughtError.message : "Unable to convert contact to client.");
     } finally {
       setConvertingDealId("");
+    }
+  }
+
+  async function deleteContact(deal: PipelineDeal) {
+    if (!window.confirm("Are you sure? This cannot be undone.")) return;
+
+    setWorkingDealId(deal.id);
+    setError("");
+
+    try {
+      const response = await fetch(`/api/pipeline/${deal.id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Unable to delete contact.");
+      }
+
+      await loadDeals();
+      setSelectedId("");
+      setMobileOpenId("");
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : "Unable to delete contact.");
+    } finally {
+      setWorkingDealId("");
     }
   }
 
@@ -1632,15 +1661,26 @@ export default function PipelinePage() {
                       <p className="section-title">Convert</p>
                       <p className="mt-1 text-sm text-slate-400">Create a client profile from this contact and open it immediately.</p>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => void convertToClient(detailDeal)}
-                      disabled={convertingDealId === detailDeal.id}
-                      className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-blue-300/30 bg-[linear-gradient(135deg,#2093FF,#0026FF)] px-5 py-2 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      <Building2 size={16} />
-                      {convertingDealId === detailDeal.id ? "Converting..." : "Convert to Client"}
-                    </button>
+                    <div className="flex flex-col gap-3 sm:flex-row">
+                      <button
+                        type="button"
+                        onClick={() => void deleteContact(detailDeal)}
+                        disabled={workingDealId === detailDeal.id}
+                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-red-500/30 bg-red-500/10 px-5 py-2 text-sm font-semibold text-red-200 transition hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        <Trash2 size={16} />
+                        {workingDealId === detailDeal.id ? "Deleting..." : "Delete Contact"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => void convertToClient(detailDeal)}
+                        disabled={convertingDealId === detailDeal.id}
+                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-blue-300/30 bg-[linear-gradient(135deg,#2093FF,#0026FF)] px-5 py-2 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        <Building2 size={16} />
+                        {convertingDealId === detailDeal.id ? "Converting..." : "Convert to Client"}
+                      </button>
+                    </div>
                   </div>
                 </section>
               </div>
