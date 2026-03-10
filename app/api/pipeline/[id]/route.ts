@@ -5,7 +5,6 @@ import {
   PIPELINE_ASSIGNEES,
   PIPELINE_STAGES,
   PipelineDeal,
-  PipelineSource,
   PipelineStage,
 } from "@/lib/pipeline-types";
 
@@ -13,7 +12,6 @@ type UpdateDealInput = Partial<Omit<PipelineDeal, "id" | "createdAt">>;
 
 const VALID_STAGES = new Set<PipelineStage>(PIPELINE_STAGES);
 const VALID_ASSIGNEES = new Set<string>(PIPELINE_ASSIGNEES);
-const VALID_SOURCES = new Set<PipelineSource>(["instantly", "manual", "referral", "website"]);
 const VALID_ENRICHMENT_STATUS = new Set<EnrichmentStatus>(["pending", "enriched", "failed"]);
 
 function isStage(value: unknown): value is PipelineStage {
@@ -35,9 +33,10 @@ function normalizeValue(value: unknown): number | undefined {
   return undefined;
 }
 
-function normalizeSource(value: unknown): PipelineSource | undefined {
+function normalizeSource(value: unknown): string | undefined {
   if (typeof value !== "string") return undefined;
-  return VALID_SOURCES.has(value as PipelineSource) ? (value as PipelineSource) : undefined;
+  const normalized = value.trim().toLowerCase();
+  return normalized || undefined;
 }
 
 function normalizeEnrichmentStatus(value: unknown): EnrichmentStatus | undefined {
@@ -87,6 +86,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
       status: patch.status === undefined ? current.status : patch.status.trim(),
       enrichmentStatus: enrichmentStatus ?? current.enrichmentStatus,
       enrichmentData: patch.enrichmentData === undefined ? current.enrichmentData : patch.enrichmentData,
+      phoneLog: patch.phoneLog === undefined ? current.phoneLog : patch.phoneLog,
       competitor: patch.competitor === undefined ? current.competitor : patch.competitor?.trim() || undefined,
       conversationHistory: patch.conversationHistory === undefined ? current.conversationHistory : patch.conversationHistory,
       messagedFrom: patch.messagedFrom === undefined ? current.messagedFrom : patch.messagedFrom?.trim() || undefined,

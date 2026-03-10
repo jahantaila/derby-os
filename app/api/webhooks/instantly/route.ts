@@ -246,6 +246,7 @@ function createWebhookDeal(
     email: lead.email,
     enrichmentStatus: "pending",
     enrichmentData: null,
+    phoneLog: [],
     conversationHistory: history.conversationHistory,
     messagedFrom: history.messagedFrom,
     website: lead.website || undefined,

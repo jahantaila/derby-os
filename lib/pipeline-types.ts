@@ -7,13 +7,20 @@ export type PipelineStage =
   | "negotiating"
   | "closed-won"
   | "closed-lost";
-export type PipelineSource = "instantly" | "manual" | "referral" | "website";
+export type PipelineSource = "instantly" | "allgood" | "manual" | "referral" | "website" | (string & {});
 export type EnrichmentStatus = "pending" | "enriched" | "failed";
 export type ConversationHistoryItem = {
   date: string;
   from: string;
   message: string;
   direction: "outbound" | "inbound";
+};
+
+export type PhoneLogEntry = {
+  id: string;
+  date: string;
+  notes: string;
+  createdAt: string;
 };
 
 export type EnrichmentData = {
@@ -47,6 +54,7 @@ export type PipelineDeal = {
   email: string;
   enrichmentStatus: EnrichmentStatus;
   enrichmentData: EnrichmentData | null;
+  phoneLog: PhoneLogEntry[];
   competitor?: string;
   conversationHistory?: ConversationHistoryItem[];
   messagedFrom?: string;
@@ -84,6 +92,7 @@ export const INITIAL_PIPELINE_DEALS: PipelineDeal[] = [
     email: "mario@mariospizzeria.com",
     enrichmentStatus: "pending",
     enrichmentData: null,
+    phoneLog: [],
   },
   {
     id: "l2",
@@ -100,6 +109,7 @@ export const INITIAL_PIPELINE_DEALS: PipelineDeal[] = [
     email: "yuki@sakurasushi.com",
     enrichmentStatus: "pending",
     enrichmentData: null,
+    phoneLog: [],
   },
   {
     id: "l3",
@@ -116,6 +126,7 @@ export const INITIAL_PIPELINE_DEALS: PipelineDeal[] = [
     email: "mike@bluegrassgaragedoor.com",
     enrichmentStatus: "pending",
     enrichmentData: null,
+    phoneLog: [],
   },
   {
     id: "l4",
@@ -132,5 +143,6 @@ export const INITIAL_PIPELINE_DEALS: PipelineDeal[] = [
     email: "",
     enrichmentStatus: "pending",
     enrichmentData: null,
+    phoneLog: [],
   },
 ];

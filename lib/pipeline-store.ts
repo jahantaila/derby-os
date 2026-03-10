@@ -4,10 +4,10 @@ import {
   EnrichmentData,
   EnrichmentStatus,
   INITIAL_PIPELINE_DEALS,
+  PhoneLogEntry,
   PIPELINE_ASSIGNEES,
   PIPELINE_STAGES,
   PipelineDeal,
-  PipelineSource,
   PipelineStage,
 } from "@/lib/pipeline-types";
 
@@ -15,7 +15,6 @@ const PIPELINE_FILE = "pipeline.json";
 const VALID_STAGES = new Set<PipelineStage>(PIPELINE_STAGES);
 const LEGACY_STAGES = new Set(["lead", "outreach", "proposal", "negotiation", "won"]);
 const VALID_ASSIGNEES = new Set<string>(PIPELINE_ASSIGNEES);
-const VALID_SOURCES = new Set<PipelineSource>(["instantly", "manual", "referral", "website"]);
 const VALID_ENRICHMENT_STATUS = new Set<EnrichmentStatus>(["pending", "enriched", "failed"]);
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -45,8 +44,10 @@ function normalizeAssignee(value: unknown): string {
   return "jahan";
 }
 
-function normalizeSource(value: unknown): PipelineSource {
-  return typeof value === "string" && VALID_SOURCES.has(value as PipelineSource) ? (value as PipelineSource) : "manual";
+function normalizeSource(value: unknown): string {
+  if (typeof value !== "string") return "manual";
+  const normalized = value.trim().toLowerCase();
+  return normalized || "manual";
 }
 
 function normalizeEnrichmentStatus(value: unknown): EnrichmentStatus {
@@ -164,6 +165,31 @@ function normalizeConversationHistory(value: unknown): ConversationHistoryItem[]
   return items.length > 0 ? items : undefined;
 }
 
+function normalizePhoneLog(value: unknown): PhoneLogEntry[] {
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .map((entry) => {
+      if (!isRecord(entry)) return null;
+
+      const id = normalizeString(entry.id);
+      const date = normalizeString(entry.date);
+      const notes = normalizeString(entry.notes);
+      const createdAt = normalizeString(entry.createdAt);
+
+      if (!id || !date || !notes) return null;
+
+      return {
+        id,
+        date,
+        notes,
+        createdAt: createdAt || new Date().toISOString(),
+      };
+    })
+    .filter((entry): entry is PhoneLogEntry => entry !== null)
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+}
+
 function normalizeDeal(raw: unknown): PipelineDeal | null {
   if (!isRecord(raw)) return null;
   const id = typeof raw.id === "string" ? raw.id.trim() : "";
@@ -189,6 +215,7 @@ function normalizeDeal(raw: unknown): PipelineDeal | null {
     email: normalizeString(raw.email),
     enrichmentStatus: normalizeEnrichmentStatus(raw.enrichmentStatus),
     enrichmentData: normalizeEnrichmentData(raw.enrichmentData),
+    phoneLog: normalizePhoneLog(raw.phoneLog),
     competitor: normalizeCompetitor(raw.competitor, raw.rawWebhookData, normalizeString(raw.notes)),
     conversationHistory: normalizeConversationHistory(raw.conversationHistory),
     messagedFrom: normalizeString(raw.messagedFrom) || undefined,

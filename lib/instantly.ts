@@ -190,6 +190,7 @@ function buildImportedDeal(lead: NormalizedInstantlyLead): PipelineDeal {
     notes: `Auto-imported from Instantly campaign: ${lead.campaign}. Competitor: ${competitor}`,
     enrichmentStatus: "pending",
     enrichmentData: null,
+    phoneLog: [],
     competitor,
     createdAt: normalizeCreatedAt(lead.timestampCreated),
     status: "new",

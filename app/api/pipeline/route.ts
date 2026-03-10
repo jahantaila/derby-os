@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getPipelineDeals, writePipelineDeals } from "@/lib/pipeline-store";
-import { PIPELINE_ASSIGNEES, PIPELINE_STAGES, PipelineDeal, PipelineSource, PipelineStage } from "@/lib/pipeline-types";
+import { PIPELINE_ASSIGNEES, PIPELINE_STAGES, PipelineDeal, PipelineStage } from "@/lib/pipeline-types";
 
 type CreateDealInput = {
   name?: string;
@@ -10,13 +10,15 @@ type CreateDealInput = {
   contact?: string;
   assignee?: string;
   notes?: string;
-  source?: PipelineSource;
+  source?: string;
   email?: string;
+  phone?: string;
+  website?: string;
+  competitor?: string;
 };
 
 const VALID_STAGES = new Set<PipelineStage>(PIPELINE_STAGES);
 const VALID_ASSIGNEES = new Set<string>(PIPELINE_ASSIGNEES);
-const VALID_SOURCES = new Set<PipelineSource>(["instantly", "manual", "referral", "website"]);
 
 function buildDealId() {
   return `l${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
@@ -43,8 +45,14 @@ function normalizeValue(value: unknown): number {
   return 0;
 }
 
-function normalizeSource(value: unknown): PipelineSource {
-  return typeof value === "string" && VALID_SOURCES.has(value as PipelineSource) ? (value as PipelineSource) : "manual";
+function normalizeSource(value: unknown): string {
+  if (typeof value !== "string") return "manual";
+  const normalized = value.trim().toLowerCase();
+  return normalized || "manual";
+}
+
+function normalizeString(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
 }
 
 export async function GET() {
@@ -76,7 +84,16 @@ export async function POST(request: Request) {
       source: normalizeSource(body.source),
       email: body.email?.trim() ?? "",
       enrichmentStatus: "pending",
-      enrichmentData: null,
+      enrichmentData:
+        normalizeString(body.phone) || normalizeString(body.website)
+          ? {
+              ...(normalizeString(body.phone) ? { phone: normalizeString(body.phone) } : {}),
+              ...(normalizeString(body.website) ? { website: normalizeString(body.website) } : {}),
+            }
+          : null,
+      phoneLog: [],
+      competitor: normalizeString(body.competitor) || undefined,
+      website: normalizeString(body.website) || undefined,
       stageUpdatedAt: today,
     };
 
