@@ -99,13 +99,9 @@ export const seedAdTemplates = [
 ];
 
 export const seedFinance = {
-  clients: [
-    { id: "bluegrass", name: "Bluegrass Garage Door", monthlyRetainer: 0, adSpend: 0, status: "active" },
-    { id: "palma", name: "Palma Italian Kitchen", monthlyRetainer: 0, adSpend: 0, status: "active" },
-    { id: "olympus", name: "OlympusLou", monthlyRetainer: 0, adSpend: 0, status: "active" },
-  ],
-  entries: [],
-  monthlyOverhead: { aiCosts: 0, software: 0, team: 0, other: 0 },
+  clients: [],
+  records: [],
+  monthlySnapshots: {},
 };
 
 export const seedCompetitors = [
