@@ -10,6 +10,8 @@ type SourceFilter = "all" | PipelineSource;
 type StageFilter = "all" | PipelineStage;
 type AssigneeFilter = "all" | (typeof TEAM_MEMBERS)[number]["id"];
 type DateRangeFilter = "7d" | "30d" | "90d" | "all";
+type CompetitorName = "SpotHopper" | "Owner.com" | "Fisherman" | "BentoBox" | "Popmenu" | "DONT KNOW";
+type CompetitorFilter = "all" | CompetitorName;
 type DealForm = {
   name: string;
   stage: PipelineStage;
@@ -97,6 +99,41 @@ const ENRICHMENT_META: Record<PipelineDeal["enrichmentStatus"], { label: string;
   failed: { label: "Failed", dot: "bg-red-400" },
 };
 
+const COMPETITOR_META: Record<CompetitorName, { label: string; className: string }> = {
+  SpotHopper: {
+    label: "SpotHopper",
+    className: "bg-orange-500 text-white",
+  },
+  "Owner.com": {
+    label: "Owner.com",
+    className: "bg-red-500 text-white",
+  },
+  Fisherman: {
+    label: "Fisherman",
+    className: "bg-blue-500 text-white",
+  },
+  BentoBox: {
+    label: "BentoBox",
+    className: "bg-green-500 text-white",
+  },
+  Popmenu: {
+    label: "Popmenu",
+    className: "bg-purple-500 text-white",
+  },
+  "DONT KNOW": {
+    label: "DONT KNOW",
+    className: "bg-slate-500 text-white",
+  },
+};
+
+const COMPETITOR_FILTER_OPTIONS: { value: CompetitorFilter; label: string }[] = [
+  { value: "all", label: "All Competitors" },
+  ...Object.values(COMPETITOR_META).map((competitor) => ({
+    value: competitor.label as CompetitorFilter,
+    label: competitor.label,
+  })),
+];
+
 const currency = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
@@ -151,6 +188,24 @@ function isWithinDateRange(value: string, range: DateRangeFilter): boolean {
   return deltaMs <= maxDays * 24 * 60 * 60 * 1000;
 }
 
+function getCompetitorMeta(competitor?: string) {
+  if (competitor && competitor in COMPETITOR_META) {
+    return COMPETITOR_META[competitor as CompetitorName];
+  }
+  return null;
+}
+
+function CompetitorBadge({ competitor }: { competitor?: string }) {
+  const meta = getCompetitorMeta(competitor);
+  if (!meta) return null;
+
+  return (
+    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ${meta.className}`}>
+      {meta.label}
+    </span>
+  );
+}
+
 export default function PipelinePage() {
   const [deals, setDeals] = useState<PipelineDeal[]>([]);
   const [loading, setLoading] = useState(true);
@@ -166,6 +221,7 @@ export default function PipelinePage() {
   const [stageFilter, setStageFilter] = useState<StageFilter>("all");
   const [assigneeFilter, setAssigneeFilter] = useState<AssigneeFilter>("all");
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>("all");
+  const [competitorFilter, setCompetitorFilter] = useState<CompetitorFilter>("all");
   const [dateRangeFilter, setDateRangeFilter] = useState<DateRangeFilter>("all");
 
   const assigneeNames = useMemo(() => {
@@ -187,11 +243,12 @@ export default function PipelinePage() {
       const matchesStage = stageFilter === "all" || deal.stage === stageFilter;
       const matchesAssignee = assigneeFilter === "all" || deal.assignee === assigneeFilter;
       const matchesSource = sourceFilter === "all" || deal.source === sourceFilter;
+      const matchesCompetitor = competitorFilter === "all" || deal.competitor === competitorFilter;
       const matchesDateRange = isWithinDateRange(deal.createdAt, dateRangeFilter);
 
-      return matchesSearch && matchesStage && matchesAssignee && matchesSource && matchesDateRange;
+      return matchesSearch && matchesStage && matchesAssignee && matchesSource && matchesCompetitor && matchesDateRange;
     });
-  }, [assigneeFilter, dateRangeFilter, deals, searchQuery, sourceFilter, stageFilter]);
+  }, [assigneeFilter, competitorFilter, dateRangeFilter, deals, searchQuery, sourceFilter, stageFilter]);
 
   const stats = useMemo(() => {
     const activeLeads = deals.filter((deal) => !CLOSED_STAGES.includes(deal.stage));
@@ -450,7 +507,7 @@ export default function PipelinePage() {
             />
           </label>
 
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:min-w-[620px] xl:flex-1">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:min-w-[780px] xl:flex-1 xl:grid-cols-5">
             <label className="space-y-1">
               <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">Stage</span>
               <select
@@ -489,6 +546,21 @@ export default function PipelinePage() {
                 className="w-full rounded-xl border border-white/12 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
               >
                 {SOURCE_FILTER_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="space-y-1">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">Competitor</span>
+              <select
+                value={competitorFilter}
+                onChange={(event) => setCompetitorFilter(event.target.value as CompetitorFilter)}
+                className="w-full rounded-xl border border-white/12 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
+              >
+                {COMPETITOR_FILTER_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
                   </option>
@@ -597,12 +669,13 @@ export default function PipelinePage() {
                             />
                           </div>
                           <p className="mt-1 text-xs text-slate-300">{deal.client}</p>
-                          <div className="mt-2">
+                          <div className="mt-2 flex flex-wrap items-center gap-2">
                             <span
                               className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] ${SOURCE_META[deal.source].className}`}
                             >
                               {SOURCE_META[deal.source].label}
                             </span>
+                            <CompetitorBadge competitor={deal.competitor} />
                           </div>
                           <p className="mt-3 text-xl font-semibold text-blue-100">{toCurrency(deal.value)}</p>
                           <div className="mt-3 flex items-center justify-between text-xs text-slate-300">
@@ -651,17 +724,23 @@ export default function PipelinePage() {
             <form onSubmit={panelMode === "create" ? handleCreate : handleUpdate} className="space-y-4">
               {panelMode === "view" && selectedDeal ? (
                 <div className="rounded-xl border border-white/10 bg-slate-900/60 p-3">
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span
                       className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] ${SOURCE_META[selectedDeal.source].className}`}
                     >
                       {SOURCE_META[selectedDeal.source].label}
                     </span>
+                    <CompetitorBadge competitor={selectedDeal.competitor} />
                     <span
                       className={`inline-block h-2.5 w-2.5 rounded-full ${ENRICHMENT_META[selectedDeal.enrichmentStatus].dot}`}
                     />
                     <span className="text-xs text-slate-300">{ENRICHMENT_META[selectedDeal.enrichmentStatus].label}</span>
                   </div>
+                  {selectedDeal.competitor ? (
+                    <p className="mt-2 text-xs text-slate-300">
+                      Competitor: <span className="text-slate-100">{selectedDeal.competitor}</span>
+                    </p>
+                  ) : null}
                   {selectedDeal.email ? (
                     <p className="mt-2 text-xs text-slate-300">
                       Email: <span className="text-slate-100">{selectedDeal.email}</span>

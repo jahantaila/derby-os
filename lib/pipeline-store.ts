@@ -68,6 +68,37 @@ function normalizeString(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
 }
 
+function detectCompetitorFromCampaign(campaignName: string): string {
+  const campaign = campaignName.toUpperCase();
+  if (campaign.includes("SPOTHOPPER")) return "SpotHopper";
+  if (campaign.includes("OWNER")) return "Owner.com";
+  if (campaign.includes("FISHERMAN")) return "Fisherman";
+  if (campaign.includes("BENTOBOX")) return "BentoBox";
+  if (campaign.includes("POPMENU")) return "Popmenu";
+  return "DONT KNOW";
+}
+
+function normalizeCompetitor(value: unknown, rawWebhookData: unknown, notes: string): string | undefined {
+  const explicit = normalizeString(value);
+  if (explicit) return explicit;
+
+  if (isRecord(rawWebhookData)) {
+    const campaignName =
+      normalizeString(rawWebhookData.campaign_name) ||
+      (isRecord(rawWebhookData.campaign) ? normalizeString(rawWebhookData.campaign.name) : "") ||
+      normalizeString(rawWebhookData.campaign);
+    if (campaignName) return detectCompetitorFromCampaign(campaignName);
+  }
+
+  const noteMatch = notes.match(/Competitor:\s*([^\n\r]+)/i);
+  if (noteMatch) {
+    const inferred = normalizeString(noteMatch[1]);
+    if (inferred) return inferred;
+  }
+
+  return undefined;
+}
+
 function normalizeOptionalNumber(value: unknown): number | undefined {
   if (typeof value === "number" && Number.isFinite(value)) return value;
   if (typeof value === "string") {
@@ -132,6 +163,7 @@ function normalizeDeal(raw: unknown): PipelineDeal | null {
     email: normalizeString(raw.email),
     enrichmentStatus: normalizeEnrichmentStatus(raw.enrichmentStatus),
     enrichmentData: normalizeEnrichmentData(raw.enrichmentData),
+    competitor: normalizeCompetitor(raw.competitor, raw.rawWebhookData, normalizeString(raw.notes)),
     rawWebhookData: raw.rawWebhookData,
     stageUpdatedAt: normalizeDate(raw.stageUpdatedAt ?? createdAt),
   };

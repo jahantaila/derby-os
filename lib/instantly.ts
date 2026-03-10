@@ -72,6 +72,16 @@ function normalizeCreatedAt(timestamp: string): string {
   return new Date().toISOString().slice(0, 10);
 }
 
+function detectCompetitor(campaignName: string): string {
+  const campaign = campaignName.toUpperCase();
+  if (campaign.includes("SPOTHOPPER")) return "SpotHopper";
+  if (campaign.includes("OWNER")) return "Owner.com";
+  if (campaign.includes("FISHERMAN")) return "Fisherman";
+  if (campaign.includes("BENTOBOX")) return "BentoBox";
+  if (campaign.includes("POPMENU")) return "Popmenu";
+  return "DONT KNOW";
+}
+
 async function fetchInstantly<T>(path: string, init: RequestInit, apiKey: string): Promise<T> {
   const response = await fetch(`${INSTANTLY_API_BASE}${path}`, {
     ...init,
@@ -166,6 +176,7 @@ async function fetchInterestedLeads(apiKey: string): Promise<NormalizedInstantly
 
 function buildImportedDeal(lead: NormalizedInstantlyLead): PipelineDeal {
   const companyOrFallback = lead.company || fallbackName(lead.email);
+  const competitor = detectCompetitor(lead.campaign);
   return {
     id: buildDealId(),
     stage: "new-lead",
@@ -176,9 +187,10 @@ function buildImportedDeal(lead: NormalizedInstantlyLead): PipelineDeal {
     contact: formatContact(lead.firstName, lead.lastName),
     value: 0,
     assignee: "kimberly",
-    notes: `Auto-imported from Instantly campaign: ${lead.campaign}`,
+    notes: `Auto-imported from Instantly campaign: ${lead.campaign}. Competitor: ${competitor}`,
     enrichmentStatus: "pending",
     enrichmentData: null,
+    competitor,
     createdAt: normalizeCreatedAt(lead.timestampCreated),
     status: "new",
     stageUpdatedAt: normalizeCreatedAt(lead.timestampCreated),

@@ -88,6 +88,7 @@ function createWebhookDeal(lead: { email: string; name: string; company: string 
   const today = new Date().toISOString().slice(0, 10);
   const displayName = lead.name || lead.company || lead.email || "Instantly Lead";
   const clientName = lead.company || lead.name || lead.email || "Unknown Company";
+  const competitor = detectCompetitor(payload);
 
   return {
     id: buildDealId(),
@@ -98,8 +99,8 @@ function createWebhookDeal(lead: { email: string; name: string; company: string 
     contact: lead.name,
     assignee: "jahan",
     createdAt: today,
-    competitor: detectCompetitor(payload),
-    notes: `Auto-imported from Instantly. Competitor: ${detectCompetitor(payload)}`,
+    competitor,
+    notes: `Auto-imported from Instantly. Competitor: ${competitor}`,
     status: "new",
     source: "instantly",
     email: lead.email,
