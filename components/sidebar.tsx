@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { CalendarDays, CheckSquare, DollarSign, FolderKanban, Funnel, UserRound, Users } from "lucide-react";
+import { CalendarDays, CheckSquare, DollarSign, FileText, FolderKanban, Funnel, UserRound, Users } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/agents", label: "Agents", icon: Users },
@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { href: "/calendar", label: "Calendar", icon: CalendarDays },
   { href: "/pipeline", label: "Pipeline", icon: Funnel },
   { href: "/projects", label: "Projects", icon: FolderKanban },
+  { href: "/documents", label: "Documents", icon: FileText },
 ] as const;
 
 export function Sidebar() {

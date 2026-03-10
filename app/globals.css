@@ -349,6 +349,53 @@ body {
   font-size: 0.83rem;
 }
 
+.document-content {
+  color: #e5edf9;
+}
+
+.document-content h1,
+.document-content h2,
+.document-content h3 {
+  margin: 0 0 0.75rem;
+  font-family: "Anton", var(--font-geist), "Segoe UI", sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+.document-content h1 {
+  font-size: 1.85rem;
+}
+
+.document-content h2 {
+  font-size: 1.4rem;
+}
+
+.document-content h3 {
+  font-size: 1.05rem;
+}
+
+.document-content p,
+.document-content li {
+  font-size: 0.98rem;
+  line-height: 1.72;
+  color: #d4deed;
+}
+
+.document-content p,
+.document-content ul {
+  margin: 0 0 1rem;
+}
+
+.document-content ul {
+  padding-left: 1.1rem;
+}
+
+.document-content strong {
+  color: #ffffff;
+}
+
 .live-view-active {
   border-color: rgba(32, 147, 255, 0.45);
   background:
