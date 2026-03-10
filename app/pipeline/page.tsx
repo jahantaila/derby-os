@@ -8,6 +8,7 @@ import {
   BarChart3,
   Brain,
   Building2,
+  ChevronDown,
   Download,
   FileSpreadsheet,
   Globe,
@@ -217,6 +218,11 @@ function getSourceTabs(deals: PipelineDeal[]): SourceTab[] {
     label: tab.label,
     count: tab.value === "all" ? deals.length : counts.get(tab.value) ?? 0,
   }));
+}
+
+function getSourceOptionLabel(tab: SourceTab) {
+  const normalized = tab.label.charAt(0) + tab.label.slice(1).toLowerCase();
+  return `${normalized} (${tab.count})`;
 }
 
 function formatCreatedAt(value?: string) {
@@ -1354,34 +1360,23 @@ export default function PipelinePage() {
               </div>
 
               <div className="glass-panel overflow-hidden p-0">
-                <div className="overflow-x-auto">
-                  <div className="flex min-w-max gap-1 px-3 pt-3">
-                    {sourceTabs.map((tab) => {
-                      const active = activeSource === tab.value;
-                      return (
-                        <button
-                          key={tab.value}
-                          type="button"
-                          onClick={() => setActiveSource(tab.value)}
-                          className={cn(
-                            "relative inline-flex items-center gap-2 whitespace-nowrap rounded-t-2xl border-b-2 px-4 py-3 text-xs font-semibold tracking-[0.18em] transition",
-                            active
-                              ? "border-[#2093FF] text-[#7FC2FF]"
-                              : "border-transparent text-slate-400 hover:text-slate-200",
-                          )}
-                        >
-                          <span>{tab.label}</span>
-                          <span
-                            className={cn(
-                              "rounded-full border px-2 py-0.5 text-[10px]",
-                              active ? "border-blue-300/35 bg-blue-500/10 text-blue-100" : "border-white/10 bg-white/5 text-slate-300",
-                            )}
-                          >
-                            {tab.count}
-                          </span>
-                        </button>
-                      );
-                    })}
+                <div className="px-3 pt-3">
+                  <div className="relative w-full max-w-[200px]">
+                    <select
+                      value={activeSource}
+                      onChange={(event) => setActiveSource(event.target.value)}
+                      className="glass-card w-full appearance-none rounded-2xl border border-white/10 bg-[#0a0a0f] px-4 py-3 pr-10 text-sm font-semibold text-white outline-none transition focus:border-[#2093FF] focus:ring-2 focus:ring-[#2093FF]/30"
+                    >
+                      {sourceTabs.map((tab) => (
+                        <option key={tab.value} value={tab.value} className="text-black" style={{ color: "black" }}>
+                          {getSourceOptionLabel(tab)}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown
+                      size={16}
+                      className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#7FC2FF]"
+                    />
                   </div>
                 </div>
               </div>
