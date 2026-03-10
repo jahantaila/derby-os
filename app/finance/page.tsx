@@ -15,7 +15,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { ArrowLeft, ArrowRight, ChevronDown, Search, Trash2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, ChevronDown, Download, Search, Trash2, Upload, X } from "lucide-react";
 import {
   FinanceClientType,
   FinanceData,
@@ -30,6 +30,17 @@ type DashboardTab = "revenue" | "expenses" | "clients" | "reports";
 type ExpenseSectionKey = "recurringExpenses" | "employeeExpenses" | "oneTimeExpenses";
 type RevenueSortKey = "clientName" | "service" | "amount" | "recurring" | "date" | "status";
 type ClientSortKey = "name" | "revenue" | "profitMargin";
+type ImportType =
+  | "Client Income"
+  | "Client Expenses"
+  | "General Recurring Expenses"
+  | "General Employee Expenses"
+  | "General One-Time Expenses";
+
+type ParsedCsvPreview = {
+  headers: string[];
+  rows: Record<string, string>[];
+};
 
 type RevenueRow = {
   id: string;
@@ -97,6 +108,14 @@ const CLIENT_TYPE_COLORS: Record<FinanceClientType, string> = {
   gaming: "#f59e0b",
   other: "#ef4444",
 };
+
+const IMPORT_TYPES: ImportType[] = [
+  "Client Income",
+  "Client Expenses",
+  "General Recurring Expenses",
+  "General Employee Expenses",
+  "General One-Time Expenses",
+];
 
 const SERVICE_BADGE_CLASS: Record<FinanceServiceType, string> = {
   Website: "border-blue-400/40 bg-blue-500/15 text-blue-100",
@@ -259,6 +278,103 @@ function statValueClass(value: number) {
   return value >= 0 ? "text-emerald-200" : "text-rose-200";
 }
 
+function normalizeHeader(value: string) {
+  return value.trim().toLowerCase().replace(/\s+/g, "_");
+}
+
+function parseCsv(text: string): ParsedCsvPreview {
+  const rows: string[][] = [];
+  let current = "";
+  let row: string[] = [];
+  let inQuotes = false;
+
+  for (let index = 0; index < text.length; index += 1) {
+    const character = text[index];
+    const next = text[index + 1];
+
+    if (character === '"') {
+      if (inQuotes && next === '"') {
+        current += '"';
+        index += 1;
+      } else {
+        inQuotes = !inQuotes;
+      }
+      continue;
+    }
+
+    if (character === "," && !inQuotes) {
+      row.push(current.trim());
+      current = "";
+      continue;
+    }
+
+    if ((character === "\n" || character === "\r") && !inQuotes) {
+      if (character === "\r" && next === "\n") index += 1;
+      row.push(current.trim());
+      if (row.some((cell) => cell.length > 0)) rows.push(row);
+      row = [];
+      current = "";
+      continue;
+    }
+
+    current += character;
+  }
+
+  if (current.length > 0 || row.length > 0) {
+    row.push(current.trim());
+    if (row.some((cell) => cell.length > 0)) rows.push(row);
+  }
+
+  if (rows.length === 0) return { headers: [], rows: [] };
+
+  const headers = rows[0].map(normalizeHeader);
+  const previewRows = rows.slice(1).map((cells) =>
+    headers.reduce<Record<string, string>>((accumulator, header, headerIndex) => {
+      accumulator[header] = cells[headerIndex]?.trim() ?? "";
+      return accumulator;
+    }, {}),
+  );
+
+  return { headers, rows: previewRows };
+}
+
+function requiredHeadersForImport(type: ImportType) {
+  if (type === "Client Income" || type === "Client Expenses") {
+    return ["client_name", "amount", "service", "recurring", "notes", "date", "payment_status"];
+  }
+
+  return ["name", "amount", "date", "recurring", "notes", "service"];
+}
+
+function csvTemplateForImport(type: ImportType) {
+  const headers = requiredHeadersForImport(type);
+  const sample =
+    type === "Client Income" || type === "Client Expenses"
+      ? ["Hop Atomica", "750", "SEO", "M", "Imported from CSV", "2026-03-01", "paid"]
+      : ["Adobe Creative Cloud", "89.99", "2026-03-01", type === "General One-Time Expenses" ? "1-time" : "M", "Imported from CSV", "Other"];
+
+  return `${headers.join(",")}\n${sample.join(",")}\n`;
+}
+
+function parseAmount(value: string) {
+  const cleaned = value.replace(/[$,\s]/g, "");
+  const amount = Number(cleaned);
+  return Number.isFinite(amount) ? amount : 0;
+}
+
+function normalizeRecurring(value: string) {
+  const normalized = value.trim().toLowerCase();
+  return normalized === "m" || normalized === "monthly" ? "M" : "1-time";
+}
+
+function normalizePaymentStatus(value: string) {
+  return value.trim().toLowerCase() === "pending" ? "pending" : "paid";
+}
+
+function normalizeService(value: string) {
+  return SERVICE_OPTIONS.includes(value as FinanceServiceType) ? (value as FinanceServiceType) : inferServiceFromText(value);
+}
+
 function MetricCard({ title, value, caption }: { title: string; value: string; caption?: string }) {
   return (
     <article className="glass-card relative overflow-hidden rounded-2xl p-3 sm:p-4">
@@ -304,6 +420,12 @@ export default function FinancePage() {
   const [clientTypeFilter, setClientTypeFilter] = useState<"all" | FinanceClientType>("all");
   const [clientStatusFilter, setClientStatusFilter] = useState<"all" | "active" | "inactive">("all");
   const [clientServiceFilter, setClientServiceFilter] = useState<"all" | FinanceServiceType>("all");
+  const [importOpen, setImportOpen] = useState(false);
+  const [importType, setImportType] = useState<ImportType>("Client Income");
+  const [importFileName, setImportFileName] = useState("");
+  const [parsedCsv, setParsedCsv] = useState<ParsedCsvPreview>({ headers: [], rows: [] });
+  const [importError, setImportError] = useState<string | null>(null);
+  const [importMessage, setImportMessage] = useState<string | null>(null);
 
   async function loadFinance() {
     try {
@@ -386,6 +508,137 @@ export default function FinancePage() {
     if (JSON.stringify(nextData) !== JSON.stringify(data)) {
       commit(nextData);
     }
+  }
+
+  function resetImportState() {
+    setImportFileName("");
+    setParsedCsv({ headers: [], rows: [] });
+    setImportError(null);
+  }
+
+  function handleImportFile(file: File | null) {
+    if (!file) {
+      resetImportState();
+      return;
+    }
+
+    setImportFileName(file.name);
+    setImportError(null);
+
+    void file.text().then((text) => {
+      const parsed = parseCsv(text);
+      const requiredHeaders = requiredHeadersForImport(importType);
+      const missing = requiredHeaders.filter((header) => !parsed.headers.includes(header));
+
+      if (missing.length > 0) {
+        setParsedCsv(parsed);
+        setImportError(`Missing required columns: ${missing.join(", ")}`);
+        return;
+      }
+
+      setParsedCsv(parsed);
+    }).catch(() => {
+      setImportError("Could not read CSV file.");
+      setParsedCsv({ headers: [], rows: [] });
+    });
+  }
+
+  function downloadTemplate() {
+    const blob = new Blob([csvTemplateForImport(importType)], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${importType.toLowerCase().replace(/\s+/g, "-")}-template.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function applyCsvImport() {
+    if (!monthData) return;
+    if (parsedCsv.rows.length === 0) {
+      setImportError("Upload a CSV file with at least one data row.");
+      return;
+    }
+
+    const requiredHeaders = requiredHeadersForImport(importType);
+    const missing = requiredHeaders.filter((header) => !parsedCsv.headers.includes(header));
+    if (missing.length > 0) {
+      setImportError(`Missing required columns: ${missing.join(", ")}`);
+      return;
+    }
+
+    const nextData = ensureMonthData(monthData, selectedMonth);
+    let importedCount = 0;
+    let skippedCount = 0;
+
+    if (importType === "Client Income" || importType === "Client Expenses") {
+      const byName = new Map(nextData.clients.map((client) => [client.name.trim().toLowerCase(), client]));
+
+      for (const row of parsedCsv.rows) {
+        const client = byName.get((row.client_name ?? "").trim().toLowerCase());
+        if (!client) {
+          skippedCount += 1;
+          continue;
+        }
+
+        const nextRow: FinanceLedgerRow = {
+          id: crypto.randomUUID(),
+          name: row.service?.trim() || row.notes?.trim() || client.name,
+          amount: parseAmount(row.amount ?? ""),
+          service: normalizeService(row.service ?? ""),
+          recurring: normalizeRecurring(row.recurring ?? ""),
+          notes: row.notes?.trim() ?? "",
+          date: row.date?.trim() ?? "",
+          paymentStatus: normalizePaymentStatus(row.payment_status ?? ""),
+        };
+
+        const month = client.months[selectedMonth] ?? emptyClientMonth(selectedMonth);
+        client.months[selectedMonth] = {
+          ...month,
+          income: importType === "Client Income" ? [...month.income, nextRow] : month.income,
+          expenses: importType === "Client Expenses" ? [...month.expenses, nextRow] : month.expenses,
+        };
+        importedCount += 1;
+      }
+    } else {
+      const section: ExpenseSectionKey =
+        importType === "General Recurring Expenses"
+          ? "recurringExpenses"
+          : importType === "General Employee Expenses"
+            ? "employeeExpenses"
+            : "oneTimeExpenses";
+
+      const currentMonthData = nextData.generalData.months[selectedMonth] ?? emptyGeneralMonth(selectedMonth);
+      const importedRows = parsedCsv.rows.map<FinanceLedgerRow>((row) => ({
+        id: crypto.randomUUID(),
+        name: row.name?.trim() ?? "",
+        amount: parseAmount(row.amount ?? ""),
+        date: row.date?.trim() ?? "",
+        recurring: section === "oneTimeExpenses" ? "1-time" : normalizeRecurring(row.recurring ?? ""),
+        notes: row.notes?.trim() ?? "",
+        service: normalizeService(row.service ?? ""),
+        paymentStatus: "paid",
+      }));
+
+      nextData.generalData.months[selectedMonth] = {
+        ...currentMonthData,
+        [section]: [...currentMonthData[section], ...importedRows],
+      };
+      importedCount = importedRows.length;
+    }
+
+    if (importedCount === 0) {
+      setImportError(skippedCount > 0 ? `No rows were imported. ${skippedCount} rows did not match an existing client name.` : "No rows were imported.");
+      return;
+    }
+
+    commit({
+      ...nextData,
+      clients: [...nextData.clients],
+    });
+    setImportMessage(skippedCount > 0 ? `Imported ${importedCount} rows. Skipped ${skippedCount} unmatched client rows.` : `Imported ${importedCount} rows.`);
+    setImportOpen(false);
+    resetImportState();
   }
 
   function updateGeneralMonth(updater: (current: FinanceGeneralMonthData) => FinanceGeneralMonthData) {
@@ -702,29 +955,44 @@ export default function FinancePage() {
             <h1 className="page-title">Finance Dashboard</h1>
             <p className="mt-2 text-sm text-slate-300">QuickBooks-style financial intelligence across revenue, expenses, clients, and reports.</p>
           </div>
-          <div className="glass-card inline-flex items-center gap-2 self-start rounded-xl px-2 py-2 md:self-auto">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="glass-card inline-flex items-center gap-2 self-start rounded-xl px-2 py-2 md:self-auto">
+              <button
+                type="button"
+                onClick={() => changeMonth(-1)}
+                className="min-h-11 rounded-lg border border-white/10 bg-white/5 p-2.5 text-slate-100 transition hover:border-blue-300/40 hover:bg-blue-500/15"
+                aria-label="Previous month"
+              >
+                <ArrowLeft size={16} />
+              </button>
+              <div className="min-w-[8.5rem] text-center text-sm font-semibold text-white sm:min-w-[9rem]">{`< ${monthLabel(selectedMonth)} >`}</div>
+              <button
+                type="button"
+                onClick={() => changeMonth(1)}
+                className="min-h-11 rounded-lg border border-white/10 bg-white/5 p-2.5 text-slate-100 transition hover:border-blue-300/40 hover:bg-blue-500/15"
+                aria-label="Next month"
+              >
+                <ArrowRight size={16} />
+              </button>
+            </div>
             <button
               type="button"
-              onClick={() => changeMonth(-1)}
-              className="min-h-11 rounded-lg border border-white/10 bg-white/5 p-2.5 text-slate-100 transition hover:border-blue-300/40 hover:bg-blue-500/15"
-              aria-label="Previous month"
+              onClick={() => {
+                setImportMessage(null);
+                setImportError(null);
+                setImportOpen(true);
+              }}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-blue-300/30 bg-[linear-gradient(135deg,rgba(32,147,255,0.2),rgba(0,38,255,0.18))] px-4 py-2 text-sm font-semibold text-blue-50 transition hover:border-blue-300/60 hover:shadow-[0_0_24px_rgba(32,147,255,0.24)]"
             >
-              <ArrowLeft size={16} />
-            </button>
-            <div className="min-w-[8.5rem] text-center text-sm font-semibold text-white sm:min-w-[9rem]">{`< ${monthLabel(selectedMonth)} >`}</div>
-            <button
-              type="button"
-              onClick={() => changeMonth(1)}
-              className="min-h-11 rounded-lg border border-white/10 bg-white/5 p-2.5 text-slate-100 transition hover:border-blue-300/40 hover:bg-blue-500/15"
-              aria-label="Next month"
-            >
-              <ArrowRight size={16} />
+              <Upload size={16} />
+              Import CSV
             </button>
           </div>
         </div>
       </header>
 
       {error ? <div className="mb-3 rounded-xl border border-red-500/35 bg-red-500/10 px-4 py-2 text-sm text-red-200">{error}</div> : null}
+      {importMessage ? <div className="mb-3 rounded-xl border border-blue-400/35 bg-blue-500/10 px-4 py-2 text-sm text-blue-100">{importMessage}</div> : null}
       {saving ? <div className="mb-3 text-xs uppercase tracking-[0.18em] text-blue-200/80">Saving finance data...</div> : null}
 
       <div className="sticky top-2 z-30 mb-5 rounded-2xl border border-white/10 bg-[#0a0a0f]/70 p-2 backdrop-blur-lg">
@@ -1146,6 +1414,125 @@ export default function FinancePage() {
           ) : null}
         </div>
       </div>
+
+      {importOpen ? (
+        <div className="fixed inset-0 z-50" role="dialog" aria-modal="true">
+          <button
+            type="button"
+            onClick={() => {
+              setImportOpen(false);
+              resetImportState();
+            }}
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            aria-label="Close CSV import"
+          />
+          <div className="absolute left-1/2 top-1/2 w-[min(94vw,980px)] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-white/15 bg-[#0b0d15]/95 p-5 shadow-2xl backdrop-blur-xl">
+            <div className="mb-5 flex items-start justify-between gap-3">
+              <div>
+                <p className="text-xs uppercase tracking-[0.14em] text-blue-200">Finance Import</p>
+                <h2 className="heading-font mt-2 text-3xl font-normal uppercase tracking-[0.04em] text-white">Import CSV</h2>
+                <p className="mt-2 text-sm text-slate-300">Import rows into {monthLabel(selectedMonth)} and save through the finance API.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setImportOpen(false);
+                  resetImportState();
+                }}
+                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/12 bg-white/5 px-3 text-slate-200 transition hover:border-blue-300/40 hover:bg-blue-500/10"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="grid gap-5 lg:grid-cols-[0.44fr_0.56fr]">
+              <div className="glass-panel space-y-4 p-4 sm:p-5">
+                <label className="space-y-2">
+                  <span className="text-sm text-slate-300">Import type</span>
+                  <select
+                    value={importType}
+                    onChange={(event) => {
+                      setImportType(event.target.value as ImportType);
+                      resetImportState();
+                    }}
+                    className="min-h-11 w-full rounded-xl border border-white/14 bg-[#101625] px-3 text-sm text-white outline-none transition focus:border-blue-400/60"
+                  >
+                    {IMPORT_TYPES.map((type) => (
+                      <option key={type} value={type}>
+                        {type}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="space-y-2">
+                  <span className="text-sm text-slate-300">CSV file</span>
+                  <input
+                    type="file"
+                    accept=".csv,text/csv"
+                    onChange={(event) => handleImportFile(event.target.files?.[0] ?? null)}
+                    className="block min-h-11 w-full rounded-xl border border-white/14 bg-[#101625] px-3 py-3 text-sm text-slate-200 file:mr-3 file:rounded-lg file:border-0 file:bg-[linear-gradient(135deg,#2093FF,#0026FF)] file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white"
+                  />
+                </label>
+
+                <button type="button" onClick={downloadTemplate} className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-blue-100 transition hover:text-white">
+                  <Download size={16} />
+                  Download Template
+                </button>
+
+                <div className="glass-card rounded-2xl p-4 text-sm text-slate-300">
+                  <p className="text-[11px] uppercase tracking-[0.16em] text-slate-500">Required Columns</p>
+                  <p className="mt-2 break-words text-white">{requiredHeadersForImport(importType).join(", ")}</p>
+                  {importFileName ? <p className="mt-3 text-slate-400">Loaded file: {importFileName}</p> : null}
+                </div>
+
+                {importError ? <div className="rounded-xl border border-red-500/35 bg-red-500/10 px-3 py-2 text-sm text-red-200">{importError}</div> : null}
+
+                <button
+                  type="button"
+                  onClick={applyCsvImport}
+                  disabled={parsedCsv.rows.length === 0 || Boolean(importError)}
+                  className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-blue-300/30 bg-[linear-gradient(135deg,#2093FF,#0026FF)] px-4 py-2 text-sm font-semibold text-white transition hover:shadow-[0_0_24px_rgba(32,147,255,0.24)] disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  <Upload size={16} />
+                  Import
+                </button>
+              </div>
+
+              <div className="glass-panel p-4 sm:p-5">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-200">Preview</h3>
+                    <p className="mt-1 text-sm text-slate-400">Showing the first 5 parsed rows.</p>
+                  </div>
+                  <span className="text-xs uppercase tracking-[0.16em] text-slate-500">{parsedCsv.rows.length} rows parsed</span>
+                </div>
+
+                <div className="mt-4 overflow-x-auto rounded-xl border border-white/10">
+                  <table className="min-w-[680px] w-full text-sm">
+                    <thead className="bg-white/[0.04] text-left text-xs uppercase tracking-[0.14em] text-slate-400">
+                      <tr>
+                        {(parsedCsv.headers.length ? parsedCsv.headers : requiredHeadersForImport(importType)).map((header) => (
+                          <th key={header} className="px-3 py-3">{header}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(parsedCsv.rows.length ? parsedCsv.rows.slice(0, 5) : Array.from({ length: 1 }).map(() => null)).map((row, index) => (
+                        <tr key={index} className="border-t border-white/10 text-slate-200">
+                          {(parsedCsv.headers.length ? parsedCsv.headers : requiredHeadersForImport(importType)).map((header) => (
+                            <td key={header} className="px-3 py-2">{row?.[header] || (row ? "-" : "Upload a CSV to preview rows")}</td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }

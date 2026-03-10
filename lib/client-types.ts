@@ -14,6 +14,30 @@ export const SERVICE_OPTIONS = [
 export type ClientService = (typeof SERVICE_OPTIONS)[number];
 export type ClientStatus = "active" | "inactive" | "paused";
 export type ClientType = "restaurant" | "home-service" | "gaming" | "other";
+export type ClientMarketingEffort = "Google Ads" | "Meta Ads" | "SEO" | "Social Media" | "Email Marketing" | "None";
+
+export type ClientOnboardingData = {
+  businessName: string;
+  ownerManagerName: string;
+  bestEmail: string;
+  bestPhone: string;
+  businessAddress: string;
+  websiteUrl: string;
+  instagramUrl: string;
+  facebookUrl: string;
+  googleBusinessUrl: string;
+  businessHours: string;
+  currentMarketingEfforts: ClientMarketingEffort[];
+  monthlyMarketingBudgetRange: string;
+  biggestChallenges: string;
+  additionalInfo: string;
+  submittedAt: string;
+};
+
+export type ClientOnboardingState = {
+  linkCreatedAt?: string;
+  data?: ClientOnboardingData;
+};
 
 export const CLIENT_TYPE_OPTIONS = ["restaurant", "home-service", "gaming", "other"] as const;
 
@@ -32,6 +56,7 @@ export type ClientProfile = {
   startDate?: string;
   status: ClientStatus;
   notes?: string;
+  onboarding?: ClientOnboardingState;
   createdAt: string;
 };
 

@@ -1,6 +1,16 @@
 import { readPersistentData, writePersistentData } from "@/lib/persistence";
 import { getFinanceData } from "@/lib/finance-store";
-import { CLIENT_TYPE_OPTIONS, ClientProfile, ClientService, ClientStatus, ClientType, SERVICE_OPTIONS } from "@/lib/client-types";
+import {
+  CLIENT_TYPE_OPTIONS,
+  ClientMarketingEffort,
+  ClientOnboardingData,
+  ClientOnboardingState,
+  ClientProfile,
+  ClientService,
+  ClientStatus,
+  ClientType,
+  SERVICE_OPTIONS,
+} from "@/lib/client-types";
 
 const CLIENTS_FILE = "clients";
 
@@ -41,6 +51,53 @@ function toServices(value: unknown): ClientService[] {
   return Array.from(new Set(next));
 }
 
+function toMarketingEfforts(value: unknown): ClientMarketingEffort[] {
+  if (!Array.isArray(value)) return [];
+  const valid = new Set<ClientMarketingEffort>(["Google Ads", "Meta Ads", "SEO", "Social Media", "Email Marketing", "None"]);
+  const next = value
+    .map((item) => toString(item))
+    .filter((item): item is ClientMarketingEffort => valid.has(item as ClientMarketingEffort));
+
+  if (next.includes("None")) return ["None"];
+  return Array.from(new Set(next));
+}
+
+function normalizeOnboardingData(raw: unknown, businessName: string): ClientOnboardingData | undefined {
+  if (!isRecord(raw)) return undefined;
+
+  return {
+    businessName: toString(raw.businessName) || businessName,
+    ownerManagerName: toString(raw.ownerManagerName),
+    bestEmail: toString(raw.bestEmail),
+    bestPhone: toString(raw.bestPhone),
+    businessAddress: toString(raw.businessAddress),
+    websiteUrl: toString(raw.websiteUrl),
+    instagramUrl: toString(raw.instagramUrl),
+    facebookUrl: toString(raw.facebookUrl),
+    googleBusinessUrl: toString(raw.googleBusinessUrl),
+    businessHours: toString(raw.businessHours),
+    currentMarketingEfforts: toMarketingEfforts(raw.currentMarketingEfforts),
+    monthlyMarketingBudgetRange: toString(raw.monthlyMarketingBudgetRange),
+    biggestChallenges: toString(raw.biggestChallenges),
+    additionalInfo: toString(raw.additionalInfo),
+    submittedAt: toString(raw.submittedAt) || new Date().toISOString(),
+  };
+}
+
+function normalizeOnboarding(raw: unknown, businessName: string): ClientOnboardingState | undefined {
+  if (!isRecord(raw)) return undefined;
+
+  const data = normalizeOnboardingData(raw.data, businessName);
+  const linkCreatedAt = toString(raw.linkCreatedAt) || undefined;
+
+  if (!linkCreatedAt && !data) return undefined;
+
+  return {
+    linkCreatedAt,
+    data,
+  };
+}
+
 function normalizeClient(raw: unknown): ClientProfile | null {
   if (!isRecord(raw)) return null;
   const id = toString(raw.id);
@@ -69,6 +126,7 @@ function normalizeClient(raw: unknown): ClientProfile | null {
     startDate: toString(raw.startDate) || undefined,
     status: toStatus(raw.status),
     notes: toString(raw.notes) || undefined,
+    onboarding: normalizeOnboarding(raw.onboarding, name),
     createdAt: toString(raw.createdAt) || new Date().toISOString(),
   };
 }

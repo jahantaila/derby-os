@@ -2,7 +2,7 @@
 
 import { FormEvent, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight, Check, Loader2, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Copy, ExternalLink, Loader2, Sparkles } from "lucide-react";
 import { CLIENT_TYPE_LABEL, type ClientProfile, type ClientService } from "@/lib/client-types";
 
 type Step = 0 | 1 | 2;
@@ -54,6 +54,10 @@ export default function ClientOnboardingPage() {
   const [form, setForm] = useState<OnboardingForm>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [createdClient, setCreatedClient] = useState<ClientProfile | null>(null);
+  const [generatedLink, setGeneratedLink] = useState<string | null>(null);
+  const [linkCopied, setLinkCopied] = useState(false);
+  const [generatingLink, setGeneratingLink] = useState(false);
 
   const summary = useMemo(
     () => [
@@ -131,12 +135,148 @@ export default function ClientOnboardingPage() {
       });
 
       if (!response.ok) throw new Error("submit");
-      router.push("/clients");
+      const client = (await response.json()) as ClientProfile;
+      setCreatedClient(client);
     } catch {
       setError("Could not create client profile.");
     } finally {
       setSaving(false);
     }
+  }
+
+  async function handleGenerateOnboardingLink() {
+    if (!createdClient) return;
+
+    try {
+      setGeneratingLink(true);
+      setError(null);
+
+      const response = await fetch(`/api/clients/${createdClient.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          onboarding: {
+            linkCreatedAt: new Date().toISOString(),
+            data: createdClient.onboarding?.data,
+          },
+        }),
+      });
+
+      if (!response.ok) throw new Error("link");
+
+      const updated = (await response.json()) as ClientProfile;
+      setCreatedClient(updated);
+      const link = `${window.location.origin}/onboard/${updated.id}`;
+      setGeneratedLink(link);
+      await navigator.clipboard.writeText(link);
+      setLinkCopied(true);
+    } catch {
+      setError("Could not generate onboarding form link.");
+    } finally {
+      setGeneratingLink(false);
+    }
+  }
+
+  if (createdClient) {
+    return (
+      <section className="animate-enter space-y-6" style={{ animationDelay: "80ms" }}>
+        <div className="glass-panel page-header p-5 sm:p-6">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.24em] text-blue-200/70">Client Intake</p>
+              <h1 className="page-title mt-2">Client Created</h1>
+              <p className="mt-2 max-w-2xl text-sm text-slate-300">
+                {createdClient.name} is in Mission Control. Generate the onboarding form link now or return to the client list.
+              </p>
+            </div>
+            <div className="glass-card inline-flex items-center gap-3 self-start rounded-2xl px-4 py-3 text-sm text-slate-200">
+              <Check size={16} className="text-blue-200" />
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.18em] text-slate-400">Status</p>
+                <p>Client profile saved</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {error ? <div className="rounded-xl border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-200">{error}</div> : null}
+
+        <section className="glass-panel p-5 sm:p-6">
+          <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
+            <div className="glass-card rounded-2xl p-5">
+              <p className="text-[11px] uppercase tracking-[0.16em] text-slate-500">Next Step</p>
+              <h2 className="heading-font mt-2 text-3xl font-normal uppercase tracking-[0.04em] text-white">Generate Onboarding Form</h2>
+              <p className="mt-3 text-sm text-slate-300">
+                This creates a shareable public form at <span className="text-blue-100">`/onboard/{createdClient.id}`</span> and marks onboarding as pending.
+              </p>
+
+              <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+                <button
+                  type="button"
+                  onClick={() => void handleGenerateOnboardingLink()}
+                  disabled={generatingLink}
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-blue-300/30 bg-[linear-gradient(135deg,#2093FF,#0026FF)] px-4 py-2 text-sm font-semibold text-white transition hover:shadow-[0_0_24px_rgba(32,147,255,0.24)] disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  {generatingLink ? <Loader2 size={16} className="animate-spin" /> : <ExternalLink size={16} />}
+                  {generatedLink ? "Regenerate + Copy Link" : "Generate Onboarding Form"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => router.push(`/clients/${createdClient.id}`)}
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/12 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-white/10"
+                >
+                  View Client
+                </button>
+              </div>
+
+              {generatedLink ? (
+                <div className="mt-4 rounded-2xl border border-blue-300/25 bg-blue-500/10 p-4">
+                  <p className="text-[11px] uppercase tracking-[0.16em] text-blue-100/80">Shareable URL</p>
+                  <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center">
+                    <code className="block flex-1 overflow-x-auto rounded-xl border border-white/10 bg-[#101625] px-3 py-3 text-sm text-blue-50">
+                      {generatedLink}
+                    </code>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        await navigator.clipboard.writeText(generatedLink);
+                        setLinkCopied(true);
+                      }}
+                      className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/12 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-white/10"
+                    >
+                      <Copy size={16} />
+                      {linkCopied ? "Copied" : "Copy Link"}
+                    </button>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+
+            <div className="glass-card rounded-2xl p-5">
+              <p className="text-[11px] uppercase tracking-[0.16em] text-slate-500">Client Summary</p>
+              <div className="mt-4 space-y-3 text-sm text-slate-200">
+                <div className="flex items-center justify-between gap-3">
+                  <span>Name</span>
+                  <span className="text-white">{createdClient.name}</span>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span>Type</span>
+                  <span className="text-white">{CLIENT_TYPE_LABEL[createdClient.clientType]}</span>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span>Budget</span>
+                  <span className="text-white">{createdClient.monthlyBudgetRange ?? "Custom"}</span>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span>Services</span>
+                  <span className="text-right text-white">{createdClient.services.join(", ")}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </section>
+    );
   }
 
   return (

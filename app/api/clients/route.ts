@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { ClientProfile } from "@/lib/client-types";
+import { ClientMarketingEffort, ClientOnboardingData, ClientOnboardingState, ClientProfile } from "@/lib/client-types";
 import { deleteClientProfile, getClients, upsertClient } from "@/lib/clients-store";
 
 export const dynamic = "force-dynamic";
@@ -20,6 +20,50 @@ function toNumber(value: unknown): number {
 function toClientType(value: unknown): ClientProfile["clientType"] {
   if (value === "restaurant" || value === "home-service" || value === "gaming") return value;
   return "other";
+}
+
+function toMarketingEfforts(value: unknown): ClientMarketingEffort[] {
+  if (!Array.isArray(value)) return [];
+  const valid = new Set<ClientMarketingEffort>(["Google Ads", "Meta Ads", "SEO", "Social Media", "Email Marketing", "None"]);
+  const efforts = value
+    .map((item) => toString(item))
+    .filter((item): item is ClientMarketingEffort => valid.has(item as ClientMarketingEffort));
+
+  if (efforts.includes("None")) return ["None"];
+  return Array.from(new Set(efforts));
+}
+
+function toOnboardingData(value: unknown, businessName: string): ClientOnboardingData | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const input = value as Record<string, unknown>;
+
+  return {
+    businessName: toString(input.businessName) || businessName,
+    ownerManagerName: toString(input.ownerManagerName),
+    bestEmail: toString(input.bestEmail),
+    bestPhone: toString(input.bestPhone),
+    businessAddress: toString(input.businessAddress),
+    websiteUrl: toString(input.websiteUrl),
+    instagramUrl: toString(input.instagramUrl),
+    facebookUrl: toString(input.facebookUrl),
+    googleBusinessUrl: toString(input.googleBusinessUrl),
+    businessHours: toString(input.businessHours),
+    currentMarketingEfforts: toMarketingEfforts(input.currentMarketingEfforts),
+    monthlyMarketingBudgetRange: toString(input.monthlyMarketingBudgetRange),
+    biggestChallenges: toString(input.biggestChallenges),
+    additionalInfo: toString(input.additionalInfo),
+    submittedAt: toString(input.submittedAt) || new Date().toISOString(),
+  };
+}
+
+function toOnboarding(value: unknown, businessName: string): ClientOnboardingState | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const input = value as Record<string, unknown>;
+  const linkCreatedAt = toString(input.linkCreatedAt) || undefined;
+  const data = toOnboardingData(input.data, businessName);
+
+  if (!linkCreatedAt && !data) return undefined;
+  return { linkCreatedAt, data };
 }
 
 export function toClientPayload(body: unknown): ClientProfile | null {
@@ -51,6 +95,7 @@ export function toClientPayload(body: unknown): ClientProfile | null {
     startDate: toString(input.startDate) || undefined,
     status: input.status === "inactive" || input.status === "paused" ? input.status : "active",
     notes: toString(input.notes) || undefined,
+    onboarding: toOnboarding(input.onboarding, name),
     createdAt: toString(input.createdAt) || new Date().toISOString(),
   };
 }

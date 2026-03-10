@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, CreditCard, ExternalLink, FileText, Globe, Mail, MapPin, PencilLine, Phone, ReceiptText, Save, X } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Copy, CreditCard, ExternalLink, FileText, Globe, Mail, MapPin, PencilLine, Phone, ReceiptText, Save, Send, X } from "lucide-react";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { GridSkeleton, TableSkeleton } from "@/components/loading-skeleton";
 import { CLIENT_TYPE_LABEL, SERVICE_BADGE_CLASSES, STATUS_BADGE_CLASSES, STATUS_LABEL, type ClientProfile } from "@/lib/client-types";
@@ -96,6 +96,11 @@ function sanitizeWebsite(value: string) {
   return value.startsWith("http://") || value.startsWith("https://") ? value : `https://${value}`;
 }
 
+function onboardingStatus(client: ClientProfile) {
+  if (client.onboarding?.data?.submittedAt) return "Completed";
+  return "Pending";
+}
+
 export default function ClientDetailPage({ params }: ClientDetailPageProps) {
   const [client, setClient] = useState<ClientProfile | null>(null);
   const [documents, setDocuments] = useState<DocumentRecord[]>([]);
@@ -104,6 +109,8 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState<EditForm | null>(null);
+  const [copyingLink, setCopyingLink] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -191,6 +198,41 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
       setError("Could not save client changes.");
     } finally {
       setIsSaving(false);
+    }
+  }
+
+  async function handleCopyOnboardingLink() {
+    if (!client) return;
+
+    try {
+      setCopyingLink(true);
+      setError(null);
+
+      let nextClient = client;
+      if (!client.onboarding?.linkCreatedAt) {
+        const response = await fetch(`/api/clients/${params.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            onboarding: {
+              linkCreatedAt: new Date().toISOString(),
+              data: client.onboarding?.data,
+            },
+          }),
+        });
+
+        if (!response.ok) throw new Error("copy");
+        nextClient = (await response.json()) as ClientProfile;
+        setClient(nextClient);
+        setForm(toEditForm(nextClient));
+      }
+
+      await navigator.clipboard.writeText(`${window.location.origin}/onboard/${nextClient.id}`);
+      setLinkCopied(true);
+    } catch {
+      setError("Could not copy onboarding link.");
+    } finally {
+      setCopyingLink(false);
     }
   }
 
@@ -414,6 +456,110 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
                   <MapPin className="h-4 w-4 text-blue-200" />
                   <span className="text-sm text-slate-200">{client.address ?? "No address on file"}</span>
                 </div>
+              </div>
+            </section>
+
+            <section className="glass-panel p-5 sm:p-6">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <h2 className="section-title">Onboarding</h2>
+                  <p className="mt-1 text-sm text-slate-400">Share the public intake form and review completed onboarding details here.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => void handleCopyOnboardingLink()}
+                  disabled={copyingLink}
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-blue-300/30 bg-[linear-gradient(135deg,rgba(32,147,255,0.2),rgba(0,38,255,0.18))] px-4 py-2 text-sm font-semibold text-blue-50 transition hover:border-blue-300/60 hover:shadow-[0_0_24px_rgba(32,147,255,0.24)] disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  <Copy className="h-4 w-4" />
+                  {copyingLink ? "Copying..." : linkCopied ? "Link Copied" : "Copy Onboarding Link"}
+                </button>
+              </div>
+
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                <div className="glass-card rounded-2xl p-4">
+                  <p className="text-[11px] uppercase tracking-[0.16em] text-slate-500">Onboarding Status</p>
+                  <div className="mt-3 flex items-center gap-2">
+                    {client.onboarding?.data?.submittedAt ? <CheckCircle2 className="h-4 w-4 text-emerald-200" /> : <Send className="h-4 w-4 text-blue-200" />}
+                    <span
+                      className={`rounded-full border px-3 py-1 text-xs uppercase tracking-[0.16em] ${
+                        client.onboarding?.data?.submittedAt
+                          ? "border-emerald-400/35 bg-emerald-500/15 text-emerald-100"
+                          : "border-blue-300/35 bg-blue-500/15 text-blue-100"
+                      }`}
+                    >
+                      {onboardingStatus(client)}
+                    </span>
+                  </div>
+                  <p className="mt-3 text-sm text-slate-300">
+                    {client.onboarding?.linkCreatedAt ? `Link generated ${formatDateTime(client.onboarding.linkCreatedAt)}.` : "Link has not been generated yet."}
+                  </p>
+                </div>
+
+                <div className="glass-card rounded-2xl p-4">
+                  <p className="text-[11px] uppercase tracking-[0.16em] text-slate-500">Public Form Path</p>
+                  <code className="mt-3 block overflow-x-auto rounded-xl border border-white/10 bg-[#101625] px-3 py-3 text-sm text-blue-50">
+                    {`/onboard/${client.id}`}
+                  </code>
+                </div>
+              </div>
+
+              <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4">
+                {client.onboarding?.data ? (
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div>
+                      <p className="text-[11px] uppercase tracking-[0.16em] text-slate-500">Owner / Manager</p>
+                      <p className="mt-2 text-sm text-white">{client.onboarding.data.ownerManagerName || "Not provided"}</p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] uppercase tracking-[0.16em] text-slate-500">Best Contact</p>
+                      <p className="mt-2 text-sm text-white">{client.onboarding.data.bestEmail || "Not provided"}</p>
+                      <p className="mt-1 text-sm text-slate-300">{client.onboarding.data.bestPhone || "Not provided"}</p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] uppercase tracking-[0.16em] text-slate-500">Business Address</p>
+                      <p className="mt-2 text-sm text-white">{client.onboarding.data.businessAddress || "Not provided"}</p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] uppercase tracking-[0.16em] text-slate-500">Website</p>
+                      <p className="mt-2 text-sm text-white">{client.onboarding.data.websiteUrl || "Not provided"}</p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] uppercase tracking-[0.16em] text-slate-500">Social Links</p>
+                      <p className="mt-2 text-sm text-white">{client.onboarding.data.instagramUrl || "Instagram not provided"}</p>
+                      <p className="mt-1 text-sm text-slate-300">{client.onboarding.data.facebookUrl || "Facebook not provided"}</p>
+                      <p className="mt-1 text-sm text-slate-300">{client.onboarding.data.googleBusinessUrl || "Google Business not provided"}</p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] uppercase tracking-[0.16em] text-slate-500">Business Hours</p>
+                      <p className="mt-2 text-sm text-white">{client.onboarding.data.businessHours || "Not provided"}</p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] uppercase tracking-[0.16em] text-slate-500">Current Marketing</p>
+                      <p className="mt-2 text-sm text-white">
+                        {client.onboarding.data.currentMarketingEfforts.length ? client.onboarding.data.currentMarketingEfforts.join(", ") : "Not provided"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] uppercase tracking-[0.16em] text-slate-500">Monthly Marketing Budget</p>
+                      <p className="mt-2 text-sm text-white">{client.onboarding.data.monthlyMarketingBudgetRange || "Not provided"}</p>
+                    </div>
+                    <div className="md:col-span-2">
+                      <p className="text-[11px] uppercase tracking-[0.16em] text-slate-500">Biggest Challenges</p>
+                      <p className="mt-2 text-sm leading-6 text-white">{client.onboarding.data.biggestChallenges || "Not provided"}</p>
+                    </div>
+                    <div className="md:col-span-2">
+                      <p className="text-[11px] uppercase tracking-[0.16em] text-slate-500">Anything Else</p>
+                      <p className="mt-2 text-sm leading-6 text-white">{client.onboarding.data.additionalInfo || "Not provided"}</p>
+                    </div>
+                    <div className="md:col-span-2">
+                      <p className="text-[11px] uppercase tracking-[0.16em] text-slate-500">Submitted</p>
+                      <p className="mt-2 text-sm text-white">{formatDateTime(client.onboarding.data.submittedAt)}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-slate-300">No onboarding form has been submitted yet.</p>
+                )}
               </div>
             </section>
 
