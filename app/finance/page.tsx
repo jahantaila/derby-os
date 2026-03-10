@@ -1,12 +1,47 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, ArrowRight, DollarSign, Plus, Trash2, TrendingUp, Users } from "lucide-react";
-import { FinanceClient, FinanceData, FinanceGeneralMonthData, FinanceLedgerRow, FinanceMonthData } from "@/lib/finance-types";
+import Link from "next/link";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  Bar,
+  BarChart,
+  Cell,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import { ArrowLeft, ArrowRight, ChevronDown, Search, Trash2 } from "lucide-react";
+import {
+  FinanceClientType,
+  FinanceData,
+  FinanceGeneralMonthData,
+  FinanceLedgerRow,
+  FinanceServiceType,
+} from "@/lib/finance-types";
 
 const DEFAULT_GOAL = 15000;
 
-type ActiveTab = "home" | string;
+type DashboardTab = "revenue" | "expenses" | "clients" | "reports";
+type ExpenseSectionKey = "recurringExpenses" | "employeeExpenses" | "oneTimeExpenses";
+type RevenueSortKey = "clientName" | "service" | "amount" | "recurring" | "date" | "status";
+type ClientSortKey = "name" | "revenue" | "profitMargin";
+
+type RevenueRow = {
+  id: string;
+  clientId: string;
+  clientName: string;
+  clientType: FinanceClientType;
+  service: FinanceServiceType;
+  amount: number;
+  recurring: "M" | "1-time";
+  date: string;
+  status: "paid" | "pending";
+};
 
 const money = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -15,13 +50,71 @@ const money = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 2,
 });
 
+const compactMoney = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  notation: "compact",
+  maximumFractionDigits: 1,
+});
+
 const percent = new Intl.NumberFormat("en-US", {
   minimumFractionDigits: 1,
   maximumFractionDigits: 1,
 });
 
+const SERVICE_OPTIONS: FinanceServiceType[] = [
+  "Website",
+  "SEO",
+  "Social Media",
+  "Google Ads",
+  "Meta Ads",
+  "Software",
+  "Review Automation",
+  "Other",
+];
+
+const CLIENT_TYPE_LABEL: Record<FinanceClientType, string> = {
+  restaurant: "Restaurant",
+  "home-service": "Home Service",
+  gaming: "Gaming",
+  other: "Other",
+};
+
+const SERVICE_COLORS: Record<FinanceServiceType, string> = {
+  Website: "#3b82f6",
+  SEO: "#10b981",
+  "Social Media": "#f59e0b",
+  "Google Ads": "#ef4444",
+  "Meta Ads": "#60a5fa",
+  Software: "#6366f1",
+  "Review Automation": "#14b8a6",
+  Other: "#94a3b8",
+};
+
+const CLIENT_TYPE_COLORS: Record<FinanceClientType, string> = {
+  restaurant: "#2093FF",
+  "home-service": "#10b981",
+  gaming: "#f59e0b",
+  other: "#ef4444",
+};
+
+const SERVICE_BADGE_CLASS: Record<FinanceServiceType, string> = {
+  Website: "border-blue-400/40 bg-blue-500/15 text-blue-100",
+  SEO: "border-emerald-400/40 bg-emerald-500/15 text-emerald-100",
+  "Social Media": "border-amber-400/40 bg-amber-500/15 text-amber-100",
+  "Google Ads": "border-rose-400/40 bg-rose-500/15 text-rose-100",
+  "Meta Ads": "border-sky-400/40 bg-sky-500/15 text-sky-100",
+  Software: "border-indigo-400/40 bg-indigo-500/15 text-indigo-100",
+  "Review Automation": "border-teal-400/40 bg-teal-500/15 text-teal-100",
+  Other: "border-slate-400/40 bg-slate-500/15 text-slate-200",
+};
+
 function formatMoney(value: number) {
   return money.format(Number.isFinite(value) ? value : 0);
+}
+
+function formatCompactMoney(value: number) {
+  return compactMoney.format(Number.isFinite(value) ? value : 0);
 }
 
 function formatPercent(value: number) {
@@ -43,20 +136,18 @@ function monthLabel(value: string) {
   return new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" }).format(new Date(Date.UTC(year, month - 1, 1)));
 }
 
-function monthTitle(value: string, activeTab: ActiveTab, clientName?: string) {
+function monthShortLabel(value: string) {
   const [year, month] = value.split("-").map(Number);
-  const label = new Intl.DateTimeFormat("en-US", { month: "long" }).format(new Date(Date.UTC(year, month - 1, 1)));
-  if (activeTab === "home") return `${label.toUpperCase()} FINANCES`;
-  return `${label.toUpperCase()} · ${clientName?.toUpperCase() ?? "CLIENT"}`;
+  return new Intl.DateTimeFormat("en-US", { month: "short" }).format(new Date(Date.UTC(year, month - 1, 1)));
 }
 
-function emptyClientMonth(month: string): FinanceMonthData {
+function emptyClientMonth(month: string) {
   return {
     month,
     goalAmount: DEFAULT_GOAL,
     stripeFeeOverride: null,
-    income: [],
-    expenses: [],
+    income: [] as FinanceLedgerRow[],
+    expenses: [] as FinanceLedgerRow[],
   };
 }
 
@@ -74,12 +165,8 @@ function cloneRecurringRows(rows: FinanceLedgerRow[]): FinanceLedgerRow[] {
   return rows
     .filter((row) => row.recurring === "M")
     .map((row) => ({
+      ...row,
       id: crypto.randomUUID(),
-      name: row.name,
-      date: row.date,
-      recurring: row.recurring,
-      notes: row.notes,
-      amount: row.amount,
     }));
 }
 
@@ -89,7 +176,7 @@ function ensureMonthData(data: FinanceData, month: string): FinanceData {
     if (client.months[month]) return client;
 
     const prevMonth = client.months[prev];
-    const nextMonth: FinanceMonthData = prevMonth
+    const nextMonth = prevMonth
       ? {
           month,
           goalAmount: prevMonth.goalAmount,
@@ -131,190 +218,85 @@ function ensureMonthData(data: FinanceData, month: string): FinanceData {
   };
 }
 
-function cellBaseClassName() {
-  return "w-full rounded-lg border border-white/10 bg-[#0d111d] px-2.5 py-2 text-sm text-slate-100 outline-none transition focus:border-blue-300/50";
-}
-
-function EditableTextCell({
-  value,
-  onSave,
-  placeholder,
-}: {
-  value: string;
-  onSave: (next: string) => void;
-  placeholder?: string;
-}) {
-  const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState(value);
-
-  useEffect(() => {
-    setDraft(value);
-  }, [value]);
-
-  if (!editing) {
-    return (
-      <button
-        type="button"
-        onClick={() => setEditing(true)}
-        className="w-full rounded-lg px-2.5 py-2 text-left text-sm text-slate-100 transition hover:bg-white/5"
-      >
-        {value || <span className="text-slate-500">{placeholder ?? "Click to edit"}</span>}
-      </button>
-    );
-  }
-
+function totalGeneralExpenses(month: FinanceGeneralMonthData) {
   return (
-    <input
-      autoFocus
-      value={draft}
-      onChange={(event) => setDraft(event.target.value)}
-      onBlur={() => {
-        setEditing(false);
-        if (draft !== value) onSave(draft);
-      }}
-      onKeyDown={(event) => {
-        if (event.key === "Enter") event.currentTarget.blur();
-        if (event.key === "Escape") {
-          setDraft(value);
-          setEditing(false);
-        }
-      }}
-      placeholder={placeholder}
-      className={cellBaseClassName()}
-    />
+    month.recurringExpenses.reduce((sum, row) => sum + row.amount, 0) +
+    month.employeeExpenses.reduce((sum, row) => sum + row.amount, 0) +
+    month.oneTimeExpenses.reduce((sum, row) => sum + row.amount, 0)
   );
 }
 
-function EditableNumberCell({
-  value,
-  onSave,
-  nullable,
-}: {
-  value: number | null;
-  onSave: (next: number | null) => void;
-  nullable?: boolean;
-}) {
-  const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState(value === null ? "" : String(value));
-
-  useEffect(() => {
-    setDraft(value === null ? "" : String(value));
-  }, [value]);
-
-  if (!editing) {
-    const shown = value === null ? "auto (3%)" : formatMoney(value);
-    return (
-      <button
-        type="button"
-        onClick={() => setEditing(true)}
-        className="w-full rounded-lg px-2.5 py-2 text-right text-sm font-semibold text-slate-100 transition hover:bg-white/5"
-      >
-        {shown}
-      </button>
-    );
-  }
-
-  return (
-    <input
-      autoFocus
-      inputMode="decimal"
-      value={draft}
-      onChange={(event) => setDraft(event.target.value)}
-      onBlur={() => {
-        setEditing(false);
-        if (!draft.trim()) {
-          onSave(nullable ? null : 0);
-          return;
-        }
-
-        const parsed = Number(draft);
-        if (!Number.isFinite(parsed) || parsed < 0) {
-          setDraft(value === null ? "" : String(value));
-          return;
-        }
-
-        onSave(parsed);
-      }}
-      onKeyDown={(event) => {
-        if (event.key === "Enter") event.currentTarget.blur();
-        if (event.key === "Escape") {
-          setDraft(value === null ? "" : String(value));
-          setEditing(false);
-        }
-      }}
-      placeholder={nullable ? "auto" : "0.00"}
-      className={`${cellBaseClassName()} text-right font-semibold`}
-    />
-  );
+function inferServiceFromText(value: string): FinanceServiceType {
+  const normalized = value.toLowerCase();
+  if (normalized.includes("review")) return "Review Automation";
+  if (normalized.includes("software") || normalized.includes("saas")) return "Software";
+  if (normalized.includes("meta") || normalized.includes("facebook") || normalized.includes("instagram")) return "Meta Ads";
+  if (normalized.includes("google") || normalized.includes("ppc")) return "Google Ads";
+  if (normalized.includes("social")) return "Social Media";
+  if (normalized.includes("seo")) return "SEO";
+  if (normalized.includes("website") || normalized.includes("hosting") || normalized.includes("site")) return "Website";
+  return "Other";
 }
 
-function SummaryCard({
-  title,
-  value,
-  icon: Icon,
-  tone,
-}: {
-  title: string;
-  value: string;
-  icon: typeof DollarSign;
-  tone?: string;
-}) {
+function compareValue(a: string | number, b: string | number, dir: "asc" | "desc") {
+  const ratio = dir === "asc" ? 1 : -1;
+  if (typeof a === "number" && typeof b === "number") return (a - b) * ratio;
+  return String(a).localeCompare(String(b)) * ratio;
+}
+
+function trailingMonths(month: string, count: number) {
+  return Array.from({ length: count }).map((_, idx) => shiftMonth(month, -(count - idx - 1)));
+}
+
+function statValueClass(value: number) {
+  return value >= 0 ? "text-emerald-200" : "text-rose-200";
+}
+
+function MetricCard({ title, value, caption }: { title: string; value: string; caption?: string }) {
   return (
-    <article className="glass-card relative overflow-hidden p-4">
+    <article className="glass-card relative overflow-hidden rounded-2xl p-4">
       <div className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,rgba(32,147,255,0),#2093FF,rgba(0,38,255,0))]" />
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400">{title}</p>
-          <p className={`mt-2 text-2xl font-semibold tracking-[-0.02em] ${tone ?? "text-white"}`}>{value}</p>
-        </div>
-        <div className="rounded-xl border border-white/10 bg-white/5 p-2 text-blue-100">
-          <Icon size={16} />
-        </div>
-      </div>
+      <p className="text-[10px] uppercase tracking-[0.16em] text-slate-400">{title}</p>
+      <p className="mt-2 text-2xl font-semibold tracking-[-0.02em] text-white">{value}</p>
+      {caption ? <p className="mt-1 text-xs text-slate-400">{caption}</p> : null}
     </article>
   );
 }
 
-function sectionHeader(title: string) {
+function SectionCard({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className="mb-3">
-      <h2 className="text-sm font-bold uppercase tracking-[0.18em] text-white">{title}</h2>
-      <div className="mt-2 h-[2px] w-40 bg-[linear-gradient(90deg,#2093FF,#0026FF)]" />
-    </div>
+    <section className="glass-panel rounded-2xl p-4">
+      <h2 className="text-sm font-semibold uppercase tracking-[0.15em] text-slate-200">{title}</h2>
+      <div className="mt-4">{children}</div>
+    </section>
   );
-}
-
-function RecurringSelector({
-  value,
-  onSave,
-}: {
-  value: "M" | "1-time";
-  onSave: (next: "M" | "1-time") => void;
-}) {
-  return (
-    <select
-      value={value}
-      onChange={(event) => onSave(event.target.value as "M" | "1-time")}
-      className="w-full rounded-lg border border-white/10 bg-[#0d111d] px-2.5 py-2 text-sm text-slate-100 outline-none"
-    >
-      <option value="M">M</option>
-      <option value="1-time">1-time</option>
-    </select>
-  );
-}
-
-function hasAnyClientData(client: FinanceClient) {
-  return Object.values(client.months).some((month) => month.income.length > 0 || month.expenses.length > 0);
 }
 
 export default function FinancePage() {
   const [data, setData] = useState<FinanceData | null>(null);
   const [selectedMonth, setSelectedMonth] = useState(() => monthKey());
-  const [activeTab, setActiveTab] = useState<ActiveTab>("home");
+  const [activeTab, setActiveTab] = useState<DashboardTab>("revenue");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const latestSaveRequest = useRef(0);
+
+  const [revenueSearch, setRevenueSearch] = useState("");
+  const [revenueServiceFilter, setRevenueServiceFilter] = useState<"all" | FinanceServiceType>("all");
+  const [revenueClientTypeFilter, setRevenueClientTypeFilter] = useState<"all" | FinanceClientType>("all");
+  const [revenueRecurringFilter, setRevenueRecurringFilter] = useState<"all" | "M" | "1-time">("all");
+  const [revenueSort, setRevenueSort] = useState<{ key: RevenueSortKey; dir: "asc" | "desc" }>({ key: "amount", dir: "desc" });
+
+  const [expensesOpen, setExpensesOpen] = useState<Record<ExpenseSectionKey, boolean>>({
+    recurringExpenses: true,
+    employeeExpenses: true,
+    oneTimeExpenses: true,
+  });
+
+  const [clientSort, setClientSort] = useState<ClientSortKey>("revenue");
+  const [clientTypeFilter, setClientTypeFilter] = useState<"all" | FinanceClientType>("all");
+  const [clientStatusFilter, setClientStatusFilter] = useState<"all" | "active" | "inactive">("all");
+  const [clientServiceFilter, setClientServiceFilter] = useState<"all" | FinanceServiceType>("all");
 
   async function loadFinance() {
     try {
@@ -325,8 +307,10 @@ export default function FinancePage() {
       const nextData = (await response.json()) as FinanceData;
       setData(nextData);
 
+      const availableMonths = Object.keys(nextData.generalData.months).sort();
       const nowMonth = monthKey();
-      setSelectedMonth((current) => (nextData.generalData.months[current] ? current : nowMonth));
+      const fallback = availableMonths[availableMonths.length - 1] ?? nowMonth;
+      setSelectedMonth((current) => (nextData.generalData.months[current] ? current : nextData.generalData.months[nowMonth] ? nowMonth : fallback));
 
       setError(null);
     } catch {
@@ -363,83 +347,17 @@ export default function FinancePage() {
 
   useEffect(() => {
     void loadFinance();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const safeData = useMemo(() => {
-    if (!data) return null;
-    if (data.clients.some((client) => client.id === activeTab) || activeTab === "home") {
-      return data;
-    }
-
-    setActiveTab("home");
-    return data;
-  }, [data, activeTab]);
-
   const monthData = useMemo(() => {
-    if (!safeData) return null;
-    return ensureMonthData(safeData, selectedMonth);
-  }, [safeData, selectedMonth]);
-
-  const currentClient = useMemo(() => {
-    if (!monthData || activeTab === "home") return null;
-    return monthData.clients.find((client) => client.id === activeTab) ?? null;
-  }, [monthData, activeTab]);
+    if (!data) return null;
+    return ensureMonthData(data, selectedMonth);
+  }, [data, selectedMonth]);
 
   const generalMonth = useMemo(() => {
     if (!monthData) return emptyGeneralMonth(selectedMonth);
     return monthData.generalData.months[selectedMonth] ?? emptyGeneralMonth(selectedMonth);
   }, [monthData, selectedMonth]);
-
-  const clientMonth = useMemo(() => {
-    if (!currentClient) return emptyClientMonth(selectedMonth);
-    return currentClient.months[selectedMonth] ?? emptyClientMonth(selectedMonth);
-  }, [currentClient, selectedMonth]);
-
-  const summary = useMemo(() => {
-    if (!monthData) {
-      return {
-        grossRevenue: 0,
-        netRevenue: 0,
-        stripeFee: 0,
-        totalExpenditure: 0,
-        totalProfit: 0,
-        profitMargin: 0,
-      };
-    }
-
-    if (activeTab === "home") {
-      const grossRevenue = monthData.clients.reduce(
-        (sum, client) => sum + (client.months[selectedMonth]?.income ?? []).reduce((x, row) => x + row.amount, 0),
-        0,
-      );
-      const stripeFee = monthData.clients.reduce((sum, client) => {
-        const cm = client.months[selectedMonth] ?? emptyClientMonth(selectedMonth);
-        if (cm.stripeFeeOverride !== null) return sum + cm.stripeFeeOverride;
-        return sum + cm.income.reduce((x, row) => x + row.amount * 0.03, 0);
-      }, 0);
-
-      const totalExpenditure =
-        generalMonth.recurringExpenses.reduce((sum, row) => sum + row.amount, 0) +
-        generalMonth.employeeExpenses.reduce((sum, row) => sum + row.amount, 0) +
-        generalMonth.oneTimeExpenses.reduce((sum, row) => sum + row.amount, 0);
-
-      const netRevenue = grossRevenue - stripeFee;
-      const totalProfit = netRevenue - totalExpenditure;
-      const profitMargin = grossRevenue > 0 ? (totalProfit / grossRevenue) * 100 : 0;
-
-      return { grossRevenue, netRevenue, stripeFee, totalExpenditure, totalProfit, profitMargin };
-    }
-
-    const grossRevenue = clientMonth.income.reduce((sum, row) => sum + row.amount, 0);
-    const stripeFee = clientMonth.stripeFeeOverride ?? clientMonth.income.reduce((sum, row) => sum + row.amount * 0.03, 0);
-    const netRevenue = grossRevenue - stripeFee;
-    const totalExpenditure = clientMonth.expenses.reduce((sum, row) => sum + row.amount, 0);
-    const totalProfit = netRevenue - totalExpenditure;
-    const profitMargin = grossRevenue > 0 ? (totalProfit / grossRevenue) * 100 : 0;
-
-    return { grossRevenue, netRevenue, stripeFee, totalExpenditure, totalProfit, profitMargin };
-  }, [monthData, activeTab, selectedMonth, generalMonth, clientMonth]);
 
   function commit(nextData: FinanceData) {
     setData(nextData);
@@ -450,6 +368,17 @@ export default function FinancePage() {
     if (!monthData) return;
     const next = updater(monthData);
     commit(next);
+  }
+
+  function changeMonth(delta: number) {
+    const next = shiftMonth(selectedMonth, delta);
+    setSelectedMonth(next);
+
+    if (!data) return;
+    const nextData = ensureMonthData(data, next);
+    if (JSON.stringify(nextData) !== JSON.stringify(data)) {
+      commit(nextData);
+    }
   }
 
   function updateGeneralMonth(updater: (current: FinanceGeneralMonthData) => FinanceGeneralMonthData) {
@@ -464,506 +393,746 @@ export default function FinancePage() {
     }));
   }
 
-  function updateClientMonth(updater: (current: FinanceMonthData) => FinanceMonthData) {
-    if (!currentClient) return;
-
-    withMonth((currentData) => ({
-      ...currentData,
-      clients: currentData.clients.map((client) => {
-        if (client.id !== currentClient.id) return client;
-        return {
-          ...client,
-          months: {
-            ...client.months,
-            [selectedMonth]: updater(client.months[selectedMonth] ?? emptyClientMonth(selectedMonth)),
-          },
-        };
-      }),
+  function addGeneralRow(section: ExpenseSectionKey) {
+    updateGeneralMonth((current) => ({
+      ...current,
+      [section]: [
+        ...current[section],
+        {
+          id: crypto.randomUUID(),
+          name: "",
+          date: "",
+          recurring: section === "oneTimeExpenses" ? "1-time" : "M",
+          notes: "",
+          amount: 0,
+          paymentStatus: "pending",
+          service: "Other",
+        },
+      ],
     }));
   }
 
-  function changeMonth(delta: number) {
-    const next = shiftMonth(selectedMonth, delta);
-    setSelectedMonth(next);
-
-    if (!data) return;
-    const nextData = ensureMonthData(data, next);
-    if (JSON.stringify(nextData) !== JSON.stringify(data)) {
-      commit(nextData);
-    }
+  function updateGeneralRow(section: ExpenseSectionKey, id: string, updater: (row: FinanceLedgerRow) => FinanceLedgerRow) {
+    updateGeneralMonth((current) => ({
+      ...current,
+      [section]: current[section].map((row) => (row.id === id ? updater(row) : row)),
+    }));
   }
 
-  function addClient() {
-    if (!monthData) return;
+  function deleteGeneralRow(section: ExpenseSectionKey, id: string) {
+    if (!window.confirm("Delete this row?")) return;
+    updateGeneralMonth((current) => ({
+      ...current,
+      [section]: current[section].filter((row) => row.id !== id),
+    }));
+  }
 
-    const name = window.prompt("Client name");
-    if (!name) return;
-    const trimmed = name.trim();
-    if (!trimmed) return;
-
-    const exists = monthData.clients.some((client) => client.name.toLowerCase() === trimmed.toLowerCase());
-    if (exists) {
-      setError("Client already exists.");
-      return;
+  const summary = useMemo(() => {
+    if (!monthData) {
+      return {
+        monthlyRevenue: 0,
+        monthlyExpenses: 0,
+        netProfit: 0,
+        profitMargin: 0,
+        mrr: 0,
+        activeClients: 0,
+        goalProgress: 0,
+      };
     }
 
-    const created: FinanceClient = {
-      id: crypto.randomUUID(),
-      name: trimmed,
-      months: {
-        [selectedMonth]: emptyClientMonth(selectedMonth),
+    const monthlyRevenue = monthData.clients.reduce(
+      (sum, client) => sum + (client.months[selectedMonth]?.income ?? []).reduce((rowSum, row) => rowSum + row.amount, 0),
+      0,
+    );
+
+    const clientExpenses = monthData.clients.reduce(
+      (sum, client) => sum + (client.months[selectedMonth]?.expenses ?? []).reduce((rowSum, row) => rowSum + row.amount, 0),
+      0,
+    );
+
+    const monthlyExpenses = totalGeneralExpenses(generalMonth) + clientExpenses;
+    const netProfit = monthlyRevenue - monthlyExpenses;
+    const profitMargin = monthlyRevenue > 0 ? (netProfit / monthlyRevenue) * 100 : 0;
+    const mrr = monthData.clients.reduce(
+      (sum, client) =>
+        sum +
+        (client.months[selectedMonth]?.income ?? [])
+          .filter((row) => row.recurring === "M")
+          .reduce((rowSum, row) => rowSum + row.amount, 0),
+      0,
+    );
+    const activeClients = monthData.clients.filter((client) => client.status === "active").length;
+    const goalProgress = Math.max(0, Math.min(100, (netProfit / DEFAULT_GOAL) * 100));
+
+    return {
+      monthlyRevenue,
+      monthlyExpenses,
+      netProfit,
+      profitMargin,
+      mrr,
+      activeClients,
+      goalProgress,
+    };
+  }, [generalMonth, monthData, selectedMonth]);
+
+  const sixMonthSeries = useMemo(() => {
+    if (!monthData) return [];
+    return trailingMonths(selectedMonth, 6).map((month) => {
+      const monthRevenue = monthData.clients.reduce(
+        (sum, client) => sum + (client.months[month]?.income ?? []).reduce((rowSum, row) => rowSum + row.amount, 0),
+        0,
+      );
+      const monthClientExpenses = monthData.clients.reduce(
+        (sum, client) => sum + (client.months[month]?.expenses ?? []).reduce((rowSum, row) => rowSum + row.amount, 0),
+        0,
+      );
+      const monthGeneral = monthData.generalData.months[month] ?? emptyGeneralMonth(month);
+      const monthExpenses = totalGeneralExpenses(monthGeneral) + monthClientExpenses;
+      const profit = monthRevenue - monthExpenses;
+      const margin = monthRevenue > 0 ? (profit / monthRevenue) * 100 : 0;
+
+      return {
+        month,
+        label: monthShortLabel(month),
+        revenue: Number(monthRevenue.toFixed(2)),
+        expenses: Number(monthExpenses.toFixed(2)),
+        margin: Number(margin.toFixed(2)),
+        goalMet: profit >= DEFAULT_GOAL,
+      };
+    });
+  }, [monthData, selectedMonth]);
+
+  const revenueByService = useMemo(() => {
+    if (!monthData) return [];
+    const totals = new Map<FinanceServiceType, number>();
+
+    for (const service of SERVICE_OPTIONS) totals.set(service, 0);
+
+    for (const client of monthData.clients) {
+      const rows = client.months[selectedMonth]?.income ?? [];
+      for (const row of rows) {
+        const service = row.service ?? client.services[0] ?? inferServiceFromText(`${row.name} ${row.notes}`);
+        totals.set(service, (totals.get(service) ?? 0) + row.amount);
+      }
+    }
+
+    return SERVICE_OPTIONS.map((service) => ({
+      name: service,
+      value: Number((totals.get(service) ?? 0).toFixed(2)),
+      color: SERVICE_COLORS[service],
+    })).filter((item) => item.value > 0);
+  }, [monthData, selectedMonth]);
+
+  const revenueByClientType = useMemo(() => {
+    if (!monthData) return [];
+    const totals = new Map<FinanceClientType, number>();
+
+    for (const type of Object.keys(CLIENT_TYPE_LABEL) as FinanceClientType[]) totals.set(type, 0);
+
+    for (const client of monthData.clients) {
+      const revenue = (client.months[selectedMonth]?.income ?? []).reduce((sum, row) => sum + row.amount, 0);
+      totals.set(client.clientType, (totals.get(client.clientType) ?? 0) + revenue);
+    }
+
+    return (Object.keys(CLIENT_TYPE_LABEL) as FinanceClientType[])
+      .map((type) => ({
+        name: CLIENT_TYPE_LABEL[type],
+        value: Number((totals.get(type) ?? 0).toFixed(2)),
+        color: CLIENT_TYPE_COLORS[type],
+      }))
+      .filter((entry) => entry.value > 0);
+  }, [monthData, selectedMonth]);
+
+  const revenueRows = useMemo<RevenueRow[]>(() => {
+    if (!monthData) return [];
+
+    return monthData.clients.flatMap((client) => {
+      const rows = client.months[selectedMonth]?.income ?? [];
+      return rows.map((row) => ({
+        id: row.id,
+        clientId: client.id,
+        clientName: client.name,
+        clientType: client.clientType,
+        service: row.service ?? client.services[0] ?? inferServiceFromText(`${row.name} ${row.notes}`),
+        amount: row.amount,
+        recurring: row.recurring,
+        date: row.date,
+        status: row.paymentStatus ?? "paid",
+      }));
+    });
+  }, [monthData, selectedMonth]);
+
+  const filteredRevenueRows = useMemo(() => {
+    const search = revenueSearch.trim().toLowerCase();
+
+    return [...revenueRows]
+      .filter((row) => {
+        if (search && !`${row.clientName} ${row.service} ${row.date}`.toLowerCase().includes(search)) return false;
+        if (revenueServiceFilter !== "all" && row.service !== revenueServiceFilter) return false;
+        if (revenueClientTypeFilter !== "all" && row.clientType !== revenueClientTypeFilter) return false;
+        if (revenueRecurringFilter !== "all" && row.recurring !== revenueRecurringFilter) return false;
+        return true;
+      })
+      .sort((a, b) => {
+        if (revenueSort.key === "amount") return compareValue(a.amount, b.amount, revenueSort.dir);
+        if (revenueSort.key === "clientName") return compareValue(a.clientName, b.clientName, revenueSort.dir);
+        if (revenueSort.key === "service") return compareValue(a.service, b.service, revenueSort.dir);
+        if (revenueSort.key === "recurring") return compareValue(a.recurring, b.recurring, revenueSort.dir);
+        if (revenueSort.key === "date") return compareValue(a.date, b.date, revenueSort.dir);
+        return compareValue(a.status, b.status, revenueSort.dir);
+      });
+  }, [revenueClientTypeFilter, revenueRecurringFilter, revenueRows, revenueSearch, revenueServiceFilter, revenueSort]);
+
+  const totalFilteredRevenue = useMemo(
+    () => filteredRevenueRows.reduce((sum, row) => sum + row.amount, 0),
+    [filteredRevenueRows],
+  );
+
+  const clientCards = useMemo(() => {
+    if (!monthData) return [];
+
+    const base = monthData.clients.map((client) => {
+      const monthRows = client.months[selectedMonth] ?? emptyClientMonth(selectedMonth);
+      const revenue = monthRows.income.reduce((sum, row) => sum + row.amount, 0);
+      const expenses = monthRows.expenses.reduce((sum, row) => sum + row.amount, 0);
+      const profit = revenue - expenses;
+      const profitMargin = revenue > 0 ? (profit / revenue) * 100 : 0;
+
+      return {
+        client,
+        revenue,
+        profitMargin,
+      };
+    });
+
+    return base
+      .filter((entry) => {
+        if (clientTypeFilter !== "all" && entry.client.clientType !== clientTypeFilter) return false;
+        if (clientStatusFilter !== "all" && entry.client.status !== clientStatusFilter) return false;
+        if (clientServiceFilter !== "all" && !entry.client.services.includes(clientServiceFilter)) return false;
+        return true;
+      })
+      .sort((a, b) => {
+        if (clientSort === "name") return a.client.name.localeCompare(b.client.name);
+        if (clientSort === "profitMargin") return b.profitMargin - a.profitMargin;
+        return b.revenue - a.revenue;
+      });
+  }, [clientServiceFilter, clientSort, clientStatusFilter, clientTypeFilter, monthData, selectedMonth]);
+
+  const reportData = useMemo(() => {
+    if (!monthData) {
+      return {
+        ytdRevenue: 0,
+        ytdExpenses: 0,
+        ytdProfit: 0,
+        topClients: [] as Array<{ name: string; profit: number }>,
+        expenseBreakdown: { recurring: 0, employee: 0, oneTime: 0 },
+      };
+    }
+
+    const [year] = selectedMonth.split("-").map(Number);
+    const monthsInYear = Object.keys(monthData.generalData.months)
+      .filter((month) => month.startsWith(`${year}-`) && month <= selectedMonth)
+      .sort();
+
+    let ytdRevenue = 0;
+    let ytdExpenses = 0;
+
+    for (const month of monthsInYear) {
+      const monthRevenue = monthData.clients.reduce(
+        (sum, client) => sum + (client.months[month]?.income ?? []).reduce((rowSum, row) => rowSum + row.amount, 0),
+        0,
+      );
+
+      const monthClientExpenses = monthData.clients.reduce(
+        (sum, client) => sum + (client.months[month]?.expenses ?? []).reduce((rowSum, row) => rowSum + row.amount, 0),
+        0,
+      );
+
+      const monthGeneral = monthData.generalData.months[month] ?? emptyGeneralMonth(month);
+      ytdRevenue += monthRevenue;
+      ytdExpenses += totalGeneralExpenses(monthGeneral) + monthClientExpenses;
+    }
+
+    const topClients = monthData.clients
+      .map((client) => {
+        const monthRows = client.months[selectedMonth] ?? emptyClientMonth(selectedMonth);
+        const revenue = monthRows.income.reduce((sum, row) => sum + row.amount, 0);
+        const expenses = monthRows.expenses.reduce((sum, row) => sum + row.amount, 0);
+        return { name: client.name, profit: revenue - expenses };
+      })
+      .sort((a, b) => b.profit - a.profit)
+      .slice(0, 8);
+
+    return {
+      ytdRevenue,
+      ytdExpenses,
+      ytdProfit: ytdRevenue - ytdExpenses,
+      topClients,
+      expenseBreakdown: {
+        recurring: generalMonth.recurringExpenses.reduce((sum, row) => sum + row.amount, 0),
+        employee: generalMonth.employeeExpenses.reduce((sum, row) => sum + row.amount, 0),
+        oneTime: generalMonth.oneTimeExpenses.reduce((sum, row) => sum + row.amount, 0),
       },
     };
-
-    const nextData: FinanceData = {
-      ...monthData,
-      clients: [...monthData.clients, created].sort((a, b) => a.name.localeCompare(b.name)),
-    };
-    setActiveTab(created.id);
-    commit(nextData);
-  }
-
-  function deleteClient(client: FinanceClient) {
-    if (hasAnyClientData(client)) {
-      window.alert("Client has finance data and cannot be deleted.");
-      return;
-    }
-
-    const confirmed = window.confirm(`Delete client '${client.name}'?`);
-    if (!confirmed || !monthData) return;
-
-    const nextData: FinanceData = {
-      ...monthData,
-      clients: monthData.clients.filter((entry) => entry.id !== client.id),
-    };
-
-    setActiveTab("home");
-    commit(nextData);
-  }
-
-  function addGeneralRow(section: "recurringExpenses" | "employeeExpenses" | "oneTimeExpenses") {
-    updateGeneralMonth((current) => ({
-      ...current,
-      [section]: [...current[section], { id: crypto.randomUUID(), name: "", date: "", recurring: section === "oneTimeExpenses" ? "1-time" : "M", notes: "", amount: 0 }],
-    }));
-  }
-
-  function addClientRow(section: "income" | "expenses") {
-    updateClientMonth((current) => ({
-      ...current,
-      [section]: [...current[section], { id: crypto.randomUUID(), name: "", date: "", recurring: "M", notes: "", amount: 0 }],
-    }));
-  }
-
-  function updateGeneralRow(
-    section: "recurringExpenses" | "employeeExpenses" | "oneTimeExpenses",
-    id: string,
-    updater: (row: FinanceLedgerRow) => FinanceLedgerRow,
-  ) {
-    updateGeneralMonth((current) => ({
-      ...current,
-      [section]: current[section].map((row) => (row.id === id ? updater(row) : row)),
-    }));
-  }
-
-  function updateClientRow(section: "income" | "expenses", id: string, updater: (row: FinanceLedgerRow) => FinanceLedgerRow) {
-    updateClientMonth((current) => ({
-      ...current,
-      [section]: current[section].map((row) => (row.id === id ? updater(row) : row)),
-    }));
-  }
-
-  function deleteGeneralRow(section: "recurringExpenses" | "employeeExpenses" | "oneTimeExpenses", id: string) {
-    const confirmed = window.confirm("Delete this row? This cannot be undone.");
-    if (!confirmed) return;
-
-    updateGeneralMonth((current) => ({
-      ...current,
-      [section]: current[section].filter((row) => row.id !== id),
-    }));
-  }
-
-  function deleteClientRow(section: "income" | "expenses", id: string) {
-    const confirmed = window.confirm("Delete this row? This cannot be undone.");
-    if (!confirmed) return;
-
-    updateClientMonth((current) => ({
-      ...current,
-      [section]: current[section].filter((row) => row.id !== id),
-    }));
-  }
+  }, [generalMonth, monthData, selectedMonth]);
 
   if (loading && !data) {
-    return <section className="glass-panel p-6 text-sm text-slate-300">Loading finance manager...</section>;
+    return <section className="glass-panel rounded-2xl p-6 text-sm text-slate-300">Loading finance dashboard...</section>;
   }
 
   if (!monthData) {
-    return <section className="glass-panel p-6 text-sm text-red-200">Finance data unavailable.</section>;
+    return <section className="glass-panel rounded-2xl p-6 text-sm text-red-200">Finance data unavailable.</section>;
   }
 
+  const marginLineColor = sixMonthSeries[sixMonthSeries.length - 1]?.goalMet ? "#10b981" : "#ef4444";
+
   return (
-    <section className="animate-enter" style={{ animationDelay: "80ms" }}>
-      <div className="flex flex-col gap-6 lg:flex-row">
-        <aside className="w-full lg:w-[290px]">
-          <div className="hidden lg:flex flex-col rounded-2xl border border-white/10 bg-white/[0.04] p-3 backdrop-blur-xl">
+    <section className="animate-enter" style={{ animationDelay: "80ms", backgroundColor: "#0a0a0f" }}>
+      <header className="mb-4 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div>
+          <h1 className="page-title">Finance Dashboard</h1>
+          <p className="mt-2 text-sm text-slate-300">QuickBooks-style financial intelligence across revenue, expenses, clients, and reports.</p>
+        </div>
+        <div className="glass-card inline-flex items-center gap-2 rounded-xl px-2 py-2">
+          <button
+            type="button"
+            onClick={() => changeMonth(-1)}
+            className="rounded-lg border border-white/10 bg-white/5 p-2 text-slate-100 transition hover:border-blue-300/40 hover:bg-blue-500/15"
+            aria-label="Previous month"
+          >
+            <ArrowLeft size={16} />
+          </button>
+          <div className="min-w-[9rem] text-center text-sm font-semibold text-white">{`< ${monthLabel(selectedMonth)} >`}</div>
+          <button
+            type="button"
+            onClick={() => changeMonth(1)}
+            className="rounded-lg border border-white/10 bg-white/5 p-2 text-slate-100 transition hover:border-blue-300/40 hover:bg-blue-500/15"
+            aria-label="Next month"
+          >
+            <ArrowRight size={16} />
+          </button>
+        </div>
+      </header>
+
+      {error ? <div className="mb-3 rounded-xl border border-red-500/35 bg-red-500/10 px-4 py-2 text-sm text-red-200">{error}</div> : null}
+      {saving ? <div className="mb-3 text-xs uppercase tracking-[0.18em] text-blue-200/80">Saving finance data...</div> : null}
+
+      <div className="sticky top-2 z-30 mb-5 rounded-2xl border border-white/10 bg-[#0a0a0f]/70 p-2 backdrop-blur-lg">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-7">
+          <MetricCard title="Monthly Revenue" value={formatMoney(summary.monthlyRevenue)} />
+          <MetricCard title="Monthly Expenses" value={formatMoney(summary.monthlyExpenses)} />
+          <MetricCard title="Net Profit" value={formatMoney(summary.netProfit)} caption={summary.netProfit >= 0 ? "Above break-even" : "Under break-even"} />
+          <MetricCard title="Profit Margin" value={formatPercent(summary.profitMargin)} caption={summary.profitMargin >= 30 ? "Healthy margin" : "Below target margin"} />
+          <MetricCard title="MRR" value={formatMoney(summary.mrr)} />
+          <MetricCard title="Active Clients" value={String(summary.activeClients)} />
+          <article className="glass-card relative overflow-hidden rounded-2xl p-4">
+            <div className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,rgba(32,147,255,0),#2093FF,rgba(0,38,255,0))]" />
+            <p className="text-[10px] uppercase tracking-[0.16em] text-slate-400">Goal Progress</p>
+            <p className={`mt-2 text-2xl font-semibold tracking-[-0.02em] ${statValueClass(summary.netProfit)}`}>{formatPercent(summary.goalProgress)}</p>
+            <div className="mt-2 h-2 rounded-full bg-white/10">
+              <div
+                className="h-2 rounded-full bg-[linear-gradient(90deg,#2093FF,#0026FF)] transition-all duration-500"
+                style={{ width: `${Math.max(4, Math.min(100, summary.goalProgress))}%` }}
+              />
+            </div>
+            <p className="mt-1 text-xs text-slate-400">Target: {formatMoney(DEFAULT_GOAL)} monthly profit</p>
+          </article>
+        </div>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <SectionCard title="Revenue vs Expenses (Last 6 Months)">
+          <div className="h-72">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={sixMonthSeries}>
+                <XAxis dataKey="label" stroke="#94a3b8" tickLine={false} axisLine={false} />
+                <YAxis stroke="#64748b" tickLine={false} axisLine={false} tickFormatter={(value) => formatCompactMoney(value as number)} />
+                <Tooltip
+                  formatter={(value: number, name: string) => [formatMoney(value), name === "revenue" ? "Revenue" : "Expenses"]}
+                  contentStyle={{ background: "#0f1322", border: "1px solid rgba(148,163,184,0.3)", borderRadius: 10 }}
+                />
+                <Bar dataKey="revenue" radius={[6, 6, 0, 0]} fill="#2093FF" />
+                <Bar dataKey="expenses" radius={[6, 6, 0, 0]} fill="#ef4444" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </SectionCard>
+
+        <SectionCard title="Revenue by Service Type">
+          <div className="h-72">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie data={revenueByService} dataKey="value" nameKey="name" innerRadius={55} outerRadius={86} paddingAngle={2}>
+                  {revenueByService.map((entry) => (
+                    <Cell key={entry.name} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value: number) => formatMoney(value)} contentStyle={{ background: "#0f1322", border: "1px solid rgba(148,163,184,0.3)", borderRadius: 10 }} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {revenueByService.map((item) => (
+              <span key={item.name} className={`rounded-full border px-2 py-1 text-xs ${SERVICE_BADGE_CLASS[item.name as FinanceServiceType]}`}>
+                {item.name}
+              </span>
+            ))}
+          </div>
+        </SectionCard>
+
+        <SectionCard title="Revenue by Client Type">
+          <div className="h-72">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie data={revenueByClientType} dataKey="value" nameKey="name" innerRadius={55} outerRadius={86} paddingAngle={2}>
+                  {revenueByClientType.map((entry) => (
+                    <Cell key={entry.name} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value: number) => formatMoney(value)} contentStyle={{ background: "#0f1322", border: "1px solid rgba(148,163,184,0.3)", borderRadius: 10 }} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="mt-2 flex flex-wrap gap-2 text-xs text-slate-300">
+            {revenueByClientType.map((item) => (
+              <span key={item.name} className="rounded-full border border-white/20 px-2 py-1">{item.name}</span>
+            ))}
+          </div>
+        </SectionCard>
+
+        <SectionCard title="Profit Margin Trend (Last 6 Months)">
+          <div className="h-72">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={sixMonthSeries}>
+                <XAxis dataKey="label" stroke="#94a3b8" tickLine={false} axisLine={false} />
+                <YAxis stroke="#64748b" tickLine={false} axisLine={false} tickFormatter={(value) => `${value}%`} />
+                <Tooltip formatter={(value: number) => `${value.toFixed(1)}%`} contentStyle={{ background: "#0f1322", border: "1px solid rgba(148,163,184,0.3)", borderRadius: 10 }} />
+                <Line dataKey="margin" type="monotone" strokeWidth={3} stroke={marginLineColor} dot={{ strokeWidth: 0 }} activeDot={{ r: 6 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+          <p className="text-xs text-slate-400">Green when above profit goal, red when below.</p>
+        </SectionCard>
+      </div>
+
+      <div className="mt-6">
+        <div className="mb-3 flex flex-wrap gap-2">
+          {(["revenue", "expenses", "clients", "reports"] as DashboardTab[]).map((tab) => (
             <button
+              key={tab}
               type="button"
-              onClick={() => setActiveTab("home")}
-              className={`mb-2 w-full rounded-xl px-3 py-2 text-left text-sm font-semibold transition ${
-                activeTab === "home"
-                  ? "bg-[linear-gradient(90deg,rgba(32,147,255,0.35),rgba(0,38,255,0.35))] text-white"
-                  : "bg-white/[0.03] text-slate-200 hover:bg-white/[0.07]"
+              onClick={() => setActiveTab(tab)}
+              className={`rounded-xl border px-4 py-2 text-sm font-semibold capitalize transition ${
+                activeTab === tab
+                  ? "border-blue-300/35 bg-[linear-gradient(90deg,rgba(32,147,255,0.28),rgba(0,38,255,0.24))] text-white"
+                  : "border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/[0.08]"
               }`}
             >
-              Derby Digital (Home)
+              {tab}
             </button>
+          ))}
+        </div>
 
-            <div className="max-h-[70vh] space-y-2 overflow-y-auto pr-1">
-              {monthData.clients.map((client) => (
-                <div key={client.id} className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab(client.id)}
-                    className={`flex-1 rounded-xl px-3 py-2 text-left text-sm transition ${
-                      activeTab === client.id
-                        ? "bg-[linear-gradient(90deg,rgba(32,147,255,0.35),rgba(0,38,255,0.35))] text-white"
-                        : "bg-white/[0.03] text-slate-200 hover:bg-white/[0.07]"
-                    }`}
-                  >
-                    {client.name}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => deleteClient(client)}
-                    className="rounded-lg border border-rose-400/25 bg-rose-500/10 p-2 text-rose-200 transition hover:bg-rose-500/20"
-                    aria-label={`Delete ${client.name}`}
-                    title="Delete client (only if no data)"
-                  >
-                    <Trash2 size={13} />
-                  </button>
-                </div>
-              ))}
-            </div>
-
-            <button
-              type="button"
-              onClick={addClient}
-              className="mt-3 inline-flex items-center justify-center gap-2 rounded-xl border border-blue-300/30 bg-blue-500/15 px-3 py-2 text-sm font-semibold text-blue-100 transition hover:bg-blue-500/25"
-            >
-              <Plus size={14} />
-              Add Client
-            </button>
-          </div>
-
-          <div className="lg:hidden space-y-3 rounded-2xl border border-white/10 bg-white/[0.04] p-3 backdrop-blur-xl">
-            <select
-              value={activeTab}
-              onChange={(event) => setActiveTab(event.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-[#0d111d] px-3 py-2 text-sm text-slate-100"
-            >
-              <option value="home">Derby Digital (Home)</option>
-              {monthData.clients.map((client) => (
-                <option key={client.id} value={client.id}>
-                  {client.name}
-                </option>
-              ))}
-            </select>
-            <button
-              type="button"
-              onClick={addClient}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-blue-300/30 bg-blue-500/15 px-3 py-2 text-sm font-semibold text-blue-100"
-            >
-              <Plus size={14} />
-              Add Client
-            </button>
-          </div>
-        </aside>
-
-        <div className="flex-1 space-y-6" style={{ backgroundColor: "#0a0a0f" }}>
-          <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <h1 className="page-title">{monthTitle(selectedMonth, activeTab, currentClient?.name)}</h1>
-              <p className="mt-2 text-sm text-slate-300">
-                {activeTab === "home"
-                  ? "Aggregate client revenue + Derby Digital operating expenses."
-                  : `${currentClient?.name ?? "Client"} finance sheet for recurring and one-time items.`}
-              </p>
-            </div>
-
-            <div className="glass-card inline-flex items-center gap-2 px-2 py-2">
-              <button
-                type="button"
-                onClick={() => changeMonth(-1)}
-                className="rounded-lg border border-white/10 bg-white/5 p-2 text-slate-100 transition hover:border-blue-300/40 hover:bg-blue-500/15"
-                aria-label="Previous month"
-              >
-                <ArrowLeft size={16} />
-              </button>
-              <div className="min-w-[10rem] text-center">
-                <p className="text-sm font-semibold text-white">{monthLabel(selectedMonth)}</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => changeMonth(1)}
-                className="rounded-lg border border-white/10 bg-white/5 p-2 text-slate-100 transition hover:border-blue-300/40 hover:bg-blue-500/15"
-                aria-label="Next month"
-              >
-                <ArrowRight size={16} />
-              </button>
-            </div>
-          </header>
-
-          {error ? <div className="rounded-xl border border-red-500/35 bg-red-500/10 px-4 py-2 text-sm text-red-200">{error}</div> : null}
-          {saving ? <div className="text-xs uppercase tracking-[0.2em] text-blue-200/80">Saving to Redis...</div> : null}
-
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            <SummaryCard title="Gross Revenue" value={formatMoney(summary.grossRevenue)} icon={DollarSign} tone="text-emerald-300" />
-            <SummaryCard title="Net Revenue" value={formatMoney(summary.netRevenue)} icon={TrendingUp} tone="text-cyan-200" />
-            <article className="glass-card relative overflow-hidden p-4">
-              <div className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,rgba(32,147,255,0),#2093FF,rgba(0,38,255,0))]" />
-              <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400">Stripe Fee</p>
-              <p className="mt-2 text-2xl font-semibold tracking-[-0.02em] text-amber-200">{formatMoney(summary.stripeFee)}</p>
-              {activeTab !== "home" ? (
-                <div className="mt-3 text-xs text-slate-300">
-                  Manual override
-                  <EditableNumberCell
-                    value={clientMonth.stripeFeeOverride}
-                    nullable
-                    onSave={(next) => updateClientMonth((current) => ({ ...current, stripeFeeOverride: next }))}
+        <div key={activeTab} className="animate-[toast-in_260ms_ease]">
+          {activeTab === "revenue" ? (
+            <section className="glass-panel rounded-2xl p-4">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <div className="relative w-full lg:max-w-sm">
+                  <Search size={16} className="pointer-events-none absolute left-3 top-2.5 text-slate-400" />
+                  <input
+                    value={revenueSearch}
+                    onChange={(event) => setRevenueSearch(event.target.value)}
+                    placeholder="Search client, service, date"
+                    className="w-full rounded-xl border border-white/10 bg-[#0d111d] px-9 py-2 text-sm text-slate-100 outline-none focus:border-blue-300/35"
                   />
                 </div>
-              ) : null}
-            </article>
-            <SummaryCard title="Total Expenditure" value={formatMoney(summary.totalExpenditure)} icon={DollarSign} tone="text-rose-300" />
-            <SummaryCard title="Total Profit" value={formatMoney(summary.totalProfit)} icon={TrendingUp} tone={summary.totalProfit >= 0 ? "text-blue-100" : "text-rose-300"} />
-            <SummaryCard title="Profit Margin" value={formatPercent(summary.profitMargin)} icon={Users} tone={summary.profitMargin >= 0 ? "text-cyan-200" : "text-rose-300"} />
-          </div>
-
-          {activeTab === "home" ? (
-            <>
-              <section className="glass-panel p-4">
-                {sectionHeader("General Recurring Expenses")}
-                <div className="mb-3 flex items-center justify-between gap-3">
-                  <p className="text-sm text-slate-400">
-                    Total: <span className="font-semibold text-white">{formatMoney(generalMonth.recurringExpenses.reduce((sum, row) => sum + row.amount, 0))}</span>
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => addGeneralRow("recurringExpenses")}
-                    className="inline-flex items-center gap-1 rounded-xl border border-blue-300/30 bg-blue-500/15 px-3 py-1.5 text-xs font-semibold text-blue-100 transition hover:bg-blue-500/25"
-                  >
-                    <Plus size={14} />
-                    Add Row
-                  </button>
+                <div className="grid gap-2 sm:grid-cols-3 lg:w-[44rem]">
+                  <select value={revenueServiceFilter} onChange={(event) => setRevenueServiceFilter(event.target.value as "all" | FinanceServiceType)} className="rounded-xl border border-white/10 bg-[#0d111d] px-3 py-2 text-sm text-slate-100">
+                    <option value="all">All services</option>
+                    {SERVICE_OPTIONS.map((service) => (
+                      <option key={service} value={service}>{service}</option>
+                    ))}
+                  </select>
+                  <select value={revenueClientTypeFilter} onChange={(event) => setRevenueClientTypeFilter(event.target.value as "all" | FinanceClientType)} className="rounded-xl border border-white/10 bg-[#0d111d] px-3 py-2 text-sm text-slate-100">
+                    <option value="all">All client types</option>
+                    {(Object.keys(CLIENT_TYPE_LABEL) as FinanceClientType[]).map((type) => (
+                      <option key={type} value={type}>{CLIENT_TYPE_LABEL[type]}</option>
+                    ))}
+                  </select>
+                  <select value={revenueRecurringFilter} onChange={(event) => setRevenueRecurringFilter(event.target.value as "all" | "M" | "1-time")} className="rounded-xl border border-white/10 bg-[#0d111d] px-3 py-2 text-sm text-slate-100">
+                    <option value="all">All billing types</option>
+                    <option value="M">Recurring</option>
+                    <option value="1-time">One-time</option>
+                  </select>
                 </div>
+              </div>
 
-                <div className="overflow-x-auto rounded-xl border border-white/10">
-                  <table className="min-w-[980px] w-full divide-y divide-white/10 text-sm">
-                    <thead className="bg-white/5 text-left text-[11px] uppercase tracking-[0.18em] text-slate-400">
-                      <tr>
-                        <th className="px-3 py-2">Name</th>
-                        <th className="px-3 py-2">Date</th>
-                        <th className="px-3 py-2">Recurring?</th>
-                        <th className="px-3 py-2">Notes</th>
-                        <th className="px-3 py-2 text-right">Amount</th>
-                        <th className="px-3 py-2">Delete</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5">
-                      {generalMonth.recurringExpenses.map((row) => (
-                        <tr key={row.id} className="transition hover:bg-white/[0.03]">
-                          <td className="px-2 py-1"><EditableTextCell value={row.name} onSave={(next) => updateGeneralRow("recurringExpenses", row.id, (item) => ({ ...item, name: next }))} /></td>
-                          <td className="px-2 py-1"><EditableTextCell value={row.date} onSave={(next) => updateGeneralRow("recurringExpenses", row.id, (item) => ({ ...item, date: next }))} /></td>
-                          <td className="px-2 py-1"><RecurringSelector value={row.recurring} onSave={(next) => updateGeneralRow("recurringExpenses", row.id, (item) => ({ ...item, recurring: next }))} /></td>
-                          <td className="px-2 py-1"><EditableTextCell value={row.notes} onSave={(next) => updateGeneralRow("recurringExpenses", row.id, (item) => ({ ...item, notes: next }))} /></td>
-                          <td className="px-2 py-1"><EditableNumberCell value={row.amount} onSave={(next) => updateGeneralRow("recurringExpenses", row.id, (item) => ({ ...item, amount: Number(next ?? 0) }))} /></td>
-                          <td className="px-2 py-1"><button type="button" onClick={() => deleteGeneralRow("recurringExpenses", row.id)} className="rounded-lg border border-rose-400/30 bg-rose-500/10 p-2 text-rose-200"><Trash2 size={14} /></button></td>
-                        </tr>
+              <div className="mt-4 overflow-x-auto rounded-xl border border-white/10">
+                <table className="min-w-[980px] w-full text-sm">
+                  <thead className="bg-white/[0.04] text-left text-[11px] uppercase tracking-[0.14em] text-slate-400">
+                    <tr>
+                      {[
+                        { key: "clientName", label: "Client Name" },
+                        { key: "service", label: "Service" },
+                        { key: "amount", label: "Amount" },
+                        { key: "recurring", label: "Type" },
+                        { key: "date", label: "Date" },
+                        { key: "status", label: "Status" },
+                      ].map((column) => (
+                        <th key={column.key} className="px-3 py-3">
+                          <button
+                            type="button"
+                            onClick={() => setRevenueSort((current) => ({ key: column.key as RevenueSortKey, dir: current.key === column.key && current.dir === "desc" ? "asc" : "desc" }))}
+                            className="inline-flex items-center gap-1"
+                          >
+                            {column.label}
+                            <ChevronDown size={12} className={revenueSort.key === column.key && revenueSort.dir === "asc" ? "rotate-180" : ""} />
+                          </button>
+                        </th>
                       ))}
-                    </tbody>
-                  </table>
-                </div>
-              </section>
-
-              <section className="glass-panel p-4">
-                {sectionHeader("Employee Expenses")}
-                <div className="mb-3 flex items-center justify-between gap-3">
-                  <p className="text-sm text-slate-400">
-                    Total: <span className="font-semibold text-white">{formatMoney(generalMonth.employeeExpenses.reduce((sum, row) => sum + row.amount, 0))}</span>
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => addGeneralRow("employeeExpenses")}
-                    className="inline-flex items-center gap-1 rounded-xl border border-blue-300/30 bg-blue-500/15 px-3 py-1.5 text-xs font-semibold text-blue-100 transition hover:bg-blue-500/25"
-                  >
-                    <Plus size={14} />
-                    Add Row
-                  </button>
-                </div>
-
-                <div className="overflow-x-auto rounded-xl border border-white/10">
-                  <table className="min-w-[980px] w-full divide-y divide-white/10 text-sm">
-                    <thead className="bg-white/5 text-left text-[11px] uppercase tracking-[0.18em] text-slate-400">
-                      <tr>
-                        <th className="px-3 py-2">Name</th>
-                        <th className="px-3 py-2">Date</th>
-                        <th className="px-3 py-2">Recurring?</th>
-                        <th className="px-3 py-2">Notes</th>
-                        <th className="px-3 py-2 text-right">Amount</th>
-                        <th className="px-3 py-2">Delete</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredRevenueRows.map((row) => (
+                      <tr key={row.id} className="border-t border-white/10 text-slate-200 hover:bg-white/[0.03]">
+                        <td className="px-3 py-2">{row.clientName}</td>
+                        <td className="px-3 py-2">
+                          <span className={`rounded-full border px-2 py-1 text-xs ${SERVICE_BADGE_CLASS[row.service]}`}>{row.service}</span>
+                        </td>
+                        <td className="px-3 py-2 font-semibold">{formatMoney(row.amount)}</td>
+                        <td className="px-3 py-2">{row.recurring === "M" ? "Recurring" : "One-time"}</td>
+                        <td className="px-3 py-2">{row.date || "-"}</td>
+                        <td className="px-3 py-2">
+                          <span className={`rounded-full border px-2 py-1 text-xs ${row.status === "paid" ? "border-emerald-400/35 bg-emerald-500/15 text-emerald-100" : "border-amber-400/35 bg-amber-500/15 text-amber-100"}`}>
+                            {row.status === "paid" ? "Paid" : "Pending"}
+                          </span>
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5">
-                      {generalMonth.employeeExpenses.map((row) => (
-                        <tr key={row.id} className="transition hover:bg-white/[0.03]">
-                          <td className="px-2 py-1"><EditableTextCell value={row.name} onSave={(next) => updateGeneralRow("employeeExpenses", row.id, (item) => ({ ...item, name: next }))} /></td>
-                          <td className="px-2 py-1"><EditableTextCell value={row.date} onSave={(next) => updateGeneralRow("employeeExpenses", row.id, (item) => ({ ...item, date: next }))} /></td>
-                          <td className="px-2 py-1"><RecurringSelector value={row.recurring} onSave={(next) => updateGeneralRow("employeeExpenses", row.id, (item) => ({ ...item, recurring: next }))} /></td>
-                          <td className="px-2 py-1"><EditableTextCell value={row.notes} onSave={(next) => updateGeneralRow("employeeExpenses", row.id, (item) => ({ ...item, notes: next }))} /></td>
-                          <td className="px-2 py-1"><EditableNumberCell value={row.amount} onSave={(next) => updateGeneralRow("employeeExpenses", row.id, (item) => ({ ...item, amount: Number(next ?? 0) }))} /></td>
-                          <td className="px-2 py-1"><button type="button" onClick={() => deleteGeneralRow("employeeExpenses", row.id)} className="rounded-lg border border-rose-400/30 bg-rose-500/10 p-2 text-rose-200"><Trash2 size={14} /></button></td>
-                        </tr>
+                    ))}
+                  </tbody>
+                  <tfoot>
+                    <tr className="border-t border-white/10 bg-white/[0.03]">
+                      <td colSpan={2} className="px-3 py-3 text-sm font-semibold text-slate-200">Filtered Total</td>
+                      <td className="px-3 py-3 text-sm font-semibold text-white">{formatMoney(totalFilteredRevenue)}</td>
+                      <td colSpan={3} />
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </section>
+          ) : null}
+
+          {activeTab === "expenses" ? (
+            <section className="space-y-4">
+              {(
+                [
+                  { key: "recurringExpenses", title: "Recurring (tools/subscriptions)" },
+                  { key: "employeeExpenses", title: "Employee (salaries + commissions)" },
+                  { key: "oneTimeExpenses", title: "One-Time" },
+                ] as Array<{ key: ExpenseSectionKey; title: string }>
+              ).map((section) => {
+                const rows = generalMonth[section.key];
+                const total = rows.reduce((sum, row) => sum + row.amount, 0);
+                const isOpen = expensesOpen[section.key];
+
+                return (
+                  <div key={section.key} className="glass-panel rounded-2xl p-4">
+                    <button
+                      type="button"
+                      onClick={() => setExpensesOpen((current) => ({ ...current, [section.key]: !current[section.key] }))}
+                      className="flex w-full items-center justify-between"
+                    >
+                      <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-200">{section.title}</h3>
+                      <ChevronDown size={16} className={isOpen ? "rotate-180" : ""} />
+                    </button>
+
+                    <div className="mt-2 flex items-center justify-between text-sm text-slate-300">
+                      <span>Total: <span className="font-semibold text-white">{formatMoney(total)}</span></span>
+                      <button
+                        type="button"
+                        onClick={() => addGeneralRow(section.key)}
+                        className="rounded-lg border border-blue-300/30 bg-blue-500/15 px-3 py-1.5 text-xs font-semibold text-blue-100"
+                      >
+                        Add Row
+                      </button>
+                    </div>
+
+                    {isOpen ? (
+                      <div className="mt-3 overflow-x-auto rounded-xl border border-white/10">
+                        <table className="min-w-[980px] w-full text-sm">
+                          <thead className="bg-white/[0.04] text-left text-[11px] uppercase tracking-[0.14em] text-slate-400">
+                            <tr>
+                              <th className="px-3 py-2">Name</th>
+                              <th className="px-3 py-2">Date</th>
+                              <th className="px-3 py-2">Recurring</th>
+                              <th className="px-3 py-2">Notes</th>
+                              <th className="px-3 py-2">Amount</th>
+                              <th className="px-3 py-2">Delete</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {rows.map((row) => (
+                              <tr key={row.id} className="border-t border-white/10 text-slate-200">
+                                <td className="px-2 py-1">
+                                  <input
+                                    value={row.name}
+                                    onChange={(event) => updateGeneralRow(section.key, row.id, (item) => ({ ...item, name: event.target.value }))}
+                                    className="w-full rounded-lg border border-white/10 bg-[#0d111d] px-2 py-1.5"
+                                  />
+                                </td>
+                                <td className="px-2 py-1">
+                                  <input
+                                    value={row.date}
+                                    onChange={(event) => updateGeneralRow(section.key, row.id, (item) => ({ ...item, date: event.target.value }))}
+                                    className="w-full rounded-lg border border-white/10 bg-[#0d111d] px-2 py-1.5"
+                                  />
+                                </td>
+                                <td className="px-2 py-1">
+                                  <select
+                                    value={row.recurring}
+                                    onChange={(event) => updateGeneralRow(section.key, row.id, (item) => ({ ...item, recurring: event.target.value as "M" | "1-time" }))}
+                                    className="w-full rounded-lg border border-white/10 bg-[#0d111d] px-2 py-1.5"
+                                  >
+                                    <option value="M">M</option>
+                                    <option value="1-time">1-time</option>
+                                  </select>
+                                </td>
+                                <td className="px-2 py-1">
+                                  <input
+                                    value={row.notes}
+                                    onChange={(event) => updateGeneralRow(section.key, row.id, (item) => ({ ...item, notes: event.target.value }))}
+                                    className="w-full rounded-lg border border-white/10 bg-[#0d111d] px-2 py-1.5"
+                                  />
+                                </td>
+                                <td className="px-2 py-1">
+                                  <input
+                                    type="number"
+                                    min={0}
+                                    step="0.01"
+                                    value={Number.isFinite(row.amount) ? row.amount : 0}
+                                    onChange={(event) => updateGeneralRow(section.key, row.id, (item) => ({ ...item, amount: Math.max(0, Number(event.target.value) || 0) }))}
+                                    className="w-full rounded-lg border border-white/10 bg-[#0d111d] px-2 py-1.5"
+                                  />
+                                </td>
+                                <td className="px-2 py-1">
+                                  <button
+                                    type="button"
+                                    onClick={() => deleteGeneralRow(section.key, row.id)}
+                                    className="rounded-lg border border-rose-400/30 bg-rose-500/10 p-2 text-rose-200"
+                                  >
+                                    <Trash2 size={14} />
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              })}
+
+              <div className="glass-card rounded-2xl p-4 text-sm text-slate-300">
+                Grand Total: <span className="font-semibold text-white">{formatMoney(totalGeneralExpenses(generalMonth))}</span>
+              </div>
+            </section>
+          ) : null}
+
+          {activeTab === "clients" ? (
+            <section className="space-y-4">
+              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+                <select value={clientSort} onChange={(event) => setClientSort(event.target.value as ClientSortKey)} className="rounded-xl border border-white/10 bg-[#0d111d] px-3 py-2 text-sm text-slate-100">
+                  <option value="revenue">Sort: Revenue</option>
+                  <option value="name">Sort: Name</option>
+                  <option value="profitMargin">Sort: Profit Margin</option>
+                </select>
+                <select value={clientTypeFilter} onChange={(event) => setClientTypeFilter(event.target.value as "all" | FinanceClientType)} className="rounded-xl border border-white/10 bg-[#0d111d] px-3 py-2 text-sm text-slate-100">
+                  <option value="all">All client types</option>
+                  {(Object.keys(CLIENT_TYPE_LABEL) as FinanceClientType[]).map((type) => (
+                    <option key={type} value={type}>{CLIENT_TYPE_LABEL[type]}</option>
+                  ))}
+                </select>
+                <select value={clientStatusFilter} onChange={(event) => setClientStatusFilter(event.target.value as "all" | "active" | "inactive")} className="rounded-xl border border-white/10 bg-[#0d111d] px-3 py-2 text-sm text-slate-100">
+                  <option value="all">All statuses</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+                <select value={clientServiceFilter} onChange={(event) => setClientServiceFilter(event.target.value as "all" | FinanceServiceType)} className="rounded-xl border border-white/10 bg-[#0d111d] px-3 py-2 text-sm text-slate-100">
+                  <option value="all">All services</option>
+                  {SERVICE_OPTIONS.map((service) => (
+                    <option key={service} value={service}>{service}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                {clientCards.map((entry) => (
+                  <Link key={entry.client.id} href={`/clients/${entry.client.id}`} className="glass-card rounded-2xl p-4 transition hover:-translate-y-0.5">
+                    <div className="flex items-start justify-between gap-3">
+                      <h3 className="text-base font-semibold text-white">{entry.client.name}</h3>
+                      <span className={`rounded-full border px-2 py-1 text-xs ${entry.client.status === "active" ? "border-emerald-400/35 bg-emerald-500/15 text-emerald-100" : "border-slate-400/35 bg-slate-500/15 text-slate-200"}`}>
+                        {entry.client.status === "active" ? "Active" : "Inactive"}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-xs uppercase tracking-[0.1em] text-slate-400">{CLIENT_TYPE_LABEL[entry.client.clientType]}</p>
+                    <p className="mt-3 text-2xl font-semibold text-white">{formatMoney(entry.revenue)}</p>
+                    <p className="mt-1 text-sm text-slate-300">Profit Margin: <span className="font-semibold">{formatPercent(entry.profitMargin)}</span></p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {entry.client.services.map((service) => (
+                        <span key={service} className={`rounded-full border px-2 py-1 text-xs ${SERVICE_BADGE_CLASS[service]}`}>{service}</span>
                       ))}
-                    </tbody>
-                  </table>
-                </div>
-              </section>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          ) : null}
 
-              <section className="glass-panel p-4">
-                {sectionHeader("One-Time Expenses")}
-                <div className="mb-3 flex items-center justify-between gap-3">
-                  <p className="text-sm text-slate-400">
-                    Total: <span className="font-semibold text-white">{formatMoney(generalMonth.oneTimeExpenses.reduce((sum, row) => sum + row.amount, 0))}</span>
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => addGeneralRow("oneTimeExpenses")}
-                    className="inline-flex items-center gap-1 rounded-xl border border-blue-300/30 bg-blue-500/15 px-3 py-1.5 text-xs font-semibold text-blue-100 transition hover:bg-blue-500/25"
-                  >
-                    <Plus size={14} />
-                    Add Row
-                  </button>
+          {activeTab === "reports" ? (
+            <section className="grid gap-4 lg:grid-cols-2">
+              <div className="glass-panel rounded-2xl p-4">
+                <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-200">Monthly P&L ({monthLabel(selectedMonth)})</h3>
+                <div className="mt-3 space-y-2 text-sm text-slate-300">
+                  <p>Revenue: <span className="font-semibold text-white">{formatMoney(summary.monthlyRevenue)}</span></p>
+                  <p>Expenses: <span className="font-semibold text-white">{formatMoney(summary.monthlyExpenses)}</span></p>
+                  <p>Net Profit: <span className={`font-semibold ${summary.netProfit >= 0 ? "text-emerald-200" : "text-rose-200"}`}>{formatMoney(summary.netProfit)}</span></p>
+                  <p>Profit Margin: <span className="font-semibold text-white">{formatPercent(summary.profitMargin)}</span></p>
                 </div>
+              </div>
 
-                <div className="overflow-x-auto rounded-xl border border-white/10">
-                  <table className="min-w-[980px] w-full divide-y divide-white/10 text-sm">
-                    <thead className="bg-white/5 text-left text-[11px] uppercase tracking-[0.18em] text-slate-400">
-                      <tr>
-                        <th className="px-3 py-2">Name</th>
-                        <th className="px-3 py-2">Date</th>
-                        <th className="px-3 py-2">Recurring?</th>
-                        <th className="px-3 py-2">Notes</th>
-                        <th className="px-3 py-2 text-right">Amount</th>
-                        <th className="px-3 py-2">Delete</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5">
-                      {generalMonth.oneTimeExpenses.map((row) => (
-                        <tr key={row.id} className="transition hover:bg-white/[0.03]">
-                          <td className="px-2 py-1"><EditableTextCell value={row.name} onSave={(next) => updateGeneralRow("oneTimeExpenses", row.id, (item) => ({ ...item, name: next }))} /></td>
-                          <td className="px-2 py-1"><EditableTextCell value={row.date} onSave={(next) => updateGeneralRow("oneTimeExpenses", row.id, (item) => ({ ...item, date: next }))} /></td>
-                          <td className="px-2 py-1"><RecurringSelector value={row.recurring} onSave={(next) => updateGeneralRow("oneTimeExpenses", row.id, (item) => ({ ...item, recurring: next }))} /></td>
-                          <td className="px-2 py-1"><EditableTextCell value={row.notes} onSave={(next) => updateGeneralRow("oneTimeExpenses", row.id, (item) => ({ ...item, notes: next }))} /></td>
-                          <td className="px-2 py-1"><EditableNumberCell value={row.amount} onSave={(next) => updateGeneralRow("oneTimeExpenses", row.id, (item) => ({ ...item, amount: Number(next ?? 0) }))} /></td>
-                          <td className="px-2 py-1"><button type="button" onClick={() => deleteGeneralRow("oneTimeExpenses", row.id)} className="rounded-lg border border-rose-400/30 bg-rose-500/10 p-2 text-rose-200"><Trash2 size={14} /></button></td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+              <div className="glass-panel rounded-2xl p-4">
+                <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-200">Year-to-Date Summary</h3>
+                <div className="mt-3 space-y-2 text-sm text-slate-300">
+                  <p>YTD Revenue: <span className="font-semibold text-white">{formatMoney(reportData.ytdRevenue)}</span></p>
+                  <p>YTD Expenses: <span className="font-semibold text-white">{formatMoney(reportData.ytdExpenses)}</span></p>
+                  <p>YTD Profit: <span className={`font-semibold ${reportData.ytdProfit >= 0 ? "text-emerald-200" : "text-rose-200"}`}>{formatMoney(reportData.ytdProfit)}</span></p>
                 </div>
-              </section>
-            </>
-          ) : (
-            <>
-              <section className="glass-panel p-4">
-                {sectionHeader("Income")}
-                <div className="mb-3 flex items-center justify-between gap-3">
-                  <p className="text-sm text-slate-400">
-                    Gross Income: <span className="font-semibold text-white">{formatMoney(clientMonth.income.reduce((sum, row) => sum + row.amount, 0))}</span>
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => addClientRow("income")}
-                    className="inline-flex items-center gap-1 rounded-xl border border-blue-300/30 bg-blue-500/15 px-3 py-1.5 text-xs font-semibold text-blue-100 transition hover:bg-blue-500/25"
-                  >
-                    <Plus size={14} />
-                    Add Row
-                  </button>
-                </div>
+              </div>
 
-                <div className="overflow-x-auto rounded-xl border border-white/10">
-                  <table className="min-w-[980px] w-full divide-y divide-white/10 text-sm">
-                    <thead className="bg-white/5 text-left text-[11px] uppercase tracking-[0.18em] text-slate-400">
-                      <tr>
-                        <th className="px-3 py-2">Name</th>
-                        <th className="px-3 py-2">Date</th>
-                        <th className="px-3 py-2">Recurring?</th>
-                        <th className="px-3 py-2">Notes</th>
-                        <th className="px-3 py-2 text-right">Amount</th>
-                        <th className="px-3 py-2">Delete</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5">
-                      {clientMonth.income.map((row) => (
-                        <tr key={row.id} className="transition hover:bg-white/[0.03]">
-                          <td className="px-2 py-1"><EditableTextCell value={row.name} onSave={(next) => updateClientRow("income", row.id, (item) => ({ ...item, name: next }))} /></td>
-                          <td className="px-2 py-1"><EditableTextCell value={row.date} onSave={(next) => updateClientRow("income", row.id, (item) => ({ ...item, date: next }))} /></td>
-                          <td className="px-2 py-1"><RecurringSelector value={row.recurring} onSave={(next) => updateClientRow("income", row.id, (item) => ({ ...item, recurring: next }))} /></td>
-                          <td className="px-2 py-1"><EditableTextCell value={row.notes} onSave={(next) => updateClientRow("income", row.id, (item) => ({ ...item, notes: next }))} /></td>
-                          <td className="px-2 py-1"><EditableNumberCell value={row.amount} onSave={(next) => updateClientRow("income", row.id, (item) => ({ ...item, amount: Number(next ?? 0) }))} /></td>
-                          <td className="px-2 py-1"><button type="button" onClick={() => deleteClientRow("income", row.id)} className="rounded-lg border border-rose-400/30 bg-rose-500/10 p-2 text-rose-200"><Trash2 size={14} /></button></td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+              <div className="glass-panel rounded-2xl p-4">
+                <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-200">Client Profitability Ranking</h3>
+                <div className="mt-3 space-y-2 text-sm text-slate-300">
+                  {reportData.topClients.map((entry, index) => (
+                    <div key={entry.name} className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2">
+                      <span>{index + 1}. {entry.name}</span>
+                      <span className="font-semibold text-white">{formatMoney(entry.profit)}</span>
+                    </div>
+                  ))}
                 </div>
-              </section>
+              </div>
 
-              <section className="glass-panel p-4">
-                {sectionHeader("Expenses")}
-                <div className="mb-3 flex items-center justify-between gap-3">
-                  <p className="text-sm text-slate-400">
-                    Gross Expenses: <span className="font-semibold text-white">{formatMoney(clientMonth.expenses.reduce((sum, row) => sum + row.amount, 0))}</span>
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => addClientRow("expenses")}
-                    className="inline-flex items-center gap-1 rounded-xl border border-blue-300/30 bg-blue-500/15 px-3 py-1.5 text-xs font-semibold text-blue-100 transition hover:bg-blue-500/25"
-                  >
-                    <Plus size={14} />
-                    Add Row
-                  </button>
+              <div className="glass-panel rounded-2xl p-4">
+                <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-200">Expense Category Breakdown</h3>
+                <div className="mt-3 space-y-2 text-sm text-slate-300">
+                  <p>Recurring: <span className="font-semibold text-white">{formatMoney(reportData.expenseBreakdown.recurring)}</span></p>
+                  <p>Employee: <span className="font-semibold text-white">{formatMoney(reportData.expenseBreakdown.employee)}</span></p>
+                  <p>One-Time: <span className="font-semibold text-white">{formatMoney(reportData.expenseBreakdown.oneTime)}</span></p>
                 </div>
-
-                <div className="overflow-x-auto rounded-xl border border-white/10">
-                  <table className="min-w-[980px] w-full divide-y divide-white/10 text-sm">
-                    <thead className="bg-white/5 text-left text-[11px] uppercase tracking-[0.18em] text-slate-400">
-                      <tr>
-                        <th className="px-3 py-2">Name</th>
-                        <th className="px-3 py-2">Date</th>
-                        <th className="px-3 py-2">Recurring?</th>
-                        <th className="px-3 py-2">Notes</th>
-                        <th className="px-3 py-2 text-right">Amount</th>
-                        <th className="px-3 py-2">Delete</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5">
-                      {clientMonth.expenses.map((row) => (
-                        <tr key={row.id} className="transition hover:bg-white/[0.03]">
-                          <td className="px-2 py-1"><EditableTextCell value={row.name} onSave={(next) => updateClientRow("expenses", row.id, (item) => ({ ...item, name: next }))} /></td>
-                          <td className="px-2 py-1"><EditableTextCell value={row.date} onSave={(next) => updateClientRow("expenses", row.id, (item) => ({ ...item, date: next }))} /></td>
-                          <td className="px-2 py-1"><RecurringSelector value={row.recurring} onSave={(next) => updateClientRow("expenses", row.id, (item) => ({ ...item, recurring: next }))} /></td>
-                          <td className="px-2 py-1"><EditableTextCell value={row.notes} onSave={(next) => updateClientRow("expenses", row.id, (item) => ({ ...item, notes: next }))} /></td>
-                          <td className="px-2 py-1"><EditableNumberCell value={row.amount} onSave={(next) => updateClientRow("expenses", row.id, (item) => ({ ...item, amount: Number(next ?? 0) }))} /></td>
-                          <td className="px-2 py-1"><button type="button" onClick={() => deleteClientRow("expenses", row.id)} className="rounded-lg border border-rose-400/30 bg-rose-500/10 p-2 text-rose-200"><Trash2 size={14} /></button></td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </section>
-            </>
-          )}
+              </div>
+            </section>
+          ) : null}
         </div>
       </div>
     </section>

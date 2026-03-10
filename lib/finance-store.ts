@@ -1,17 +1,109 @@
 import { readPersistentData, writePersistentData } from "@/lib/persistence";
 import {
   FinanceClient,
+  FinanceClientStatus,
+  FinanceClientType,
   FinanceData,
   FinanceGeneralMonthData,
   FinanceIncomeRow,
   FinanceLedgerRow,
   FinanceMonthData,
+  FinanceServiceType,
   FinanceSummary,
 } from "@/lib/finance-types";
 
 export const FINANCE_FILE = "finance";
 export const MARCH_2026 = "2026-03";
 const DEFAULT_GOAL = 15000;
+
+const FINANCE_SERVICES: readonly FinanceServiceType[] = [
+  "Website",
+  "SEO",
+  "Social Media",
+  "Google Ads",
+  "Meta Ads",
+  "Software",
+  "Review Automation",
+  "Other",
+] as const;
+
+const CLIENT_TYPES: readonly FinanceClientType[] = ["restaurant", "home-service", "gaming", "other"] as const;
+const CLIENT_STATUSES: readonly FinanceClientStatus[] = ["active", "inactive"] as const;
+
+const RESTAURANT_CLIENTS = new Set([
+  "Al Forno",
+  "El Vaquero",
+  "Pina Fiesta",
+  "El Mañanero",
+  "Hop Atomica",
+  "Las Chamas",
+  "Suri Sushi Thai",
+  "Hela-do Feliz",
+  "BS Brew Works",
+  "Bella Napoli Pizzeria",
+  "May Fly",
+  "Palma Italian + Jack",
+  "Tuscany Italian",
+]);
+
+const HOME_SERVICE_CLIENTS = new Set([
+  "Chamberlain Painting",
+  "Lake Reliable Services",
+  "Roofing KY",
+  "Hardwire Electric",
+  "Asgari Home Services",
+]);
+
+const GAMING_CLIENTS = new Set(["Olympus Gaming"]);
+
+const SEEDED_CLIENT_NAMES = [
+  "Hop Atomica",
+  "Tuscany Italian",
+  "Chamberlain Painting",
+  "Al Forno",
+  "El Vaquero",
+  "Pina Fiesta",
+  "Las Chamas",
+  "Palma Italian + Jack",
+  "Lake Reliable Services",
+  "BS Brew Works",
+  "Bella Napoli Pizzeria",
+  "Suri Sushi Thai",
+  "May Fly",
+  "El Mañanero",
+  "Hela-do Feliz",
+  "Ghost Face Brewing",
+  "Roofing KY",
+  "Service Station",
+  "Olympus Gaming",
+  "Asgari Home Services",
+  "Asgari Enterprise",
+  "Hardwire Electric",
+] as const;
+
+const SEEDED_CLIENT_SERVICES: Partial<Record<(typeof SEEDED_CLIENT_NAMES)[number], FinanceServiceType[]>> = {
+  "Hop Atomica": ["Website", "SEO", "Software", "Social Media", "Review Automation"],
+  "Tuscany Italian": ["Website", "SEO", "Social Media"],
+  "Chamberlain Painting": ["Website", "SEO", "Google Ads"],
+  "Al Forno": ["Website", "SEO"],
+  "El Vaquero": ["Website", "SEO"],
+  "Pina Fiesta": ["Website", "SEO"],
+  "Las Chamas": ["Website", "SEO"],
+  "Palma Italian + Jack": ["Website", "SEO", "Social Media"],
+  "Lake Reliable Services": ["Website", "Google Ads", "Meta Ads"],
+  "BS Brew Works": ["Website", "SEO"],
+  "Bella Napoli Pizzeria": ["Website", "SEO"],
+  "Suri Sushi Thai": ["Website", "SEO"],
+  "May Fly": ["Website", "SEO"],
+  "El Mañanero": ["Social Media"],
+  "Hela-do Feliz": ["Social Media"],
+  "Roofing KY": ["Google Ads", "Website"],
+  "Service Station": ["Other"],
+  "Olympus Gaming": ["Software", "Other"],
+  "Asgari Home Services": ["Website", "Google Ads"],
+  "Asgari Enterprise": ["Other"],
+  "Hardwire Electric": ["Website", "Google Ads"],
+};
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -68,6 +160,65 @@ function toRecurring(value: unknown): "M" | "1-time" {
   return "1-time";
 }
 
+function seededClientType(name: string): FinanceClientType {
+  if (RESTAURANT_CLIENTS.has(name)) return "restaurant";
+  if (HOME_SERVICE_CLIENTS.has(name)) return "home-service";
+  if (GAMING_CLIENTS.has(name)) return "gaming";
+  return "other";
+}
+
+function toClientType(value: unknown, fallbackName: string): FinanceClientType {
+  if (typeof value === "string" && (CLIENT_TYPES as readonly string[]).includes(value)) {
+    return value as FinanceClientType;
+  }
+  return seededClientType(fallbackName);
+}
+
+function toClientStatus(value: unknown): FinanceClientStatus {
+  if (typeof value === "string" && (CLIENT_STATUSES as readonly string[]).includes(value)) {
+    return value as FinanceClientStatus;
+  }
+  return "active";
+}
+
+function inferService(value: string): FinanceServiceType {
+  const normalized = value.toLowerCase();
+  if (normalized.includes("review")) return "Review Automation";
+  if (normalized.includes("software") || normalized.includes("saas")) return "Software";
+  if (normalized.includes("meta") || normalized.includes("facebook") || normalized.includes("instagram")) return "Meta Ads";
+  if (normalized.includes("google") || normalized.includes("ppc")) return "Google Ads";
+  if (normalized.includes("social")) return "Social Media";
+  if (normalized.includes("seo")) return "SEO";
+  if (normalized.includes("website") || normalized.includes("site") || normalized.includes("hosting")) return "Website";
+  return "Other";
+}
+
+function toService(value: unknown, fallback: string): FinanceServiceType {
+  if (typeof value === "string" && (FINANCE_SERVICES as readonly string[]).includes(value)) {
+    return value as FinanceServiceType;
+  }
+  return inferService(fallback);
+}
+
+function toServices(value: unknown, fallbackName: string): FinanceServiceType[] {
+  if (Array.isArray(value)) {
+    const valid = new Set<string>(FINANCE_SERVICES);
+    const services = value
+      .map((item) => toString(item))
+      .filter((service): service is FinanceServiceType => valid.has(service));
+    if (services.length > 0) return Array.from(new Set(services));
+  }
+
+  const seeded = SEEDED_CLIENT_SERVICES[fallbackName as (typeof SEEDED_CLIENT_NAMES)[number]];
+  if (seeded && seeded.length > 0) return seeded;
+  return ["Other"];
+}
+
+function toPaymentStatus(value: unknown): "paid" | "pending" {
+  if (value === "pending") return "pending";
+  return "paid";
+}
+
 function normalizeLedgerRow(raw: unknown, prefix: string): FinanceLedgerRow | null {
   if (!isRecord(raw)) return null;
   const name = toString(raw.name);
@@ -82,6 +233,8 @@ function normalizeLedgerRow(raw: unknown, prefix: string): FinanceLedgerRow | nu
   // but drop fully empty anonymous objects from malformed payloads.
   if (!hasMeaningfulContent && typeof raw.id !== "string") return null;
 
+  const serviceContext = `${name} ${notes}`.trim();
+
   return {
     id: toId(raw.id, prefix),
     name,
@@ -89,6 +242,8 @@ function normalizeLedgerRow(raw: unknown, prefix: string): FinanceLedgerRow | nu
     recurring,
     notes,
     amount,
+    service: toService(raw.service, serviceContext),
+    paymentStatus: toPaymentStatus(raw.paymentStatus),
   };
 }
 
@@ -122,6 +277,8 @@ function cloneRecurringLedgerRows(rows: FinanceLedgerRow[]): FinanceLedgerRow[] 
       recurring: row.recurring,
       notes: row.notes,
       amount: row.amount,
+      service: row.service,
+      paymentStatus: row.paymentStatus,
     }));
 }
 
@@ -135,6 +292,8 @@ function cloneRecurringIncomeRows(rows: FinanceIncomeRow[]): FinanceIncomeRow[] 
       recurring: row.recurring,
       notes: row.notes,
       amount: row.amount,
+      service: row.service,
+      paymentStatus: row.paymentStatus,
     }));
 }
 
@@ -214,40 +373,18 @@ function normalizeGeneralMonth(raw: unknown, month: string): FinanceGeneralMonth
   };
 }
 
-const SEEDED_CLIENT_NAMES = [
-  "Hop Atomica",
-  "Tuscany Italian",
-  "Chamberlain Painting",
-  "Al Forno",
-  "El Vaquero",
-  "Pina Fiesta",
-  "Las Chamas",
-  "Palma Italian + Jack",
-  "Lake Reliable Services",
-  "BS Brew Works",
-  "Bella Napoli Pizzeria",
-  "Suri Sushi Thai",
-  "May Fly",
-  "El Mañanero",
-  "Hela-do Feliz",
-  "Ghost Face Brewing",
-  "Roofing KY",
-  "Service Station",
-  "Olympus Gaming",
-  "Asgari Home Services",
-  "Asgari Enterprise",
-  "Hardwire Electric",
-];
-
 function emptyClient(name: string): FinanceClient {
   return {
     id: crypto.randomUUID(),
     name,
+    clientType: seededClientType(name),
+    status: "active",
+    services: toServices([], name),
     months: {},
   };
 }
 
-function seededIncome(name: string, amount: number, notes = "Monthly retainer"): FinanceIncomeRow {
+function seededIncome(name: string, amount: number, notes = "Monthly retainer", service?: FinanceServiceType): FinanceIncomeRow {
   return {
     id: crypto.randomUUID(),
     name,
@@ -255,6 +392,8 @@ function seededIncome(name: string, amount: number, notes = "Monthly retainer"):
     recurring: "M",
     notes,
     amount,
+    service: service ?? inferService(`${name} ${notes}`),
+    paymentStatus: "paid",
   };
 }
 
@@ -266,36 +405,38 @@ function seededExpense(name: string, amount: number): FinanceLedgerRow {
     recurring: "M",
     notes: "",
     amount,
+    service: inferService(name),
+    paymentStatus: "paid",
   };
 }
 
 function seededGeneralRecurringExpenses(): FinanceLedgerRow[] {
   return [
-    { id: crypto.randomUUID(), name: "Google Account", date: "first of every month", recurring: "M", notes: "gmail + biz accounts", amount: 50.4 },
-    { id: crypto.randomUUID(), name: "Cloudways", date: "8th of every month", recurring: "M", notes: "for sites", amount: 54.5 },
-    { id: crypto.randomUUID(), name: "Canva Premium", date: "10th of every month", recurring: "M", notes: "", amount: 7.95 },
-    { id: crypto.randomUUID(), name: "Instantly Emails x9", date: "15th of every month", recurring: "M", notes: "pre warmed accounts", amount: 45 },
-    { id: crypto.randomUUID(), name: "Instantly Monthly x10", date: "15th of every month", recurring: "M", notes: "pre warmed accounts", amount: 100 },
-    { id: crypto.randomUUID(), name: "Instantly Subscription", date: "16th of every month", recurring: "M", notes: "basic tier plan", amount: 97 },
-    { id: crypto.randomUUID(), name: "Envato Elements", date: "17th of every month", recurring: "M", notes: "", amount: 41.34 },
-    { id: crypto.randomUUID(), name: "Captions.ai", date: "18th of every month", recurring: "M", notes: "pro plan", amount: 10.59 },
-    { id: crypto.randomUUID(), name: "Framer Hosting", date: "25th of every month", recurring: "M", notes: "derby digital site", amount: 20 },
-    { id: crypto.randomUUID(), name: "GoHighLevel", date: "28th of every month", recurring: "M", notes: "", amount: 297 },
-    { id: crypto.randomUUID(), name: "Allgood Prime Site", date: "29th of every month", recurring: "M", notes: "framer hosting", amount: 10 },
-    { id: crypto.randomUUID(), name: "Claude Max", date: "3rd of every month", recurring: "M", notes: "openclaw", amount: 200 },
-    { id: crypto.randomUUID(), name: "Webild.io", date: "8th of every month", recurring: "M", notes: "", amount: 12 },
+    { id: crypto.randomUUID(), name: "Google Account", date: "first of every month", recurring: "M", notes: "gmail + biz accounts", amount: 50.4, service: "Other", paymentStatus: "paid" },
+    { id: crypto.randomUUID(), name: "Cloudways", date: "8th of every month", recurring: "M", notes: "for sites", amount: 54.5, service: "Website", paymentStatus: "paid" },
+    { id: crypto.randomUUID(), name: "Canva Premium", date: "10th of every month", recurring: "M", notes: "", amount: 7.95, service: "Social Media", paymentStatus: "paid" },
+    { id: crypto.randomUUID(), name: "Instantly Emails x9", date: "15th of every month", recurring: "M", notes: "pre warmed accounts", amount: 45, service: "Other", paymentStatus: "paid" },
+    { id: crypto.randomUUID(), name: "Instantly Monthly x10", date: "15th of every month", recurring: "M", notes: "pre warmed accounts", amount: 100, service: "Other", paymentStatus: "paid" },
+    { id: crypto.randomUUID(), name: "Instantly Subscription", date: "16th of every month", recurring: "M", notes: "basic tier plan", amount: 97, service: "Other", paymentStatus: "paid" },
+    { id: crypto.randomUUID(), name: "Envato Elements", date: "17th of every month", recurring: "M", notes: "", amount: 41.34, service: "Website", paymentStatus: "paid" },
+    { id: crypto.randomUUID(), name: "Captions.ai", date: "18th of every month", recurring: "M", notes: "pro plan", amount: 10.59, service: "Social Media", paymentStatus: "paid" },
+    { id: crypto.randomUUID(), name: "Framer Hosting", date: "25th of every month", recurring: "M", notes: "derby digital site", amount: 20, service: "Website", paymentStatus: "paid" },
+    { id: crypto.randomUUID(), name: "GoHighLevel", date: "28th of every month", recurring: "M", notes: "", amount: 297, service: "Software", paymentStatus: "paid" },
+    { id: crypto.randomUUID(), name: "Allgood Prime Site", date: "29th of every month", recurring: "M", notes: "framer hosting", amount: 10, service: "Website", paymentStatus: "paid" },
+    { id: crypto.randomUUID(), name: "Claude Max", date: "3rd of every month", recurring: "M", notes: "openclaw", amount: 200, service: "Other", paymentStatus: "paid" },
+    { id: crypto.randomUUID(), name: "Webild.io", date: "8th of every month", recurring: "M", notes: "", amount: 12, service: "Other", paymentStatus: "paid" },
   ];
 }
 
 function seededGeneralEmployeeExpenses(): FinanceLedgerRow[] {
   return [
-    { id: crypto.randomUUID(), name: "Abdul Salary", date: "first of every month", recurring: "M", notes: "extra $100 for chino", amount: 500.48 },
-    { id: crypto.randomUUID(), name: "Elang Salary", date: "first of every month", recurring: "M", notes: "", amount: 350 },
-    { id: crypto.randomUUID(), name: "Muhammad Salary", date: "22nd of every month", recurring: "M", notes: "", amount: 400 },
-    { id: crypto.randomUUID(), name: "Manu Commission", date: "first of every month", recurring: "M", notes: "502 thrifts, todays man, 502 snkr plug", amount: 630.06 },
-    { id: crypto.randomUUID(), name: "Sharvil Commission", date: "first of every month", recurring: "M", notes: "$40 for little angels and $100 for Claude Code", amount: 140 },
-    { id: crypto.randomUUID(), name: "Allgood Commission", date: "staggered throughout the month", recurring: "M", notes: "25% presumed commission", amount: 74.86 },
-    { id: crypto.randomUUID(), name: "Hammas Sites", date: "staggered throughout the month", recurring: "M", notes: "$300 for derby city pizza, $300 for capital tire & muffler", amount: 600 },
+    { id: crypto.randomUUID(), name: "Abdul Salary", date: "first of every month", recurring: "M", notes: "extra $100 for chino", amount: 500.48, service: "Other", paymentStatus: "paid" },
+    { id: crypto.randomUUID(), name: "Elang Salary", date: "first of every month", recurring: "M", notes: "", amount: 350, service: "Other", paymentStatus: "paid" },
+    { id: crypto.randomUUID(), name: "Muhammad Salary", date: "22nd of every month", recurring: "M", notes: "", amount: 400, service: "Other", paymentStatus: "paid" },
+    { id: crypto.randomUUID(), name: "Manu Commission", date: "first of every month", recurring: "M", notes: "502 thrifts, todays man, 502 snkr plug", amount: 630.06, service: "Other", paymentStatus: "paid" },
+    { id: crypto.randomUUID(), name: "Sharvil Commission", date: "first of every month", recurring: "M", notes: "$40 for little angels and $100 for Claude Code", amount: 140, service: "Other", paymentStatus: "paid" },
+    { id: crypto.randomUUID(), name: "Allgood Commission", date: "staggered throughout the month", recurring: "M", notes: "25% presumed commission", amount: 74.86, service: "Other", paymentStatus: "paid" },
+    { id: crypto.randomUUID(), name: "Hammas Sites", date: "staggered throughout the month", recurring: "M", notes: "$300 for derby city pizza, $300 for capital tire & muffler", amount: 600, service: "Website", paymentStatus: "paid" },
   ];
 }
 
@@ -308,8 +449,8 @@ function seedMarch2026Data(): FinanceData {
     goalAmount: DEFAULT_GOAL,
     stripeFeeOverride: null,
     income: [
-      seededIncome("Google review automation", 67),
-      seededIncome("Website, SEO, software, social media", 280),
+      seededIncome("Google review automation", 67, "Monthly retainer", "Review Automation"),
+      seededIncome("Website, SEO, software, social media", 280, "Monthly retainer", "Website"),
     ],
     expenses: [],
   };
@@ -317,98 +458,98 @@ function seedMarch2026Data(): FinanceData {
     month: MARCH_2026,
     goalAmount: DEFAULT_GOAL,
     stripeFeeOverride: null,
-    income: [seededIncome("Monthly retainer", 799)],
+    income: [seededIncome("Monthly retainer", 799, "Monthly retainer", "Website")],
     expenses: [],
   };
   byName.get("Chamberlain Painting")!.months[MARCH_2026] = {
     month: MARCH_2026,
     goalAmount: DEFAULT_GOAL,
     stripeFeeOverride: null,
-    income: [seededIncome("Monthly retainer", 750)],
+    income: [seededIncome("Monthly retainer", 750, "Monthly retainer", "Google Ads")],
     expenses: [seededExpense("Hosting", 20)],
   };
   byName.get("Al Forno")!.months[MARCH_2026] = {
     month: MARCH_2026,
     goalAmount: DEFAULT_GOAL,
     stripeFeeOverride: null,
-    income: [seededIncome("Monthly retainer", 280)],
+    income: [seededIncome("Monthly retainer", 280, "Monthly retainer", "Website")],
     expenses: [],
   };
   byName.get("El Vaquero")!.months[MARCH_2026] = {
     month: MARCH_2026,
     goalAmount: DEFAULT_GOAL,
     stripeFeeOverride: null,
-    income: [seededIncome("Monthly retainer", 280)],
+    income: [seededIncome("Monthly retainer", 280, "Monthly retainer", "Website")],
     expenses: [],
   };
   byName.get("Pina Fiesta")!.months[MARCH_2026] = {
     month: MARCH_2026,
     goalAmount: DEFAULT_GOAL,
     stripeFeeOverride: null,
-    income: [seededIncome("Monthly retainer", 280)],
+    income: [seededIncome("Monthly retainer", 280, "Monthly retainer", "Website")],
     expenses: [],
   };
   byName.get("Las Chamas")!.months[MARCH_2026] = {
     month: MARCH_2026,
     goalAmount: DEFAULT_GOAL,
     stripeFeeOverride: null,
-    income: [seededIncome("Monthly retainer", 280)],
+    income: [seededIncome("Monthly retainer", 280, "Monthly retainer", "Website")],
     expenses: [],
   };
   byName.get("Palma Italian + Jack")!.months[MARCH_2026] = {
     month: MARCH_2026,
     goalAmount: DEFAULT_GOAL,
     stripeFeeOverride: null,
-    income: [seededIncome("Monthly retainer", 338.3)],
+    income: [seededIncome("Monthly retainer", 338.3, "Monthly retainer", "Website")],
     expenses: [],
   };
   byName.get("Lake Reliable Services")!.months[MARCH_2026] = {
     month: MARCH_2026,
     goalAmount: DEFAULT_GOAL,
     stripeFeeOverride: null,
-    income: [seededIncome("Monthly retainer", 299)],
+    income: [seededIncome("Monthly retainer", 299, "Monthly retainer", "Google Ads")],
     expenses: [],
   };
   byName.get("BS Brew Works")!.months[MARCH_2026] = {
     month: MARCH_2026,
     goalAmount: DEFAULT_GOAL,
     stripeFeeOverride: null,
-    income: [seededIncome("Monthly retainer", 199)],
+    income: [seededIncome("Monthly retainer", 199, "Monthly retainer", "Website")],
     expenses: [],
   };
   byName.get("Bella Napoli Pizzeria")!.months[MARCH_2026] = {
     month: MARCH_2026,
     goalAmount: DEFAULT_GOAL,
     stripeFeeOverride: null,
-    income: [seededIncome("Monthly retainer", 199)],
+    income: [seededIncome("Monthly retainer", 199, "Monthly retainer", "Website")],
     expenses: [],
   };
   byName.get("Suri Sushi Thai")!.months[MARCH_2026] = {
     month: MARCH_2026,
     goalAmount: DEFAULT_GOAL,
     stripeFeeOverride: null,
-    income: [seededIncome("Monthly retainer", 199)],
+    income: [seededIncome("Monthly retainer", 199, "Monthly retainer", "Website")],
     expenses: [],
   };
   byName.get("May Fly")!.months[MARCH_2026] = {
     month: MARCH_2026,
     goalAmount: DEFAULT_GOAL,
     stripeFeeOverride: null,
-    income: [seededIncome("Monthly retainer", 199)],
+    income: [seededIncome("Monthly retainer", 199, "Monthly retainer", "Website")],
     expenses: [],
   };
   byName.get("El Mañanero")!.months[MARCH_2026] = {
     month: MARCH_2026,
     goalAmount: DEFAULT_GOAL,
     stripeFeeOverride: null,
-    income: [seededIncome("Monthly retainer", 84.15)],
+    income: [seededIncome("Monthly retainer", 84.15, "Monthly retainer", "Social Media")],
     expenses: [],
   };
   byName.get("Hela-do Feliz")!.months[MARCH_2026] = {
     month: MARCH_2026,
     goalAmount: DEFAULT_GOAL,
     stripeFeeOverride: null,
-    income: [seededIncome("Monthly retainer", 84.15)],
+    income: [seededIncome("Monthly retainer", 84.15, "Monthly retainer", "Social Media")],
     expenses: [],
   };
 
@@ -460,14 +601,29 @@ function seedMarch2026Data(): FinanceData {
   };
 }
 
+function ensureClientMetadata(client: FinanceClient): FinanceClient {
+  const inferredServices = client.services.length > 0
+    ? client.services
+    : toServices([], client.name);
+
+  return {
+    ...client,
+    clientType: client.clientType ?? seededClientType(client.name),
+    status: client.status ?? "active",
+    services: inferredServices,
+  };
+}
+
 function normalizedClientsWithSeed(clients: FinanceClient[]): FinanceClient[] {
-  const byName = new Map(clients.map((client) => [client.name.toLowerCase(), client]));
+  const byName = new Map(clients.map((client) => [client.name.toLowerCase(), ensureClientMetadata(client)]));
   for (const name of SEEDED_CLIENT_NAMES) {
     if (!byName.has(name.toLowerCase())) {
-      clients.push(emptyClient(name));
+      const created = emptyClient(name);
+      byName.set(name.toLowerCase(), created);
     }
   }
-  return clients.sort((a, b) => a.name.localeCompare(b.name));
+
+  return Array.from(byName.values()).sort((a, b) => a.name.localeCompare(b.name));
 }
 
 function normalizeClient(raw: unknown): FinanceClient | null {
@@ -486,6 +642,9 @@ function normalizeClient(raw: unknown): FinanceClient | null {
   return {
     id: toId(raw.id, "client"),
     name,
+    clientType: toClientType(raw.clientType, name),
+    status: toClientStatus(raw.status),
+    services: toServices(raw.services, name),
     months,
   };
 }
@@ -564,6 +723,7 @@ function migrateLegacyData(raw: Record<string, unknown>): FinanceData {
           recurring: "1-time",
           notes: toString(revenueRaw.notes),
           amount: toNumber(revenueRaw.amount),
+          paymentStatus: "paid",
         },
         "legacy-income",
       );
@@ -581,13 +741,78 @@ function migrateLegacyData(raw: Record<string, unknown>): FinanceData {
   };
 }
 
+function roundMoney(value: number) {
+  return Number(value.toFixed(2));
+}
+
+function scaleRows(rows: FinanceLedgerRow[], factor: number, month: string): FinanceLedgerRow[] {
+  const [year, monthNum] = month.split("-");
+  const syntheticDate = `${year}-${monthNum}-01`;
+
+  return rows
+    .filter((row) => row.amount > 0)
+    .map((row) => ({
+      ...row,
+      id: crypto.randomUUID(),
+      date: syntheticDate,
+      amount: roundMoney(row.amount * factor),
+      paymentStatus: "paid",
+    }));
+}
+
+function ensureHistoricalPlaceholders(data: FinanceData): FinanceData {
+  const placeholders: Array<{ month: string; factor: number }> = [
+    { month: "2026-01", factor: 0.78 },
+    { month: "2026-02", factor: 0.9 },
+  ];
+
+  const next: FinanceData = {
+    clients: data.clients.map((client) => ({ ...client, months: { ...client.months } })),
+    generalData: {
+      months: { ...data.generalData.months },
+    },
+  };
+
+  const baseGeneral = next.generalData.months[MARCH_2026];
+
+  for (const item of placeholders) {
+    if (!next.generalData.months[item.month]) {
+      next.generalData.months[item.month] = baseGeneral
+        ? {
+            month: item.month,
+            goalAmount: baseGeneral.goalAmount,
+            recurringExpenses: scaleRows(baseGeneral.recurringExpenses, item.factor, item.month),
+            employeeExpenses: scaleRows(baseGeneral.employeeExpenses, item.factor, item.month),
+            oneTimeExpenses: [],
+          }
+        : emptyGeneralMonth(item.month);
+    }
+
+    for (const client of next.clients) {
+      if (client.months[item.month]) continue;
+      const baseMonth = client.months[MARCH_2026];
+      client.months[item.month] = baseMonth
+        ? {
+            month: item.month,
+            goalAmount: baseMonth.goalAmount,
+            stripeFeeOverride: null,
+            income: scaleRows(baseMonth.income, item.factor, item.month),
+            expenses: scaleRows(baseMonth.expenses, item.factor, item.month),
+          }
+        : emptyClientMonth(item.month);
+    }
+  }
+
+  return next;
+}
+
 function normalizeFinanceData(raw: unknown): FinanceData {
   if (!isRecord(raw)) {
-    return seedMarch2026Data();
+    return ensureHistoricalPlaceholders(seedMarch2026Data());
   }
 
   if (!Array.isArray(raw.clients) || !isRecord(raw.generalData)) {
-    return migrateLegacyData(raw);
+    return ensureHistoricalPlaceholders(migrateLegacyData(raw));
   }
 
   const clients = raw.clients.map(normalizeClient).filter((client): client is FinanceClient => client !== null);
@@ -598,10 +823,10 @@ function normalizeFinanceData(raw: unknown): FinanceData {
     generalData.months[MARCH_2026] = emptyGeneralMonth(MARCH_2026);
   }
 
-  return {
+  return ensureHistoricalPlaceholders({
     clients: normalizedClients,
     generalData,
-  };
+  });
 }
 
 export function buildFinanceSummary(data: FinanceData, requestedMonth?: string): FinanceSummary {
@@ -615,7 +840,10 @@ export function buildFinanceSummary(data: FinanceData, requestedMonth?: string):
     return sum + monthData.income.reduce((x, row) => x + row.amount * 0.03, 0);
   }, 0);
 
+  const clientExpenses = clients.reduce((sum, monthData) => sum + monthData.expenses.reduce((rowSum, row) => rowSum + row.amount, 0), 0);
+
   const totalExpenditure =
+    clientExpenses +
     generalMonth.recurringExpenses.reduce((sum, row) => sum + row.amount, 0) +
     generalMonth.employeeExpenses.reduce((sum, row) => sum + row.amount, 0) +
     generalMonth.oneTimeExpenses.reduce((sum, row) => sum + row.amount, 0);

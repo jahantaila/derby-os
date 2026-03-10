@@ -1,4 +1,16 @@
 export type FinanceRecurringFlag = "M" | "1-time";
+export type FinanceClientType = "restaurant" | "home-service" | "gaming" | "other";
+export type FinanceClientStatus = "active" | "inactive";
+export type FinancePaymentStatus = "paid" | "pending";
+export type FinanceServiceType =
+  | "Website"
+  | "SEO"
+  | "Social Media"
+  | "Google Ads"
+  | "Meta Ads"
+  | "Software"
+  | "Review Automation"
+  | "Other";
 
 export type FinanceLedgerRow = {
   id: string;
@@ -7,6 +19,8 @@ export type FinanceLedgerRow = {
   recurring: FinanceRecurringFlag;
   notes: string;
   amount: number;
+  service?: FinanceServiceType;
+  paymentStatus?: FinancePaymentStatus;
 };
 
 export type FinanceIncomeRow = FinanceLedgerRow;
@@ -22,6 +36,9 @@ export type FinanceMonthData = {
 export type FinanceClient = {
   id: string;
   name: string;
+  clientType: FinanceClientType;
+  status: FinanceClientStatus;
+  services: FinanceServiceType[];
   months: Record<string, FinanceMonthData>;
 };
 
