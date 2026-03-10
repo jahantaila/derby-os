@@ -122,12 +122,13 @@ function formatPercent(value: number) {
 }
 
 function monthKey(date = new Date()) {
-  const easternDate = date.toLocaleDateString("en-US", {
+  const parts = new Intl.DateTimeFormat("en-US", {
     timeZone: "America/New_York",
     year: "numeric",
     month: "2-digit",
-  });
-  const [month, , year] = easternDate.split("/");
+  }).formatToParts(date);
+  const year = parts.find((p) => p.type === "year")!.value;
+  const month = parts.find((p) => p.type === "month")!.value;
   return `${year}-${month}`;
 }
 
