@@ -1,980 +1,1347 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { Download, Funnel, LoaderCircle, Plus, Search, Trash2, X } from "lucide-react";
-import { TEAM_MEMBERS } from "@/lib/tasks-schema";
-import { PipelineDeal, PipelineSource, PipelineStage } from "@/lib/pipeline-types";
+import {
+  ArrowLeft,
+  ArrowRight,
+  BarChart3,
+  Building2,
+  ChevronDown,
+  ChevronUp,
+  Clock3,
+  DollarSign,
+  Globe,
+  LoaderCircle,
+  Mail,
+  MessagesSquare,
+  NotebookPen,
+  Phone,
+  Plus,
+  Search,
+  Sparkles,
+  Trash2,
+  UserRoundPen,
+  X,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { PIPELINE_STAGES, PipelineDeal, PipelineSource, PipelineStage } from "@/lib/pipeline-types";
 
-type PanelMode = "create" | "view" | null;
-type SourceFilter = "all" | PipelineSource;
-type StageFilter = "all" | PipelineStage;
-type AssigneeFilter = "all" | (typeof TEAM_MEMBERS)[number]["id"];
-type DateRangeFilter = "7d" | "30d" | "90d" | "all";
-type CompetitorName = "SpotHopper" | "Owner.com" | "Fisherman" | "BentoBox" | "Popmenu" | "DONT KNOW";
-type CompetitorFilter = "all" | CompetitorName;
-type DealForm = {
+type QuickNote = {
+  text: string;
+  timestamp: string;
+};
+
+type NotesState = {
+  relationshipNote: string;
+  relationshipTimestamp: string;
+  quickNotes: QuickNote[];
+};
+
+type SortMode = "newest" | "alphabetical" | "stage";
+
+type CreateContactForm = {
   name: string;
+  company: string;
+  email: string;
+  phone: string;
   stage: PipelineStage;
-  value: string;
-  client: string;
-  contact: string;
-  assignee: string;
+  source: PipelineSource;
   notes: string;
 };
-type ToastState = {
-  message: string;
-  tone: "success" | "error";
-} | null;
 
-const STAGE_COLUMNS: { stage: PipelineStage; title: string; color: string; accent: string }[] = [
-  { stage: "new-lead", title: "New Lead", color: "#94A3B8", accent: "rgba(148,163,184,0.18)" },
-  { stage: "contacted", title: "Contacted", color: "#2093FF", accent: "rgba(32,147,255,0.22)" },
-  { stage: "interested", title: "Interested", color: "#FFBD59", accent: "rgba(255,189,89,0.2)" },
-  { stage: "scheduled-meeting", title: "Scheduled Meeting", color: "#A855F7", accent: "rgba(168,85,247,0.2)" },
-  { stage: "attended-meeting", title: "Attended Meeting", color: "#22D3EE", accent: "rgba(34,211,238,0.2)" },
-  { stage: "negotiating", title: "Negotiating", color: "#F97316", accent: "rgba(249,115,22,0.2)" },
-  { stage: "closed-won", title: "Closed Won", color: "#22C55E", accent: "rgba(34,197,94,0.2)" },
-  { stage: "closed-lost", title: "Closed Lost", color: "#F93C3C", accent: "rgba(249,60,60,0.2)" },
+type EditForm = {
+  name: string;
+  company: string;
+  email: string;
+};
+
+const EASTERN_TIME_ZONE = "America/New_York";
+const MAIN_NOTE_PLACEHOLDER =
+  "e.g., Louie runs a small Italian spot in Louisville. Business is slow right now. Interested in Google Ads but worried about budget. Has 2 kids, loves fishing...";
+
+const STAGE_META: Record<
+  PipelineStage,
+  {
+    label: string;
+    color: string;
+    dot: string;
+    pill: string;
+  }
+> = {
+  "new-lead": {
+    label: "New",
+    color: "#2093FF",
+    dot: "bg-blue-400",
+    pill: "border-blue-400/30 bg-blue-500/15 text-blue-100",
+  },
+  contacted: {
+    label: "Contacted",
+    color: "#22D3EE",
+    dot: "bg-cyan-400",
+    pill: "border-cyan-400/30 bg-cyan-500/15 text-cyan-100",
+  },
+  interested: {
+    label: "Interested",
+    color: "#10B981",
+    dot: "bg-emerald-400",
+    pill: "border-emerald-400/30 bg-emerald-500/15 text-emerald-100",
+  },
+  "scheduled-meeting": {
+    label: "Meeting",
+    color: "#F59E0B",
+    dot: "bg-amber-400",
+    pill: "border-amber-400/30 bg-amber-500/15 text-amber-100",
+  },
+  "attended-meeting": {
+    label: "Attended",
+    color: "#F97316",
+    dot: "bg-orange-400",
+    pill: "border-orange-400/30 bg-orange-500/15 text-orange-100",
+  },
+  negotiating: {
+    label: "Negotiating",
+    color: "#A855F7",
+    dot: "bg-purple-400",
+    pill: "border-purple-400/30 bg-purple-500/15 text-purple-100",
+  },
+  "closed-won": {
+    label: "Won",
+    color: "#22C55E",
+    dot: "bg-green-400",
+    pill: "border-green-400/30 bg-green-500/15 text-green-100",
+  },
+  "closed-lost": {
+    label: "Lost",
+    color: "#94A3B8",
+    dot: "bg-slate-400",
+    pill: "border-slate-400/30 bg-slate-500/15 text-slate-100",
+  },
+};
+
+const STAGE_FILTERS: { value: "all" | PipelineStage; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "new-lead", label: "New" },
+  { value: "contacted", label: "Contacted" },
+  { value: "interested", label: "Interested" },
+  { value: "scheduled-meeting", label: "Meeting" },
+  { value: "closed-won", label: "Won" },
+  { value: "closed-lost", label: "Lost" },
 ];
 
-const EMPTY_FORM: DealForm = {
+const SOURCE_META: Record<PipelineSource, string> = {
+  instantly: "border-blue-400/30 bg-blue-500/15 text-blue-100",
+  manual: "border-slate-400/30 bg-slate-500/15 text-slate-100",
+  referral: "border-emerald-400/30 bg-emerald-500/15 text-emerald-100",
+  website: "border-indigo-400/30 bg-indigo-500/15 text-indigo-100",
+};
+
+const EMPTY_CREATE_FORM: CreateContactForm = {
   name: "",
+  company: "",
+  email: "",
+  phone: "",
   stage: "new-lead",
-  value: "0",
-  client: "",
-  contact: "",
-  assignee: TEAM_MEMBERS[0].id,
+  source: "manual",
   notes: "",
 };
 
-const CLOSED_STAGES: PipelineStage[] = ["closed-won", "closed-lost"];
-
-const SOURCE_META: Record<PipelineSource, { label: string; className: string }> = {
-  instantly: {
-    label: "Instantly",
-    className: "border-purple-300/35 bg-purple-500/25 text-purple-100",
-  },
-  manual: {
-    label: "Manual",
-    className: "border-slate-300/30 bg-slate-500/20 text-slate-100",
-  },
-  referral: {
-    label: "Referral",
-    className: "border-emerald-300/35 bg-emerald-500/25 text-emerald-100",
-  },
-  website: {
-    label: "Website",
-    className: "border-blue-300/35 bg-blue-500/25 text-blue-100",
-  },
-};
-
-const SOURCE_FILTER_OPTIONS: { value: SourceFilter; label: string }[] = [
-  { value: "all", label: "All Sources" },
-  { value: "instantly", label: "Instantly" },
-  { value: "manual", label: "Manual" },
-  { value: "referral", label: "Referral" },
-  { value: "website", label: "Website" },
-];
-
-const STAGE_FILTER_OPTIONS: { value: StageFilter; label: string }[] = [
-  { value: "all", label: "All Stages" },
-  ...STAGE_COLUMNS.map((column) => ({ value: column.stage, label: column.title })),
-];
-
-const ASSIGNEE_FILTER_OPTIONS: { value: AssigneeFilter; label: string }[] = [
-  { value: "all", label: "All Assignees" },
-  ...TEAM_MEMBERS.map((member) => ({ value: member.id, label: member.name })),
-];
-
-const DATE_RANGE_OPTIONS: { value: DateRangeFilter; label: string }[] = [
-  { value: "7d", label: "Last 7 days" },
-  { value: "30d", label: "Last 30 days" },
-  { value: "90d", label: "Last 90 days" },
-  { value: "all", label: "All time" },
-];
-
-const ENRICHMENT_META: Record<PipelineDeal["enrichmentStatus"], { label: string; dot: string }> = {
-  pending: { label: "Pending", dot: "bg-amber-400" },
-  enriched: { label: "Enriched", dot: "bg-emerald-400" },
-  failed: { label: "Failed", dot: "bg-red-400" },
-};
-
-const COMPETITOR_META: Record<CompetitorName, { label: string; className: string }> = {
-  SpotHopper: {
-    label: "SpotHopper",
-    className: "bg-orange-500 text-white",
-  },
-  "Owner.com": {
-    label: "Owner.com",
-    className: "bg-red-500 text-white",
-  },
-  Fisherman: {
-    label: "Fisherman",
-    className: "bg-blue-500 text-white",
-  },
-  BentoBox: {
-    label: "BentoBox",
-    className: "bg-green-500 text-white",
-  },
-  Popmenu: {
-    label: "Popmenu",
-    className: "bg-purple-500 text-white",
-  },
-  "DONT KNOW": {
-    label: "DONT KNOW",
-    className: "bg-slate-500 text-white",
-  },
-};
-
-const COMPETITOR_FILTER_OPTIONS: { value: CompetitorFilter; label: string }[] = [
-  { value: "all", label: "All Competitors" },
-  ...Object.values(COMPETITOR_META).map((competitor) => ({
-    value: competitor.label as CompetitorFilter,
-    label: competitor.label,
-  })),
-];
-
-const currency = new Intl.NumberFormat("en-US", {
+const moneyFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
   maximumFractionDigits: 0,
 });
 
-function toCurrency(value: number) {
-  return currency.format(value);
+const easternDateFormatter = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+  timeZone: EASTERN_TIME_ZONE,
+});
+
+const easternDateTimeFormatter = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
+  hour12: true,
+  timeZone: EASTERN_TIME_ZONE,
+});
+
+function makeTimestamp(date = new Date()) {
+  return date.toISOString();
 }
 
-function toInitials(value: string) {
-  return value
-    .split(" ")
-    .map((segment) => segment[0]?.toUpperCase() ?? "")
-    .slice(0, 2)
-    .join("");
+function parseQuickNotes(notes: string, fallbackDate?: string): NotesState {
+  const trimmed = notes.trim();
+  const baseTimestamp = fallbackDate ? new Date(`${fallbackDate}T12:00:00`).toISOString() : makeTimestamp();
+
+  if (!trimmed) {
+    return {
+      relationshipNote: "",
+      relationshipTimestamp: baseTimestamp,
+      quickNotes: [],
+    };
+  }
+
+  try {
+    const parsed = JSON.parse(trimmed) as unknown;
+    if (Array.isArray(parsed)) {
+      const normalized = parsed
+        .map((entry) => {
+          if (!entry || typeof entry !== "object") return null;
+          const note = entry as { text?: unknown; timestamp?: unknown };
+          if (typeof note.text !== "string") return null;
+          return {
+            text: note.text,
+            timestamp: typeof note.timestamp === "string" && note.timestamp.trim() ? note.timestamp : baseTimestamp,
+          };
+        })
+        .filter((entry): entry is QuickNote => entry !== null);
+
+      if (normalized.length === 0) {
+        return { relationshipNote: "", relationshipTimestamp: baseTimestamp, quickNotes: [] };
+      }
+
+      const [relationship, ...quickNotes] = normalized;
+      return {
+        relationshipNote: relationship.text,
+        relationshipTimestamp: relationship.timestamp,
+        quickNotes,
+      };
+    }
+  } catch {}
+
+  return {
+    relationshipNote: trimmed,
+    relationshipTimestamp: baseTimestamp,
+    quickNotes: [],
+  };
 }
 
-function normalizeWebsiteUrl(value: string): string {
-  if (!value) return "";
-  return /^https?:\/\//i.test(value) ? value : `https://${value}`;
-}
+function serializeQuickNotes(notesState: NotesState): string {
+  const entries: QuickNote[] = [];
 
-function formatTimestamp(value: string): string {
-  const trimmed = value.trim();
-  if (!trimmed) return value;
-
-  const direct = Date.parse(trimmed);
-  if (!Number.isNaN(direct)) {
-    return new Date(direct).toLocaleString("en-US", {
-      month: "numeric",
-      day: "numeric",
-      year: "2-digit",
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-      timeZoneName: "short",
+  if (notesState.relationshipNote.trim()) {
+    entries.push({
+      text: notesState.relationshipNote.trim(),
+      timestamp: notesState.relationshipTimestamp || makeTimestamp(),
     });
   }
 
-  const localMatch = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{1,2}):(\d{2})$/);
-  if (!localMatch) return value;
-
-  const [, yearRaw, monthRaw, dayRaw, hourRaw, minuteRaw] = localMatch;
-  const localDate = new Date(Number(yearRaw), Number(monthRaw) - 1, Number(dayRaw), Number(hourRaw), Number(minuteRaw));
-  if (Number.isNaN(localDate.getTime())) return value;
-
-  return localDate.toLocaleString("en-US", {
-    month: "numeric",
-    day: "numeric",
-    year: "2-digit",
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-    timeZoneName: "short",
+  notesState.quickNotes.forEach((note) => {
+    if (!note.text.trim()) return;
+    entries.push({
+      text: note.text.trim(),
+      timestamp: note.timestamp || makeTimestamp(),
+    });
   });
+
+  return JSON.stringify(entries);
 }
 
-function leadDaysInStage(deal: PipelineDeal): number {
-  const source = deal.stageUpdatedAt ?? deal.createdAt;
-  const date = new Date(`${source}T00:00:00`);
-  if (Number.isNaN(date.getTime())) return 0;
-
-  const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const start = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  const deltaMs = today.getTime() - start.getTime();
-  return Math.max(0, Math.floor(deltaMs / (1000 * 60 * 60 * 24)));
+function formatMoney(value: number) {
+  return moneyFormatter.format(value || 0);
 }
 
-function isThisMonth(value: string): boolean {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
-  const now = new Date();
-  const [year, month] = value.split("-").map(Number);
-  return year === now.getFullYear() && month === now.getMonth() + 1;
-}
-
-function isWithinDateRange(value: string, range: DateRangeFilter): boolean {
-  if (range === "all") return true;
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
-
-  const [year, month, day] = value.split("-").map(Number);
-  const target = new Date(year, month - 1, day);
-  if (Number.isNaN(target.getTime())) return false;
-
-  const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const deltaMs = today.getTime() - target.getTime();
-  if (deltaMs < 0) return false;
-
-  const maxDays = range === "7d" ? 7 : range === "30d" ? 30 : 90;
-  return deltaMs <= maxDays * 24 * 60 * 60 * 1000;
-}
-
-function getCompetitorMeta(competitor?: string) {
-  if (competitor && competitor in COMPETITOR_META) {
-    return COMPETITOR_META[competitor as CompetitorName];
+function formatEasternDate(value?: string) {
+  if (!value) return "Unknown";
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    const [year, month, day] = value.split("-").map(Number);
+    return easternDateFormatter.format(new Date(Date.UTC(year, month - 1, day, 12, 0, 0)));
   }
-  return null;
+
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return value;
+  return easternDateTimeFormatter.format(parsed);
 }
 
-function CompetitorBadge({ competitor }: { competitor?: string }) {
-  const meta = getCompetitorMeta(competitor);
-  if (!meta) return null;
+function formatRelativeTime(value: string) {
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return formatEasternDate(value);
 
+  const deltaMs = Date.now() - parsed.getTime();
+  const deltaMinutes = Math.floor(deltaMs / 60000);
+  if (deltaMinutes < 1) return "Just now";
+  if (deltaMinutes < 60) return `${deltaMinutes}m ago`;
+  const deltaHours = Math.floor(deltaMinutes / 60);
+  if (deltaHours < 24) return `${deltaHours}h ago`;
+  const deltaDays = Math.floor(deltaHours / 24);
+  if (deltaDays < 7) return `${deltaDays}d ago`;
+  return formatEasternDate(value);
+}
+
+function getPrimaryName(deal: PipelineDeal) {
+  return deal.contact || deal.name;
+}
+
+function getSearchableNotesText(deal: PipelineDeal) {
+  const parsed = parseQuickNotes(deal.notes, deal.createdAt);
+  const values = [parsed.relationshipNote, ...parsed.quickNotes.map((note) => note.text)];
+  return values.join(" ").toLowerCase();
+}
+
+function getWebsite(deal: PipelineDeal) {
+  return deal.website || deal.enrichmentData?.website || "";
+}
+
+function normalizeWebsite(url: string) {
+  if (!url) return "";
+  return /^https?:\/\//i.test(url) ? url : `https://${url}`;
+}
+
+function getPhone(deal: PipelineDeal) {
+  return deal.enrichmentData?.phone || "";
+}
+
+function isSameMonth(dateIso?: string) {
+  if (!dateIso) return false;
+  const parsed = new Date(dateIso);
+  if (Number.isNaN(parsed.getTime())) return false;
+  const now = new Date();
   return (
-    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ${meta.className}`}>
-      {meta.label}
-    </span>
+    parsed.getUTCFullYear() === now.getUTCFullYear() &&
+    parsed.getUTCMonth() === now.getUTCMonth()
+  );
+}
+
+function EmptyProfileState() {
+  return (
+    <section className="glass-panel flex min-h-[420px] items-center justify-center p-8 text-center">
+      <div className="max-w-md">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-blue-400/20 bg-blue-500/10 text-blue-100">
+          <MessagesSquare size={24} />
+        </div>
+        <h2 className="heading-font mt-5 text-3xl font-normal uppercase tracking-[0.04em] text-white">
+          Contact Profile
+        </h2>
+        <p className="mt-3 text-sm text-slate-300">Select a contact from the sidebar or add a new one</p>
+      </div>
+    </section>
+  );
+}
+
+function MetricCard({
+  label,
+  value,
+  icon: Icon,
+}: {
+  label: string;
+  value: string;
+  icon: typeof Building2;
+}) {
+  return (
+    <div className="glass-card rounded-2xl p-4">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-xs uppercase tracking-[0.24em] text-slate-400">{label}</p>
+        <Icon size={16} className="text-blue-200" />
+      </div>
+      <p className="mt-3 text-2xl font-semibold text-white">{value}</p>
+    </div>
   );
 }
 
 export default function PipelinePage() {
-  const [deals, setDeals] = useState<PipelineDeal[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [importing, setImporting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [toast, setToast] = useState<ToastState>(null);
-  const [panelMode, setPanelMode] = useState<PanelMode>(null);
-  const [selectedDealId, setSelectedDealId] = useState<string | null>(null);
-  const [form, setForm] = useState<DealForm>(EMPTY_FORM);
-  const [dragOverStage, setDragOverStage] = useState<PipelineStage | null>(null);
+  const [contacts, setContacts] = useState<PipelineDeal[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [stageFilter, setStageFilter] = useState<StageFilter>("all");
-  const [assigneeFilter, setAssigneeFilter] = useState<AssigneeFilter>("all");
-  const [sourceFilter, setSourceFilter] = useState<SourceFilter>("all");
-  const [competitorFilter, setCompetitorFilter] = useState<CompetitorFilter>("all");
-  const [dateRangeFilter, setDateRangeFilter] = useState<DateRangeFilter>("all");
+  const [stageFilter, setStageFilter] = useState<"all" | PipelineStage>("all");
+  const [sortMode, setSortMode] = useState<SortMode>("newest");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createForm, setCreateForm] = useState<CreateContactForm>(EMPTY_CREATE_FORM);
+  const [submitting, setSubmitting] = useState(false);
+  const [quickNoteDraft, setQuickNoteDraft] = useState("");
+  const [editMode, setEditMode] = useState(false);
+  const [editForm, setEditForm] = useState<EditForm>({ name: "", company: "", email: "" });
+  const [notesDraft, setNotesDraft] = useState("");
+  const [notesSaved, setNotesSaved] = useState(false);
+  const [notesSaving, setNotesSaving] = useState(false);
+  const [panelOpen, setPanelOpen] = useState<string | null>(null);
 
-  const assigneeNames = useMemo(() => {
-    return Object.fromEntries(TEAM_MEMBERS.map((member) => [member.id, member.name]));
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadContacts() {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const response = await fetch("/api/pipeline", { cache: "no-store" });
+        if (!response.ok) {
+          throw new Error("Unable to load contacts.");
+        }
+
+        const data = (await response.json()) as PipelineDeal[];
+        if (cancelled) return;
+        setContacts(data);
+        setSelectedId((current) => current ?? data[0]?.id ?? null);
+      } catch (loadError) {
+        if (!cancelled) {
+          setError(loadError instanceof Error ? loadError.message : "Unable to load contacts.");
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadContacts();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  const selectedDeal = useMemo(
-    () => (selectedDealId ? deals.find((deal) => deal.id === selectedDealId) ?? null : null),
-    [deals, selectedDealId],
+  useEffect(() => {
+    if (!notesSaved) return undefined;
+    const timeout = window.setTimeout(() => setNotesSaved(false), 1800);
+    return () => window.clearTimeout(timeout);
+  }, [notesSaved]);
+
+  const selectedContact = useMemo(
+    () => contacts.find((contact) => contact.id === selectedId) ?? null,
+    [contacts, selectedId],
   );
 
-  const visibleDeals = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
-
-    return deals.filter((deal) => {
-      const matchesSearch =
-        query.length === 0 ||
-        [deal.name, deal.client, deal.contact, deal.email].some((value) => value.toLowerCase().includes(query));
-      const matchesStage = stageFilter === "all" || deal.stage === stageFilter;
-      const matchesAssignee = assigneeFilter === "all" || deal.assignee === assigneeFilter;
-      const matchesSource = sourceFilter === "all" || deal.source === sourceFilter;
-      const matchesCompetitor = competitorFilter === "all" || deal.competitor === competitorFilter;
-      const matchesDateRange = isWithinDateRange(deal.createdAt, dateRangeFilter);
-
-      return matchesSearch && matchesStage && matchesAssignee && matchesSource && matchesCompetitor && matchesDateRange;
-    });
-  }, [assigneeFilter, competitorFilter, dateRangeFilter, deals, searchQuery, sourceFilter, stageFilter]);
-
-  const stats = useMemo(() => {
-    const activeLeads = deals.filter((deal) => !CLOSED_STAGES.includes(deal.stage));
-    const newLeads = deals.filter((deal) => deal.stage === "new-lead");
-    const wonThisMonthLeads = deals.filter(
-      (deal) => deal.stage === "closed-won" && isThisMonth(deal.stageUpdatedAt ?? deal.createdAt),
-    );
-    const lostThisMonthLeads = deals.filter(
-      (deal) => deal.stage === "closed-lost" && isThisMonth(deal.stageUpdatedAt ?? deal.createdAt),
-    );
-    const wonThisMonthValue = wonThisMonthLeads.reduce((sum, deal) => sum + deal.value, 0);
-
-    return {
-      totalLeads: activeLeads.length,
-      newThisWeek: newLeads.length,
-      wonThisMonthCount: wonThisMonthLeads.length,
-      wonThisMonthValue,
-      lostThisMonthCount: lostThisMonthLeads.length,
-    };
-  }, [deals]);
-
-  async function loadDeals() {
-    try {
-      setLoading(true);
-      const response = await fetch("/api/pipeline", { cache: "no-store" });
-      if (!response.ok) throw new Error("Load failed");
-      const data = (await response.json()) as PipelineDeal[];
-      setDeals(data);
-      setError(null);
-    } catch {
-      setError("Could not load pipeline leads.");
-    } finally {
-      setLoading(false);
-    }
-  }
+  const selectedNotesState = useMemo(
+    () => parseQuickNotes(selectedContact?.notes ?? "", selectedContact?.createdAt),
+    [selectedContact],
+  );
 
   useEffect(() => {
-    void loadDeals();
-  }, []);
+    setNotesDraft(selectedNotesState.relationshipNote);
+    setQuickNoteDraft("");
+  }, [selectedNotesState.relationshipNote, selectedId]);
 
   useEffect(() => {
-    if (!toast) return undefined;
-
-    const timer = window.setTimeout(() => setToast(null), 3000);
-    return () => window.clearTimeout(timer);
-  }, [toast]);
-
-  function openCreatePanel() {
-    setPanelMode("create");
-    setSelectedDealId(null);
-    setForm(EMPTY_FORM);
-  }
-
-  function openDealPanel(deal: PipelineDeal) {
-    setPanelMode("view");
-    setSelectedDealId(deal.id);
-    setForm({
-      name: deal.name,
-      stage: deal.stage,
-      value: String(deal.value),
-      client: deal.client,
-      contact: deal.contact,
-      assignee: deal.assignee,
-      notes: deal.notes,
-    });
-  }
-
-  function closePanel() {
-    setPanelMode(null);
-    setSelectedDealId(null);
-  }
-
-  async function handleCreate(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!form.name.trim() || !form.client.trim()) {
-      setError("Lead name and client are required.");
+    if (!selectedContact) {
+      setEditMode(false);
+      setEditForm({ name: "", company: "", email: "" });
       return;
     }
 
+    setEditForm({
+      name: getPrimaryName(selectedContact),
+      company: selectedContact.client,
+      email: selectedContact.email,
+    });
+  }, [selectedContact]);
+
+  const filteredContacts = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    const next = contacts.filter((contact) => {
+      const matchesStage = stageFilter === "all" || contact.stage === stageFilter;
+      if (!matchesStage) return false;
+      if (!query) return true;
+
+      const haystack = [
+        getPrimaryName(contact),
+        contact.client,
+        contact.email,
+        contact.contact,
+        getSearchableNotesText(contact),
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      return haystack.includes(query);
+    });
+
+    next.sort((left, right) => {
+      if (sortMode === "alphabetical") {
+        return getPrimaryName(left).localeCompare(getPrimaryName(right));
+      }
+
+      if (sortMode === "stage") {
+        return PIPELINE_STAGES.indexOf(left.stage) - PIPELINE_STAGES.indexOf(right.stage);
+      }
+
+      const leftTime = new Date(left.stageUpdatedAt ?? left.createdAt).getTime();
+      const rightTime = new Date(right.stageUpdatedAt ?? right.createdAt).getTime();
+      return rightTime - leftTime;
+    });
+
+    return next;
+  }, [contacts, searchQuery, sortMode, stageFilter]);
+
+  useEffect(() => {
+    if (!filteredContacts.length) {
+      setSelectedId(null);
+      return;
+    }
+
+    if (!selectedId || !filteredContacts.some((contact) => contact.id === selectedId)) {
+      setSelectedId(filteredContacts[0].id);
+    }
+  }, [filteredContacts, selectedId]);
+
+  const stageCounts = useMemo(() => {
+    return PIPELINE_STAGES.map((stage) => ({
+      stage,
+      count: contacts.filter((contact) => contact.stage === stage).length,
+    }));
+  }, [contacts]);
+
+  const maxStageCount = Math.max(1, ...stageCounts.map((entry) => entry.count));
+  const wonThisMonth = contacts.filter(
+    (contact) => contact.stage === "closed-won" && isSameMonth(contact.stageUpdatedAt ?? contact.createdAt),
+  ).length;
+  const conversionRate = contacts.length ? Math.round((contacts.filter((contact) => contact.stage === "closed-won").length / contacts.length) * 100) : 0;
+  const recentActivity = useMemo(() => {
+    return [...contacts]
+      .sort((left, right) => {
+        const leftTime = new Date(left.stageUpdatedAt ?? left.createdAt).getTime();
+        const rightTime = new Date(right.stageUpdatedAt ?? right.createdAt).getTime();
+        return rightTime - leftTime;
+      })
+      .slice(0, 5);
+  }, [contacts]);
+
+  async function patchContact(id: string, patch: Partial<Omit<PipelineDeal, "id" | "createdAt">>) {
+    const response = await fetch(`/api/pipeline/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(patch),
+    });
+
+    if (!response.ok) {
+      throw new Error("Unable to update contact.");
+    }
+
+    const updated = (await response.json()) as PipelineDeal;
+    setContacts((current) => current.map((contact) => (contact.id === id ? updated : contact)));
+    return updated;
+  }
+
+  async function handleStageChange(id: string, stage: PipelineStage) {
     try {
-      setSaving(true);
+      await patchContact(id, { stage });
+    } catch (stageError) {
+      setError(stageError instanceof Error ? stageError.message : "Unable to update stage.");
+    }
+  }
+
+  async function handleNotesBlur() {
+    if (!selectedContact) return;
+
+    const serialized = serializeQuickNotes({
+      relationshipNote: notesDraft,
+      relationshipTimestamp: selectedNotesState.relationshipTimestamp,
+      quickNotes: selectedNotesState.quickNotes,
+    });
+
+    if (serialized === selectedContact.notes) return;
+
+    setNotesSaving(true);
+    try {
+      await patchContact(selectedContact.id, { notes: serialized });
+      setNotesSaved(true);
+    } catch (notesError) {
+      setError(notesError instanceof Error ? notesError.message : "Unable to save notes.");
+    } finally {
+      setNotesSaving(false);
+    }
+  }
+
+  async function handleAddQuickNote(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!selectedContact || !quickNoteDraft.trim()) return;
+
+    const nextNotes = {
+      relationshipNote: notesDraft,
+      relationshipTimestamp: selectedNotesState.relationshipTimestamp,
+      quickNotes: [
+        {
+          text: quickNoteDraft.trim(),
+          timestamp: makeTimestamp(),
+        },
+        ...selectedNotesState.quickNotes,
+      ],
+    };
+
+    try {
+      await patchContact(selectedContact.id, { notes: serializeQuickNotes(nextNotes) });
+      setQuickNoteDraft("");
+      setNotesSaved(true);
+    } catch (noteError) {
+      setError(noteError instanceof Error ? noteError.message : "Unable to add note.");
+    }
+  }
+
+  async function handleDeleteQuickNote(timestamp: string) {
+    if (!selectedContact) return;
+
+    const nextNotes = {
+      relationshipNote: notesDraft,
+      relationshipTimestamp: selectedNotesState.relationshipTimestamp,
+      quickNotes: selectedNotesState.quickNotes.filter((note) => note.timestamp !== timestamp),
+    };
+
+    try {
+      await patchContact(selectedContact.id, { notes: serializeQuickNotes(nextNotes) });
+      setNotesSaved(true);
+    } catch (noteError) {
+      setError(noteError instanceof Error ? noteError.message : "Unable to delete note.");
+    }
+  }
+
+  async function handleDeleteContact() {
+    if (!selectedContact || !window.confirm(`Delete ${getPrimaryName(selectedContact)}?`)) return;
+
+    try {
+      const response = await fetch(`/api/pipeline/${selectedContact.id}`, { method: "DELETE" });
+      if (!response.ok) {
+        throw new Error("Unable to delete contact.");
+      }
+
+      setContacts((current) => current.filter((contact) => contact.id !== selectedContact.id));
+      setSelectedId(null);
+    } catch (deleteError) {
+      setError(deleteError instanceof Error ? deleteError.message : "Unable to delete contact.");
+    }
+  }
+
+  async function handleSaveInlineEdit() {
+    if (!selectedContact) return;
+
+    try {
+      await patchContact(selectedContact.id, {
+        name: editForm.name,
+        contact: editForm.name,
+        client: editForm.company,
+        email: editForm.email,
+      });
+      setEditMode(false);
+    } catch (editError) {
+      setError(editError instanceof Error ? editError.message : "Unable to save contact.");
+    }
+  }
+
+  async function handleCreateContact(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSubmitting(true);
+    setError(null);
+
+    try {
       const response = await fetch("/api/pipeline", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: form.name,
-          stage: form.stage,
-          value: Number(form.value),
-          client: form.client,
-          contact: form.contact,
-          assignee: form.assignee,
-          notes: form.notes,
+          name: createForm.name,
+          stage: createForm.stage,
+          value: 0,
+          client: createForm.company,
+          contact: createForm.name,
+          assignee: "kevin",
+          notes: serializeQuickNotes({
+            relationshipNote: createForm.notes,
+            relationshipTimestamp: makeTimestamp(),
+            quickNotes: [],
+          }),
+          source: createForm.source,
+          email: createForm.email,
         }),
       });
-      if (!response.ok) throw new Error("Create failed");
-      const created = (await response.json()) as PipelineDeal;
-      setDeals((prev) => [...prev, created]);
-      closePanel();
-      setError(null);
-    } catch {
-      setError("Could not create lead.");
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function handleUpdate(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!selectedDeal) return;
-
-    try {
-      setSaving(true);
-      const response = await fetch(`/api/pipeline/${selectedDeal.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: form.name,
-          stage: form.stage,
-          value: Number(form.value),
-          client: form.client,
-          contact: form.contact,
-          assignee: form.assignee,
-          notes: form.notes,
-        }),
-      });
-      if (!response.ok) throw new Error("Update failed");
-      const updated = (await response.json()) as PipelineDeal;
-      setDeals((prev) => prev.map((deal) => (deal.id === updated.id ? updated : deal)));
-      closePanel();
-      setError(null);
-    } catch {
-      setError("Could not update lead.");
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function handleDelete() {
-    if (!selectedDeal) return;
-    try {
-      setSaving(true);
-      const response = await fetch(`/api/pipeline/${selectedDeal.id}`, { method: "DELETE" });
-      if (!response.ok) throw new Error("Delete failed");
-      setDeals((prev) => prev.filter((deal) => deal.id !== selectedDeal.id));
-      closePanel();
-      setError(null);
-    } catch {
-      setError("Could not delete lead.");
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function moveDeal(dealId: string, stage: PipelineStage) {
-    const current = deals.find((deal) => deal.id === dealId);
-    if (!current || current.stage === stage) return;
-
-    setDeals((prev) => prev.map((deal) => (deal.id === dealId ? { ...deal, stage } : deal)));
-
-    try {
-      const response = await fetch(`/api/pipeline/${dealId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ stage }),
-      });
-      if (!response.ok) throw new Error("Move failed");
-      const updated = (await response.json()) as PipelineDeal;
-      setDeals((prev) => prev.map((deal) => (deal.id === updated.id ? updated : deal)));
-      setError(null);
-    } catch {
-      setDeals((prev) => prev.map((deal) => (deal.id === dealId ? current : deal)));
-      setError("Could not move lead.");
-    }
-  }
-
-  async function handleInstantlyImport() {
-    try {
-      setImporting(true);
-      const response = await fetch("/api/instantly/import", { method: "POST" });
-      const payload = (await response.json()) as { imported?: number; error?: string };
 
       if (!response.ok) {
-        throw new Error(payload.error || "Import failed");
+        throw new Error("Unable to create contact.");
       }
 
-      await loadDeals();
-      setError(null);
-      setToast({
-        message: `Imported ${payload.imported ?? 0} new leads from Instantly`,
-        tone: "success",
-      });
-    } catch (caught) {
-      const message = caught instanceof Error ? caught.message : "Could not import from Instantly.";
-      setError(message);
-      setToast({ message, tone: "error" });
+      let created = (await response.json()) as PipelineDeal;
+      setContacts((current) => [created, ...current]);
+
+      if (createForm.phone.trim()) {
+        created = await patchContact(created.id, {
+          enrichmentData: {
+            ...(created.enrichmentData ?? {}),
+            phone: createForm.phone.trim(),
+          },
+        });
+      }
+
+      setSelectedId(created.id);
+      setCreateForm(EMPTY_CREATE_FORM);
+      setCreateOpen(false);
+    } catch (createError) {
+      setError(createError instanceof Error ? createError.message : "Unable to create contact.");
     } finally {
-      setImporting(false);
+      setSubmitting(false);
     }
+  }
+
+  if (loading) {
+    return (
+      <section className="glass-panel rounded-2xl p-6 text-sm text-slate-300">
+        <div className="flex items-center gap-3">
+          <LoaderCircle size={18} className="animate-spin text-blue-200" />
+          Loading CRM...
+        </div>
+      </section>
+    );
+  }
+
+  if (error && contacts.length === 0) {
+    return (
+      <section className="glass-panel rounded-2xl p-6 text-sm text-red-100">
+        {error}
+      </section>
+    );
   }
 
   return (
-    <section className="animate-enter space-y-5 sm:space-y-6" style={{ animationDelay: "80ms" }}>
-      <div className="pointer-events-none fixed right-4 top-4 z-50">
-        {toast ? (
-          <div
-            className={`pointer-events-auto min-w-[280px] rounded-2xl border px-4 py-3 text-sm text-white shadow-[0_24px_80px_rgba(0,0,0,0.45)] backdrop-blur-2xl animate-[toast-in_220ms_ease-out] ${
-              toast.tone === "success"
-                ? "border-white/20 bg-[linear-gradient(135deg,rgba(108,43,217,0.32),rgba(15,23,42,0.72))]"
-                : "border-red-300/25 bg-[linear-gradient(135deg,rgba(185,28,28,0.28),rgba(15,23,42,0.72))]"
-            }`}
-          >
-            {toast.message}
+    <>
+      <div className="animate-enter space-y-6" style={{ animationDelay: "80ms" }}>
+        <header className="glass-panel page-header p-5 sm:p-6">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.24em] text-blue-200/70">CRM Pipeline</p>
+              <h1 className="page-title mt-2">Relationships</h1>
+              <p className="mt-2 max-w-3xl text-sm text-slate-300">
+                Salesforce-style contact memory for every conversation, company, and follow-up in Eastern time.
+              </p>
+            </div>
+            <div className="glass-card inline-flex items-center gap-3 self-start rounded-2xl px-4 py-3 text-sm text-slate-200">
+              <Clock3 size={16} className="text-blue-200" />
+              {easternDateTimeFormatter.format(new Date())} ET
+            </div>
+          </div>
+        </header>
+
+        {error ? (
+          <div className="glass-card rounded-2xl border border-red-400/25 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+            {error}
           </div>
         ) : null}
-      </div>
 
-      <div className="glass-panel page-header p-5 sm:p-6">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <h1 className="page-title">Pipeline</h1>
-            <p className="mt-2 text-sm text-slate-300">Sales pipeline and client acquisition tracking.</p>
-          </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              type="button"
-              onClick={handleInstantlyImport}
-              disabled={importing}
-              className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-fuchsia-300/35 bg-[linear-gradient(135deg,rgba(139,92,246,0.28),rgba(91,33,182,0.38))] px-4 py-2.5 text-sm font-semibold text-fuchsia-50 shadow-[0_12px_34px_rgba(91,33,182,0.28)] transition hover:border-fuchsia-200/60 hover:bg-[linear-gradient(135deg,rgba(168,85,247,0.34),rgba(109,40,217,0.42))] disabled:cursor-not-allowed disabled:opacity-70"
-            >
-              {importing ? <LoaderCircle size={16} className="animate-spin" /> : <Download size={16} />}
-              Import from Instantly
-            </button>
-            <button
-              type="button"
-              onClick={openCreatePanel}
-              className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-blue-300/30 bg-blue-500/20 px-4 py-2.5 text-sm font-semibold text-blue-100 transition hover:border-blue-300/60 hover:bg-blue-500/30"
-            >
-              <Plus size={16} />
-              Add Lead
-            </button>
-          </div>
-        </div>
-      </div>
+        <div className="grid gap-4 xl:grid-cols-[280px_minmax(0,1fr)_240px]">
+          <aside
+            className={cn(
+              "glass-panel h-[calc(100vh-13rem)] min-h-[620px] flex-col p-4",
+              selectedContact ? "hidden xl:flex" : "flex",
+            )}
+          >
+            <div className="relative">
+              <Search
+                size={16}
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
+              />
+              <input
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Search contacts"
+                className="w-full rounded-2xl border border-white/10 bg-black/20 py-3 pl-10 pr-3 text-sm text-white outline-none transition focus:border-blue-400/50"
+              />
+            </div>
 
-      <div className="glass-panel p-3 md:p-4">
-        <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
-          <label className="relative min-w-0 flex-1">
-            <Search
-              size={16}
-              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-            />
-            <input
-              type="search"
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Search leads..."
-              className="min-h-11 w-full rounded-2xl border border-white/14 bg-[linear-gradient(180deg,rgba(15,23,42,0.88),rgba(15,23,42,0.72))] py-3 pl-11 pr-4 text-sm text-slate-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_18px_40px_rgba(2,6,23,0.24)] backdrop-blur-xl outline-none transition placeholder:text-slate-500 focus:border-blue-400/55 focus:bg-slate-900/80"
-            />
-          </label>
-
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 xl:min-w-[780px] xl:flex-1 xl:grid-cols-5">
-            <label className="space-y-1">
-              <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">Stage</span>
-              <select
-                value={stageFilter}
-                onChange={(event) => setStageFilter(event.target.value as StageFilter)}
-                className="min-h-11 w-full rounded-xl border border-white/12 bg-slate-950/70 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
-              >
-                {STAGE_FILTER_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label className="space-y-1">
-              <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">Assignee</span>
-              <select
-                value={assigneeFilter}
-                onChange={(event) => setAssigneeFilter(event.target.value as AssigneeFilter)}
-                className="min-h-11 w-full rounded-xl border border-white/12 bg-slate-950/70 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
-              >
-                {ASSIGNEE_FILTER_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label className="space-y-1">
-              <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">Source</span>
-              <select
-                value={sourceFilter}
-                onChange={(event) => setSourceFilter(event.target.value as SourceFilter)}
-                className="min-h-11 w-full rounded-xl border border-white/12 bg-slate-950/70 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
-              >
-                {SOURCE_FILTER_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label className="space-y-1">
-              <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">Competitor</span>
-              <select
-                value={competitorFilter}
-                onChange={(event) => setCompetitorFilter(event.target.value as CompetitorFilter)}
-                className="min-h-11 w-full rounded-xl border border-white/12 bg-slate-950/70 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
-              >
-                {COMPETITOR_FILTER_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label className="space-y-1">
-              <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">Date Range</span>
-              <select
-                value={dateRangeFilter}
-                onChange={(event) => setDateRangeFilter(event.target.value as DateRangeFilter)}
-                className="min-h-11 w-full rounded-xl border border-white/12 bg-slate-950/70 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-400/60"
-              >
-                {DATE_RANGE_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-        </div>
-      </div>
-
-      {error ? (
-        <div className="rounded-xl border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-200">{error}</div>
-      ) : null}
-
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-2 xl:grid-cols-4">
-        <div className="glass-card p-4">
-          <p className="text-sm uppercase tracking-[0.12em] text-slate-300">Total Leads</p>
-          <p className="mt-3 text-2xl font-semibold text-blue-100">{stats.totalLeads}</p>
-        </div>
-        <div className="glass-card p-4">
-          <p className="text-sm uppercase tracking-[0.12em] text-slate-300">New This Week</p>
-          <p className="mt-3 text-2xl font-semibold text-slate-100">{stats.newThisWeek}</p>
-        </div>
-        <div className="glass-card p-4">
-          <p className="text-sm uppercase tracking-[0.12em] text-slate-300">Won This Month</p>
-          <p className="mt-3 text-2xl font-semibold text-emerald-300">
-            {stats.wonThisMonthCount} <span className="text-base text-emerald-200">({toCurrency(stats.wonThisMonthValue)})</span>
-          </p>
-        </div>
-        <div className="glass-card p-4">
-          <p className="text-sm uppercase tracking-[0.12em] text-slate-300">Lost This Month</p>
-          <p className="mt-3 text-2xl font-semibold text-rose-300">{stats.lostThisMonthCount}</p>
-        </div>
-      </div>
-
-      {loading ? (
-        <div className="glass-panel p-6 text-sm text-slate-300">Loading pipeline...</div>
-      ) : (
-        <div className="glass-panel overflow-x-auto p-3 md:p-4">
-          <div className="grid min-w-max grid-flow-col auto-cols-[240px] gap-3 pb-2 xl:grid-flow-row xl:grid-cols-8 xl:auto-cols-fr">
-            {STAGE_COLUMNS.map((column) => {
-              const stageDeals = visibleDeals.filter((deal) => deal.stage === column.stage);
-
-              return (
-                <div
-                  key={column.stage}
-                  onDragOver={(event) => {
-                    event.preventDefault();
-                    setDragOverStage(column.stage);
-                  }}
-                  onDragLeave={() => setDragOverStage(null)}
-                  onDrop={(event) => {
-                    event.preventDefault();
-                    const dealId = event.dataTransfer.getData("text/pipeline-lead-id");
-                    setDragOverStage(null);
-                    if (dealId) void moveDeal(dealId, column.stage);
-                  }}
-                  className="min-h-[460px] min-w-[235px] rounded-xl border border-white/10 bg-slate-950/35 p-3"
-                  style={{
-                    borderColor: dragOverStage === column.stage ? column.color : undefined,
-                    boxShadow: dragOverStage === column.stage ? `0 0 0 1px ${column.color}` : undefined,
-                  }}
+            <div className="mt-4 flex flex-wrap gap-2">
+              {STAGE_FILTERS.map((filter) => (
+                <button
+                  key={filter.value}
+                  type="button"
+                  onClick={() => setStageFilter(filter.value)}
+                  className={cn(
+                    "rounded-full border px-3 py-1.5 text-xs font-medium transition",
+                    stageFilter === filter.value
+                      ? "border-blue-400/40 bg-[linear-gradient(135deg,rgba(32,147,255,0.2),rgba(0,38,255,0.2))] text-white"
+                      : "border-white/10 bg-white/5 text-slate-300 hover:border-blue-400/30 hover:text-white",
+                  )}
                 >
-                  <div
-                    className="mb-3 flex items-center justify-between rounded-lg border px-3 py-2"
-                    style={{ borderColor: `${column.color}66`, background: column.accent }}
+                  {filter.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="mt-4">
+              <label className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Sort</label>
+              <div className="mt-2 relative">
+                <select
+                  value={sortMode}
+                  onChange={(event) => setSortMode(event.target.value as SortMode)}
+                  className="w-full appearance-none rounded-2xl border border-white/10 bg-black/20 px-3 py-3 text-sm text-white outline-none transition focus:border-blue-400/50"
+                >
+                  <option value="newest">Newest</option>
+                  <option value="alphabetical">Alphabetical</option>
+                  <option value="stage">Stage</option>
+                </select>
+                <ChevronDown size={16} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-500" />
+              </div>
+            </div>
+
+            <div className="mt-4 flex-1 space-y-3 overflow-y-auto pr-1">
+              {filteredContacts.map((contact) => {
+                const active = selectedId === contact.id;
+                const competitor = contact.competitor?.trim();
+
+                return (
+                  <button
+                    key={contact.id}
+                    type="button"
+                    onClick={() => setSelectedId(contact.id)}
+                    className={cn(
+                      "glass-card w-full rounded-2xl p-4 text-left transition",
+                      active
+                        ? "border-blue-400/40 bg-[linear-gradient(135deg,rgba(32,147,255,0.18),rgba(0,38,255,0.14))] shadow-[0_18px_48px_rgba(32,147,255,0.18)]"
+                        : "hover:border-blue-400/25",
+                    )}
                   >
-                    <p className="text-sm font-semibold" style={{ color: column.color }}>
-                      {column.title} ({stageDeals.length})
-                    </p>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-white">{getPrimaryName(contact)}</p>
+                        <p className="mt-1 truncate text-xs text-slate-400">{contact.client}</p>
+                      </div>
+                      <span className={cn("mt-1 h-2.5 w-2.5 rounded-full", STAGE_META[contact.stage].dot)} />
+                    </div>
+                    <div className="mt-3 flex items-center gap-2">
+                      {competitor ? (
+                        <span className="rounded-full border border-white/10 bg-white/10 px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-slate-200">
+                          {competitor}
+                        </span>
+                      ) : null}
+                      <span className={cn("rounded-full border px-2 py-1 text-[10px] uppercase tracking-[0.16em]", STAGE_META[contact.stage].pill)}>
+                        {STAGE_META[contact.stage].label}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
+
+              {!filteredContacts.length ? (
+                <div className="glass-card rounded-2xl p-6 text-center text-sm text-slate-400">
+                  No contacts match your filters.
+                </div>
+              ) : null}
+            </div>
+
+            <div className="mt-4 space-y-3">
+              <p className="text-xs text-slate-500">{filteredContacts.length} contacts</p>
+              <button
+                type="button"
+                onClick={() => setCreateOpen(true)}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-blue-400/35 bg-[linear-gradient(135deg,#2093FF,#0026FF)] px-4 py-3 text-sm font-medium text-white shadow-[0_16px_32px_rgba(0,38,255,0.28)] transition hover:scale-[1.01]"
+              >
+                <Plus size={16} />
+                Add Contact
+              </button>
+            </div>
+          </aside>
+
+          <main className={cn("min-w-0 space-y-4", selectedContact ? "block" : "hidden xl:block")}>
+            {!selectedContact ? (
+              <EmptyProfileState />
+            ) : (
+              <>
+                <section className="glass-panel page-header p-5 sm:p-6">
+                  <div className="flex flex-col gap-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="min-w-0">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedId(null)}
+                          className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs uppercase tracking-[0.18em] text-slate-300 xl:hidden"
+                        >
+                          <ArrowLeft size={14} />
+                          Back
+                        </button>
+                        <p className="text-[11px] uppercase tracking-[0.24em] text-blue-200/70">Contact Record</p>
+                        <h2 className="heading-font mt-2 truncate text-3xl font-normal uppercase tracking-[0.04em] text-white sm:text-4xl">
+                          {getPrimaryName(selectedContact)}
+                        </h2>
+                        <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-slate-300">
+                          <span className="inline-flex items-center gap-2">
+                            <Building2 size={15} className="text-blue-200" />
+                            {selectedContact.client}
+                          </span>
+                          <span>Created {formatEasternDate(selectedContact.createdAt)}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap justify-end gap-2">
+                        <div className="relative">
+                          <select
+                            value={selectedContact.stage}
+                            onChange={(event) => handleStageChange(selectedContact.id, event.target.value as PipelineStage)}
+                            className={cn(
+                              "appearance-none rounded-full border px-4 py-2 pr-9 text-xs font-semibold uppercase tracking-[0.18em] outline-none",
+                              STAGE_META[selectedContact.stage].pill,
+                            )}
+                          >
+                            {PIPELINE_STAGES.map((stage) => (
+                              <option key={stage} value={stage} className="bg-slate-950 text-white">
+                                {STAGE_META[stage].label}
+                              </option>
+                            ))}
+                          </select>
+                          <ChevronDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-current" />
+                        </div>
+
+                        {selectedContact.competitor ? (
+                          <span className="rounded-full border border-white/10 bg-white/10 px-3 py-2 text-xs uppercase tracking-[0.18em] text-slate-100">
+                            {selectedContact.competitor}
+                          </span>
+                        ) : null}
+
+                        <span className={cn("rounded-full border px-3 py-2 text-xs uppercase tracking-[0.18em]", SOURCE_META[selectedContact.source])}>
+                          {selectedContact.source}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                      <a
+                        href={selectedContact.email ? `mailto:${selectedContact.email}` : undefined}
+                        className={cn(
+                          "glass-card rounded-2xl p-4",
+                          selectedContact.email ? "hover:border-blue-400/30" : "pointer-events-none opacity-70",
+                        )}
+                      >
+                        <div className="flex items-center gap-2 text-xs uppercase tracking-[0.24em] text-slate-500">
+                          <Mail size={14} className="text-blue-200" />
+                          Email
+                        </div>
+                        <p className="mt-3 truncate text-sm text-white">{selectedContact.email || "No email"}</p>
+                      </a>
+
+                      <div className="glass-card rounded-2xl p-4">
+                        <div className="flex items-center gap-2 text-xs uppercase tracking-[0.24em] text-slate-500">
+                          <Phone size={14} className="text-blue-200" />
+                          Phone
+                        </div>
+                        <p className="mt-3 truncate text-sm text-white">{getPhone(selectedContact) || "Not enriched"}</p>
+                      </div>
+
+                      <a
+                        href={getWebsite(selectedContact) ? normalizeWebsite(getWebsite(selectedContact)) : undefined}
+                        target="_blank"
+                        rel="noreferrer"
+                        className={cn(
+                          "glass-card rounded-2xl p-4",
+                          getWebsite(selectedContact) ? "hover:border-blue-400/30" : "pointer-events-none opacity-70",
+                        )}
+                      >
+                        <div className="flex items-center gap-2 text-xs uppercase tracking-[0.24em] text-slate-500">
+                          <Globe size={14} className="text-blue-200" />
+                          Website
+                        </div>
+                        <p className="mt-3 truncate text-sm text-white">{getWebsite(selectedContact) || "No website"}</p>
+                      </a>
+
+                      <div className="glass-card rounded-2xl p-4">
+                        <div className="flex items-center gap-2 text-xs uppercase tracking-[0.24em] text-slate-500">
+                          <DollarSign size={14} className="text-blue-200" />
+                          Retainer
+                        </div>
+                        <p className="mt-3 truncate text-sm text-white">{formatMoney(selectedContact.value)}</p>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                <section className="glass-panel p-5 sm:p-6">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="section-title">Relationship Notes</p>
+                      <p className="mt-2 max-w-2xl text-sm text-slate-400">
+                        Personal context, business situation, conversation highlights, anything worth remembering.
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-slate-400">
+                      {notesSaving ? <LoaderCircle size={14} className="animate-spin text-blue-200" /> : null}
+                      {notesSaved ? "Saved" : notesSaving ? "Saving" : "Autosaves on blur"}
+                    </div>
                   </div>
 
-                  <div className="space-y-3">
-                    {stageDeals.map((deal) => {
-                      const assignee = assigneeNames[deal.assignee] ?? deal.assignee;
-                      return (
-                        <button
-                          key={deal.id}
-                          type="button"
-                          draggable
-                          onDragStart={(event) => event.dataTransfer.setData("text/pipeline-lead-id", deal.id)}
-                          onClick={() => openDealPanel(deal)}
-                          className="glass-card w-full cursor-pointer p-3 text-left transition hover:-translate-y-1"
-                          aria-label={`Lead ${deal.name}`}
-                        >
-                          <div className="flex items-start justify-between gap-2">
-                            <p className="text-sm font-bold leading-snug text-white">{deal.name}</p>
-                            <span
-                              title={ENRICHMENT_META[deal.enrichmentStatus].label}
-                              className={`mt-1 inline-block h-2.5 w-2.5 shrink-0 rounded-full ${ENRICHMENT_META[deal.enrichmentStatus].dot}`}
-                            />
-                          </div>
-                          <p className="mt-1 text-sm text-slate-300">{deal.client}</p>
-                          <div className="mt-2 flex flex-wrap items-center gap-2">
-                            <span
-                              className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] ${SOURCE_META[deal.source].className}`}
+                  <textarea
+                    value={notesDraft}
+                    onChange={(event) => setNotesDraft(event.target.value)}
+                    onBlur={handleNotesBlur}
+                    placeholder={MAIN_NOTE_PLACEHOLDER}
+                    className="mt-4 min-h-[220px] w-full rounded-[1.25rem] border border-blue-400/20 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(10,10,15,0.7))] p-5 text-sm leading-6 text-white outline-none transition focus:border-blue-400/45"
+                  />
+                </section>
+
+                <section className="glass-panel p-5 sm:p-6">
+                  <div className="flex items-center gap-2">
+                    <NotebookPen size={18} className="text-blue-200" />
+                    <p className="section-title">Quick Notes Timeline</p>
+                  </div>
+
+                  <form onSubmit={handleAddQuickNote} className="mt-4 flex flex-col gap-3 sm:flex-row">
+                    <input
+                      value={quickNoteDraft}
+                      onChange={(event) => setQuickNoteDraft(event.target.value)}
+                      placeholder="Add a quick note..."
+                      className="min-w-0 flex-1 rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-blue-400/50"
+                    />
+                    <button
+                      type="submit"
+                      className="inline-flex items-center justify-center gap-2 rounded-2xl border border-blue-400/35 bg-[linear-gradient(135deg,#2093FF,#0026FF)] px-4 py-3 text-sm font-medium text-white"
+                    >
+                      <Plus size={16} />
+                      Add Note
+                    </button>
+                  </form>
+
+                  <div className="mt-4 space-y-3">
+                    {selectedNotesState.quickNotes.length ? (
+                      selectedNotesState.quickNotes.map((note) => (
+                        <div key={note.timestamp} className="glass-card rounded-2xl p-4">
+                          <div className="flex items-start justify-between gap-4">
+                            <div>
+                              <p className="text-sm text-white">{note.text}</p>
+                              <p className="mt-2 text-xs text-slate-500">
+                                {formatRelativeTime(note.timestamp)} · {formatEasternDate(note.timestamp)} ET
+                              </p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteQuickNote(note.timestamp)}
+                              className="rounded-full border border-white/10 bg-white/5 p-2 text-slate-400 transition hover:border-red-400/30 hover:text-red-200"
+                              aria-label="Delete note"
                             >
-                              {SOURCE_META[deal.source].label}
-                            </span>
-                            <CompetitorBadge competitor={deal.competitor} />
+                              <X size={14} />
+                            </button>
                           </div>
-                          <p className="mt-3 text-xl font-semibold text-blue-100">{toCurrency(deal.value)}</p>
-                          <div className="mt-3 flex items-center justify-between text-sm text-slate-300">
-                            <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/20 bg-white/10 text-[10px] font-semibold text-slate-100">
-                              {toInitials(assignee)}
-                            </span>
-                            <span>{leadDaysInStage(deal)}d in stage</span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="glass-card rounded-2xl p-5 text-sm text-slate-400">
+                        No quick notes yet.
+                      </div>
+                    )}
+                  </div>
+                </section>
+
+                {selectedContact.conversationHistory?.length ? (
+                  <section className="glass-panel p-5 sm:p-6">
+                    <div className="flex items-center gap-2">
+                      <MessagesSquare size={18} className="text-blue-200" />
+                      <p className="section-title">Conversation History</p>
+                    </div>
+                    <div className="mt-4 space-y-3">
+                      {selectedContact.conversationHistory.map((message, index) => (
+                        <div
+                          key={`${message.date}-${index}`}
+                          className={cn(
+                            "glass-card rounded-2xl p-4",
+                            message.direction === "inbound"
+                              ? "border-blue-400/20 bg-blue-500/10"
+                              : "border-slate-400/20 bg-slate-500/10",
+                          )}
+                        >
+                          <div className="flex items-start justify-between gap-4">
+                            <div>
+                              <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-slate-400">
+                                {message.direction === "inbound" ? (
+                                  <ArrowRight size={14} className="text-blue-200" />
+                                ) : (
+                                  <ArrowLeft size={14} className="text-slate-300" />
+                                )}
+                                {message.from}
+                              </div>
+                              <p className="mt-3 text-sm text-slate-100">{message.message}</p>
+                            </div>
+                            <p className="text-xs text-slate-500">{formatEasternDate(message.date)} ET</p>
                           </div>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                ) : null}
+
+                {selectedContact.enrichmentData ? (
+                  <section className="glass-panel p-5 sm:p-6">
+                    <button
+                      type="button"
+                      onClick={() => setPanelOpen((current) => (current === "enrichment" ? null : "enrichment"))}
+                      className="flex w-full items-center justify-between gap-3 text-left"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Sparkles size={18} className="text-blue-200" />
+                        <p className="section-title">Enrichment Data</p>
+                      </div>
+                      {panelOpen === "enrichment" ? (
+                        <ChevronUp size={18} className="text-slate-400" />
+                      ) : (
+                        <ChevronDown size={18} className="text-slate-400" />
+                      )}
+                    </button>
+
+                    {panelOpen === "enrichment" ? (
+                      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                        <div className="glass-card rounded-2xl p-4">
+                          <p className="text-xs uppercase tracking-[0.24em] text-slate-500">Google Rating</p>
+                          <p className="mt-2 text-lg font-semibold text-white">
+                            {selectedContact.enrichmentData.googleRating ?? "N/A"}
+                          </p>
+                        </div>
+                        <div className="glass-card rounded-2xl p-4">
+                          <p className="text-xs uppercase tracking-[0.24em] text-slate-500">Review Count</p>
+                          <p className="mt-2 text-lg font-semibold text-white">
+                            {selectedContact.enrichmentData.reviewCount ?? "N/A"}
+                          </p>
+                        </div>
+                        <div className="glass-card rounded-2xl p-4">
+                          <p className="text-xs uppercase tracking-[0.24em] text-slate-500">Cuisine</p>
+                          <p className="mt-2 text-sm text-white">{selectedContact.enrichmentData.cuisine || "N/A"}</p>
+                        </div>
+                        <div className="glass-card rounded-2xl p-4">
+                          <p className="text-xs uppercase tracking-[0.24em] text-slate-500">Social Links</p>
+                          <div className="mt-2 space-y-1 text-sm text-white">
+                            <p>{selectedContact.enrichmentData.socialMedia?.facebook || "No Facebook"}</p>
+                            <p>{selectedContact.enrichmentData.socialMedia?.instagram || "No Instagram"}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ) : null}
+                  </section>
+                ) : null}
+
+                <section className="glass-panel p-5 sm:p-6">
+                  <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                    <div className="space-y-3">
+                      <p className="section-title">Actions</p>
+                      <div className="flex flex-col gap-3 sm:flex-row">
+                        <div className="relative">
+                          <select
+                            value={selectedContact.stage}
+                            onChange={(event) => handleStageChange(selectedContact.id, event.target.value as PipelineStage)}
+                            className="appearance-none rounded-2xl border border-white/10 bg-black/20 px-4 py-3 pr-9 text-sm text-white outline-none transition focus:border-blue-400/50"
+                          >
+                            {PIPELINE_STAGES.map((stage) => (
+                              <option key={stage} value={stage} className="bg-slate-950 text-white">
+                                Move to {STAGE_META[stage].label}
+                              </option>
+                            ))}
+                          </select>
+                          <ChevronDown size={16} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => setEditMode((current) => !current)}
+                          className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white transition hover:border-blue-400/30"
+                        >
+                          <UserRoundPen size={16} />
+                          {editMode ? "Close Edit" : "Edit"}
                         </button>
-                      );
-                    })}
-                    {stageDeals.length === 0 ? (
-                      <div className="rounded-lg border border-dashed border-white/15 px-3 py-8 text-center text-xs text-slate-400">
-                        No leads
+
+                        <button
+                          type="button"
+                          onClick={handleDeleteContact}
+                          className="inline-flex items-center justify-center gap-2 rounded-2xl border border-red-400/25 bg-red-500/10 px-4 py-3 text-sm text-red-100 transition hover:border-red-400/40"
+                        >
+                          <Trash2 size={16} />
+                          Delete Contact
+                        </button>
+                      </div>
+                    </div>
+
+                    {editMode ? (
+                      <div className="grid w-full gap-3 sm:grid-cols-3 xl:max-w-3xl">
+                        <input
+                          value={editForm.name}
+                          onChange={(event) => setEditForm((current) => ({ ...current, name: event.target.value }))}
+                          placeholder="Name"
+                          className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-blue-400/50"
+                        />
+                        <input
+                          value={editForm.company}
+                          onChange={(event) => setEditForm((current) => ({ ...current, company: event.target.value }))}
+                          placeholder="Company"
+                          className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-blue-400/50"
+                        />
+                        <div className="flex gap-3">
+                          <input
+                            value={editForm.email}
+                            onChange={(event) => setEditForm((current) => ({ ...current, email: event.target.value }))}
+                            placeholder="Email"
+                            className="min-w-0 flex-1 rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-blue-400/50"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleSaveInlineEdit}
+                            className="rounded-2xl border border-blue-400/35 bg-[linear-gradient(135deg,#2093FF,#0026FF)] px-4 py-3 text-sm font-medium text-white"
+                          >
+                            Save
+                          </button>
+                        </div>
                       </div>
                     ) : null}
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
+                </section>
+              </>
+            )}
+          </main>
 
-      {panelMode ? (
-        <div className="fixed inset-0 z-40 bg-slate-950/70 backdrop-blur-sm">
-          <div className="ml-auto h-full w-full overflow-y-auto border-l border-white/15 bg-slate-950/95 p-4 shadow-[0_12px_42px_rgba(0,0,0,0.5)] sm:max-w-md sm:p-5">
-            <div className="mb-5 flex items-start justify-between gap-3">
+          <aside className="hidden space-y-4 xl:block">
+            <section className="glass-panel p-4">
+              <div className="flex items-center gap-2">
+                <BarChart3 size={18} className="text-blue-200" />
+                <p className="section-title">Stage Distribution</p>
+              </div>
+              <div className="mt-5 flex h-48 items-end gap-3">
+                {stageCounts.map(({ stage, count }) => (
+                  <div key={stage} className="flex flex-1 flex-col items-center gap-2">
+                    <div
+                      className="w-full rounded-t-2xl bg-[linear-gradient(180deg,#2093FF,#0026FF)]"
+                      style={{
+                        height: `${Math.max(10, (count / maxStageCount) * 100)}%`,
+                        opacity: count === 0 ? 0.25 : 1,
+                      }}
+                    />
+                    <p className="text-[10px] uppercase tracking-[0.16em] text-slate-500">{STAGE_META[stage].label}</p>
+                    <p className="text-xs text-white">{count}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section className="space-y-3">
+              <MetricCard label="Total Contacts" value={`${contacts.length}`} icon={Building2} />
+              <MetricCard label="Won This Month" value={`${wonThisMonth}`} icon={Sparkles} />
+              <MetricCard label="Conversion Rate" value={`${conversionRate}%`} icon={BarChart3} />
+            </section>
+
+            <section className="glass-panel p-4">
+              <p className="section-title">Recent Activity</p>
+              <div className="mt-4 space-y-3">
+                {recentActivity.map((contact) => (
+                  <div key={contact.id} className="glass-card rounded-2xl p-3">
+                    <p className="text-sm font-medium text-white">{getPrimaryName(contact)}</p>
+                    <p className="mt-1 text-xs text-slate-400">
+                      Moved to {STAGE_META[contact.stage].label}
+                    </p>
+                    <p className="mt-2 text-[11px] uppercase tracking-[0.16em] text-slate-500">
+                      {formatEasternDate(contact.stageUpdatedAt ?? contact.createdAt)} ET
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          </aside>
+        </div>
+      </div>
+
+      {createOpen ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+          <div className="glass-panel w-full max-w-2xl p-5 sm:p-6">
+            <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-xs uppercase tracking-[0.14em] text-blue-200">
-                  {panelMode === "create" ? "New Lead" : "Lead Details"}
-                </p>
-                <h2 className="mt-1 text-xl font-semibold text-white">
-                  {panelMode === "create" ? "Add Pipeline Lead" : selectedDeal?.name ?? "Lead"}
+                <p className="text-[11px] uppercase tracking-[0.24em] text-blue-200/70">New Contact</p>
+                <h2 className="heading-font mt-2 text-3xl font-normal uppercase tracking-[0.04em] text-white">
+                  Add Contact
                 </h2>
               </div>
               <button
                 type="button"
-                onClick={closePanel}
-                className="min-h-11 rounded-lg border border-white/15 bg-white/5 p-2.5 text-slate-200 transition hover:border-blue-300/50 hover:bg-blue-500/20"
+                onClick={() => setCreateOpen(false)}
+                className="rounded-full border border-white/10 bg-white/5 p-2 text-slate-400 transition hover:border-blue-400/30 hover:text-white"
+                aria-label="Close"
               >
                 <X size={16} />
               </button>
             </div>
 
-            <form onSubmit={panelMode === "create" ? handleCreate : handleUpdate} className="space-y-4">
-              {panelMode === "view" && selectedDeal ? (
-                <div className="rounded-xl border border-white/10 bg-slate-900/60 p-3">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span
-                      className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] ${SOURCE_META[selectedDeal.source].className}`}
-                    >
-                      {SOURCE_META[selectedDeal.source].label}
-                    </span>
-                    <CompetitorBadge competitor={selectedDeal.competitor} />
-                    <span
-                      className={`inline-block h-2.5 w-2.5 rounded-full ${ENRICHMENT_META[selectedDeal.enrichmentStatus].dot}`}
-                    />
-                    <span className="text-xs text-slate-300">{ENRICHMENT_META[selectedDeal.enrichmentStatus].label}</span>
-                  </div>
-                  {selectedDeal.competitor ? (
-                    <p className="mt-2 text-xs text-slate-300">
-                      Competitor: <span className="text-slate-100">{selectedDeal.competitor}</span>
-                    </p>
-                  ) : null}
-                  {selectedDeal.email ? (
-                    <p className="mt-2 text-xs text-slate-300">
-                      Email: <span className="text-slate-100">{selectedDeal.email}</span>
-                    </p>
-                  ) : null}
-                  {selectedDeal.messagedFrom ? (
-                    <p className="mt-2 text-xs text-slate-300">
-                      Messaged from: <span className="text-blue-100">{selectedDeal.messagedFrom}</span>
-                    </p>
-                  ) : null}
-                  {selectedDeal.website ? (
-                    <p className="mt-2 text-xs text-slate-300">
-                      Website:{" "}
-                      <a
-                        href={normalizeWebsiteUrl(selectedDeal.website)}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-blue-200 underline decoration-blue-400/50 underline-offset-2 transition hover:text-blue-100"
-                      >
-                        {selectedDeal.website}
-                      </a>
-                    </p>
-                  ) : null}
-                </div>
-              ) : null}
-
-              <label className="block space-y-1.5">
-                <span className="text-xs uppercase tracking-[0.11em] text-slate-300">Lead Name</span>
+            <form onSubmit={handleCreateContact} className="mt-6 space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <input
-                  value={form.name}
-                  onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))}
-                  className="min-h-11 w-full rounded-xl border border-white/15 bg-slate-900/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-400/70"
+                  value={createForm.name}
+                  onChange={(event) => setCreateForm((current) => ({ ...current, name: event.target.value }))}
+                  placeholder="Name"
                   required
+                  className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-blue-400/50"
                 />
-              </label>
-
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <label className="block space-y-1.5">
-                  <span className="text-xs uppercase tracking-[0.11em] text-slate-300">Stage</span>
+                <input
+                  value={createForm.company}
+                  onChange={(event) => setCreateForm((current) => ({ ...current, company: event.target.value }))}
+                  placeholder="Company"
+                  required
+                  className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-blue-400/50"
+                />
+                <input
+                  value={createForm.email}
+                  onChange={(event) => setCreateForm((current) => ({ ...current, email: event.target.value }))}
+                  placeholder="Email"
+                  className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-blue-400/50"
+                />
+                <input
+                  value={createForm.phone}
+                  onChange={(event) => setCreateForm((current) => ({ ...current, phone: event.target.value }))}
+                  placeholder="Phone"
+                  className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-blue-400/50"
+                />
+                <div className="relative">
                   <select
-                    value={form.stage}
-                    onChange={(event) => setForm((prev) => ({ ...prev, stage: event.target.value as PipelineStage }))}
-                    className="min-h-11 w-full rounded-xl border border-white/15 bg-slate-900/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-400/70"
+                    value={createForm.stage}
+                    onChange={(event) =>
+                      setCreateForm((current) => ({ ...current, stage: event.target.value as PipelineStage }))
+                    }
+                    className="w-full appearance-none rounded-2xl border border-white/10 bg-black/20 px-4 py-3 pr-9 text-sm text-white outline-none transition focus:border-blue-400/50"
                   >
-                    {STAGE_COLUMNS.map((column) => (
-                      <option key={column.stage} value={column.stage}>
-                        {column.title}
+                    {PIPELINE_STAGES.map((stage) => (
+                      <option key={stage} value={stage} className="bg-slate-950 text-white">
+                        {STAGE_META[stage].label}
                       </option>
                     ))}
                   </select>
-                </label>
-                <label className="block space-y-1.5">
-                  <span className="text-xs uppercase tracking-[0.11em] text-slate-300">Value ($)</span>
-                  <input
-                    type="number"
-                    min={0}
-                    step={100}
-                    value={form.value}
-                    onChange={(event) => setForm((prev) => ({ ...prev, value: event.target.value }))}
-                    className="min-h-11 w-full rounded-xl border border-white/15 bg-slate-900/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-400/70"
-                  />
-                </label>
+                  <ChevronDown size={16} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                </div>
+                <div className="relative">
+                  <select
+                    value={createForm.source}
+                    onChange={(event) =>
+                      setCreateForm((current) => ({ ...current, source: event.target.value as PipelineSource }))
+                    }
+                    className="w-full appearance-none rounded-2xl border border-white/10 bg-black/20 px-4 py-3 pr-9 text-sm text-white outline-none transition focus:border-blue-400/50"
+                  >
+                    <option value="instantly" className="bg-slate-950 text-white">
+                      Instantly
+                    </option>
+                    <option value="manual" className="bg-slate-950 text-white">
+                      Manual
+                    </option>
+                    <option value="referral" className="bg-slate-950 text-white">
+                      Referral
+                    </option>
+                    <option value="website" className="bg-slate-950 text-white">
+                      Website
+                    </option>
+                  </select>
+                  <ChevronDown size={16} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                </div>
               </div>
 
-              <label className="block space-y-1.5">
-                <span className="text-xs uppercase tracking-[0.11em] text-slate-300">Client</span>
-                <input
-                  value={form.client}
-                  onChange={(event) => setForm((prev) => ({ ...prev, client: event.target.value }))}
-                  className="min-h-11 w-full rounded-xl border border-white/15 bg-slate-900/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-400/70"
-                  required
-                />
-              </label>
+              <textarea
+                value={createForm.notes}
+                onChange={(event) => setCreateForm((current) => ({ ...current, notes: event.target.value }))}
+                placeholder={MAIN_NOTE_PLACEHOLDER}
+                className="min-h-[180px] w-full rounded-[1.25rem] border border-blue-400/20 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(10,10,15,0.7))] p-5 text-sm leading-6 text-white outline-none transition focus:border-blue-400/45"
+              />
 
-              <label className="block space-y-1.5">
-                <span className="text-xs uppercase tracking-[0.11em] text-slate-300">Contact</span>
-                <input
-                  value={form.contact}
-                  onChange={(event) => setForm((prev) => ({ ...prev, contact: event.target.value }))}
-                  className="min-h-11 w-full rounded-xl border border-white/15 bg-slate-900/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-400/70"
-                />
-              </label>
-
-              <label className="block space-y-1.5">
-                <span className="text-xs uppercase tracking-[0.11em] text-slate-300">Assignee</span>
-                <select
-                  value={form.assignee}
-                  onChange={(event) => setForm((prev) => ({ ...prev, assignee: event.target.value }))}
-                  className="min-h-11 w-full rounded-xl border border-white/15 bg-slate-900/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-400/70"
+              <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                <button
+                  type="button"
+                  onClick={() => setCreateOpen(false)}
+                  className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-blue-400/30"
                 >
-                  {TEAM_MEMBERS.map((member) => (
-                    <option key={member.id} value={member.id}>
-                      {member.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label className="block space-y-1.5">
-                <span className="text-xs uppercase tracking-[0.11em] text-slate-300">Notes</span>
-                <textarea
-                  value={form.notes}
-                  onChange={(event) => setForm((prev) => ({ ...prev, notes: event.target.value }))}
-                  rows={5}
-                  className="min-h-11 w-full rounded-xl border border-white/15 bg-slate-900/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-400/70"
-                />
-              </label>
-
-              {panelMode === "view" && selectedDeal ? (
-                <div className="space-y-3 rounded-xl border border-white/10 bg-slate-900/50 p-3">
-                  <p className="text-xs uppercase tracking-[0.11em] text-slate-300">Conversation Timeline</p>
-                  {selectedDeal.conversationHistory?.length ? (
-                    <div className="space-y-2">
-                      {selectedDeal.conversationHistory.map((entry, index) => (
-                        <div
-                          key={`${selectedDeal.id}-${entry.date}-${index}`}
-                          className={`rounded-xl border px-3 py-2 text-sm ${
-                            entry.direction === "outbound"
-                              ? "border-blue-400/25 bg-blue-500/12 text-blue-50"
-                              : "border-emerald-400/25 bg-emerald-500/12 text-emerald-50"
-                          }`}
-                        >
-                          <p className="text-xs font-medium uppercase tracking-[0.08em] text-slate-300">{formatTimestamp(entry.date)}</p>
-                          <p className="mt-1 leading-relaxed">{entry.message}</p>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-slate-400">No conversation history yet.</p>
-                  )}
-                </div>
-              ) : null}
-
-              {panelMode === "view" && selectedDeal ? (
-                <div className="space-y-2 rounded-xl border border-white/10 bg-slate-900/50 p-3">
-                  <p className="text-xs uppercase tracking-[0.11em] text-slate-300">Enrichment Data</p>
-                  {selectedDeal.enrichmentStatus === "pending" ? (
-                    <p className="text-sm text-amber-300">Awaiting research...</p>
-                  ) : selectedDeal.enrichmentStatus === "failed" ? (
-                    <p className="text-sm text-red-300">Enrichment failed. Retry research.</p>
-                  ) : (
-                    <div className="space-y-1.5 text-sm text-slate-200">
-                      <p>Phone: {selectedDeal.enrichmentData?.phone || "N/A"}</p>
-                      <p>Owner Name: {selectedDeal.enrichmentData?.ownerName || "N/A"}</p>
-                      <p>Address: {selectedDeal.enrichmentData?.address || "N/A"}</p>
-                      <p>Website: {selectedDeal.website || selectedDeal.enrichmentData?.website || "N/A"}</p>
-                      <p>
-                        Google Rating:{" "}
-                        {selectedDeal.enrichmentData?.googleRating !== undefined
-                          ? selectedDeal.enrichmentData.googleRating
-                          : "N/A"}
-                      </p>
-                      <p>
-                        Review Count:{" "}
-                        {selectedDeal.enrichmentData?.reviewCount !== undefined
-                          ? selectedDeal.enrichmentData.reviewCount
-                          : "N/A"}
-                      </p>
-                      {selectedDeal.enrichmentData?.cuisine ? <p>Cuisine: {selectedDeal.enrichmentData.cuisine}</p> : null}
-                      {selectedDeal.enrichmentData?.notes ? <p>Notes: {selectedDeal.enrichmentData.notes}</p> : null}
-                    </div>
-                  )}
-                </div>
-              ) : null}
-
-              <div className="flex items-center justify-between gap-3 pt-2">
-                {panelMode === "view" ? (
-                  <button
-                    type="button"
-                    onClick={handleDelete}
-                    disabled={saving}
-                    className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-red-400/35 bg-red-500/20 px-3 py-2.5 text-sm font-semibold text-red-100 transition hover:border-red-300/65 hover:bg-red-500/30 disabled:opacity-60"
-                  >
-                    <Trash2 size={15} />
-                    Delete
-                  </button>
-                ) : (
-                  <div />
-                )}
+                  Cancel
+                </button>
                 <button
                   type="submit"
-                  disabled={saving}
-                  className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-blue-300/35 bg-blue-500/25 px-4 py-2.5 text-sm font-semibold text-blue-100 transition hover:border-blue-300/70 hover:bg-blue-500/35 disabled:opacity-60"
+                  disabled={submitting}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-blue-400/35 bg-[linear-gradient(135deg,#2093FF,#0026FF)] px-4 py-3 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  <Funnel size={15} />
-                  {panelMode === "create" ? "Create Lead" : "Save Changes"}
+                  {submitting ? <LoaderCircle size={16} className="animate-spin" /> : <Plus size={16} />}
+                  Create Contact
                 </button>
               </div>
             </form>
           </div>
         </div>
       ) : null}
-    </section>
+    </>
   );
 }
