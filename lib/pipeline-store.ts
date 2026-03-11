@@ -39,8 +39,8 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
-function todayIsoDate(): string {
-  return new Date().toISOString().slice(0, 10);
+function easternIsoDate(): string {
+  return new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
 }
 
 function buildDealId() {
@@ -49,7 +49,7 @@ function buildDealId() {
 
 function normalizeDate(value: unknown): string {
   if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
-  return todayIsoDate();
+  return easternIsoDate();
 }
 
 function normalizeStage(value: unknown): PipelineStage {
@@ -173,7 +173,7 @@ function createDealFromInput(input: PipelineDealUpsertInput): PipelineDeal | nul
 
   if (!name || !client) return null;
 
-  const today = todayIsoDate();
+  const today = easternIsoDate();
   const competitor = normalizeString(input.competitor) || undefined;
   const phone = normalizeString(input.phone);
   const website = normalizeString(input.website);
@@ -255,7 +255,7 @@ function mergeDeal(current: PipelineDeal, input: PipelineDealUpsertInput): Pipel
     city: current.city || normalizeOptionalString(input.city),
     state: current.state || normalizeOptionalString(input.state),
     rawWebhookData: current.rawWebhookData,
-    stageUpdatedAt: stageChanged ? todayIsoDate() : current.stageUpdatedAt ?? current.createdAt,
+    stageUpdatedAt: stageChanged ? easternIsoDate() : current.stageUpdatedAt ?? current.createdAt,
   };
 }
 
@@ -372,7 +372,7 @@ function normalizePhoneLog(value: unknown): PhoneLogEntry[] {
         id,
         date,
         notes,
-        createdAt: createdAt || new Date().toISOString(),
+        createdAt: createdAt || easternIsoDate(),
       };
     })
     .filter((entry): entry is PhoneLogEntry => entry !== null)

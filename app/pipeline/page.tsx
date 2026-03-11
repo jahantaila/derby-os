@@ -271,6 +271,10 @@ const easternDateTimeFormatter = new Intl.DateTimeFormat("en-US", {
   timeZone: EASTERN_TIME_ZONE,
 });
 
+function easternDateOnly(value = new Date()) {
+  return value.toLocaleDateString("en-CA", { timeZone: EASTERN_TIME_ZONE });
+}
+
 function makeId(prefix: string) {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
     return `${prefix}-${crypto.randomUUID()}`;
@@ -371,7 +375,7 @@ function isWithinLastSevenDays(value?: string) {
 
 function parseNotes(raw: string, fallbackDate?: string): DealNotesState {
   const trimmed = raw.trim();
-  const fallbackTimestamp = fallbackDate ? `${fallbackDate}T12:00:00.000Z` : new Date().toISOString();
+  const fallbackTimestamp = fallbackDate ? `${fallbackDate}T12:00:00.000Z` : `${easternDateOnly()}T12:00:00.000Z`;
 
   if (!trimmed) return EMPTY_NOTES;
 
@@ -552,7 +556,7 @@ function getDateOnlyValue(value?: string) {
   if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return "";
-  return parsed.toISOString().slice(0, 10);
+  return easternDateOnly(parsed);
 }
 
 function csvEscape(value: unknown) {
@@ -1365,7 +1369,7 @@ export default function PipelinePage() {
   }
 
   function downloadSegmentsExport(format: "csv" | "json") {
-    const filename = `pipeline-segments-${new Date().toISOString().slice(0, 10)}.${format}`;
+    const filename = `pipeline-segments-${easternDateOnly()}.${format}`;
     const rows = segmentedDeals.map((deal) => ({
       id: deal.id,
       name: getPrimaryName(deal),
