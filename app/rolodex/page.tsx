@@ -338,6 +338,17 @@ function nextBirthdayOccurrence(birthday?: string) {
   return Number.isNaN(nextYear.getTime()) ? null : nextYear;
 }
 
+function monthKey(date: Date) {
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
+}
+
+function monthLabelShort(date: Date) {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    timeZone: "America/New_York",
+  }).format(date);
+}
+
 function formatTrendArrow(delta: number) {
   if (delta > 0) return "↑";
   if (delta < 0) return "↓";
@@ -1040,6 +1051,227 @@ function ActivityHeatmap({
           </div>
         </div>
       </div>
+    </GlassCard>
+  );
+}
+
+function RelationshipTrajectoryCard({
+  interactions,
+}: {
+  interactions: Interaction[];
+}) {
+  const series = useMemo(() => {
+    const current = easternTodayDate();
+    const buckets = Array.from({ length: 6 }, (_, index) => {
+      const bucketDate = new Date(Date.UTC(current.getUTCFullYear(), current.getUTCMonth() - (5 - index), 1, 12));
+      return {
+        key: monthKey(bucketDate),
+        label: monthLabelShort(bucketDate),
+        count: 0,
+      };
+    });
+
+    const bucketIndex = new Map(buckets.map((entry, index) => [entry.key, index]));
+    interactions.forEach((interaction) => {
+      const parsed = new Date(`${interaction.date}T12:00:00.000Z`);
+      if (Number.isNaN(parsed.getTime())) return;
+      const index = bucketIndex.get(monthKey(parsed));
+      if (index === undefined) return;
+      buckets[index]!.count += 1;
+    });
+
+    return buckets;
+  }, [interactions]);
+
+  const maxCount = Math.max(1, ...series.map((entry) => entry.count));
+  const points = series.map((entry, index) => {
+    const x = (index / Math.max(1, series.length - 1)) * 100;
+    const y = 90 - (entry.count / maxCount) * 70;
+    return { ...entry, x, y };
+  });
+  const polylinePoints = points.map((point) => `${point.x},${point.y}`).join(" ");
+  const areaPoints = `0,90 ${polylinePoints} 100,90`;
+  const firstHalf = series.slice(0, 3).reduce((sum, entry) => sum + entry.count, 0);
+  const secondHalf = series.slice(3).reduce((sum, entry) => sum + entry.count, 0);
+  const trend = secondHalf > firstHalf ? "Trending up" : secondHalf < firstHalf ? "Declining" : "Stable";
+
+  return (
+    <GlassCard className="p-6">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          {sectionTitle("Relationship Trajectory")}
+          <p className="mt-2 text-sm text-slate-400">Interaction count across the last six months.</p>
+        </div>
+        <div className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-slate-300">{trend}</div>
+      </div>
+
+      <div className="mt-6 rounded-[24px] border border-white/10 bg-slate-950/40 p-4">
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="h-44 w-full">
+          <defs>
+            <linearGradient id="trajectoryFill" x1="0%" x2="0%" y1="0%" y2="100%">
+              <stop offset="0%" stopColor="rgba(56,189,248,0.35)" />
+              <stop offset="100%" stopColor="rgba(56,189,248,0.04)" />
+            </linearGradient>
+          </defs>
+          <line x1="0" y1="90" x2="100" y2="90" stroke="rgba(148,163,184,0.2)" strokeWidth="0.75" />
+          <line x1="0" y1="55" x2="100" y2="55" stroke="rgba(148,163,184,0.12)" strokeWidth="0.75" strokeDasharray="2 2" />
+          <line x1="0" y1="20" x2="100" y2="20" stroke="rgba(148,163,184,0.12)" strokeWidth="0.75" strokeDasharray="2 2" />
+          <polygon points={areaPoints} fill="url(#trajectoryFill)" />
+          <polyline points={polylinePoints} fill="none" stroke="#38bdf8" strokeWidth="2.2" strokeLinejoin="round" strokeLinecap="round" />
+          {points.map((point) => (
+            <circle key={point.key} cx={point.x} cy={point.y} r="2.5" fill="#0f172a" stroke="#7dd3fc" strokeWidth="1.5" />
+          ))}
+        </svg>
+
+        <div className="mt-4 grid grid-cols-6 gap-2">
+          {series.map((entry) => (
+            <div key={entry.key} className="text-center">
+              <p className="text-xs text-slate-500">{entry.label}</p>
+              <p className="mt-1 text-sm font-medium text-white">{entry.count}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </GlassCard>
+  );
+}
+
+function CommunicationInsightsCard({
+  interactions,
+}: {
+  interactions: Interaction[];
+}) {
+  const insights = useMemo(() => {
+    const total = interactions.length;
+    const counts = interactions.reduce<Record<InteractionType, number>>(
+      (accumulator, interaction) => {
+        accumulator[interaction.type] += 1;
+        return accumulator;
+      },
+      {
+        call: 0,
+        email: 0,
+        meeting: 0,
+        text: 0,
+        social: 0,
+        event: 0,
+        note: 0,
+        gift: 0,
+        referral: 0,
+        deal: 0,
+      },
+    );
+
+    const orderedTypes = Object.entries(counts)
+      .filter(([, count]) => count > 0)
+      .sort((left, right) => right[1] - left[1]) as Array<[InteractionType, number]>;
+
+    const displayTypes = orderedTypes.slice(0, 4);
+    const topType = orderedTypes[0]?.[0];
+
+    const positiveByType = orderedTypes
+      .map(([type, count]) => {
+        const positive = interactions.filter((interaction) => interaction.type === type && interaction.sentiment === "positive").length;
+        return {
+          type,
+          count,
+          positive,
+          positiveRate: count ? positive / count : 0,
+        };
+      })
+      .filter((entry) => entry.positive > 0)
+      .sort((left, right) => right.positiveRate - left.positiveRate || right.positive - left.positive);
+
+    const bestSentimentType = positiveByType[0];
+    const callCount = counts.call;
+    const callPositive = interactions.filter((interaction) => interaction.type === "call" && interaction.sentiment === "positive").length;
+    const callPositiveRate = callCount ? callPositive / callCount : 0;
+
+    let suggestion = "Keep mixing channels to avoid over-relying on one format.";
+    if (callCount > 0 && callPositiveRate >= 0.6 && topType !== "call") {
+      suggestion = "Try calling more. Your calls tend to land well.";
+    } else if (bestSentimentType && bestSentimentType.type !== topType) {
+      suggestion = `Lean into ${INTERACTION_TYPE_LABELS[bestSentimentType.type].toLowerCase()} touchpoints. They carry the strongest positive signal.`;
+    } else if (topType) {
+      suggestion = `Stay consistent with ${INTERACTION_TYPE_LABELS[topType].toLowerCase()} and layer in one higher-touch follow-up this month.`;
+    }
+
+    return {
+      total,
+      displayTypes,
+      topType,
+      bestSentimentType,
+      suggestion,
+    };
+  }, [interactions]);
+
+  return (
+    <GlassCard className="p-6">
+      <div>
+        {sectionTitle("Communication Insights")}
+        <p className="mt-2 text-sm text-slate-400">How this relationship responds across channels.</p>
+      </div>
+
+      {insights.total ? (
+        <>
+          <div className="mt-5 overflow-hidden rounded-full border border-white/10 bg-slate-950/60">
+            <div className="flex h-4 w-full">
+              {insights.displayTypes.map(([type, count]) => (
+                <div
+                  key={type}
+                  title={`${INTERACTION_TYPE_LABELS[type]}: ${Math.round((count / insights.total) * 100)}%`}
+                  className="h-full"
+                  style={{
+                    width: `${(count / insights.total) * 100}%`,
+                    backgroundColor: relationshipDot[
+                      type === "call"
+                        ? "client"
+                        : type === "email"
+                          ? "partner"
+                          : type === "meeting"
+                            ? "mentor"
+                            : type === "text"
+                              ? "friend"
+                              : "industry"
+                    ],
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+
+          <p className="mt-4 text-sm text-slate-300">
+            {insights.displayTypes
+              .map(([type, count]) => `${Math.round((count / insights.total) * 100)}% ${INTERACTION_TYPE_LABELS[type].toLowerCase()}`)
+              .join(", ")}
+          </p>
+
+          <div className="mt-5 grid gap-3 md:grid-cols-3">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Most Common</p>
+              <p className="mt-3 text-base font-semibold text-white">
+                {insights.topType ? INTERACTION_TYPE_LABELS[insights.topType] : "No activity yet"}
+              </p>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Best Sentiment</p>
+              <p className="mt-3 text-base font-semibold text-white">
+                {insights.bestSentimentType
+                  ? `${INTERACTION_TYPE_LABELS[insights.bestSentimentType.type]} (${Math.round(
+                      insights.bestSentimentType.positiveRate * 100,
+                    )}% positive)`
+                  : "No positive pattern yet"}
+              </p>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Suggestion</p>
+              <p className="mt-3 text-sm text-slate-200">{insights.suggestion}</p>
+            </div>
+          </div>
+        </>
+      ) : (
+        <p className="mt-4 text-sm text-slate-500">Log a few interactions to surface channel patterns and sentiment signals.</p>
+      )}
     </GlassCard>
   );
 }
@@ -1861,7 +2093,25 @@ function ConnectionsTab({
   const sameCity = contacts.filter(
     (entry) => entry.id !== contact.id && entry.city && contact.city && entry.city.toLowerCase() === contact.city.toLowerCase(),
   );
-  const introducedBy = contacts.find((entry) => fullName(entry).toLowerCase() === (contact.introducedBy ?? "").toLowerCase());
+  const findByIntroducerName = (name?: string) =>
+    contacts.find((entry) => name && fullName(entry).toLowerCase() === name.toLowerCase());
+  const introducedBy = findByIntroducerName(contact.introducedBy);
+  const referralChain = (() => {
+    const chain: RolodexContact[] = [];
+    const seen = new Set<string>([contact.id]);
+    let current = introducedBy;
+
+    while (current && !seen.has(current.id)) {
+      chain.unshift(current);
+      seen.add(current.id);
+      current = findByIntroducerName(current.introducedBy);
+    }
+
+    return chain;
+  })();
+  const introducedOthersCount = contacts.filter(
+    (entry) => entry.id !== contact.id && (entry.introducedBy ?? "").toLowerCase() === fullName(contact).toLowerCase(),
+  ).length;
 
   return (
     <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
@@ -1952,6 +2202,42 @@ function ConnectionsTab({
       </div>
 
       <div className="space-y-4">
+        <GlassCard>
+          <div className="mb-4 flex items-start justify-between gap-3">
+            <div>
+              {sectionTitle("Referral Chain")}
+              <p className="mt-2 text-sm text-slate-400">How this contact entered your network and who they may have brought in.</p>
+            </div>
+            <div className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-slate-400">
+              {introducedOthersCount} introduction{introducedOthersCount === 1 ? "" : "s"}
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="rounded-full border border-sky-400/20 bg-sky-500/10 px-3 py-2 text-sm font-medium text-sky-100">You</span>
+            {referralChain.map((entry) => (
+              <div key={entry.id} className="contents">
+                <ArrowRight className="h-4 w-4 text-slate-500" />
+                <button
+                  type="button"
+                  onClick={() => onJumpToContact(entry.id)}
+                  className="rounded-full border border-white/10 bg-white/[0.02] px-3 py-2 text-sm text-white transition hover:border-sky-400/40"
+                >
+                  {fullName(entry)}
+                </button>
+              </div>
+            ))}
+            <ArrowRight className="h-4 w-4 text-slate-500" />
+            <span className="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-3 py-2 text-sm font-medium text-emerald-100">
+              {fullName(contact)}
+            </span>
+          </div>
+
+          {!referralChain.length && !contact.introducedBy ? (
+            <p className="mt-4 text-sm text-slate-500">No introducer chain captured yet.</p>
+          ) : null}
+        </GlassCard>
+
         <GlassCard>
           <div className="mb-4">{sectionTitle("Introduced By")}</div>
           {introducedBy ? (
@@ -2915,6 +3201,36 @@ export default function RolodexPage() {
     [contacts],
   );
 
+  const upcomingEvents = useMemo(() => {
+    const today = easternTodayDate().getTime();
+    const nextFollowUps = contacts
+      .filter((contact) => contact.nextFollowUp)
+      .map((contact) => {
+        const parsed = new Date(`${contact.nextFollowUp}T12:00:00.000Z`);
+        if (Number.isNaN(parsed.getTime())) return null;
+        const daysAway = Math.ceil((parsed.getTime() - today) / 86400000);
+        if (daysAway < 0 || daysAway > 7) return null;
+        return {
+          id: `${contact.id}-followup`,
+          contact,
+          icon: "📅",
+          date: contact.nextFollowUp!,
+          daysAway,
+        };
+      })
+      .filter((entry): entry is { id: string; contact: RolodexContact; icon: string; date: string; daysAway: number } => entry !== null);
+
+    const birthdays = upcomingBirthdays.map(({ contact, date, daysAway }) => ({
+      id: `${contact.id}-birthday`,
+      contact,
+      icon: "🎂",
+      date,
+      daysAway,
+    }));
+
+    return [...birthdays, ...nextFollowUps].sort((left, right) => left.daysAway - right.daysAway).slice(0, 5);
+  }, [contacts, upcomingBirthdays]);
+
   function navigateTo(view: ViewMode, contactId?: string | null) {
     const hash = buildHash(view, contactId);
     setCurrentView(view);
@@ -3757,6 +4073,34 @@ export default function RolodexPage() {
                       })}
                     </div>
                   </GlassCard>
+
+                  <GlassCard className="rounded-[28px] p-6">
+                    {sectionTitle("Upcoming Events")}
+                    <div className="mt-5 space-y-3">
+                      {upcomingEvents.map((item) => (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => jumpToContact(item.contact.id)}
+                          className="flex w-full items-center justify-between gap-4 rounded-[24px] border border-white/10 bg-white/[0.02] p-4 text-left transition hover:border-sky-400/40"
+                        >
+                          <div className="min-w-0">
+                            <p className="truncate font-semibold text-white">
+                              {item.icon} {fullName(item.contact)}
+                            </p>
+                            <p className="mt-1 truncate text-sm text-slate-400">{item.contact.company || titleLine(item.contact)}</p>
+                          </div>
+                          <div className="shrink-0 text-right">
+                            <p className="text-sm text-white">{formatDate(item.date)}</p>
+                            <p className="mt-1 text-xs text-slate-500">
+                              {item.daysAway === 0 ? "Today" : `In ${item.daysAway} day${item.daysAway === 1 ? "" : "s"}`}
+                            </p>
+                          </div>
+                        </button>
+                      ))}
+                      {!upcomingEvents.length ? <p className="text-sm text-slate-500">No birthdays or scheduled follow-ups in the next few days.</p> : null}
+                    </div>
+                  </GlassCard>
                 </div>
               </div>
             </section>
@@ -4199,6 +4543,11 @@ export default function RolodexPage() {
 
                       <ActivityHeatmap interactions={selectedContact.interactions} />
 
+                      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+                        <RelationshipTrajectoryCard interactions={selectedContact.interactions} />
+                        <CommunicationInsightsCard interactions={selectedContact.interactions} />
+                      </div>
+
                       <GlassCard className="p-6">
                         <div className="mb-4">
                           {sectionTitle("Quick Log")}
@@ -4395,7 +4744,6 @@ export default function RolodexPage() {
     </div>
   );
 }
-
 
 
 
