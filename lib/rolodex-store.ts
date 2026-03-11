@@ -1,5 +1,4 @@
-import fs from "fs/promises";
-import path from "path";
+import { readPersistentData, writePersistentData } from "@/lib/persistence";
 import { getPipelineDeals } from "@/lib/pipeline-store";
 import {
   INTERACTION_TYPES,
@@ -13,7 +12,6 @@ import {
   StayInTouchReminder,
 } from "@/lib/rolodex-types";
 
-const DATA_DIR = path.join(process.env.HOME || "/home/kim", "mission-control-data");
 const ROLODEX_FILE = "rolodex.json";
 const VALID_RELATIONSHIP_TYPES = new Set<RelationshipType>(RELATIONSHIP_TYPES);
 const VALID_INTERACTION_TYPES = new Set<InteractionType>(INTERACTION_TYPES);
@@ -346,27 +344,17 @@ function normalizeContact(raw: unknown): RolodexContact | null {
   return contact;
 }
 
-async function ensureDataDir() {
-  await fs.mkdir(DATA_DIR, { recursive: true });
-}
-
 async function readRolodexFile(): Promise<RolodexContact[]> {
-  try {
-    const raw = await fs.readFile(path.join(DATA_DIR, ROLODEX_FILE), "utf-8");
-    const parsed = JSON.parse(raw) as unknown;
-    if (!Array.isArray(parsed)) return [];
-    return parsed
-      .map((entry) => normalizeContact(entry))
-      .filter((entry): entry is RolodexContact => entry !== null)
-      .sort((left, right) => left.firstName.localeCompare(right.firstName) || left.lastName.localeCompare(right.lastName));
-  } catch {
-    return [];
-  }
+  const raw = await readPersistentData<unknown[]>(ROLODEX_FILE, []);
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((entry) => normalizeContact(entry))
+    .filter((entry): entry is RolodexContact => entry !== null)
+    .sort((left, right) => left.firstName.localeCompare(right.firstName) || left.lastName.localeCompare(right.lastName));
 }
 
 async function writeRolodexFile(contacts: RolodexContact[]) {
-  await ensureDataDir();
-  await fs.writeFile(path.join(DATA_DIR, ROLODEX_FILE), JSON.stringify(contacts, null, 2), "utf-8");
+  await writePersistentData(ROLODEX_FILE, contacts);
 }
 
 function createContactFromInput(input: RolodexContactInput): RolodexContact | null {
