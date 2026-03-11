@@ -46,6 +46,7 @@ import {
 type DetailTab = "overview" | "activity" | "notes" | "connections" | "ai";
 type SortMode = "recently-contacted" | "alphabetical" | "relationship-score" | "newest";
 type FilterMode = "all" | RelationshipType;
+type SmartGroupKey = "city" | "stale-30" | "top-score" | "new-this-month" | "has-phone";
 type TimelineFilter = "all" | InteractionType;
 type SentimentValue = "" | "positive" | "neutral" | "negative";
 
@@ -2473,6 +2474,30 @@ function topContactTypes(contacts: RolodexContact[]) {
     }));
 }
 
+function startOfMonth(date = easternTodayDate()) {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1, 12, 0, 0, 0));
+}
+
+function bubbleDiameter(interactionCount: number, maxInteractions: number) {
+  if (maxInteractions <= 0) return 44;
+  const scaled = 44 + (interactionCount / maxInteractions) * 56;
+  return Math.round(Math.max(44, Math.min(100, scaled)));
+}
+
+function networkMapPosition(index: number) {
+  if (index === 0) return { left: 50, top: 50 };
+  const ring = Math.floor(Math.sqrt(index - 1)) + 1;
+  const ringStart = (ring - 1) * (ring - 1) + 1;
+  const positionInRing = index - ringStart;
+  const itemsInRing = ring * 2 + 2;
+  const angle = (Math.PI * 2 * positionInRing) / itemsInRing - Math.PI / 2;
+  const radius = 14 + ring * 12;
+  return {
+    left: 50 + Math.cos(angle) * radius,
+    top: 50 + Math.sin(angle) * radius,
+  };
+}
+
 function buildNetworkAnswer(prompt: string, contacts: RolodexContact[]) {
   const lower = prompt.toLowerCase();
   const sortedByScore = [...contacts].sort((left, right) => right.relationshipScore - left.relationshipScore);
@@ -2644,6 +2669,8 @@ export default function RolodexPage() {
   const [currentView, setCurrentView] = useState<ViewMode>("home");
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<FilterMode>("all");
+  const [selectedSmartGroup, setSelectedSmartGroup] = useState<{ key: SmartGroupKey; value?: string } | null>(null);
+  const [smartGroupsOpen, setSmartGroupsOpen] = useState(true);
   const [sort, setSort] = useState<SortMode>("recently-contacted");
   const [browserMode, setBrowserMode] = useState<BrowserMode>("grid");
   const [activeTab, setActiveTab] = useState<DetailTab>("overview");
@@ -2786,20 +2813,86 @@ export default function RolodexPage() {
     shouldFocusContactsSearchRef.current = false;
   }, [currentView]);
 
+  const monthStart = useMemo(() => startOfMonth(), []);
+
+  const smartGroups = useMemo(() => {
+    const cityEntries = Array.from(
+      contacts.reduce<Map<string, number>>((accumulator, contact) => {
+        const city = contact.city?.trim();
+        if (!city) return accumulator;
+        accumulator.set(city, (accumulator.get(city) ?? 0) + 1);
+        return accumulator;
+      }, new Map()),
+    )
+      .sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]))
+      .slice(0, 5)
+      .map(([city, count]) => ({
+        id: `city:${city}`,
+        key: "city" as const,
+        value: city,
+        label: `${city} (${count})`,
+        count,
+      }));
+
+    const stale30Count = contacts.filter((contact) => (daysSinceDate(contact.lastContactedAt) ?? Number.POSITIVE_INFINITY) >= 30).length;
+    const newThisMonthCount = contacts.filter((contact) => {
+      const createdAt = Date.parse(contact.createdAt);
+      return !Number.isNaN(createdAt) && createdAt >= monthStart.getTime();
+    }).length;
+    const hasPhoneCount = contacts.filter((contact) => Boolean(contact.phone?.trim() || contact.secondaryPhone?.trim())).length;
+
+    return [
+      ...cityEntries,
+      {
+        id: "stale-30",
+        key: "stale-30" as const,
+        label: `Haven't Talked To in 30+ Days (${stale30Count})`,
+        count: stale30Count,
+      },
+      {
+        id: "top-score",
+        key: "top-score" as const,
+        label: `Top 10 by Score (${Math.min(10, contacts.length)})`,
+        count: Math.min(10, contacts.length),
+      },
+      {
+        id: "new-this-month",
+        key: "new-this-month" as const,
+        label: `New This Month (${newThisMonthCount})`,
+        count: newThisMonthCount,
+      },
+      {
+        id: "has-phone",
+        key: "has-phone" as const,
+        label: `Has Phone Number (${hasPhoneCount})`,
+        count: hasPhoneCount,
+      },
+    ];
+  }, [contacts, monthStart]);
+
   const filteredContacts = useMemo(() => {
     return [...contacts]
       .filter((contact) => {
         if (filter !== "all" && contact.relationshipType !== filter) return false;
+        if (selectedSmartGroup?.key === "city" && contact.city?.trim() !== selectedSmartGroup.value) return false;
+        if (selectedSmartGroup?.key === "stale-30" && (daysSinceDate(contact.lastContactedAt) ?? Number.POSITIVE_INFINITY) < 30) return false;
+        if (selectedSmartGroup?.key === "new-this-month") {
+          const createdAt = Date.parse(contact.createdAt);
+          if (Number.isNaN(createdAt) || createdAt < monthStart.getTime()) return false;
+        }
+        if (selectedSmartGroup?.key === "has-phone" && !(contact.phone?.trim() || contact.secondaryPhone?.trim())) return false;
         if (!deferredSearch.trim()) return true;
         return contactSearchIndex(contact).includes(deferredSearch.trim().toLowerCase());
       })
       .sort((left, right) => {
+        if (selectedSmartGroup?.key === "top-score") return right.relationshipScore - left.relationshipScore;
         if (sort === "alphabetical") return fullName(left).localeCompare(fullName(right));
         if (sort === "relationship-score") return right.relationshipScore - left.relationshipScore;
         if (sort === "newest") return Date.parse(right.createdAt) - Date.parse(left.createdAt);
         return (right.lastContactedAt ?? "").localeCompare(left.lastContactedAt ?? "");
-      });
-  }, [contacts, deferredSearch, filter, sort]);
+      })
+      .slice(0, selectedSmartGroup?.key === "top-score" ? 10 : undefined);
+  }, [contacts, deferredSearch, filter, monthStart, selectedSmartGroup, sort]);
 
   const selectedContact = useMemo(
     () => contacts.find((contact) => contact.id === selectedContactId) ?? filteredContacts[0] ?? null,
@@ -3230,6 +3323,23 @@ export default function RolodexPage() {
 
     return [...birthdays, ...nextFollowUps].sort((left, right) => left.daysAway - right.daysAway).slice(0, 5);
   }, [contacts, upcomingBirthdays]);
+
+  const networkMapContacts = useMemo(() => {
+    const ranked = [...contacts]
+      .sort((left, right) => {
+        const interactionDelta = right.interactions.length - left.interactions.length;
+        if (interactionDelta !== 0) return interactionDelta;
+        return right.relationshipScore - left.relationshipScore;
+      })
+      .slice(0, 20);
+
+    const maxInteractions = Math.max(1, ...ranked.map((contact) => contact.interactions.length));
+    return ranked.map((contact, index) => ({
+      contact,
+      diameter: bubbleDiameter(contact.interactions.length, maxInteractions),
+      position: networkMapPosition(index),
+    }));
+  }, [contacts]);
 
   function navigateTo(view: ViewMode, contactId?: string | null) {
     const hash = buildHash(view, contactId);
@@ -3706,6 +3816,13 @@ export default function RolodexPage() {
   function openSearchContacts() {
     shouldFocusContactsSearchRef.current = true;
     navigateTo("contacts");
+  }
+
+  function applySmartGroup(group: { key: SmartGroupKey; value?: string }) {
+    setFilter("all");
+    setSelectedSmartGroup((current) =>
+      current?.key === group.key && current?.value === group.value ? null : { key: group.key, value: group.value },
+    );
   }
 
   function openQuickActionLog() {
@@ -4195,6 +4312,55 @@ export default function RolodexPage() {
 
             <section>
               <GlassCard className="rounded-[28px] p-6">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    {sectionTitle("Network Map")}
+                    <p className="mt-2 text-sm text-slate-400">Top 20 contacts by interaction volume. Bubble size reflects activity and color reflects relationship type.</p>
+                  </div>
+                  <div className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs text-slate-400">
+                    {networkMapContacts.length} shown
+                  </div>
+                </div>
+                <div className="relative mt-6 h-[360px] overflow-hidden rounded-[28px] border border-white/10 bg-[radial-gradient(circle_at_center,_rgba(56,189,248,0.12),_rgba(15,23,42,0.08)_42%,_rgba(2,6,23,0.55)_100%)]">
+                  {networkMapContacts.map(({ contact, diameter, position }) => (
+                    <button
+                      key={contact.id}
+                      type="button"
+                      onClick={() => jumpToContact(contact.id)}
+                      title={`${fullName(contact)} · ${contact.interactions.length} interaction${contact.interactions.length === 1 ? "" : "s"}`}
+                      className="absolute flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border text-center transition hover:z-10 hover:scale-105 hover:border-white/40"
+                      style={{
+                        left: `${position.left}%`,
+                        top: `${position.top}%`,
+                        width: diameter,
+                        height: diameter,
+                        backgroundColor: `${relationshipDot[contact.relationshipType]}33`,
+                        borderColor: `${relationshipDot[contact.relationshipType]}66`,
+                        boxShadow: `0 0 0 1px ${relationshipDot[contact.relationshipType]}22, 0 18px 40px rgba(2,6,23,0.35)`,
+                      }}
+                    >
+                      <span
+                        className="px-2 font-semibold text-white"
+                        style={{ fontSize: diameter >= 88 ? 12 : diameter >= 64 ? 11 : 10, lineHeight: 1.1 }}
+                      >
+                        {initials(contact)}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+                <div className="mt-4 flex flex-wrap gap-2 text-xs text-slate-400">
+                  {typeBreakdown.map((item) => (
+                    <span key={item.type} className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5">
+                      <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: relationshipDot[item.type] }} />
+                      {RELATIONSHIP_TYPE_LABELS[item.type]}
+                    </span>
+                  ))}
+                </div>
+              </GlassCard>
+            </section>
+
+            <section>
+              <GlassCard className="rounded-[28px] p-6">
                 {sectionTitle("🧊 Going Cold")}
                 <div className="mt-5 space-y-3">
                   {goingColdContacts.map(({ contact, daysSince, trend }) => (
@@ -4294,12 +4460,49 @@ export default function RolodexPage() {
                 </div>
               </div>
 
+              <div className="rounded-[28px] border border-white/10 bg-white/[0.02] p-4">
+                <button
+                  type="button"
+                  onClick={() => setSmartGroupsOpen((state) => !state)}
+                  className="flex w-full items-center justify-between gap-3 text-left"
+                >
+                  <div>
+                    {sectionTitle("Smart Groups")}
+                    <p className="mt-2 text-sm text-slate-400">Auto-generated from your current contact data.</p>
+                  </div>
+                  <ChevronDown className={cn("h-4 w-4 text-slate-400 transition", smartGroupsOpen ? "rotate-180" : "")} />
+                </button>
+                {smartGroupsOpen ? (
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {smartGroups.map((group) => {
+                      const active = selectedSmartGroup?.key === group.key && selectedSmartGroup?.value === group.value;
+                      return (
+                        <button
+                          key={group.id}
+                          type="button"
+                          onClick={() => applySmartGroup({ key: group.key, value: group.value })}
+                          className={cn(
+                            "rounded-full border px-3 py-2 text-sm transition",
+                            active ? "border-sky-400/40 bg-sky-500/15 text-white" : "border-white/10 bg-white/[0.02] text-slate-400 hover:text-white",
+                          )}
+                        >
+                          {group.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : null}
+              </div>
+
               <div className="flex flex-wrap gap-2">
                 {FILTER_PILLS.map((pill) => (
                   <button
                     key={pill.value}
                     type="button"
-                    onClick={() => setFilter(pill.value)}
+                    onClick={() => {
+                      setFilter(pill.value);
+                      setSelectedSmartGroup(null);
+                    }}
                     className={cn(
                       "rounded-full border px-3 py-2 text-sm transition",
                       filter === pill.value ? "border-sky-400/40 bg-sky-500/15 text-white" : "border-white/10 bg-white/[0.02] text-slate-400 hover:text-white",
@@ -4744,10 +4947,6 @@ export default function RolodexPage() {
     </div>
   );
 }
-
-
-
-
 
 
 
