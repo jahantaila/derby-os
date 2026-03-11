@@ -109,6 +109,7 @@ type SegmentsFilters = {
 
 type SegmentsSortKey = "name" | "company" | "email" | "city" | "state" | "tags" | "stage" | "source" | "created";
 type SegmentsSortDirection = "asc" | "desc";
+type BulkAction = "stage" | "tag" | "delete";
 
 const EASTERN_TIME_ZONE = "America/New_York";
 const SOURCE_TABS_CONFIG = [
@@ -565,6 +566,68 @@ function csvEscape(value: unknown) {
   return `"${text.replace(/"/g, '""')}"`;
 }
 
+function buildSegmentsExportRows(deals: PipelineDeal[]) {
+  return deals.map((deal) => ({
+    id: deal.id,
+    name: getPrimaryName(deal),
+    company: getCompanyName(deal),
+    email: deal.email,
+    phone: getPhone(deal),
+    website: getWebsite(deal),
+    city: deal.city ?? "",
+    state: deal.state ?? "",
+    source: normalizeSourceValue(deal.source),
+    sourceLabel: formatSourceLabel(deal.source),
+    stage: deal.stage,
+    stageLabel: STAGE_META[deal.stage].label,
+    competitor: deal.competitor ?? "",
+    tags: deal.tags.join(", "),
+    createdAt: deal.createdAt,
+    stageUpdatedAt: deal.stageUpdatedAt ?? "",
+    rolodex: parseNotes(deal.notes, deal.createdAt).rolodex,
+    quickNotes: parseNotes(deal.notes, deal.createdAt).quickNotes.map((entry) => entry.text).join(" | "),
+    phoneLog: deal.phoneLog.map((entry) => `${entry.date}: ${entry.notes}`).join(" | "),
+  }));
+}
+
+function downloadRowsAsFile(rows: ReturnType<typeof buildSegmentsExportRows>, filename: string, format: "csv" | "json") {
+  const payload =
+    format === "json"
+      ? JSON.stringify(rows, null, 2)
+      : [
+          Object.keys(rows[0] ?? {
+            id: "",
+            name: "",
+            company: "",
+            email: "",
+            phone: "",
+            website: "",
+            city: "",
+            state: "",
+            source: "",
+            sourceLabel: "",
+            stage: "",
+            stageLabel: "",
+            competitor: "",
+            tags: "",
+            createdAt: "",
+            stageUpdatedAt: "",
+            rolodex: "",
+            quickNotes: "",
+            phoneLog: "",
+          }).join(","),
+          ...rows.map((row) => Object.values(row).map(csvEscape).join(",")),
+        ].join("\n");
+
+  const blob = new Blob([payload], { type: format === "json" ? "application/json;charset=utf-8" : "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
+
 function normalizeStageValue(value: string): PipelineStage {
   return PIPELINE_STAGES.includes(value as PipelineStage) ? (value as PipelineStage) : "new-lead";
 }
@@ -613,6 +676,49 @@ function SelectOptions({ values, getLabel }: { values: readonly string[]; getLab
         </option>
       ))}
     </>
+  );
+}
+
+function TableCheckbox({
+  checked,
+  indeterminate = false,
+  onChange,
+  ariaLabel,
+}: {
+  checked: boolean;
+  indeterminate?: boolean;
+  onChange: (checked: boolean) => void;
+  ariaLabel: string;
+}) {
+  const ref = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.indeterminate = indeterminate && !checked;
+    }
+  }, [checked, indeterminate]);
+
+  return (
+    <label className="inline-flex cursor-pointer items-center">
+      <input
+        ref={ref}
+        type="checkbox"
+        checked={checked}
+        onChange={(event) => onChange(event.target.checked)}
+        aria-label={ariaLabel}
+        className="sr-only"
+      />
+      <span
+        className={cn(
+          "inline-flex h-5 w-5 items-center justify-center rounded-md border transition",
+          checked || indeterminate
+            ? "border-blue-300/70 bg-[linear-gradient(135deg,#2093FF,#0026FF)] text-white"
+            : "border-white/15 bg-white/5 text-transparent hover:border-blue-300/30",
+        )}
+      >
+        <span className={cn("block h-2 w-2 rounded-sm bg-current", indeterminate ? "opacity-100" : checked ? "opacity-100" : "opacity-0")} />
+      </span>
+    </label>
   );
 }
 
@@ -880,6 +986,11 @@ export default function PipelinePage() {
   const [segmentsVisibleCount, setSegmentsVisibleCount] = useState(50);
   const [segmentsSortKey, setSegmentsSortKey] = useState<SegmentsSortKey>("created");
   const [segmentsSortDirection, setSegmentsSortDirection] = useState<SegmentsSortDirection>("desc");
+  const [selectedSegmentIds, setSelectedSegmentIds] = useState<string[]>([]);
+  const [bulkStageValue, setBulkStageValue] = useState("");
+  const [bulkTagValue, setBulkTagValue] = useState("");
+  const [bulkWorkingAction, setBulkWorkingAction] = useState<BulkAction | "">("");
+  const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
   const tagEditorRef = useRef<HTMLDivElement | null>(null);
   const [kanbanVisibleCounts, setKanbanVisibleCounts] = useState<Record<PipelineStage, number>>({
     "new-lead": 20,
@@ -946,6 +1057,12 @@ export default function PipelinePage() {
   useEffect(() => {
     setSegmentsVisibleCount(50);
   }, [segmentsFilters, segmentsSearch, segmentsSortDirection, segmentsSortKey]);
+
+  useEffect(() => {
+    setSelectedSegmentIds([]);
+    setBulkStageValue("");
+    setBulkTagValue("");
+  }, [segmentsFilters, segmentsSearch]);
 
   useEffect(() => {
     if (activeTagFilter && !availableTags.some((tag) => tag.toLowerCase() === activeTagFilter.toLowerCase())) {
@@ -1164,6 +1281,18 @@ export default function PipelinePage() {
   const conversionRate = totalContacts ? Math.round((wonThisMonth / totalContacts) * 100) : 0;
   const maxStageCount = Math.max(...stageDistribution.map((entry) => entry.count), 0);
   const maxSourceCount = Math.max(...sourceBreakdown.map((entry) => entry.count), 0);
+  const visibleSegmentedDeals = useMemo(() => segmentedDeals.slice(0, segmentsVisibleCount), [segmentedDeals, segmentsVisibleCount]);
+  const selectedSegmentDeals = useMemo(
+    () => visibleSegmentedDeals.filter((deal) => selectedSegmentIds.includes(deal.id)),
+    [selectedSegmentIds, visibleSegmentedDeals],
+  );
+  const allVisibleSegmentsSelected = visibleSegmentedDeals.length > 0 && visibleSegmentedDeals.every((deal) => selectedSegmentIds.includes(deal.id));
+  const someVisibleSegmentsSelected = visibleSegmentedDeals.some((deal) => selectedSegmentIds.includes(deal.id));
+
+  useEffect(() => {
+    const visibleIds = new Set(visibleSegmentedDeals.map((deal) => deal.id));
+    setSelectedSegmentIds((current) => current.filter((id) => visibleIds.has(id)));
+  }, [visibleSegmentedDeals]);
 
   async function submitInsightsQuery(nextQuery?: string) {
     const query = (nextQuery ?? insightsQuery).trim();
@@ -1370,63 +1499,69 @@ export default function PipelinePage() {
 
   function downloadSegmentsExport(format: "csv" | "json") {
     const filename = `pipeline-segments-${easternDateOnly()}.${format}`;
-    const rows = segmentedDeals.map((deal) => ({
-      id: deal.id,
-      name: getPrimaryName(deal),
-      company: getCompanyName(deal),
-      email: deal.email,
-      phone: getPhone(deal),
-      website: getWebsite(deal),
-      city: deal.city ?? "",
-      state: deal.state ?? "",
-      source: normalizeSourceValue(deal.source),
-      sourceLabel: formatSourceLabel(deal.source),
-      stage: deal.stage,
-      stageLabel: STAGE_META[deal.stage].label,
-      competitor: deal.competitor ?? "",
-      tags: deal.tags.join(", "),
-      createdAt: deal.createdAt,
-      stageUpdatedAt: deal.stageUpdatedAt ?? "",
-      rolodex: parseNotes(deal.notes, deal.createdAt).rolodex,
-      quickNotes: parseNotes(deal.notes, deal.createdAt).quickNotes.map((entry) => entry.text).join(" | "),
-      phoneLog: deal.phoneLog.map((entry) => `${entry.date}: ${entry.notes}`).join(" | "),
-    }));
+    downloadRowsAsFile(buildSegmentsExportRows(segmentedDeals), filename, format);
+  }
 
-    const payload =
-      format === "json"
-        ? JSON.stringify(rows, null, 2)
-        : [
-            Object.keys(rows[0] ?? {
-              id: "",
-              name: "",
-              company: "",
-              email: "",
-              phone: "",
-              website: "",
-              city: "",
-              state: "",
-              source: "",
-              sourceLabel: "",
-              stage: "",
-              stageLabel: "",
-              competitor: "",
-              tags: "",
-              createdAt: "",
-              stageUpdatedAt: "",
-              rolodex: "",
-              quickNotes: "",
-              phoneLog: "",
-            }).join(","),
-            ...rows.map((row) => Object.values(row).map(csvEscape).join(",")),
-          ].join("\n");
+  function toggleSegmentSelection(id: string, checked: boolean) {
+    setSelectedSegmentIds((current) => {
+      if (checked) {
+        return current.includes(id) ? current : [...current, id];
+      }
+      return current.filter((entry) => entry !== id);
+    });
+  }
 
-    const blob = new Blob([payload], { type: format === "json" ? "application/json;charset=utf-8" : "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = filename;
-    anchor.click();
-    URL.revokeObjectURL(url);
+  function toggleAllVisibleSegments(checked: boolean) {
+    setSelectedSegmentIds((current) => {
+      const visibleIds = visibleSegmentedDeals.map((deal) => deal.id);
+      if (checked) {
+        return [...new Set([...current, ...visibleIds])];
+      }
+      return current.filter((id) => !visibleIds.includes(id));
+    });
+  }
+
+  function clearSegmentSelection() {
+    setSelectedSegmentIds([]);
+    setBulkStageValue("");
+    setBulkTagValue("");
+  }
+
+  async function runBulkAction(action: BulkAction, value?: string) {
+    if (!selectedSegmentIds.length) return;
+
+    setBulkWorkingAction(action);
+    setError("");
+
+    try {
+      const response = await fetch("/api/pipeline/bulk", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: selectedSegmentIds, action, value }),
+      });
+
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(payload?.error || "Unable to update selected contacts.");
+      }
+
+      await loadDeals();
+      clearSegmentSelection();
+      setShowBulkDeleteConfirm(false);
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : "Unable to update selected contacts.");
+    } finally {
+      setBulkWorkingAction("");
+    }
+  }
+
+  function exportSelectedSegments() {
+    if (!selectedSegmentDeals.length) return;
+    downloadRowsAsFile(
+      buildSegmentsExportRows(selectedSegmentDeals),
+      `pipeline-selected-${easternDateOnly()}.csv`,
+      "csv",
+    );
   }
 
   async function convertToClient(deal: PipelineDeal) {
@@ -2139,6 +2274,14 @@ export default function PipelinePage() {
               <table className="min-w-full text-left text-sm text-slate-200">
                 <thead className="bg-white/5 text-[11px] uppercase tracking-[0.16em] text-slate-400">
                   <tr>
+                    <th className="px-4 py-3">
+                      <TableCheckbox
+                        checked={allVisibleSegmentsSelected}
+                        indeterminate={!allVisibleSegmentsSelected && someVisibleSegmentsSelected}
+                        onChange={toggleAllVisibleSegments}
+                        ariaLabel="Select all visible contacts"
+                      />
+                    </th>
                     {[
                       ["name", "Name"],
                       ["company", "Company"],
@@ -2172,8 +2315,15 @@ export default function PipelinePage() {
                 </thead>
                 <tbody>
                   {segmentedDeals.length ? (
-                    segmentedDeals.slice(0, segmentsVisibleCount).map((deal, index) => (
+                    visibleSegmentedDeals.map((deal, index) => (
                       <tr key={deal.id} className={cn("border-t border-white/10", index % 2 === 0 ? "bg-white/[0.02]" : "bg-transparent")}>
+                        <td className="px-4 py-3">
+                          <TableCheckbox
+                            checked={selectedSegmentIds.includes(deal.id)}
+                            onChange={(checked) => toggleSegmentSelection(deal.id, checked)}
+                            ariaLabel={`Select ${getPrimaryName(deal)}`}
+                          />
+                        </td>
                         <td className="px-4 py-3 font-semibold text-white">{getPrimaryName(deal)}</td>
                         <td className="px-4 py-3">{getCompanyName(deal)}</td>
                         <td className="px-4 py-3">{deal.email || "-"}</td>
@@ -2193,7 +2343,7 @@ export default function PipelinePage() {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={9} className="px-4 py-8 text-center text-slate-400">No contacts match the current filters.</td>
+                      <td colSpan={10} className="px-4 py-8 text-center text-slate-400">No contacts match the current filters.</td>
                     </tr>
                   )}
                 </tbody>
@@ -2210,6 +2360,89 @@ export default function PipelinePage() {
               </button>
             ) : null}
           </section>
+
+          {selectedSegmentIds.length ? (
+            <div className="fixed bottom-6 left-1/2 z-50 w-[calc(100%-1.5rem)] max-w-5xl -translate-x-1/2">
+              <div className="overflow-hidden rounded-3xl border border-white/10 bg-[#060913]/85 backdrop-blur-xl">
+                <div className="h-1 w-full bg-[linear-gradient(90deg,#2093FF,#0026FF)]" />
+                <div className="flex flex-col gap-3 p-4 lg:flex-row lg:items-center lg:justify-between">
+                  <span className="rounded-full border border-blue-300/30 bg-blue-500/10 px-3 py-1 text-xs uppercase tracking-[0.16em] text-blue-100">
+                    {selectedSegmentIds.length} contacts selected
+                  </span>
+                  <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+                    <select
+                      value={bulkStageValue}
+                      onChange={(event) => {
+                        const value = event.target.value;
+                        setBulkStageValue(value);
+                        if (value) void runBulkAction("stage", value);
+                      }}
+                      disabled={bulkWorkingAction !== ""}
+                      className="min-h-11 rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white outline-none transition hover:border-blue-300/30 focus:border-blue-300/40 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      <option value="" className="text-black">Change Stage</option>
+                      {PIPELINE_STAGES.map((stage) => (
+                        <option key={stage} value={stage} className="text-black">{STAGE_META[stage].label}</option>
+                      ))}
+                    </select>
+                    <div className="flex flex-col gap-2 sm:flex-row">
+                      <input
+                        list="bulk-tag-suggestions"
+                        value={bulkTagValue}
+                        onChange={(event) => setBulkTagValue(event.target.value)}
+                        placeholder="Add tag"
+                        disabled={bulkWorkingAction !== ""}
+                        className="min-h-11 min-w-[180px] rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white outline-none transition placeholder:text-slate-500 hover:border-blue-300/30 focus:border-blue-300/40 disabled:cursor-not-allowed disabled:opacity-60"
+                      />
+                      <datalist id="bulk-tag-suggestions">
+                        {[...new Set([...TAG_SUGGESTIONS, ...availableTags])].map((tag) => (
+                          <option key={tag} value={tag} />
+                        ))}
+                      </datalist>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const tag = normalizeTagValue(bulkTagValue);
+                          if (tag) void runBulkAction("tag", tag);
+                        }}
+                        disabled={bulkWorkingAction !== "" || !normalizeTagValue(bulkTagValue)}
+                        className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-blue-300/30 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        Add Tag
+                      </button>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={exportSelectedSegments}
+                      disabled={bulkWorkingAction !== ""}
+                      className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-blue-300/30 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      <Download size={16} />
+                      Export Selected
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowBulkDeleteConfirm(true)}
+                      disabled={bulkWorkingAction !== ""}
+                      className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-red-400/30 bg-red-500/10 px-4 py-2 text-sm font-semibold text-red-100 transition hover:border-red-300/50 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      <Trash2 size={16} />
+                      Delete
+                    </button>
+                    <button
+                      type="button"
+                      onClick={clearSegmentSelection}
+                      disabled={bulkWorkingAction !== ""}
+                      className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-slate-300 transition hover:border-blue-300/30 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                      aria-label="Clear selection"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : null}
         </div>
       ) : null}
 
@@ -3087,6 +3320,38 @@ export default function PipelinePage() {
                   ) : null}
                 </tbody>
               </table>
+            </div>
+          </div>
+        </ModalShell>
+      ) : null}
+
+      {showBulkDeleteConfirm ? (
+        <ModalShell
+          title="Delete Selected Contacts"
+          icon={<Trash2 size={16} className="text-red-200" />}
+          onClose={() => setShowBulkDeleteConfirm(false)}
+        >
+          <div className="space-y-5">
+            <div className="glass-card rounded-2xl border border-red-400/20 bg-red-500/10 p-4 text-sm text-red-100">
+              Delete {selectedSegmentIds.length} selected contacts? This cannot be undone.
+            </div>
+            <div className="flex flex-wrap justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setShowBulkDeleteConfirm(false)}
+                className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-blue-300/30"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => void runBulkAction("delete")}
+                disabled={bulkWorkingAction === "delete"}
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-red-400/30 bg-red-500/10 px-4 py-2 text-sm font-semibold text-red-100 transition hover:border-red-300/50 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <Trash2 size={16} />
+                {bulkWorkingAction === "delete" ? "Deleting..." : "Delete Contacts"}
+              </button>
             </div>
           </div>
         </ModalShell>
