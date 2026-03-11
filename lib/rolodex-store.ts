@@ -253,7 +253,7 @@ function normalizeContact(raw: unknown): RolodexContact | null {
   const id = normalizeString(raw.id);
   const firstName = normalizeString(raw.firstName);
   const lastName = normalizeString(raw.lastName);
-  if (!id || !firstName || !lastName) return null;
+  if (!id || !firstName) return null;
 
   const createdAt = normalizeString(raw.createdAt) || isoTimestamp();
   const interactions = sortInteractions(
@@ -336,7 +336,7 @@ async function writeRolodexFile(contacts: RolodexContact[]) {
 function createContactFromInput(input: RolodexContactInput): RolodexContact | null {
   const firstName = normalizeString(input.firstName);
   const lastName = normalizeString(input.lastName);
-  if (!firstName || !lastName) return null;
+  if (!firstName) return null;
   const today = easternDate();
   const now = isoTimestamp();
   const interactions = sortInteractions(
@@ -349,7 +349,7 @@ function createContactFromInput(input: RolodexContactInput): RolodexContact | nu
   const contact: RolodexContact = {
     id: buildId("rc"),
     firstName,
-    lastName,
+    lastName: lastName || "",
     nickname: normalizeOptionalString(input.nickname),
     avatar: normalizeOptionalString(input.avatar),
     email: normalizeOptionalString(input.email),

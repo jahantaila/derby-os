@@ -321,7 +321,7 @@ function buildContactPayload(form: ContactFormState) {
     city: form.city || undefined,
     state: form.state || undefined,
     country: form.country || undefined,
-    relationshipType: form.relationshipType,
+    relationshipType: form.relationshipType || "other",
     tags: splitTags(form.tags),
     howWeMet: form.howWeMet || undefined,
     metDate: form.metDate || undefined,
@@ -453,6 +453,7 @@ export default function RolodexPage() {
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState("");
   const [pipelinePrefillId, setPipelinePrefillId] = useState("");
+  const [showMoreAddFields, setShowMoreAddFields] = useState(false);
 
   async function loadRolodex() {
     setError("");
@@ -556,6 +557,16 @@ export default function RolodexPage() {
     setDetailForm((current) => ({ ...current, [name]: nextValue }));
   }
 
+  function handlePrimaryContactChange(event: ChangeEvent<HTMLInputElement>) {
+    const value = event.target.value;
+    const looksLikeEmail = value.includes("@");
+    setAddForm((current) => ({
+      ...current,
+      email: looksLikeEmail ? value : "",
+      phone: looksLikeEmail ? "" : value,
+    }));
+  }
+
   function prefillFromPipeline(dealId: string, target: "add" | "detail") {
     const deal = pipelineDeals.find((entry) => entry.id === dealId);
     if (!deal) return;
@@ -589,6 +600,10 @@ export default function RolodexPage() {
 
   async function createContact(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!addForm.firstName.trim()) {
+      setError("First name is required.");
+      return;
+    }
     setSaving(true);
     try {
       const contact = await readJson<RolodexContact>("/api/rolodex", {
@@ -599,6 +614,8 @@ export default function RolodexPage() {
       setSelectedId(contact.id);
       setShowAddModal(false);
       setAddForm(EMPTY_CONTACT_FORM);
+      setShowMoreAddFields(false);
+      setPipelinePrefillId("");
       setToast("Contact added");
       await loadRolodex();
     } catch (caughtError) {
@@ -755,7 +772,10 @@ export default function RolodexPage() {
             </label>
             <button
               type="button"
-              onClick={() => setShowAddModal(true)}
+              onClick={() => {
+                setShowMoreAddFields(false);
+                setShowAddModal(true);
+              }}
               className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-blue-300/30 bg-[linear-gradient(135deg,#2093FF,#0026FF)] px-4 py-2 text-sm font-semibold text-white transition hover:shadow-[0_0_24px_rgba(32,147,255,0.24)]"
             >
               <Plus className="h-4 w-4" />
@@ -1362,7 +1382,14 @@ export default function RolodexPage() {
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-blue-200/70">New Relationship</p>
                 <h2 className="page-title mt-2">Add Contact</h2>
               </div>
-              <button type="button" onClick={() => setShowAddModal(false)} className="rounded-full border border-white/10 bg-white/5 p-2 text-slate-300 transition hover:bg-white/10 hover:text-white">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowMoreAddFields(false);
+                  setShowAddModal(false);
+                }}
+                className="rounded-full border border-white/10 bg-white/5 p-2 text-slate-300 transition hover:bg-white/10 hover:text-white"
+              >
                 <X className="h-4 w-4" />
               </button>
             </div>
@@ -1388,93 +1415,151 @@ export default function RolodexPage() {
                 </div>
               </div>
 
-              <div className="grid gap-6 xl:grid-cols-2">
-                <div className="space-y-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Basic Info</p>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <FormField label="First Name" name="firstName" value={addForm.firstName} onChange={handleContactInputChange} />
-                    <FormField label="Last Name" name="lastName" value={addForm.lastName} onChange={handleContactInputChange} />
-                    <FormField label="Nickname" name="nickname" value={addForm.nickname} onChange={handleContactInputChange} />
-                    <FormField label="Avatar" name="avatar" value={addForm.avatar} onChange={handleContactInputChange} placeholder="URL or emoji" />
-                  </div>
-
-                  <p className="pt-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Contact</p>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <FormField label="Email" name="email" value={addForm.email} onChange={handleContactInputChange} type="email" />
-                    <FormField label="Phone" name="phone" value={addForm.phone} onChange={handleContactInputChange} />
-                    <FormField label="Secondary Email" name="secondaryEmail" value={addForm.secondaryEmail} onChange={handleContactInputChange} type="email" />
-                    <FormField label="Secondary Phone" name="secondaryPhone" value={addForm.secondaryPhone} onChange={handleContactInputChange} />
-                  </div>
-
-                  <p className="pt-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Professional</p>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <FormField label="Company" name="company" value={addForm.company} onChange={handleContactInputChange} />
-                    <FormField label="Title" name="title" value={addForm.title} onChange={handleContactInputChange} />
-                    <FormField label="Industry" name="industry" value={addForm.industry} onChange={handleContactInputChange} />
-                    <FormField label="Website" name="website" value={addForm.website} onChange={handleContactInputChange} />
-                    <FormField label="City" name="city" value={addForm.city} onChange={handleContactInputChange} />
-                    <FormField label="State" name="state" value={addForm.state} onChange={handleContactInputChange} />
-                  </div>
+              <div className="space-y-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Basic Info</p>
+                <div className="grid gap-4 md:grid-cols-3">
+                  <label className="space-y-2">
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">First Name</span>
+                    <input
+                      name="firstName"
+                      value={addForm.firstName}
+                      onChange={handleContactInputChange}
+                      className={fieldClassName()}
+                      required
+                    />
+                  </label>
+                  <FormField label="Last Name" name="lastName" value={addForm.lastName} onChange={handleContactInputChange} />
+                  <label className="space-y-2">
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Email/Phone</span>
+                    <input
+                      value={addForm.email || addForm.phone}
+                      onChange={handlePrimaryContactChange}
+                      className={fieldClassName()}
+                      placeholder="name@company.com or (555) 555-5555"
+                    />
+                  </label>
                 </div>
 
-                <div className="space-y-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Personal</p>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <FormField label="Birthday" name="birthday" value={addForm.birthday} onChange={handleContactInputChange} type="date" />
-                    <FormField label="Spouse" name="spouse" value={addForm.spouse} onChange={handleContactInputChange} />
-                    <FormField label="Children" name="children" value={addForm.children} onChange={handleContactInputChange} />
-                    <FormField label="Favorite Food" name="favoriteFood" value={addForm.favoriteFood} onChange={handleContactInputChange} />
-                    <FormField label="Interests" name="interests" value={addForm.interests} onChange={handleContactInputChange} />
-                    <FormField label="Introduced By" name="introducedBy" value={addForm.introducedBy} onChange={handleContactInputChange} />
-                  </div>
-                  <FormTextArea label="Personal Notes" name="personalNotes" value={addForm.personalNotes} onChange={handleContactInputChange} />
+                <div className="rounded-2xl border border-white/10 bg-white/5">
+                  <button
+                    type="button"
+                    onClick={() => setShowMoreAddFields((current) => !current)}
+                    className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left"
+                  >
+                    <div>
+                      <p className="text-sm font-semibold text-white">Show More Fields</p>
+                      <p className="text-xs text-slate-400">Company, relationship details, personal notes, socials, reminders, and more.</p>
+                    </div>
+                    <ChevronRight className={cn("h-4 w-4 text-slate-300 transition", showMoreAddFields ? "rotate-90" : "")} />
+                  </button>
 
-                  <p className="pt-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Relationship</p>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <label className="space-y-2">
-                      <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Type</span>
-                      <select name="relationshipType" value={addForm.relationshipType} onChange={handleContactInputChange} className={fieldClassName()}>
-                        {RELATIONSHIP_TYPES.map((type) => (
-                          <option key={type} value={type} className="bg-slate-950">
-                            {RELATIONSHIP_TYPE_LABELS[type]}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                    <FormField label="Met Date" name="metDate" value={addForm.metDate} onChange={handleContactInputChange} type="date" />
-                    <FormField label="Tags" name="tags" value={addForm.tags} onChange={handleContactInputChange} placeholder="Client, VIP, Referral" />
-                    <FormField label="How We Met" name="howWeMet" value={addForm.howWeMet} onChange={handleContactInputChange} />
-                  </div>
+                  {showMoreAddFields ? (
+                    <div className="space-y-6 border-t border-white/10 px-4 py-4">
+                      <div className="space-y-4">
+                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Additional Contact</p>
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          <FormField label="Email" name="email" value={addForm.email} onChange={handleContactInputChange} type="email" />
+                          <FormField label="Phone" name="phone" value={addForm.phone} onChange={handleContactInputChange} />
+                          <FormField label="Secondary Email" name="secondaryEmail" value={addForm.secondaryEmail} onChange={handleContactInputChange} type="email" />
+                          <FormField label="Secondary Phone" name="secondaryPhone" value={addForm.secondaryPhone} onChange={handleContactInputChange} />
+                          <FormField label="Nickname" name="nickname" value={addForm.nickname} onChange={handleContactInputChange} />
+                          <FormField label="Avatar" name="avatar" value={addForm.avatar} onChange={handleContactInputChange} placeholder="URL or emoji" />
+                        </div>
+                      </div>
 
-                  <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                    <label className="inline-flex items-center gap-2 text-sm text-slate-200">
-                      <input type="checkbox" name="stayInTouchEnabled" checked={addForm.stayInTouchEnabled} onChange={handleContactInputChange} />
-                      Enable stay-in-touch reminders
-                    </label>
-                    {addForm.stayInTouchEnabled ? (
-                      <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                        <label className="space-y-2">
-                          <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Frequency</span>
-                          <select name="stayInTouchFrequency" value={addForm.stayInTouchFrequency} onChange={handleContactInputChange} className={fieldClassName()}>
-                            <option value="weekly">Weekly</option>
-                            <option value="biweekly">Biweekly</option>
-                            <option value="monthly">Monthly</option>
-                            <option value="quarterly">Quarterly</option>
-                            <option value="yearly">Yearly</option>
-                            <option value="custom">Custom</option>
-                          </select>
+                      <div className="space-y-4">
+                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Professional</p>
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          <FormField label="Company" name="company" value={addForm.company} onChange={handleContactInputChange} />
+                          <FormField label="Title" name="title" value={addForm.title} onChange={handleContactInputChange} />
+                          <FormField label="Industry" name="industry" value={addForm.industry} onChange={handleContactInputChange} />
+                          <FormField label="Website" name="website" value={addForm.website} onChange={handleContactInputChange} />
+                          <FormField label="City" name="city" value={addForm.city} onChange={handleContactInputChange} />
+                          <FormField label="State" name="state" value={addForm.state} onChange={handleContactInputChange} />
+                          <FormField label="Country" name="country" value={addForm.country} onChange={handleContactInputChange} />
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Relationship</p>
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          <label className="space-y-2">
+                            <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Type</span>
+                            <select name="relationshipType" value={addForm.relationshipType || "other"} onChange={handleContactInputChange} className={fieldClassName()}>
+                              {RELATIONSHIP_TYPES.map((type) => (
+                                <option key={type} value={type} className="bg-slate-950">
+                                  {RELATIONSHIP_TYPE_LABELS[type]}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                          <FormField label="Met Date" name="metDate" value={addForm.metDate} onChange={handleContactInputChange} type="date" />
+                          <FormField label="Tags" name="tags" value={addForm.tags} onChange={handleContactInputChange} placeholder="Client, VIP, Referral" />
+                          <FormField label="How We Met" name="howWeMet" value={addForm.howWeMet} onChange={handleContactInputChange} />
+                          <FormField label="Introduced By" name="introducedBy" value={addForm.introducedBy} onChange={handleContactInputChange} />
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Personal</p>
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          <FormField label="Birthday" name="birthday" value={addForm.birthday} onChange={handleContactInputChange} type="date" />
+                          <FormField label="Spouse" name="spouse" value={addForm.spouse} onChange={handleContactInputChange} />
+                          <FormField label="Children" name="children" value={addForm.children} onChange={handleContactInputChange} />
+                          <FormField label="Favorite Food" name="favoriteFood" value={addForm.favoriteFood} onChange={handleContactInputChange} />
+                          <FormField label="Interests" name="interests" value={addForm.interests} onChange={handleContactInputChange} />
+                        </div>
+                        <FormTextArea label="Personal Notes" name="personalNotes" value={addForm.personalNotes} onChange={handleContactInputChange} />
+                      </div>
+
+                      <div className="space-y-4">
+                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Social Links</p>
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          <FormField label="LinkedIn" name="linkedin" value={addForm.linkedin} onChange={handleContactInputChange} />
+                          <FormField label="Instagram" name="instagram" value={addForm.instagram} onChange={handleContactInputChange} />
+                          <FormField label="Twitter" name="twitter" value={addForm.twitter} onChange={handleContactInputChange} />
+                          <FormField label="Facebook" name="facebook" value={addForm.facebook} onChange={handleContactInputChange} />
+                        </div>
+                      </div>
+
+                      <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                        <label className="inline-flex items-center gap-2 text-sm text-slate-200">
+                          <input type="checkbox" name="stayInTouchEnabled" checked={addForm.stayInTouchEnabled} onChange={handleContactInputChange} />
+                          Enable stay-in-touch reminders
                         </label>
-                        {addForm.stayInTouchFrequency === "custom" ? (
-                          <FormField label="Custom Days" name="stayInTouchCustomDays" value={addForm.stayInTouchCustomDays} onChange={handleContactInputChange} type="number" />
+                        {addForm.stayInTouchEnabled ? (
+                          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                            <label className="space-y-2">
+                              <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Frequency</span>
+                              <select name="stayInTouchFrequency" value={addForm.stayInTouchFrequency} onChange={handleContactInputChange} className={fieldClassName()}>
+                                <option value="weekly">Weekly</option>
+                                <option value="biweekly">Biweekly</option>
+                                <option value="monthly">Monthly</option>
+                                <option value="quarterly">Quarterly</option>
+                                <option value="yearly">Yearly</option>
+                                <option value="custom">Custom</option>
+                              </select>
+                            </label>
+                            {addForm.stayInTouchFrequency === "custom" ? (
+                              <FormField label="Custom Days" name="stayInTouchCustomDays" value={addForm.stayInTouchCustomDays} onChange={handleContactInputChange} type="number" />
+                            ) : null}
+                          </div>
                         ) : null}
                       </div>
-                    ) : null}
-                  </div>
+                    </div>
+                  ) : null}
                 </div>
               </div>
 
               <div className="flex items-center justify-end gap-3">
-                <button type="button" onClick={() => setShowAddModal(false)} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-white/10">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowMoreAddFields(false);
+                    setShowAddModal(false);
+                  }}
+                  className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-white/10"
+                >
                   Cancel
                 </button>
                 <button type="submit" disabled={saving} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-blue-300/30 bg-[linear-gradient(135deg,#2093FF,#0026FF)] px-4 py-2 text-sm font-semibold text-white transition hover:shadow-[0_0_24px_rgba(32,147,255,0.24)] disabled:opacity-60">
