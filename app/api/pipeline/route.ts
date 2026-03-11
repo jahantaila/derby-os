@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { enrichDeal, isEnrichableDeal } from "@/lib/enrich-utils";
 import { getPipelineDeals, PipelineDealUpsertInput, upsertPipelineDealByEmail } from "@/lib/pipeline-store";
 
 export async function GET() {
@@ -20,7 +21,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Lead name and client are required." }, { status: 400 });
     }
 
-    return NextResponse.json(result.deal, { status: result.action === "created" ? 201 : 200 });
+    let responseDeal = result.deal;
+
+    if (result.action === "created" && isEnrichableDeal(result.deal)) {
+      try {
+        responseDeal = (await enrichDeal(result.deal.id)) ?? result.deal;
+      } catch (error) {
+        console.error(`Pipeline auto-enrichment failed for deal ${result.deal.id}`, error);
+      }
+    }
+
+    return NextResponse.json(responseDeal, { status: result.action === "created" ? 201 : 200 });
   } catch {
     return NextResponse.json({ error: "Unable to create lead." }, { status: 500 });
   }

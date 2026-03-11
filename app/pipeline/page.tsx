@@ -852,6 +852,8 @@ export default function PipelinePage() {
   const [editingPhoneNotesDraft, setEditingPhoneNotesDraft] = useState("");
   const [editingQuickNoteId, setEditingQuickNoteId] = useState("");
   const [editingQuickNoteDraft, setEditingQuickNoteDraft] = useState("");
+  const [editingLocationField, setEditingLocationField] = useState<"city" | "state" | "">("");
+  const [editingLocationDraft, setEditingLocationDraft] = useState("");
   const [showAddContact, setShowAddContact] = useState(false);
   const [addForm, setAddForm] = useState<AddContactForm>(EMPTY_ADD_FORM);
   const [submittingContact, setSubmittingContact] = useState(false);
@@ -974,6 +976,13 @@ export default function PipelinePage() {
       setShowPhoneComposer(false);
       setPhoneDateDraft("");
       setPhoneNotesDraft("");
+      setEditingPhoneId("");
+      setEditingPhoneDateDraft("");
+      setEditingPhoneNotesDraft("");
+      setEditingQuickNoteId("");
+      setEditingQuickNoteDraft("");
+      setEditingLocationField("");
+      setEditingLocationDraft("");
       return;
     }
 
@@ -988,10 +997,17 @@ export default function PipelinePage() {
     setEditingPhoneNotesDraft("");
     setEditingQuickNoteId("");
     setEditingQuickNoteDraft("");
+    setEditingLocationField("");
+    setEditingLocationDraft("");
   }, [selectedDeal]);
 
   useEffect(() => {
     setShowTagEditor(false);
+  }, [activeDetailId]);
+
+  useEffect(() => {
+    setEditingLocationField("");
+    setEditingLocationDraft("");
   }, [activeDetailId]);
 
   useEffect(() => {
@@ -1317,6 +1333,21 @@ export default function PipelinePage() {
         quickNotes: current.quickNotes.filter((entry) => entry.id !== noteId),
       }),
     });
+  }
+
+  function startEditingLocation(field: "city" | "state", value?: string) {
+    setEditingLocationField(field);
+    setEditingLocationDraft(value ?? "");
+  }
+
+  function cancelEditingLocation() {
+    setEditingLocationField("");
+    setEditingLocationDraft("");
+  }
+
+  async function saveLocationField(deal: PipelineDeal, field: "city" | "state") {
+    const updated = await patchDeal(deal.id, { [field]: editingLocationDraft } as Partial<PipelineDeal>);
+    if (updated) cancelEditingLocation();
   }
 
   function updateSegmentsFilter<Key extends keyof SegmentsFilters>(key: Key, value: SegmentsFilters[Key]) {
@@ -2451,14 +2482,90 @@ export default function PipelinePage() {
                         <MapPin size={14} className="text-blue-200" />
                         City
                       </div>
-                      <p className="mt-2 text-sm text-white">{detailDeal.city || "No city"}</p>
+                      {editingLocationField === "city" ? (
+                        <div className="mt-2 space-y-2">
+                          <input
+                            value={editingLocationDraft}
+                            onChange={(event) => setEditingLocationDraft(event.target.value)}
+                            placeholder="Enter city"
+                            className="w-full rounded-2xl border border-white/10 bg-[#0a0a0f] px-3 py-2 text-sm text-white outline-none placeholder:text-slate-500 focus:border-blue-400/40"
+                          />
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => void saveLocationField(detailDeal, "city")}
+                              disabled={workingDealId === detailDeal.id}
+                              className="rounded-full border border-blue-300/30 bg-blue-500/10 px-3 py-1.5 text-[11px] uppercase tracking-[0.16em] text-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              Save
+                            </button>
+                            <button
+                              type="button"
+                              onClick={cancelEditingLocation}
+                              className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] uppercase tracking-[0.16em] text-slate-300"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="mt-2 flex items-center gap-2">
+                          <p className="min-w-0 text-sm text-white">{detailDeal.city || "No city"}</p>
+                          <button
+                            type="button"
+                            onClick={() => startEditingLocation("city", detailDeal.city)}
+                            className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-300 transition hover:border-blue-400/40 hover:text-blue-100"
+                            aria-label="Edit city"
+                          >
+                            <Pencil size={12} />
+                          </button>
+                        </div>
+                      )}
                     </div>
                     <div className="glass-card rounded-2xl p-4">
                       <div className="flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-slate-400">
                         <MapIcon size={14} className="text-blue-200" />
                         State
                       </div>
-                      <p className="mt-2 text-sm text-white">{detailDeal.state || "No state"}</p>
+                      {editingLocationField === "state" ? (
+                        <div className="mt-2 space-y-2">
+                          <input
+                            value={editingLocationDraft}
+                            onChange={(event) => setEditingLocationDraft(event.target.value)}
+                            placeholder="Enter state"
+                            className="w-full rounded-2xl border border-white/10 bg-[#0a0a0f] px-3 py-2 text-sm text-white outline-none placeholder:text-slate-500 focus:border-blue-400/40"
+                          />
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => void saveLocationField(detailDeal, "state")}
+                              disabled={workingDealId === detailDeal.id}
+                              className="rounded-full border border-blue-300/30 bg-blue-500/10 px-3 py-1.5 text-[11px] uppercase tracking-[0.16em] text-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              Save
+                            </button>
+                            <button
+                              type="button"
+                              onClick={cancelEditingLocation}
+                              className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] uppercase tracking-[0.16em] text-slate-300"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="mt-2 flex items-center gap-2">
+                          <p className="min-w-0 text-sm text-white">{detailDeal.state || "No state"}</p>
+                          <button
+                            type="button"
+                            onClick={() => startEditingLocation("state", detailDeal.state)}
+                            className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-300 transition hover:border-blue-400/40 hover:text-blue-100"
+                            aria-label="Edit state"
+                          >
+                            <Pencil size={12} />
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </section>

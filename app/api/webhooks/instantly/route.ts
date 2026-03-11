@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { enrichDeal, isEnrichableDeal } from "@/lib/enrich-utils";
 import { getPipelineDeals, writePipelineDeals } from "@/lib/pipeline-store";
 import { ConversationHistoryItem, PipelineDeal } from "@/lib/pipeline-types";
 
@@ -284,6 +285,14 @@ export async function POST(request: Request) {
     const deal = createWebhookDeal(lead, record, history);
     deals.push(deal);
     await writePipelineDeals(deals);
+
+    if (isEnrichableDeal(deal)) {
+      try {
+        await enrichDeal(deal.id);
+      } catch (error) {
+        console.error(`Instantly webhook auto-enrichment failed for deal ${deal.id}`, error);
+      }
+    }
 
     return NextResponse.json({ ok: true, dealId: deal.id, competitor: deal.competitor });
   } catch (err) {
