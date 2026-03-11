@@ -63,12 +63,48 @@ const STATE_NAMES = Object.values(US_STATE_ABBREVS);
 const STATE_NAMES_PATTERN = STATE_NAMES.map((state) => state.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
   .sort((left, right) => right.length - left.length)
   .join("|");
+const STREET_SUFFIXES = new Set([
+  "aly",
+  "ave",
+  "avenue",
+  "blvd",
+  "boulevard",
+  "cir",
+  "circle",
+  "court",
+  "ct",
+  "cv",
+  "cove",
+  "dr",
+  "drive",
+  "hwy",
+  "highway",
+  "lane",
+  "ln",
+  "loop",
+  "pkwy",
+  "parkway",
+  "place",
+  "pl",
+  "rd",
+  "road",
+  "sq",
+  "st",
+  "street",
+  "suite",
+  "ste",
+  "ter",
+  "terrace",
+  "trl",
+  "trail",
+  "way",
+]);
 const ADDRESS_PATTERN = new RegExp(
-  String.raw`(?:\d{1,6}\s+[A-Za-z0-9.'#&/\- ]+,\s*)?([A-Z][A-Za-z.'\-]+(?:\s+[A-Z][A-Za-z.'\-]+)*),\s*([A-Z]{2}|${STATE_NAMES_PATTERN})\s+\d{5}(?:-\d{4})?`,
+  String.raw`(?:^|[\s\n\r:;|,(])\s*([^,\n\r]+?),\s*([A-Z]{2}|${STATE_NAMES_PATTERN})\s+\d{5}(?:-\d{4})?`,
   "g",
 );
 const CITY_STATE_PATTERN = new RegExp(
-  String.raw`([A-Z][A-Za-z.'\-]+(?:\s+[A-Z][A-Za-z.'\-]+)*),\s*([A-Z]{2}|${STATE_NAMES_PATTERN})(?:\b|[^A-Za-z])`,
+  String.raw`(?:^|[\n\r,;|])\s*([A-Z][A-Za-z.'\-]+(?:\s+[A-Z][A-Za-z.'\-]+){0,2}),\s*([A-Z]{2}|${STATE_NAMES_PATTERN})(?:\b|[^A-Za-z])`,
   "g",
 );
 
@@ -101,7 +137,7 @@ function stripTags(value: string): string {
 export function normalizeCity(value: unknown): string | null {
   const normalized = normalizeString(value);
   if (!normalized) return null;
-  return normalized.replace(/^[,.\s]+|[,.\s]+$/g, "") || null;
+  return normalized.replace(/^[,.\s]+|[,.\s]+$/g, "").toLowerCase() || null;
 }
 
 export function normalizeState(value: unknown): string | null {
@@ -112,11 +148,11 @@ export function normalizeState(value: unknown): string | null {
   const upper = cleaned.toUpperCase();
 
   if (US_STATE_ABBREVS[upper]) {
-    return US_STATE_ABBREVS[upper];
+    return US_STATE_ABBREVS[upper].toLowerCase();
   }
 
   const matchedState = STATE_NAMES.find((state) => state.toLowerCase() === cleaned.toLowerCase());
-  return matchedState ?? null;
+  return matchedState?.toLowerCase() ?? null;
 }
 
 export function buildLocation(city: unknown, state: unknown): LocationMatch | null {
@@ -252,13 +288,56 @@ function extractFromMetaTags(html: string): LocationMatch | null {
   );
 }
 
+function extractCityFromAddressPrefix(prefix: string): string | null {
+  const normalized = normalizeString(prefix);
+  if (!normalized) return null;
+
+  const candidate = normalized
+    .split(",")
+    .map((segment) => segment.trim())
+    .filter(Boolean)
+    .at(-1);
+
+  const words = (candidate ?? normalized).split(/\s+/).filter(Boolean);
+  if (words.length === 0) return null;
+
+  let cityWords = words;
+
+  for (let index = words.length - 1; index >= 0; index -= 1) {
+    const token = words[index].replace(/[.,]/g, "").toLowerCase();
+    if (!STREET_SUFFIXES.has(token) || index >= words.length - 1) continue;
+    cityWords = words.slice(index + 1);
+    break;
+  }
+
+  while (cityWords.length > 0 && /^[\d#&./-]+$/.test(cityWords[0])) {
+    cityWords = cityWords.slice(1);
+  }
+
+  if (cityWords.length > 3) {
+    cityWords = cityWords.slice(-2);
+  }
+
+  return normalizeCity(cityWords.join(" "));
+}
+
 function extractFromAddressText(text: string): LocationMatch | null {
-  for (const pattern of [ADDRESS_PATTERN, CITY_STATE_PATTERN]) {
-    pattern.lastIndex = 0;
-    const match = pattern.exec(text);
-    if (!match) continue;
+  ADDRESS_PATTERN.lastIndex = 0;
+
+  let match = ADDRESS_PATTERN.exec(text);
+  while (match) {
+    const location = buildLocation(extractCityFromAddressPrefix(match[1] ?? ""), match[2]);
+    if (location) return location;
+    match = ADDRESS_PATTERN.exec(text);
+  }
+
+  CITY_STATE_PATTERN.lastIndex = 0;
+
+  match = CITY_STATE_PATTERN.exec(text);
+  while (match) {
     const location = buildLocation(match[1], match[2]);
     if (location) return location;
+    match = CITY_STATE_PATTERN.exec(text);
   }
 
   return null;
@@ -362,8 +441,8 @@ export async function enrichDeal(dealId: string): Promise<PipelineDeal | null> {
 
     const updated: PipelineDeal = {
       ...current,
-      city: normalizeString(current.city) ?? location.city,
-      state: normalizeString(current.state) ?? location.state,
+      city: location.city,
+      state: location.state,
       enrichmentStatus: "enriched",
       enrichmentData: {
         ...(current.enrichmentData ?? {}),

@@ -1,14 +1,7 @@
 import { NextResponse } from "next/server";
 import { getPipelineDeals, writePipelineDeals } from "@/lib/pipeline-store";
-import {
-  extractLocationFromHtml,
-  fetchWebsiteHtml,
-  getDealWebsite,
-  isEnrichableDeal,
-  US_STATE_ABBREVS,
-} from "@/lib/enrich-utils";
-
-export { US_STATE_ABBREVS };
+import { PipelineDeal } from "@/lib/pipeline-types";
+import { extractLocationFromHtml, fetchWebsiteHtml, getDealWebsite } from "@/lib/enrich-utils";
 
 type EnrichRequest =
   | {
@@ -43,6 +36,10 @@ function normalizeWebsiteUrl(website: string): string {
   return `https://${website}`;
 }
 
+function hasEnrichmentWebsite(deal: PipelineDeal) {
+  return Boolean(getDealWebsite(deal));
+}
+
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as Partial<EnrichRequest>;
@@ -53,15 +50,15 @@ export async function POST(request: Request) {
 
     const deals = await getPipelineDeals();
     const targets = body.all
-      ? deals.filter(isEnrichableDeal)
-      : deals.filter((deal) => deal.id === body.dealId && isEnrichableDeal(deal));
+      ? deals.filter(hasEnrichmentWebsite)
+      : deals.filter((deal) => deal.id === body.dealId && hasEnrichmentWebsite(deal));
 
     if (!body.all && body.dealId && !deals.some((deal) => deal.id === body.dealId)) {
       return NextResponse.json({ error: "Deal not found." }, { status: 404 });
     }
 
     if (!body.all && body.dealId && targets.length === 0) {
-      return NextResponse.json({ error: "Deal does not have an enrichable website/location." }, { status: 400 });
+      return NextResponse.json({ error: "Deal does not have a website to enrich." }, { status: 400 });
     }
 
     const results: EnrichResult[] = [];
@@ -97,8 +94,8 @@ export async function POST(request: Request) {
           const current = deals[existingIndex];
           deals[existingIndex] = {
             ...current,
-            city: normalizeString(current.city) ?? location.city,
-            state: normalizeString(current.state) ?? location.state,
+            city: location.city,
+            state: location.state,
             enrichmentStatus: "enriched",
             enrichmentData: {
               ...(current.enrichmentData ?? {}),
@@ -112,8 +109,8 @@ export async function POST(request: Request) {
         results.push({
           id: deal.id,
           name: deal.name,
-          city: normalizeString(deal.city) ?? location.city,
-          state: normalizeString(deal.state) ?? location.state,
+          city: location.city,
+          state: location.state,
         });
       } catch (caughtError) {
         const existingIndex = deals.findIndex((entry) => entry.id === deal.id);
