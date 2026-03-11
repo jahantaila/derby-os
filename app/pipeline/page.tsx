@@ -482,6 +482,23 @@ function getSearchableText(deal: PipelineDeal) {
     .toLowerCase();
 }
 
+function getSegmentsSearchableText(deal: PipelineDeal) {
+  const notes = parseNotes(deal.notes, deal.createdAt);
+  return [
+    getPrimaryName(deal),
+    getCompanyName(deal),
+    deal.email,
+    deal.city ?? "",
+    deal.state ?? "",
+    getPhone(deal),
+    ...deal.tags,
+    notes.rolodex,
+    ...notes.quickNotes.map((entry) => entry.text),
+  ]
+    .join(" ")
+    .toLowerCase();
+}
+
 function normalizeTagValue(value: string) {
   return value.trim().replace(/\s+/g, " ");
 }
@@ -853,6 +870,7 @@ export default function PipelinePage() {
   const [dropStage, setDropStage] = useState<PipelineStage | "">("");
   const [showTagEditor, setShowTagEditor] = useState(false);
   const [segmentsFilters, setSegmentsFilters] = useState<SegmentsFilters>(EMPTY_SEGMENTS_FILTERS);
+  const [segmentsSearch, setSegmentsSearch] = useState("");
   const [segmentsVisibleCount, setSegmentsVisibleCount] = useState(50);
   const [segmentsSortKey, setSegmentsSortKey] = useState<SegmentsSortKey>("created");
   const [segmentsSortDirection, setSegmentsSortDirection] = useState<SegmentsSortDirection>("desc");
@@ -921,7 +939,7 @@ export default function PipelinePage() {
 
   useEffect(() => {
     setSegmentsVisibleCount(50);
-  }, [segmentsFilters, segmentsSortDirection, segmentsSortKey]);
+  }, [segmentsFilters, segmentsSearch, segmentsSortDirection, segmentsSortKey]);
 
   useEffect(() => {
     if (activeTagFilter && !availableTags.some((tag) => tag.toLowerCase() === activeTagFilter.toLowerCase())) {
@@ -1027,6 +1045,7 @@ export default function PipelinePage() {
   const segmentSources = useMemo(() => getUniqueValues(deals.map((deal) => normalizeSourceValue(deal.source))), [deals]);
 
   const segmentedDeals = useMemo(() => {
+    const normalizedSegmentsSearch = segmentsSearch.trim().toLowerCase();
     const filtered = deals.filter((deal) => {
       if (segmentsFilters.city && (deal.city ?? "").trim() !== segmentsFilters.city) return false;
       if (segmentsFilters.state && (deal.state ?? "").trim() !== segmentsFilters.state) return false;
@@ -1040,6 +1059,7 @@ export default function PipelinePage() {
       const createdDate = getDateOnlyValue(deal.createdAt);
       if (segmentsFilters.dateFrom && (!createdDate || createdDate < segmentsFilters.dateFrom)) return false;
       if (segmentsFilters.dateTo && (!createdDate || createdDate > segmentsFilters.dateTo)) return false;
+      if (normalizedSegmentsSearch && !getSegmentsSearchableText(deal).includes(normalizedSegmentsSearch)) return false;
       return true;
     });
 
@@ -1099,7 +1119,7 @@ export default function PipelinePage() {
     });
 
     return sorted;
-  }, [deals, segmentsFilters, segmentsSortDirection, segmentsSortKey]);
+  }, [deals, segmentsFilters, segmentsSearch, segmentsSortDirection, segmentsSortKey]);
   const activeSegmentsFilters = useMemo(
     () =>
       [
@@ -1954,6 +1974,16 @@ export default function PipelinePage() {
             </div>
 
             <div className="glass-card mt-5 grid gap-3 rounded-2xl p-4 xl:grid-cols-[repeat(5,minmax(0,1fr))_minmax(0,1.4fr)]">
+              <label className="relative xl:col-span-full">
+                <Search size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="search"
+                  value={segmentsSearch}
+                  onChange={(event) => setSegmentsSearch(event.target.value)}
+                  placeholder="Search contacts by name, email, company, notes..."
+                  className="w-full rounded-2xl border border-white/10 bg-[#0a0a0f] px-4 py-3 pl-11 text-sm text-white outline-none focus:border-blue-400/40"
+                />
+              </label>
               <select
                 value={segmentsFilters.city}
                 onChange={(event) => updateSegmentsFilter("city", event.target.value)}
