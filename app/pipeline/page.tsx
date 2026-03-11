@@ -674,7 +674,7 @@ function ModalShell({
   return (
     <div className="fixed inset-0 z-50 bg-[#02040a]/80 backdrop-blur-sm">
       <div className="absolute inset-0" onClick={onClose} aria-hidden="true" />
-      <div className="absolute left-1/2 top-1/2 w-[calc(100%-1rem)] max-w-4xl -translate-x-1/2 -translate-y-1/2 px-2 sm:w-full sm:px-4">
+      <div className="absolute left-1/2 top-4 w-[calc(100%-1rem)] max-w-4xl -translate-x-1/2 px-2 sm:w-full sm:px-4">
         <div className="glass-panel max-h-[90vh] overflow-y-auto p-5 sm:p-6">
           <div className="flex items-start justify-between gap-4">
             <div>
