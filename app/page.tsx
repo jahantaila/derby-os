@@ -5,6 +5,7 @@ import { type ComponentType, useEffect, useMemo, useState } from "react";
 import {
   ArrowRight,
   ArrowUpRight,
+  BookUser,
   BriefcaseBusiness,
   Building2,
   CalendarClock,
@@ -28,6 +29,7 @@ import {
 } from "@/lib/pipeline-dashboard";
 import { type PipelineActivityEntry } from "@/lib/pipeline-activity";
 import { type PipelineDeal, type PipelineStage } from "@/lib/pipeline-types";
+import { type RolodexContact } from "@/lib/rolodex-types";
 
 type StatTrend = {
   value: number;
@@ -39,6 +41,7 @@ type DashboardData = {
   pipeline: PipelineDeal[];
   summary: MorningSummary;
   activity: PipelineActivityEntry[];
+  reminders: Array<RolodexContact & { overdueDays?: number }>;
 };
 
 type PriorityItem = {
@@ -212,26 +215,29 @@ function sectionTitle(icon: ComponentType<{ className?: string }>, label: string
 }
 
 async function fetchDashboardData(): Promise<DashboardData> {
-  const [pipelineRes, summaryRes, activityRes] = await Promise.all([
+  const [pipelineRes, summaryRes, activityRes, remindersRes] = await Promise.all([
     fetch("/api/pipeline", { cache: "no-store" }),
     fetch("/api/pipeline/morning-summary", { cache: "no-store" }),
     fetch("/api/pipeline/activity", { cache: "no-store" }),
+    fetch("/api/rolodex/reminders", { cache: "no-store" }),
   ]);
 
-  if (!pipelineRes.ok || !summaryRes.ok || !activityRes.ok) {
+  if (!pipelineRes.ok || !summaryRes.ok || !activityRes.ok || !remindersRes.ok) {
     throw new Error("Unable to load pipeline command center.");
   }
 
-  const [pipeline, summary, activity] = await Promise.all([
+  const [pipeline, summary, activity, reminders] = await Promise.all([
     pipelineRes.json() as Promise<PipelineDeal[]>,
     summaryRes.json() as Promise<MorningSummary>,
     activityRes.json() as Promise<PipelineActivityEntry[]>,
+    remindersRes.json() as Promise<Array<RolodexContact & { overdueDays?: number }>>,
   ]);
 
   return {
     pipeline: Array.isArray(pipeline) ? pipeline : [],
     summary: summary ?? buildMorningSummary([]),
     activity: Array.isArray(activity) ? activity : [],
+    reminders: Array.isArray(reminders) ? reminders : [],
   };
 }
 
@@ -239,6 +245,7 @@ export default function HomePage() {
   const [pipeline, setPipeline] = useState<PipelineDeal[]>([]);
   const [summary, setSummary] = useState<MorningSummary>(() => buildMorningSummary([]));
   const [activity, setActivity] = useState<PipelineActivityEntry[]>([]);
+  const [reminders, setReminders] = useState<Array<RolodexContact & { overdueDays?: number }>>([]);
   const [geographyMode, setGeographyMode] = useState<GeographyMode>("city");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -260,6 +267,7 @@ export default function HomePage() {
       setPipeline(data.pipeline);
       setSummary(data.summary);
       setActivity(data.activity);
+      setReminders(data.reminders);
       setLastUpdatedAt(Date.now());
     } catch (caughtError) {
       setError(caughtError instanceof Error ? caughtError.message : "Unable to load dashboard.");
@@ -436,6 +444,41 @@ export default function HomePage() {
             )}
           </div>
         </article>
+      </section>
+
+      <section className="glass-panel rounded-[24px] p-5 sm:p-6">
+        <div className="flex items-center justify-between gap-4">
+          {sectionTitle(BookUser, "Rolodex Reminders")}
+          <Link href="/rolodex" className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.14em] text-blue-200 transition hover:text-white">
+            Open Rolodex
+            <ArrowUpRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+        <div className="mt-5 grid gap-3 xl:grid-cols-4">
+          <div className="glass-card rounded-2xl p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Needs Attention</p>
+            <p className="mt-3 text-3xl font-bold text-white">{reminders.length}</p>
+            <p className="mt-2 text-sm text-slate-300">Contacts with overdue stay-in-touch follow-ups.</p>
+          </div>
+          <div className="xl:col-span-3">
+            <div className="grid gap-3 lg:grid-cols-3">
+              {reminders.length ? (
+                reminders.slice(0, 3).map((contact) => (
+                  <Link key={contact.id} href="/rolodex" className="glass-card rounded-2xl p-4 transition hover:-translate-y-0.5">
+                    <p className="text-sm font-semibold text-white">{contact.firstName} {contact.lastName}</p>
+                    <p className="mt-1 text-sm text-slate-300">{contact.company || contact.relationshipType}</p>
+                    <div className="mt-3 flex items-center justify-between text-xs uppercase tracking-[0.14em] text-slate-400">
+                      <span>{contact.overdueDays ?? 0}d overdue</span>
+                      <span>{contact.nextFollowUp ? formatDate(contact.nextFollowUp) : "Due now"}</span>
+                    </div>
+                  </Link>
+                ))
+              ) : (
+                <div className="glass-card rounded-2xl px-4 py-5 text-sm text-slate-300 lg:col-span-3">No rolodex follow-ups are due right now.</div>
+              )}
+            </div>
+          </div>
+        </div>
       </section>
 
       <section className="grid gap-4 xl:grid-cols-2">
