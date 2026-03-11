@@ -5,10 +5,12 @@ import { useRouter } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import {
   ArrowLeft,
+  ArrowUpDown,
   BarChart3,
   Brain,
   Building2,
   ChevronDown,
+  ChevronUp,
   Download,
   FileSpreadsheet,
   Globe,
@@ -19,6 +21,7 @@ import {
   Phone,
   PhoneCall,
   Plus,
+  Pencil,
   Search,
   SendHorizontal,
   Sparkles,
@@ -32,7 +35,7 @@ import { cn } from "@/lib/utils";
 import { PhoneLogEntry, PIPELINE_STAGES, PipelineDeal, PipelineStage } from "@/lib/pipeline-types";
 
 type SortMode = "newest" | "alphabetical" | "stage";
-type PipelineSubview = "dashboard" | "kanban" | "contacts";
+type PipelineSubview = "dashboard" | "kanban" | "segments" | "contacts";
 
 type QuickNoteEntry = {
   id: string;
@@ -94,6 +97,19 @@ type ActivityEntry = {
   timestamp: string;
 };
 
+type SegmentsFilters = {
+  city: string;
+  state: string;
+  tag: string;
+  source: string;
+  stage: string;
+  dateFrom: string;
+  dateTo: string;
+};
+
+type SegmentsSortKey = "name" | "company" | "email" | "city" | "state" | "tags" | "stage" | "source" | "created";
+type SegmentsSortDirection = "asc" | "desc";
+
 const EASTERN_TIME_ZONE = "America/New_York";
 const SOURCE_TABS_CONFIG = [
   { value: "all", label: "ALL" },
@@ -102,6 +118,7 @@ const SOURCE_TABS_CONFIG = [
 const SUBVIEW_TABS: SubviewTab[] = [
   { value: "dashboard", label: "DASHBOARD", icon: BarChart3 },
   { value: "kanban", label: "KANBAN", icon: KanbanSquare },
+  { value: "segments", label: "SEGMENTS", icon: Download },
   { value: "contacts", label: "CONTACTS", icon: Users },
 ];
 const INSIGHT_PROMPTS = [
@@ -121,6 +138,15 @@ const EMPTY_ADD_FORM: AddContactForm = {
   stage: "new-lead",
   notes: "",
   tags: [],
+};
+const EMPTY_SEGMENTS_FILTERS: SegmentsFilters = {
+  city: "",
+  state: "",
+  tag: "",
+  source: "",
+  stage: "",
+  dateFrom: "",
+  dateTo: "",
 };
 const TAG_SUGGESTIONS = ["SpotHopper", "BentoBox", "Owner.com", "Popmenu", "Fisherman", "Hot Lead", "Follow Up", "VIP"] as const;
 const TAG_PILL_STYLES = [
@@ -496,6 +522,28 @@ function getTagPillClass(index: number) {
   return TAG_PILL_STYLES[index % TAG_PILL_STYLES.length];
 }
 
+function getUniqueValues(values: Array<string | undefined>) {
+  return [...new Set(values.map((value) => value?.trim()).filter(Boolean) as string[])].sort((a, b) => a.localeCompare(b));
+}
+
+function getCompetitorTagOptions(deals: PipelineDeal[]) {
+  return getUniqueValues(deals.flatMap((deal) => [deal.competitor, ...deal.tags]));
+}
+
+function getDateOnlyValue(value?: string) {
+  if (!value) return "";
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "";
+  return parsed.toISOString().slice(0, 10);
+}
+
+function csvEscape(value: unknown) {
+  const text = String(value ?? "");
+  if (!text.includes(",") && !text.includes('"') && !text.includes("\n")) return text;
+  return `"${text.replace(/"/g, '""')}"`;
+}
+
 function normalizeStageValue(value: string): PipelineStage {
   return PIPELINE_STAGES.includes(value as PipelineStage) ? (value as PipelineStage) : "new-lead";
 }
@@ -782,6 +830,11 @@ export default function PipelinePage() {
   const [showPhoneComposer, setShowPhoneComposer] = useState(false);
   const [phoneDateDraft, setPhoneDateDraft] = useState("");
   const [phoneNotesDraft, setPhoneNotesDraft] = useState("");
+  const [editingPhoneId, setEditingPhoneId] = useState("");
+  const [editingPhoneDateDraft, setEditingPhoneDateDraft] = useState("");
+  const [editingPhoneNotesDraft, setEditingPhoneNotesDraft] = useState("");
+  const [editingQuickNoteId, setEditingQuickNoteId] = useState("");
+  const [editingQuickNoteDraft, setEditingQuickNoteDraft] = useState("");
   const [showAddContact, setShowAddContact] = useState(false);
   const [addForm, setAddForm] = useState<AddContactForm>(EMPTY_ADD_FORM);
   const [submittingContact, setSubmittingContact] = useState(false);
@@ -799,6 +852,10 @@ export default function PipelinePage() {
   const [draggedDealId, setDraggedDealId] = useState("");
   const [dropStage, setDropStage] = useState<PipelineStage | "">("");
   const [showTagEditor, setShowTagEditor] = useState(false);
+  const [segmentsFilters, setSegmentsFilters] = useState<SegmentsFilters>(EMPTY_SEGMENTS_FILTERS);
+  const [segmentsVisibleCount, setSegmentsVisibleCount] = useState(50);
+  const [segmentsSortKey, setSegmentsSortKey] = useState<SegmentsSortKey>("created");
+  const [segmentsSortDirection, setSegmentsSortDirection] = useState<SegmentsSortDirection>("desc");
   const tagEditorRef = useRef<HTMLDivElement | null>(null);
   const [kanbanVisibleCounts, setKanbanVisibleCounts] = useState<Record<PipelineStage, number>>({
     "new-lead": 20,
@@ -863,6 +920,10 @@ export default function PipelinePage() {
   }, [deals]);
 
   useEffect(() => {
+    setSegmentsVisibleCount(50);
+  }, [segmentsFilters, segmentsSortDirection, segmentsSortKey]);
+
+  useEffect(() => {
     if (activeTagFilter && !availableTags.some((tag) => tag.toLowerCase() === activeTagFilter.toLowerCase())) {
       setActiveTagFilter("");
     }
@@ -904,6 +965,11 @@ export default function PipelinePage() {
     setShowPhoneComposer(false);
     setPhoneDateDraft(formatPhoneLogDate());
     setPhoneNotesDraft("");
+    setEditingPhoneId("");
+    setEditingPhoneDateDraft("");
+    setEditingPhoneNotesDraft("");
+    setEditingQuickNoteId("");
+    setEditingQuickNoteDraft("");
   }, [selectedDeal]);
 
   useEffect(() => {
@@ -955,6 +1021,100 @@ export default function PipelinePage() {
   }, [deals]);
 
   const recentActivity = useMemo(() => buildRecentActivity(deals), [deals]);
+  const segmentCities = useMemo(() => getUniqueValues(deals.map((deal) => deal.city)), [deals]);
+  const segmentStates = useMemo(() => getUniqueValues(deals.map((deal) => deal.state)), [deals]);
+  const segmentTags = useMemo(() => getCompetitorTagOptions(deals), [deals]);
+  const segmentSources = useMemo(() => getUniqueValues(deals.map((deal) => normalizeSourceValue(deal.source))), [deals]);
+
+  const segmentedDeals = useMemo(() => {
+    const filtered = deals.filter((deal) => {
+      if (segmentsFilters.city && (deal.city ?? "").trim() !== segmentsFilters.city) return false;
+      if (segmentsFilters.state && (deal.state ?? "").trim() !== segmentsFilters.state) return false;
+      if (segmentsFilters.tag) {
+        const matchesTag = deal.tags.some((tag) => tag === segmentsFilters.tag) || (deal.competitor ?? "") === segmentsFilters.tag;
+        if (!matchesTag) return false;
+      }
+      if (segmentsFilters.source && normalizeSourceValue(deal.source) !== segmentsFilters.source) return false;
+      if (segmentsFilters.stage && deal.stage !== segmentsFilters.stage) return false;
+
+      const createdDate = getDateOnlyValue(deal.createdAt);
+      if (segmentsFilters.dateFrom && (!createdDate || createdDate < segmentsFilters.dateFrom)) return false;
+      if (segmentsFilters.dateTo && (!createdDate || createdDate > segmentsFilters.dateTo)) return false;
+      return true;
+    });
+
+    const sorted = [...filtered].sort((a, b) => {
+      const leftValue = (() => {
+        switch (segmentsSortKey) {
+          case "name":
+            return getPrimaryName(a);
+          case "company":
+            return getCompanyName(a);
+          case "email":
+            return a.email;
+          case "city":
+            return a.city ?? "";
+          case "state":
+            return a.state ?? "";
+          case "tags":
+            return [a.competitor, ...a.tags].filter(Boolean).join(", ");
+          case "stage":
+            return STAGE_META[a.stage].label;
+          case "source":
+            return formatSourceLabel(a.source);
+          case "created":
+            return a.createdAt;
+        }
+      })();
+
+      const rightValue = (() => {
+        switch (segmentsSortKey) {
+          case "name":
+            return getPrimaryName(b);
+          case "company":
+            return getCompanyName(b);
+          case "email":
+            return b.email;
+          case "city":
+            return b.city ?? "";
+          case "state":
+            return b.state ?? "";
+          case "tags":
+            return [b.competitor, ...b.tags].filter(Boolean).join(", ");
+          case "stage":
+            return STAGE_META[b.stage].label;
+          case "source":
+            return formatSourceLabel(b.source);
+          case "created":
+            return b.createdAt;
+        }
+      })();
+
+      const comparison =
+        segmentsSortKey === "created"
+          ? new Date(String(leftValue)).getTime() - new Date(String(rightValue)).getTime()
+          : String(leftValue).localeCompare(String(rightValue));
+
+      return segmentsSortDirection === "asc" ? comparison : -comparison;
+    });
+
+    return sorted;
+  }, [deals, segmentsFilters, segmentsSortDirection, segmentsSortKey]);
+  const activeSegmentsFilters = useMemo(
+    () =>
+      [
+        segmentsFilters.city ? { key: "city", label: `City: ${segmentsFilters.city}` } : null,
+        segmentsFilters.state ? { key: "state", label: `State: ${segmentsFilters.state}` } : null,
+        segmentsFilters.tag ? { key: "tag", label: `Competitor/Tag: ${segmentsFilters.tag}` } : null,
+        segmentsFilters.source ? { key: "source", label: `Source: ${formatSourceLabel(segmentsFilters.source)}` } : null,
+        segmentsFilters.stage
+          ? { key: "stage", label: `Stage: ${STAGE_META[segmentsFilters.stage as PipelineStage].label}` }
+          : null,
+        segmentsFilters.dateFrom ? { key: "dateFrom", label: `From: ${segmentsFilters.dateFrom}` } : null,
+        segmentsFilters.dateTo ? { key: "dateTo", label: `To: ${segmentsFilters.dateTo}` } : null,
+      ].filter((entry): entry is { key: keyof SegmentsFilters; label: string } => entry !== null),
+    [segmentsFilters],
+  );
   const totalContacts = deals.length;
   const newThisWeek = useMemo(() => deals.filter((deal) => isWithinLastSevenDays(deal.createdAt)).length, [deals]);
   const wonThisMonth = useMemo(
@@ -1065,10 +1225,153 @@ export default function PipelinePage() {
     setShowPhoneComposer(false);
   }
 
+  function startEditingPhoneCall(entry: PhoneLogEntry) {
+    setEditingPhoneId(entry.id);
+    setEditingPhoneDateDraft(entry.date);
+    setEditingPhoneNotesDraft(entry.notes);
+  }
+
+  function cancelEditingPhoneCall() {
+    setEditingPhoneId("");
+    setEditingPhoneDateDraft("");
+    setEditingPhoneNotesDraft("");
+  }
+
+  async function savePhoneCallEdit(deal: PipelineDeal, callId: string) {
+    const nextNotes = editingPhoneNotesDraft.trim();
+    const nextDate = editingPhoneDateDraft.trim() || formatPhoneLogDate();
+    if (!nextNotes) return;
+
+    const nextPhoneLog = deal.phoneLog.map((entry) =>
+      entry.id === callId
+        ? {
+            ...entry,
+            date: nextDate,
+            notes: nextNotes,
+          }
+        : entry,
+    );
+
+    const updated = await patchDeal(deal.id, { phoneLog: nextPhoneLog });
+    if (updated) cancelEditingPhoneCall();
+  }
+
   async function deletePhoneCall(deal: PipelineDeal, callId: string) {
+    if (!window.confirm("Delete this phone call entry?")) return;
     await patchDeal(deal.id, {
       phoneLog: deal.phoneLog.filter((entry) => entry.id !== callId),
     });
+  }
+
+  function startEditingQuickNote(entry: QuickNoteEntry) {
+    setEditingQuickNoteId(entry.id);
+    setEditingQuickNoteDraft(entry.text);
+  }
+
+  function cancelEditingQuickNote() {
+    setEditingQuickNoteId("");
+    setEditingQuickNoteDraft("");
+  }
+
+  async function saveQuickNoteEdit(deal: PipelineDeal, noteId: string) {
+    const current = parseNotes(deal.notes, deal.createdAt);
+    const nextText = editingQuickNoteDraft.trim();
+    if (!nextText) return;
+
+    const nextSerialized = serializeNotes({
+      rolodex: current.rolodex,
+      quickNotes: current.quickNotes.map((entry) => (entry.id === noteId ? { ...entry, text: nextText } : entry)),
+    });
+
+    const updated = await patchDeal(deal.id, { notes: nextSerialized });
+    if (updated) cancelEditingQuickNote();
+  }
+
+  async function deleteQuickNote(deal: PipelineDeal, noteId: string) {
+    if (!window.confirm("Delete this quick note?")) return;
+
+    const current = parseNotes(deal.notes, deal.createdAt);
+    await patchDeal(deal.id, {
+      notes: serializeNotes({
+        rolodex: current.rolodex,
+        quickNotes: current.quickNotes.filter((entry) => entry.id !== noteId),
+      }),
+    });
+  }
+
+  function updateSegmentsFilter<Key extends keyof SegmentsFilters>(key: Key, value: SegmentsFilters[Key]) {
+    setSegmentsFilters((current) => ({ ...current, [key]: value }));
+  }
+
+  function toggleSegmentsSort(key: SegmentsSortKey) {
+    if (segmentsSortKey === key) {
+      setSegmentsSortDirection((current) => (current === "asc" ? "desc" : "asc"));
+      return;
+    }
+
+    setSegmentsSortKey(key);
+    setSegmentsSortDirection(key === "created" ? "desc" : "asc");
+  }
+
+  function downloadSegmentsExport(format: "csv" | "json") {
+    const filename = `pipeline-segments-${new Date().toISOString().slice(0, 10)}.${format}`;
+    const rows = segmentedDeals.map((deal) => ({
+      id: deal.id,
+      name: getPrimaryName(deal),
+      company: getCompanyName(deal),
+      email: deal.email,
+      phone: getPhone(deal),
+      website: getWebsite(deal),
+      city: deal.city ?? "",
+      state: deal.state ?? "",
+      source: normalizeSourceValue(deal.source),
+      sourceLabel: formatSourceLabel(deal.source),
+      stage: deal.stage,
+      stageLabel: STAGE_META[deal.stage].label,
+      competitor: deal.competitor ?? "",
+      tags: deal.tags.join(", "),
+      createdAt: deal.createdAt,
+      stageUpdatedAt: deal.stageUpdatedAt ?? "",
+      rolodex: parseNotes(deal.notes, deal.createdAt).rolodex,
+      quickNotes: parseNotes(deal.notes, deal.createdAt).quickNotes.map((entry) => entry.text).join(" | "),
+      phoneLog: deal.phoneLog.map((entry) => `${entry.date}: ${entry.notes}`).join(" | "),
+    }));
+
+    const payload =
+      format === "json"
+        ? JSON.stringify(rows, null, 2)
+        : [
+            Object.keys(rows[0] ?? {
+              id: "",
+              name: "",
+              company: "",
+              email: "",
+              phone: "",
+              website: "",
+              city: "",
+              state: "",
+              source: "",
+              sourceLabel: "",
+              stage: "",
+              stageLabel: "",
+              competitor: "",
+              tags: "",
+              createdAt: "",
+              stageUpdatedAt: "",
+              rolodex: "",
+              quickNotes: "",
+              phoneLog: "",
+            }).join(","),
+            ...rows.map((row) => Object.values(row).map(csvEscape).join(",")),
+          ].join("\n");
+
+    const blob = new Blob([payload], { type: format === "json" ? "application/json;charset=utf-8" : "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = filename;
+    anchor.click();
+    URL.revokeObjectURL(url);
   }
 
   async function convertToClient(deal: PipelineDeal) {
@@ -1639,6 +1942,212 @@ export default function PipelinePage() {
         </section>
       ) : null}
 
+      {activeSubview === "segments" ? (
+        <div className="space-y-4">
+          <section className="glass-panel p-5 sm:p-6">
+            <div className="flex items-center gap-2">
+              <Download size={16} className="text-blue-200" />
+              <div>
+                <p className="section-title">Segments & Export</p>
+                <p className="mt-1 text-sm text-slate-400">Filter the pipeline, inspect matching contacts, and export the current slice.</p>
+              </div>
+            </div>
+
+            <div className="glass-card mt-5 grid gap-3 rounded-2xl p-4 xl:grid-cols-[repeat(5,minmax(0,1fr))_minmax(0,1.4fr)]">
+              <select
+                value={segmentsFilters.city}
+                onChange={(event) => updateSegmentsFilter("city", event.target.value)}
+                className="rounded-2xl border border-white/10 bg-[#0a0a0f] px-4 py-3 text-sm text-white outline-none focus:border-blue-400/40"
+              >
+                <option value="" className="text-black">All Cities</option>
+                {segmentCities.map((city) => (
+                  <option key={city} value={city} className="text-black">{city}</option>
+                ))}
+              </select>
+              <select
+                value={segmentsFilters.state}
+                onChange={(event) => updateSegmentsFilter("state", event.target.value)}
+                className="rounded-2xl border border-white/10 bg-[#0a0a0f] px-4 py-3 text-sm text-white outline-none focus:border-blue-400/40"
+              >
+                <option value="" className="text-black">All States</option>
+                {segmentStates.map((state) => (
+                  <option key={state} value={state} className="text-black">{state}</option>
+                ))}
+              </select>
+              <select
+                value={segmentsFilters.tag}
+                onChange={(event) => updateSegmentsFilter("tag", event.target.value)}
+                className="rounded-2xl border border-white/10 bg-[#0a0a0f] px-4 py-3 text-sm text-white outline-none focus:border-blue-400/40"
+              >
+                <option value="" className="text-black">All Competitors/Tags</option>
+                {segmentTags.map((tag) => (
+                  <option key={tag} value={tag} className="text-black">{tag}</option>
+                ))}
+              </select>
+              <select
+                value={segmentsFilters.source}
+                onChange={(event) => updateSegmentsFilter("source", event.target.value)}
+                className="rounded-2xl border border-white/10 bg-[#0a0a0f] px-4 py-3 text-sm text-white outline-none focus:border-blue-400/40"
+              >
+                <option value="" className="text-black">All Sources</option>
+                {segmentSources.map((source) => (
+                  <option key={source} value={source} className="text-black">{formatSourceLabel(source)}</option>
+                ))}
+              </select>
+              <select
+                value={segmentsFilters.stage}
+                onChange={(event) => updateSegmentsFilter("stage", event.target.value)}
+                className="rounded-2xl border border-white/10 bg-[#0a0a0f] px-4 py-3 text-sm text-white outline-none focus:border-blue-400/40"
+              >
+                <option value="" className="text-black">All Stages</option>
+                {PIPELINE_STAGES.map((stage) => (
+                  <option key={stage} value={stage} className="text-black">{STAGE_META[stage].label}</option>
+                ))}
+              </select>
+              <div className="grid gap-3 md:grid-cols-2">
+                <input
+                  type="date"
+                  value={segmentsFilters.dateFrom}
+                  onChange={(event) => updateSegmentsFilter("dateFrom", event.target.value)}
+                  className="rounded-2xl border border-white/10 bg-[#0a0a0f] px-4 py-3 text-sm text-white outline-none focus:border-blue-400/40"
+                />
+                <input
+                  type="date"
+                  value={segmentsFilters.dateTo}
+                  onChange={(event) => updateSegmentsFilter("dateTo", event.target.value)}
+                  className="rounded-2xl border border-white/10 bg-[#0a0a0f] px-4 py-3 text-sm text-white outline-none focus:border-blue-400/40"
+                />
+              </div>
+            </div>
+
+            {activeSegmentsFilters.length ? (
+              <div className="mt-4 flex flex-wrap gap-2">
+                {activeSegmentsFilters.map((filter) => (
+                  <button
+                    key={filter.key}
+                    type="button"
+                    onClick={() => updateSegmentsFilter(filter.key, "")}
+                    className="inline-flex items-center gap-2 rounded-full border border-blue-300/30 bg-blue-500/10 px-3 py-1.5 text-xs uppercase tracking-[0.16em] text-blue-100"
+                  >
+                    <span>{filter.label}</span>
+                    <X size={12} />
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => setSegmentsFilters(EMPTY_SEGMENTS_FILTERS)}
+                  className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs uppercase tracking-[0.16em] text-slate-300"
+                >
+                  Clear All
+                </button>
+              </div>
+            ) : null}
+          </section>
+
+          <section className="glass-panel p-5 sm:p-6">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="section-title">{segmentedDeals.length} contacts match filters</p>
+                <p className="mt-1 text-sm text-slate-400">Sortable table view of the current segment.</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => downloadSegmentsExport("csv")}
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-blue-300/30 bg-[linear-gradient(135deg,#2093FF,#0026FF)] px-4 py-2 text-sm font-semibold text-white"
+                >
+                  <Download size={16} />
+                  Download CSV
+                </button>
+                <button
+                  type="button"
+                  onClick={() => downloadSegmentsExport("json")}
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-200"
+                >
+                  <FileSpreadsheet size={16} />
+                  Download JSON
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-5 overflow-x-auto rounded-2xl border border-white/10 bg-[#05070d]">
+              <table className="min-w-full text-left text-sm text-slate-200">
+                <thead className="bg-white/5 text-[11px] uppercase tracking-[0.16em] text-slate-400">
+                  <tr>
+                    {[
+                      ["name", "Name"],
+                      ["company", "Company"],
+                      ["email", "Email"],
+                      ["city", "City"],
+                      ["state", "State"],
+                      ["tags", "Tags"],
+                      ["stage", "Stage"],
+                      ["source", "Source"],
+                      ["created", "Created"],
+                    ].map(([key, label]) => {
+                      const active = segmentsSortKey === key;
+                      return (
+                        <th key={key} className="px-4 py-3">
+                          <button
+                            type="button"
+                            onClick={() => toggleSegmentsSort(key as SegmentsSortKey)}
+                            className="inline-flex items-center gap-2 text-left transition hover:text-white"
+                          >
+                            <span>{label}</span>
+                            {active ? (
+                              <ChevronUp size={14} className={cn("transition", segmentsSortDirection === "desc" && "rotate-180")} />
+                            ) : (
+                              <ArrowUpDown size={14} />
+                            )}
+                          </button>
+                        </th>
+                      );
+                    })}
+                  </tr>
+                </thead>
+                <tbody>
+                  {segmentedDeals.length ? (
+                    segmentedDeals.slice(0, segmentsVisibleCount).map((deal, index) => (
+                      <tr key={deal.id} className={cn("border-t border-white/10", index % 2 === 0 ? "bg-white/[0.02]" : "bg-transparent")}>
+                        <td className="px-4 py-3 font-semibold text-white">{getPrimaryName(deal)}</td>
+                        <td className="px-4 py-3">{getCompanyName(deal)}</td>
+                        <td className="px-4 py-3">{deal.email || "-"}</td>
+                        <td className="px-4 py-3">{deal.city || "-"}</td>
+                        <td className="px-4 py-3">{deal.state || "-"}</td>
+                        <td className="px-4 py-3">
+                          {[deal.competitor, ...deal.tags].filter(Boolean).join(", ") || "-"}
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className={cn("rounded-full border px-2.5 py-1 text-[10px] uppercase tracking-[0.16em]", STAGE_META[deal.stage].pill)}>
+                            {STAGE_META[deal.stage].label}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">{formatSourceLabel(deal.source)}</td>
+                        <td className="px-4 py-3">{formatCreatedAt(deal.createdAt)}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={9} className="px-4 py-8 text-center text-slate-400">No contacts match the current filters.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {segmentedDeals.length > segmentsVisibleCount ? (
+              <button
+                type="button"
+                onClick={() => setSegmentsVisibleCount((current) => current + 50)}
+                className="glass-card mt-4 w-full rounded-2xl py-3 text-sm text-blue-200 transition hover:bg-white/5"
+              >
+                Load More ({Math.min(segmentsVisibleCount, segmentedDeals.length)} of {segmentedDeals.length})
+              </button>
+            ) : null}
+          </section>
+        </div>
+      ) : null}
+
       {activeSubview === "contacts" ? (
         <div className="grid gap-4 lg:grid-cols-[280px_minmax(0,1fr)_240px]">
           <aside className={cn("glass-panel p-4", showMobileDetail ? "hidden lg:block" : "block")}>
@@ -1985,21 +2494,77 @@ export default function PipelinePage() {
 
                   <div className="mt-4 space-y-3">
                     {phoneLog.length ? (
-                      phoneLog.map((entry) => (
-                        <div key={entry.id} className="glass-card flex items-start justify-between gap-3 rounded-2xl p-4">
-                          <div>
-                            <p className="text-xs uppercase tracking-[0.16em] text-blue-100">{entry.date}</p>
-                            <p className="mt-2 text-sm text-white">{entry.notes}</p>
+                      phoneLog.map((entry) => {
+                        const isEditing = editingPhoneId === entry.id;
+
+                        return (
+                          <div key={entry.id} className="glass-card rounded-2xl p-4">
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0 flex-1">
+                                {isEditing ? (
+                                  <div className="grid gap-3 md:grid-cols-[160px_minmax(0,1fr)]">
+                                    <input
+                                      value={editingPhoneDateDraft}
+                                      onChange={(event) => setEditingPhoneDateDraft(event.target.value)}
+                                      className="rounded-2xl border border-white/10 bg-[#0a0a0f] px-3 py-3 text-sm text-white outline-none focus:border-blue-400/40"
+                                    />
+                                    <input
+                                      value={editingPhoneNotesDraft}
+                                      onChange={(event) => setEditingPhoneNotesDraft(event.target.value)}
+                                      className="rounded-2xl border border-white/10 bg-[#0a0a0f] px-3 py-3 text-sm text-white outline-none focus:border-blue-400/40"
+                                    />
+                                  </div>
+                                ) : (
+                                  <>
+                                    <p className="text-xs uppercase tracking-[0.16em] text-blue-100">{entry.date}</p>
+                                    <p className="mt-2 text-sm text-white">{entry.notes}</p>
+                                  </>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {isEditing ? (
+                                  <>
+                                    <button
+                                      type="button"
+                                      onClick={() => void savePhoneCallEdit(detailDeal, entry.id)}
+                                      disabled={!editingPhoneNotesDraft.trim()}
+                                      className="rounded-full border border-blue-300/30 bg-blue-500/10 px-3 py-1.5 text-xs uppercase tracking-[0.16em] text-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                      Save
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={cancelEditingPhoneCall}
+                                      className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs uppercase tracking-[0.16em] text-slate-300"
+                                    >
+                                      Cancel
+                                    </button>
+                                  </>
+                                ) : (
+                                  <>
+                                    <button
+                                      type="button"
+                                      onClick={() => startEditingPhoneCall(entry)}
+                                      className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-300 transition hover:border-blue-400/40 hover:text-blue-100"
+                                      aria-label="Edit phone call"
+                                    >
+                                      <Pencil size={14} />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => void deletePhoneCall(detailDeal, entry.id)}
+                                      className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-red-500/30 bg-red-500/10 text-red-200 transition hover:bg-red-500/20"
+                                      aria-label="Delete phone call"
+                                    >
+                                      <Trash2 size={14} />
+                                    </button>
+                                  </>
+                                )}
+                              </div>
+                            </div>
                           </div>
-                          <button
-                            type="button"
-                            onClick={() => void deletePhoneCall(detailDeal, entry.id)}
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-300 transition hover:border-red-400/40 hover:text-red-200"
-                          >
-                            <X size={14} />
-                          </button>
-                        </div>
-                      ))
+                        );
+                      })
                     ) : (
                       <div className="glass-card rounded-2xl p-5 text-sm text-slate-400">No phone calls logged yet.</div>
                     )}
@@ -2036,12 +2601,68 @@ export default function PipelinePage() {
                       selectedNotes.quickNotes
                         .slice()
                         .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-                        .map((note) => (
-                          <div key={note.id} className="glass-card rounded-2xl p-4">
-                            <p className="text-xs uppercase tracking-[0.16em] text-blue-100">{formatCreatedAt(note.timestamp)}</p>
-                            <p className="mt-2 text-sm text-white">{note.text}</p>
-                          </div>
-                        ))
+                        .map((note) => {
+                          const isEditing = editingQuickNoteId === note.id;
+
+                          return (
+                            <div key={note.id} className="glass-card rounded-2xl p-4">
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0 flex-1">
+                                  <p className="text-xs uppercase tracking-[0.16em] text-blue-100">{formatCreatedAt(note.timestamp)}</p>
+                                  {isEditing ? (
+                                    <input
+                                      value={editingQuickNoteDraft}
+                                      onChange={(event) => setEditingQuickNoteDraft(event.target.value)}
+                                      className="mt-3 w-full rounded-2xl border border-white/10 bg-[#0a0a0f] px-4 py-3 text-sm text-white outline-none focus:border-blue-400/40"
+                                    />
+                                  ) : (
+                                    <p className="mt-2 text-sm text-white">{note.text}</p>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  {isEditing ? (
+                                    <>
+                                      <button
+                                        type="button"
+                                        onClick={() => void saveQuickNoteEdit(detailDeal, note.id)}
+                                        disabled={!editingQuickNoteDraft.trim()}
+                                        className="rounded-full border border-blue-300/30 bg-blue-500/10 px-3 py-1.5 text-xs uppercase tracking-[0.16em] text-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
+                                      >
+                                        Save
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={cancelEditingQuickNote}
+                                        className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs uppercase tracking-[0.16em] text-slate-300"
+                                      >
+                                        Cancel
+                                      </button>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <button
+                                        type="button"
+                                        onClick={() => startEditingQuickNote(note)}
+                                        className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-300 transition hover:border-blue-400/40 hover:text-blue-100"
+                                        aria-label="Edit quick note"
+                                      >
+                                        <Pencil size={14} />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => void deleteQuickNote(detailDeal, note.id)}
+                                        className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-red-500/30 bg-red-500/10 text-red-200 transition hover:bg-red-500/20"
+                                        aria-label="Delete quick note"
+                                      >
+                                        <Trash2 size={14} />
+                                      </button>
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })
                     ) : (
                       <div className="glass-card rounded-2xl p-5 text-sm text-slate-400">No quick notes yet.</div>
                     )}
