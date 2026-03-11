@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { enrichDeal, isEnrichableDeal } from "@/lib/enrich-utils";
+import { appendPipelineActivity, createLeadCreatedActivity } from "@/lib/pipeline-activity";
 import { getPipelineDeals, writePipelineDeals } from "@/lib/pipeline-store";
 import { ConversationHistoryItem, PipelineDeal } from "@/lib/pipeline-types";
 
@@ -285,6 +286,7 @@ export async function POST(request: Request) {
     const deal = createWebhookDeal(lead, record, history);
     deals.push(deal);
     await writePipelineDeals(deals);
+    await appendPipelineActivity(createLeadCreatedActivity(deal));
 
     if (isEnrichableDeal(deal)) {
       try {

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { appendPipelineActivity, createEnrichmentActivity } from "@/lib/pipeline-activity";
 import { getPipelineDeals, writePipelineDeals } from "@/lib/pipeline-store";
 import { PipelineDeal } from "@/lib/pipeline-types";
 import { extractLocationFromHtml, fetchWebsiteHtml, getDealWebsite } from "@/lib/enrich-utils";
@@ -64,6 +65,7 @@ export async function POST(request: Request) {
     const results: EnrichResult[] = [];
     let enriched = 0;
     let failed = 0;
+    const activityEntries = [];
 
     for (let index = 0; index < targets.length; index += 1) {
       const deal = targets[index];
@@ -103,6 +105,7 @@ export async function POST(request: Request) {
               enrichedAt: new Date().toISOString(),
             },
           };
+          activityEntries.push(createEnrichmentActivity(current, deals[existingIndex]));
         }
 
         enriched += 1;
@@ -138,6 +141,9 @@ export async function POST(request: Request) {
     }
 
     await writePipelineDeals(deals);
+    if (activityEntries.length) {
+      await appendPipelineActivity(activityEntries);
+    }
 
     return NextResponse.json({
       enriched,

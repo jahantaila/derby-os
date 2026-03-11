@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { enrichDeal, isEnrichableDeal } from "@/lib/enrich-utils";
+import { appendPipelineActivity, createLeadCreatedActivity, createStageChangedActivity } from "@/lib/pipeline-activity";
 import { getPipelineDeals, PipelineDealUpsertInput, upsertPipelineDealByEmail } from "@/lib/pipeline-store";
 
 export async function GET() {
@@ -16,9 +17,23 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Lead name and client are required." }, { status: 400 });
     }
 
+    const previousDeals = body.email ? await getPipelineDeals() : [];
+    const previousDeal =
+      body.email?.trim().toLowerCase()
+        ? previousDeals.find((deal) => deal.email.trim().toLowerCase() === body.email?.trim().toLowerCase())
+        : null;
+
     const result = await upsertPipelineDealByEmail(body);
     if (!result) {
       return NextResponse.json({ error: "Lead name and client are required." }, { status: 400 });
+    }
+
+    if (result.action === "created") {
+      await appendPipelineActivity(createLeadCreatedActivity(result.deal));
+    }
+
+    if (result.action === "updated" && previousDeal && previousDeal.stage !== result.deal.stage) {
+      await appendPipelineActivity(createStageChangedActivity(previousDeal, result.deal));
     }
 
     let responseDeal = result.deal;

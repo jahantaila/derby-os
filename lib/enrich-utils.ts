@@ -1,4 +1,5 @@
 import { getPipelineDeals, writePipelineDeals } from "@/lib/pipeline-store";
+import { appendPipelineActivity, createEnrichmentActivity } from "@/lib/pipeline-activity";
 import { PipelineDeal } from "@/lib/pipeline-types";
 
 export const US_STATE_ABBREVS: Record<string, string> = {
@@ -453,6 +454,7 @@ export async function enrichDeal(dealId: string): Promise<PipelineDeal | null> {
 
     deals[index] = updated;
     await writePipelineDeals(deals);
+    await appendPipelineActivity(createEnrichmentActivity(current, updated));
     return updated;
   } catch (error) {
     deals[index] = {

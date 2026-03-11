@@ -1,661 +1,576 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { type ComponentType, useEffect, useMemo, useState } from "react";
 import {
   ArrowRight,
   ArrowUpRight,
   BriefcaseBusiness,
-  CalendarDays,
-  Circle,
-  Clock3,
-  FileText,
-  FolderKanban,
-  LayoutGrid,
-  LineChart,
-  Plus,
-  Users,
+  Building2,
+  CalendarClock,
+  Flame,
+  MapPinned,
+  PhoneCall,
+  RefreshCw,
+  Sparkles,
+  TrendingDown,
+  TrendingUp,
 } from "lucide-react";
-import { ErrorBoundary } from "@/components/error-boundary";
-import { GridSkeleton, TableSkeleton } from "@/components/loading-skeleton";
+import {
+  buildMorningSummary,
+  diffEasternDays,
+  EASTERN_TIME_ZONE,
+  getPrimaryName,
+  HOT_LEAD_STAGES,
+  type CampaignStat,
+  type MorningSummary,
+  STAGE_META,
+} from "@/lib/pipeline-dashboard";
+import { type PipelineActivityEntry } from "@/lib/pipeline-activity";
+import { type PipelineDeal, type PipelineStage } from "@/lib/pipeline-types";
 
-type AgentStatus = "online" | "working" | "idle" | "offline";
-type TaskStatus = "todo" | "in-progress" | "blocked" | "done";
-type TaskPriority = "high" | "medium" | "low";
-
-type Agent = {
-  id: string;
-  name: string;
-  role: string;
-  department: "Executive" | "Marketing" | "Development" | "Fulfillment";
-  type: "ceo" | "agent" | "employee";
-  model: string | null;
-  status: string;
-  currentTask: string;
-};
-
-type Task = {
-  id: string;
-  title: string;
-  status: TaskStatus;
-  priority: TaskPriority;
-  assignee: string;
-  client: string;
-  dueDate: string | null;
-};
-
-type Client = {
-  id: string;
-  name: string;
-  status?: string;
-};
-
-type ActivityItem = {
-  id: string;
-  message: string;
-  timestamp: string;
-  actor: string;
-  type: string;
-};
-
-type PipelineLead = {
-  id: string;
-  createdAt: string;
-};
-
-type DocumentRecord = {
-  id: string;
-  title: string;
-  category: string;
-  createdBy: string;
-  createdAt: string;
-  updatedAt: string;
-};
-
-type CalendarEvent = {
-  id: string;
-  title: string;
-  date: string;
-  time: string | null;
-  assignee: string;
-  type: "deadline" | "milestone" | "meeting" | "task";
-  client: string;
-};
-
-type DashboardMetric = {
-  label: string;
+type StatTrend = {
   value: number;
-  href: string;
-  icon: typeof Users;
-};
-
-type QuickAction = {
+  direction: "up" | "down" | "neutral";
   label: string;
+};
+
+type DashboardData = {
+  pipeline: PipelineDeal[];
+  summary: MorningSummary;
+  activity: PipelineActivityEntry[];
+};
+
+type PriorityItem = {
+  id: string;
   href: string;
-  icon: typeof Plus;
+  icon: typeof Flame;
+  eyebrow: string;
+  title: string;
+  detail: string;
+  tone: string;
+  priority: number;
 };
 
-const TIME_ZONE = "America/New_York";
+type GeographyMode = "city" | "state";
 
-const PRIORITY_STYLES: Record<TaskPriority, string> = {
-  high: "border-rose-400/30 bg-rose-500/10 text-rose-200",
-  medium: "border-amber-400/30 bg-amber-500/10 text-amber-100",
-  low: "border-sky-400/30 bg-sky-500/10 text-sky-100",
-};
+const REFRESH_INTERVAL_MS = 30000;
 
-const TASK_STATUS_STYLES: Record<TaskStatus, string> = {
-  todo: "bg-slate-400",
-  "in-progress": "bg-[#2093FF]",
-  blocked: "bg-rose-400",
-  done: "bg-emerald-400",
-};
-
-const AGENT_STATUS_STYLES: Record<AgentStatus, { dot: string; badge: string; pulse: boolean }> = {
-  online: { dot: "bg-emerald-400", badge: "text-emerald-200", pulse: true },
-  working: { dot: "bg-emerald-400", badge: "text-emerald-200", pulse: true },
-  idle: { dot: "bg-amber-300", badge: "text-amber-100", pulse: false },
-  offline: { dot: "bg-slate-500", badge: "text-slate-300", pulse: false },
-};
-
-const CATEGORY_STYLES: Record<string, string> = {
-  report: "border-sky-400/30 bg-sky-500/10 text-sky-100",
-  "ad-copy": "border-indigo-400/30 bg-indigo-500/10 text-indigo-100",
-  proposal: "border-emerald-400/30 bg-emerald-500/10 text-emerald-100",
-  "campaign-plan": "border-cyan-400/30 bg-cyan-500/10 text-cyan-100",
-  analysis: "border-blue-400/30 bg-blue-500/10 text-blue-100",
-  other: "border-slate-400/30 bg-slate-500/10 text-slate-100",
-};
-
-const EVENT_TYPE_STYLES: Record<CalendarEvent["type"], string> = {
-  deadline: "border-rose-400/30 bg-rose-500/10 text-rose-200",
-  milestone: "border-blue-400/30 bg-blue-500/10 text-blue-100",
-  meeting: "border-emerald-400/30 bg-emerald-500/10 text-emerald-100",
-  task: "border-slate-400/30 bg-slate-500/10 text-slate-100",
-};
-
-function normalizeAgentStatus(status: string): AgentStatus {
-  const normalized = status.toLowerCase();
-  if (normalized === "working") return "working";
-  if (normalized === "active" || normalized === "online") return "online";
-  if (normalized === "idle") return "idle";
-  return "offline";
-}
-
-function formatClock(date: Date) {
-  return new Intl.DateTimeFormat("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-    timeZone: TIME_ZONE,
-  }).format(date);
-}
-
-function formatDateLabel(date: Date) {
-  return new Intl.DateTimeFormat("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-    timeZone: TIME_ZONE,
-  }).format(date);
-}
-
-function formatShortDate(value: string) {
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return "Unknown";
+function formatDate(value: string | null) {
+  if (!value) return "--";
+  const parsed = /^\d{4}-\d{2}-\d{2}$/.test(value) ? new Date(`${value}T12:00:00.000Z`) : new Date(value);
+  if (Number.isNaN(parsed.getTime())) return value;
   return new Intl.DateTimeFormat("en-US", {
     month: "short",
     day: "numeric",
-    timeZone: TIME_ZONE,
+    timeZone: EASTERN_TIME_ZONE,
   }).format(parsed);
 }
 
-function formatShortDateTime(value: string) {
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return "Unknown";
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-    timeZone: TIME_ZONE,
-  }).format(parsed);
-}
-
-function formatCalendarEvent(event: CalendarEvent) {
-  const base = new Date(`${event.date}T${event.time ?? "12:00"}:00`);
-  if (Number.isNaN(base.getTime())) return "TBD";
-
-  const datePart = new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    timeZone: TIME_ZONE,
-  }).format(base);
-
-  if (!event.time) return datePart;
-
-  return `${datePart} · ${new Intl.DateTimeFormat("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-    timeZone: TIME_ZONE,
-  }).format(base)}`;
-}
-
-function relativeTimeFromIso(value: string, now: Date): string {
-  const timestamp = Date.parse(value);
-  if (Number.isNaN(timestamp)) return "Unknown";
-  const seconds = Math.max(0, Math.floor((now.getTime() - timestamp) / 1000));
-  if (seconds < 60) return "Just now";
+function formatRelativeFromNow(value: string, now: number) {
+  const parsed = Date.parse(value);
+  if (Number.isNaN(parsed)) return "Unknown";
+  const seconds = Math.max(0, Math.floor((now - parsed) / 1000));
+  if (seconds < 60) return `${seconds}s ago`;
   if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
   if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
   return `${Math.floor(seconds / 86400)}d ago`;
 }
 
-function parseSortableDate(value: string | null | undefined) {
-  if (!value) return Number.POSITIVE_INFINITY;
-  const parsed = Date.parse(value);
-  return Number.isNaN(parsed) ? Number.POSITIVE_INFINITY : parsed;
+function buildTrend(value: number, labelUp: string, labelDown: string, labelNeutral: string): StatTrend {
+  if (value > 0) return { value, direction: "up", label: labelUp };
+  if (value < 0) return { value, direction: "down", label: labelDown };
+  return { value, direction: "neutral", label: labelNeutral };
 }
 
-function titleCase(value: string) {
-  return value
-    .split("-")
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
+function getYesterdayCount(deals: PipelineDeal[]) {
+  return deals.filter((deal) => diffEasternDays(deal.createdAt) === 1).length;
 }
 
-function resolveAssignee(assignee: string, agents: Agent[]) {
-  const normalized = assignee.trim().toLowerCase();
-  return agents.find((agent) => agent.id.toLowerCase() === normalized || agent.name.toLowerCase() === normalized) ?? null;
+function getPreviousWeekCount(deals: PipelineDeal[]) {
+  return deals.filter((deal) => {
+    const age = diffEasternDays(deal.createdAt);
+    return age >= 7 && age < 14;
+  }).length;
 }
 
-function DashboardSectionHeader({ title, href }: { title: string; href: string }) {
+function getOldestStageDate(deal: PipelineDeal) {
+  return deal.stageUpdatedAt || deal.createdAt;
+}
+
+function buildPriorityItems(deals: PipelineDeal[], summary: MorningSummary): PriorityItem[] {
+  const freshInterested = deals
+    .filter((deal) => HOT_LEAD_STAGES.includes(deal.stage))
+    .filter((deal) => diffEasternDays(deal.createdAt) <= 1)
+    .slice(0, 3)
+    .map((deal) => ({
+      id: `fresh-${deal.id}`,
+      href: `/pipeline?view=contacts&contact=${deal.id}`,
+      icon: Flame,
+      eyebrow: "New Interested Leads",
+      title: `${getPrimaryName(deal)} at ${deal.client}`,
+      detail: "New lead came in within the last 24 hours. Review, qualify, and assign next action.",
+      tone: "border-emerald-400/30 bg-emerald-500/12 text-emerald-100",
+      priority: 100 - diffEasternDays(deal.createdAt),
+    }));
+
+  const followUps = summary.needsFollowUp.slice(0, 3).map((lead) => ({
+    id: `follow-up-${lead.id}`,
+    href: `/pipeline?view=contacts&contact=${lead.id}`,
+    icon: PhoneCall,
+    eyebrow: "Overdue Follow-Ups",
+    title: `Call ${lead.name} at ${lead.company}`,
+    detail: `Contacted ${lead.ageDays} days ago with no stage change. Follow up now.`,
+    tone: "border-amber-400/30 bg-amber-500/12 text-amber-100",
+    priority: 90 - lead.ageDays,
+  }));
+
+  const staleLeads = deals
+    .filter((deal) => deal.stage === "new-lead" && diffEasternDays(deal.createdAt) >= 7)
+    .sort((left, right) => diffEasternDays(right.createdAt) - diffEasternDays(left.createdAt))
+    .slice(0, 2)
+    .map((deal) => ({
+      id: `stale-${deal.id}`,
+      href: `/pipeline?view=contacts&contact=${deal.id}`,
+      icon: BriefcaseBusiness,
+      eyebrow: "Stale Leads",
+      title: `${getPrimaryName(deal)} at ${deal.client}`,
+      detail: `Sitting in New Lead for ${diffEasternDays(deal.createdAt)} days. Needs first touch.`,
+      tone: "border-sky-400/30 bg-sky-500/12 text-sky-100",
+      priority: 70 - diffEasternDays(deal.createdAt),
+    }));
+
+  const closeOpportunities = deals
+    .filter((deal) => deal.stage === "scheduled-meeting" || deal.stage === "negotiating")
+    .sort((left, right) => getOldestStageDate(left).localeCompare(getOldestStageDate(right)))
+    .slice(0, 3)
+    .map((deal) => ({
+      id: `close-${deal.id}`,
+      href: `/pipeline?view=contacts&contact=${deal.id}`,
+      icon: CalendarClock,
+      eyebrow: "Close Opportunities",
+      title: `${getPrimaryName(deal)} at ${deal.client}`,
+      detail:
+        deal.stage === "scheduled-meeting"
+          ? "Meeting is on deck. Prep notes, objections, and offer before the call."
+          : "Active negotiation. Tighten next step and push toward close.",
+      tone: "border-blue-400/30 bg-blue-500/12 text-blue-100",
+      priority: deal.stage === "negotiating" ? 95 : 85,
+    }));
+
+  return [...freshInterested, ...followUps, ...staleLeads, ...closeOpportunities]
+    .sort((left, right) => right.priority - left.priority || left.title.localeCompare(right.title))
+    .slice(0, 10);
+}
+
+function buildGeographyRows(deals: PipelineDeal[], mode: GeographyMode) {
+  const counts = new Map<string, number>();
+  deals.forEach((deal) => {
+    const key = mode === "city" ? deal.city?.trim() : deal.state?.trim();
+    if (!key) return;
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  });
+
+  return [...counts.entries()]
+    .map(([label, count]) => ({ label, count }))
+    .sort((left, right) => right.count - left.count || left.label.localeCompare(right.label))
+    .slice(0, 10);
+}
+
+function activityIcon(type: PipelineActivityEntry["type"]) {
+  if (type === "new-lead") return "+";
+  if (type === "stage-change") return "→";
+  return "🔍";
+}
+
+function trendIcon(direction: StatTrend["direction"]) {
+  if (direction === "up") return TrendingUp;
+  if (direction === "down") return TrendingDown;
+  return ArrowRight;
+}
+
+function trendClass(direction: StatTrend["direction"]) {
+  if (direction === "up") return "text-emerald-300";
+  if (direction === "down") return "text-rose-300";
+  return "text-slate-300";
+}
+
+function campaignStatusClass(status: CampaignStat["status"]) {
+  if (status === "active") return "border-emerald-400/30 bg-emerald-500/12 text-emerald-100";
+  if (status === "cooling") return "border-amber-400/30 bg-amber-500/12 text-amber-100";
+  return "border-slate-400/30 bg-slate-500/12 text-slate-200";
+}
+
+function sectionTitle(icon: ComponentType<{ className?: string }>, label: string) {
+  const Icon = icon;
   return (
-    <div className="flex items-center justify-between gap-4">
-      <h2 className="section-title">{title}</h2>
-      <Link href={href} className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.14em] text-sky-200 transition hover:text-white">
-        View all
-        <ArrowRight className="h-3.5 w-3.5" />
-      </Link>
+    <div className="flex items-center gap-2">
+      <Icon className="h-4 w-4 text-blue-200" />
+      <h2 className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">{label}</h2>
     </div>
   );
 }
 
-export default function DashboardPage() {
-  const [agents, setAgents] = useState<Agent[]>([]);
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [clients, setClients] = useState<Client[]>([]);
-  const [activity, setActivity] = useState<ActivityItem[]>([]);
-  const [pipeline, setPipeline] = useState<PipelineLead[]>([]);
-  const [documents, setDocuments] = useState<DocumentRecord[]>([]);
-  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
-  const [now, setNow] = useState(() => new Date());
-  const [isLoading, setIsLoading] = useState(true);
+async function fetchDashboardData(): Promise<DashboardData> {
+  const [pipelineRes, summaryRes, activityRes] = await Promise.all([
+    fetch("/api/pipeline", { cache: "no-store" }),
+    fetch("/api/pipeline/morning-summary", { cache: "no-store" }),
+    fetch("/api/pipeline/activity", { cache: "no-store" }),
+  ]);
+
+  if (!pipelineRes.ok || !summaryRes.ok || !activityRes.ok) {
+    throw new Error("Unable to load pipeline command center.");
+  }
+
+  const [pipeline, summary, activity] = await Promise.all([
+    pipelineRes.json() as Promise<PipelineDeal[]>,
+    summaryRes.json() as Promise<MorningSummary>,
+    activityRes.json() as Promise<PipelineActivityEntry[]>,
+  ]);
+
+  return {
+    pipeline: Array.isArray(pipeline) ? pipeline : [],
+    summary: summary ?? buildMorningSummary([]),
+    activity: Array.isArray(activity) ? activity : [],
+  };
+}
+
+export default function HomePage() {
+  const [pipeline, setPipeline] = useState<PipelineDeal[]>([]);
+  const [summary, setSummary] = useState<MorningSummary>(() => buildMorningSummary([]));
+  const [activity, setActivity] = useState<PipelineActivityEntry[]>([]);
+  const [geographyMode, setGeographyMode] = useState<GeographyMode>("city");
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState("");
+  const [lastUpdatedAt, setLastUpdatedAt] = useState<number | null>(null);
+  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
-    let mounted = true;
-
-    const loadDashboard = async () => {
-      try {
-        const [agentRes, taskRes, clientRes, activityRes, pipelineRes, documentRes, calendarRes] = await Promise.all([
-          fetch("/api/agents", { cache: "no-store" }),
-          fetch("/api/tasks", { cache: "no-store" }),
-          fetch("/api/clients", { cache: "no-store" }),
-          fetch("/api/activity", { cache: "no-store" }),
-          fetch("/api/pipeline", { cache: "no-store" }),
-          fetch("/api/documents", { cache: "no-store" }),
-          fetch("/api/calendar", { cache: "no-store" }),
-        ]);
-
-        if (!agentRes.ok || !taskRes.ok || !clientRes.ok || !activityRes.ok || !pipelineRes.ok || !documentRes.ok || !calendarRes.ok) {
-          return;
-        }
-
-        const [agentData, taskData, clientData, activityData, pipelineData, documentData, calendarData] = await Promise.all([
-          agentRes.json() as Promise<Agent[]>,
-          taskRes.json() as Promise<Task[]>,
-          clientRes.json() as Promise<Client[]>,
-          activityRes.json() as Promise<ActivityItem[]>,
-          pipelineRes.json() as Promise<PipelineLead[]>,
-          documentRes.json() as Promise<DocumentRecord[]>,
-          calendarRes.json() as Promise<CalendarEvent[]>,
-        ]);
-
-        if (!mounted) return;
-
-        setAgents(Array.isArray(agentData) ? agentData : []);
-        setTasks(Array.isArray(taskData) ? taskData : []);
-        setClients(Array.isArray(clientData) ? clientData : []);
-        setActivity(
-          Array.isArray(activityData)
-            ? activityData
-                .filter((item) => typeof item?.id === "string" && typeof item?.message === "string")
-                .sort((a, b) => Date.parse(b.timestamp) - Date.parse(a.timestamp))
-            : [],
-        );
-        setPipeline(Array.isArray(pipelineData) ? pipelineData : []);
-        setDocuments(Array.isArray(documentData) ? documentData : []);
-        setCalendarEvents(Array.isArray(calendarData) ? calendarData : []);
-      } catch {
-        // Keep the last successful dashboard snapshot during transient failures.
-      } finally {
-        if (mounted) setIsLoading(false);
-      }
-    };
-
-    loadDashboard();
-    const interval = window.setInterval(loadDashboard, 5000);
-
-    return () => {
-      mounted = false;
-      window.clearInterval(interval);
-    };
-  }, []);
-
-  useEffect(() => {
-    const timer = window.setInterval(() => setNow(new Date()), 1000);
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
     return () => window.clearInterval(timer);
   }, []);
 
-  const activeClientCount = useMemo(() => {
-    if (clients.length === 0) return 0;
-    return clients.filter((client) => (client.status ?? "active").toLowerCase() === "active").length;
-  }, [clients]);
+  async function loadDashboard(isManual = false) {
+    setError("");
+    if (isManual || !loading) setRefreshing(true);
 
-  const openTaskCount = useMemo(() => tasks.filter((task) => task.status !== "done").length, [tasks]);
+    try {
+      const data = await fetchDashboardData();
+      setPipeline(data.pipeline);
+      setSummary(data.summary);
+      setActivity(data.activity);
+      setLastUpdatedAt(Date.now());
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : "Unable to load dashboard.");
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }
 
-  const metrics = useMemo<DashboardMetric[]>(
-    () => [
-      { label: "Total Active Clients", value: activeClientCount, href: "/clients", icon: BriefcaseBusiness },
-      { label: "Open Tasks", value: openTaskCount, href: "/tasks", icon: FolderKanban },
-      { label: "Pipeline Leads", value: pipeline.length, href: "/pipeline", icon: LineChart },
-      { label: "Active Documents", value: documents.length, href: "/documents", icon: FileText },
-    ],
-    [activeClientCount, documents.length, openTaskCount, pipeline.length],
-  );
+  useEffect(() => {
+    void loadDashboard();
+    const timer = window.setInterval(() => {
+      void loadDashboard();
+    }, REFRESH_INTERVAL_MS);
+    return () => window.clearInterval(timer);
+  }, []);
 
-  const featuredAgents = useMemo(() => {
-    const preferredOrder = ["kimberly", "alex", "sabri", "kevin"];
-    const ordered = preferredOrder
-      .map((id) => agents.find((agent) => agent.id === id))
-      .filter((agent): agent is Agent => Boolean(agent));
+  const stats = useMemo(() => {
+    const newTodayTrend = buildTrend(
+      summary.newToday - getYesterdayCount(pipeline),
+      "Ahead of yesterday",
+      "Behind yesterday",
+      "Flat vs yesterday",
+    );
+    const totalTrend = buildTrend(
+      summary.newThisWeek - getPreviousWeekCount(pipeline),
+      "Lead volume is up vs last week",
+      "Lead volume is down vs last week",
+      "Flat vs last week",
+    );
+    const followUpTrend = buildTrend(
+      0 - summary.needsFollowUp.length,
+      "Follow-ups cleared",
+      "Backlog needs attention",
+      "No change in follow-up load",
+    );
+    const hotLeadTrend = buildTrend(
+      summary.hotLeads.length - pipeline.filter((deal) => HOT_LEAD_STAGES.includes(deal.stage) && diffEasternDays(getOldestStageDate(deal)) >= 7).length,
+      "More late-stage momentum",
+      "Late-stage pipeline cooled off",
+      "Steady late-stage pipeline",
+    );
 
-    if (ordered.length >= 4) return ordered.slice(0, 4);
+    return [
+      { label: "Total Leads", value: pipeline.length, trend: totalTrend },
+      { label: "New Today", value: summary.newToday, trend: newTodayTrend },
+      { label: "Needs Follow-Up", value: summary.needsFollowUp.length, trend: followUpTrend },
+      { label: "Hot Leads", value: summary.hotLeads.length, trend: hotLeadTrend },
+    ];
+  }, [pipeline, summary]);
 
-    const remaining = agents.filter((agent) => agent.type !== "ceo" && !preferredOrder.includes(agent.id));
-    return [...ordered, ...remaining].slice(0, 4);
-  }, [agents]);
+  const priorityItems = useMemo(() => buildPriorityItems(pipeline, summary), [pipeline, summary]);
+  const geographyRows = useMemo(() => buildGeographyRows(pipeline, geographyMode), [pipeline, geographyMode]);
+  const geographyMax = Math.max(...geographyRows.map((row) => row.count), 1);
+  const funnelMax = Math.max(...summary.funnelData.map((item) => item.count), 1);
 
-  const recentTasks = useMemo(() => {
-    return [...tasks]
-      .sort((a, b) => parseSortableDate(a.dueDate) - parseSortableDate(b.dueDate))
-      .slice(0, 5);
-  }, [tasks]);
-
-  const recentDocuments = useMemo(() => {
-    return [...documents]
-      .sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt))
-      .slice(0, 3);
-  }, [documents]);
-
-  const recentActivity = useMemo(() => activity.slice(0, 5), [activity]);
-
-  const upcomingEvents = useMemo(() => {
-    const currentDate = new Date(now.toLocaleString("en-US", { timeZone: TIME_ZONE }));
-
-    return [...calendarEvents]
-      .filter((event) => {
-        const eventDate = new Date(`${event.date}T${event.time ?? "23:59"}:00`);
-        return !Number.isNaN(eventDate.getTime()) && eventDate.getTime() >= currentDate.getTime() - 60_000;
-      })
-      .sort((a, b) => {
-        const aTime = new Date(`${a.date}T${a.time ?? "23:59"}:00`).getTime();
-        const bTime = new Date(`${b.date}T${b.time ?? "23:59"}:00`).getTime();
-        return aTime - bTime;
-      })
-      .slice(0, 3);
-  }, [calendarEvents, now]);
-
-  const quickActions = useMemo<QuickAction[]>(
-    () => [
-      { label: "New Task", href: "/tasks", icon: Plus },
-      { label: "New Document", href: "/documents", icon: FileText },
-      { label: "View Pipeline", href: "/pipeline", icon: LineChart },
-      { label: "View Finance", href: "/finance", icon: LayoutGrid },
-    ],
-    [],
-  );
+  if (loading) {
+    return <section className="glass-panel rounded-[28px] p-6 text-sm text-slate-300">Loading pipeline command center...</section>;
+  }
 
   return (
-    <ErrorBoundary fallbackTitle="Dashboard unavailable" fallbackMessage="The dashboard hit an unexpected rendering error. Retry to re-mount the view.">
-      <div className="space-y-6 pb-4 sm:space-y-8" style={{ backgroundColor: "#0a0a0f" }}>
-      <section className="glass-panel animate-enter relative overflow-hidden p-5 sm:p-6" style={{ animationDelay: "40ms" }}>
-        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#2093FF] via-[#58B8FF] to-[#0026FF]" />
-        <div className="absolute right-0 top-0 h-32 w-32 rounded-full bg-[#2093FF]/12 blur-3xl" />
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs uppercase tracking-[0.18em] text-slate-300">
-              <Clock3 className="h-3.5 w-3.5 text-sky-200" />
-              Eastern Command Center
-            </div>
-            <div>
-              <h1 className="page-title bg-gradient-to-r from-white via-[#9FD2FF] to-[#2093FF] bg-clip-text text-transparent">Welcome back, Jahan</h1>
-              <p className="mt-2 text-sm text-slate-300">{formatDateLabel(now)}</p>
-            </div>
+    <div className="space-y-6">
+      <section className="glass-panel page-header relative overflow-hidden rounded-[28px] p-6 sm:p-7">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(32,147,255,0.18),transparent_35%),linear-gradient(140deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))]" />
+        <div className="relative flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-200/80">Pipeline Command Center</p>
+            <h1 className="page-title mt-3">Good morning, Jahan</h1>
+            <p className="mt-3 max-w-3xl text-sm text-slate-300">
+              Live pipeline visibility, follow-up pressure, campaign performance, and geographic lead flow in one command
+              surface.
+            </p>
           </div>
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="glass-card min-w-[180px] rounded-2xl px-4 py-3">
-              <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Current Time</p>
-              <p className="mt-2 heading-font text-3xl font-normal uppercase tracking-[0.03em] text-white">{formatClock(now)}</p>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="glass-card rounded-2xl px-4 py-3 text-right">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Last Updated</p>
+              <p className="mt-1 text-sm text-white">{lastUpdatedAt ? `${Math.floor((now - lastUpdatedAt) / 1000)}s ago` : "Just now"}</p>
             </div>
-            <div className="glass-card min-w-[180px] rounded-2xl px-4 py-3">
-              <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Live Status</p>
-              <div className="mt-2 flex items-center gap-2">
-                <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-emerald-400" />
-                <p className="text-sm font-medium text-white">Systems synced and monitoring</p>
-              </div>
-            </div>
+            <button
+              type="button"
+              onClick={() => void loadDashboard(true)}
+              className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-blue-300/30 bg-[linear-gradient(135deg,#2093FF,#0026FF)] px-4 py-2 text-sm font-semibold text-white transition hover:shadow-[0_0_24px_rgba(32,147,255,0.24)]"
+            >
+              <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
+              Refresh
+            </button>
           </div>
         </div>
+        {error ? <p className="relative mt-4 text-sm text-rose-200">{error}</p> : null}
       </section>
 
-        <section className="animate-enter" style={{ animationDelay: "90ms" }}>
-          {isLoading ? (
-            <GridSkeleton className="grid-cols-2 xl:grid-cols-4" count={4} />
-          ) : (
-            <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-              {metrics.map((metric, index) => {
-                const Icon = metric.icon;
+      <section className="grid gap-4 xl:grid-cols-4">
+        {stats.map((card, index) => {
+          const TrendIcon = trendIcon(card.trend.direction);
+          return (
+            <article
+              key={card.label}
+              className="glass-card animate-enter relative overflow-hidden rounded-[24px] p-5"
+              style={{ animationDelay: `${80 + index * 60}ms` }}
+            >
+              <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-[#2093FF] via-[#58B8FF] to-[#0026FF]" />
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">{card.label}</p>
+              <p className="mt-4 text-3xl font-bold text-white">{card.value.toLocaleString()}</p>
+              <div className={`mt-4 inline-flex items-center gap-2 text-xs ${trendClass(card.trend.direction)}`}>
+                <TrendIcon className="h-3.5 w-3.5" />
+                <span>{card.trend.label}</span>
+              </div>
+            </article>
+          );
+        })}
+      </section>
 
+      <section className="grid gap-4 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+        <article className="glass-panel rounded-[24px] p-5 sm:p-6">
+          <div className="flex items-center justify-between gap-4">
+            {sectionTitle(Sparkles, "Today's Priority Actions")}
+            <Link href="/pipeline" className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.14em] text-blue-200 transition hover:text-white">
+              View All in Pipeline
+              <ArrowUpRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+          <p className="mt-4 text-lg font-semibold text-white">Good morning, Jahan. Here&apos;s what needs attention today:</p>
+          <div className="mt-5 space-y-3">
+            {priorityItems.length ? (
+              priorityItems.map((item) => {
+                const Icon = item.icon;
                 return (
                   <Link
-                    key={metric.label}
-                    href={metric.href}
-                    className="glass-card animate-enter relative overflow-hidden rounded-2xl p-4 sm:p-5"
-                    style={{ animationDelay: `${120 + index * 40}ms` }}
+                    key={item.id}
+                    href={item.href}
+                    className={`glass-card flex items-start gap-4 rounded-2xl p-4 transition hover:-translate-y-0.5 ${item.tone}`}
                   >
-                    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-[#2093FF]/0 via-[#2093FF] to-[#0026FF]/0" />
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-2.5">
-                        <Icon className="h-5 w-5 text-sky-200" />
-                      </div>
-                      <div className="inline-flex items-center gap-1 text-xs uppercase tracking-[0.16em] text-slate-400">
-                        <ArrowUpRight className="h-3.5 w-3.5 text-sky-300" />
-                        Stable
-                      </div>
+                    <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/6">
+                      <Icon className="h-4 w-4" />
                     </div>
-                    <p className="mt-5 text-3xl font-semibold text-white sm:text-4xl">{metric.value}</p>
-                    <p className="mt-1 text-xs uppercase tracking-[0.14em] text-slate-400 sm:text-sm">{metric.label}</p>
-                  </Link>
-                );
-              })}
-            </div>
-          )}
-        </section>
-
-        {isLoading ? (
-          <section className="grid gap-4 xl:grid-cols-[minmax(0,1.6fr)_minmax(320px,1fr)]">
-            <div className="space-y-4">
-              <GridSkeleton columns={2} count={4} />
-              <TableSkeleton />
-              <GridSkeleton columns={3} count={3} />
-            </div>
-            <div className="space-y-4">
-              <TableSkeleton />
-              <TableSkeleton />
-              <TableSkeleton rows={3} />
-            </div>
-          </section>
-        ) : (
-          <section className="grid gap-4 xl:grid-cols-[minmax(0,1.6fr)_minmax(320px,1fr)]">
-            <div className="space-y-4">
-          <article className="glass-panel animate-enter rounded-2xl p-4 sm:p-5" style={{ animationDelay: "180ms" }}>
-            <DashboardSectionHeader title="Agent Status Grid" href="/agents" />
-            <div className="mt-4 grid gap-3 md:grid-cols-2">
-              {featuredAgents.map((agent, index) => {
-                const status = normalizeAgentStatus(agent.status);
-                const statusStyle = AGENT_STATUS_STYLES[status];
-
-                return (
-                  <Link
-                    key={agent.id}
-                    href={`/agents/${agent.id}`}
-                    className="glass-card animate-enter rounded-2xl p-4"
-                    style={{ animationDelay: `${220 + index * 35}ms` }}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className={`h-2.5 w-2.5 rounded-full ${statusStyle.dot} ${statusStyle.pulse ? "animate-pulse" : ""}`} />
-                          <p className="truncate text-base font-semibold text-white">{agent.name}</p>
-                        </div>
-                        <p className="mt-1 truncate text-sm text-slate-400">{agent.role}</p>
-                      </div>
-                      <span className={`text-[11px] font-semibold uppercase tracking-[0.16em] ${statusStyle.badge}`}>{status}</span>
-                    </div>
-                    <div className="mt-4 rounded-xl border border-white/8 bg-black/20 px-3 py-2.5">
-                      <p className="text-[11px] uppercase tracking-[0.16em] text-slate-500">Current Task</p>
-                      <p className="mt-1 line-clamp-2 text-sm text-slate-200">{agent.currentTask || "Standing by for assignment"}</p>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          </article>
-
-          <article className="glass-panel animate-enter rounded-2xl p-4 sm:p-5" style={{ animationDelay: "220ms" }}>
-            <DashboardSectionHeader title="Recent Tasks" href="/tasks" />
-            <div className="mt-4 space-y-2">
-              {recentTasks.length > 0 ? (
-                recentTasks.map((task, index) => {
-                  const assignee = resolveAssignee(task.assignee, agents);
-
-                  return (
-                    <Link
-                      key={task.id}
-                      href="/tasks"
-                      className="glass-card animate-enter flex flex-col gap-3 rounded-2xl px-4 py-3 transition hover:-translate-y-0.5 sm:flex-row sm:items-center sm:justify-between"
-                      style={{ animationDelay: `${260 + index * 30}ms` }}
-                    >
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className={`h-2.5 w-2.5 rounded-full ${TASK_STATUS_STYLES[task.status]}`} />
-                          <p className="truncate text-sm font-semibold text-white">{task.title}</p>
-                        </div>
-                        <p className="mt-1 text-xs text-slate-400">{assignee?.name ?? task.assignee} · {task.client}</p>
-                      </div>
-
-                      <div className="flex items-center gap-2 text-xs">
-                        <span className={`rounded-full border px-2 py-1 font-semibold uppercase tracking-[0.12em] ${PRIORITY_STYLES[task.priority]}`}>
-                          {task.priority}
-                        </span>
-                        <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-1 uppercase tracking-[0.12em] text-slate-300">
-                          {task.dueDate ? formatShortDate(task.dueDate) : "No due"}
-                        </span>
-                      </div>
-                    </Link>
-                  );
-                })
-              ) : (
-                <div className="glass-card rounded-2xl px-4 py-5 text-sm text-slate-400">No recent tasks yet.</div>
-              )}
-            </div>
-          </article>
-
-          <article className="glass-panel animate-enter rounded-2xl p-4 sm:p-5" style={{ animationDelay: "260ms" }}>
-            <DashboardSectionHeader title="Recent Documents" href="/documents" />
-            <div className="mt-4 grid gap-3 md:grid-cols-3">
-              {recentDocuments.length > 0 ? (
-                recentDocuments.map((document, index) => (
-                  <Link
-                    key={document.id}
-                    href="/documents"
-                    className="glass-card animate-enter rounded-2xl p-4"
-                    style={{ animationDelay: `${300 + index * 35}ms` }}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <p className="line-clamp-2 text-sm font-semibold text-white">{document.title}</p>
-                      <FileText className="h-4 w-4 shrink-0 text-sky-200" />
-                    </div>
-                    <div className="mt-4 flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.14em]">
-                      <span className={`rounded-full border px-2 py-1 ${CATEGORY_STYLES[document.category] ?? CATEGORY_STYLES.other}`}>
-                        {titleCase(document.category)}
-                      </span>
-                      <span className="text-slate-500">{formatShortDateTime(document.updatedAt)}</span>
-                    </div>
-                    <p className="mt-3 text-xs text-slate-400">By {titleCase(document.createdBy)}</p>
-                  </Link>
-                ))
-              ) : (
-                <div className="glass-card rounded-2xl px-4 py-5 text-sm text-slate-400 md:col-span-3">No documents available.</div>
-              )}
-            </div>
-          </article>
-            </div>
-
-            <div className="space-y-4">
-          <article className="glass-panel animate-enter rounded-2xl p-4 sm:p-5" style={{ animationDelay: "200ms" }}>
-            <DashboardSectionHeader title="Quick Actions" href="/office" />
-            <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-              {quickActions.map((action, index) => {
-                const Icon = action.icon;
-
-                return (
-                  <Link
-                    key={action.label}
-                    href={action.href}
-                    className="glass-card animate-enter flex items-center justify-between rounded-2xl px-4 py-3"
-                    style={{ animationDelay: `${230 + index * 30}ms` }}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="rounded-xl border border-white/10 bg-white/[0.04] p-2">
-                        <Icon className="h-4 w-4 text-sky-200" />
-                      </div>
-                      <span className="text-sm font-medium text-white">{action.label}</span>
-                    </div>
-                    <ArrowRight className="h-4 w-4 text-slate-400" />
-                  </Link>
-                );
-              })}
-            </div>
-          </article>
-
-          <article className="glass-panel animate-enter rounded-2xl p-4 sm:p-5" style={{ animationDelay: "240ms" }}>
-            <DashboardSectionHeader title="Activity Timeline" href="/team" />
-            <div className="mt-4 space-y-4">
-              {recentActivity.length > 0 ? (
-                recentActivity.map((item, index) => (
-                  <div key={item.id} className="relative pl-6">
-                    <span className="absolute left-0 top-1.5 flex h-3 w-3 items-center justify-center rounded-full border border-[#2093FF]/40 bg-[#0a0a0f]">
-                      <Circle className="h-1.5 w-1.5 fill-[#2093FF] text-[#2093FF]" />
-                    </span>
-                    {index < recentActivity.length - 1 ? <span className="absolute left-[5px] top-4 h-[calc(100%+10px)] w-px bg-gradient-to-b from-[#2093FF]/50 to-[#0026FF]/10" /> : null}
-                    <p className="text-sm text-slate-200">{item.message}</p>
-                    <p className="mt-1 text-[11px] uppercase tracking-[0.14em] text-slate-500">{relativeTimeFromIso(item.timestamp, now)}</p>
-                  </div>
-                ))
-              ) : (
-                <p className="text-sm text-slate-400">No recent activity yet.</p>
-              )}
-            </div>
-          </article>
-
-          <article className="glass-panel animate-enter rounded-2xl p-4 sm:p-5" style={{ animationDelay: "280ms" }}>
-            <DashboardSectionHeader title="Calendar Preview" href="/calendar" />
-            <div className="mt-4 space-y-3">
-              {upcomingEvents.length > 0 ? (
-                upcomingEvents.map((event, index) => (
-                  <Link
-                    key={event.id}
-                    href="/calendar"
-                    className="glass-card animate-enter flex items-start justify-between gap-3 rounded-2xl px-4 py-3"
-                    style={{ animationDelay: `${320 + index * 35}ms` }}
-                  >
                     <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <CalendarDays className="mt-0.5 h-4 w-4 shrink-0 text-sky-200" />
-                        <p className="truncate text-sm font-semibold text-white">{event.title}</p>
-                      </div>
-                      <p className="mt-1 text-xs text-slate-400">{event.client}</p>
-                      <p className="mt-2 text-xs uppercase tracking-[0.12em] text-slate-500">{formatCalendarEvent(event)}</p>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-300">{item.eyebrow}</p>
+                      <p className="mt-1 text-sm font-semibold text-white">{item.title}</p>
+                      <p className="mt-1 text-sm text-slate-300">{item.detail}</p>
                     </div>
-                    <span className={`rounded-full border px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] ${EVENT_TYPE_STYLES[event.type]}`}>
-                      {event.type}
-                    </span>
                   </Link>
+                );
+              })
+            ) : (
+              <div className="glass-card rounded-2xl px-4 py-5 text-sm text-slate-300">No urgent actions right now.</div>
+            )}
+          </div>
+        </article>
+
+        <article className="glass-panel rounded-[24px] p-5 sm:p-6">
+          <div className="flex items-center justify-between gap-4">
+            {sectionTitle(RefreshCw, "Live Activity Feed")}
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Auto-refresh every 30s</p>
+          </div>
+          <div className="mt-5 space-y-3">
+            {activity.length ? (
+              activity.map((entry) => (
+                <Link
+                  key={entry.id}
+                  href={`/pipeline?view=contacts&contact=${entry.leadId}`}
+                  className="glass-card flex items-start gap-3 rounded-2xl px-4 py-3 transition hover:-translate-y-0.5"
+                >
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-blue-300/25 bg-[linear-gradient(135deg,rgba(32,147,255,0.18),rgba(0,38,255,0.18))] text-sm text-white">
+                    {activityIcon(entry.type)}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm text-white">{entry.message}</p>
+                    <p className="mt-1 text-xs uppercase tracking-[0.14em] text-slate-400">{formatRelativeFromNow(entry.timestamp, now)}</p>
+                  </div>
+                </Link>
+              ))
+            ) : (
+              <div className="glass-card rounded-2xl px-4 py-5 text-sm text-slate-300">No recent pipeline activity.</div>
+            )}
+          </div>
+        </article>
+      </section>
+
+      <section className="grid gap-4 xl:grid-cols-2">
+        <article className="glass-panel rounded-[24px] p-5 sm:p-6">
+          <div className="flex items-center justify-between gap-4">
+            {sectionTitle(TrendingUp, "Pipeline Funnel")}
+            <Link href="/pipeline?view=kanban" className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.14em] text-blue-200 transition hover:text-white">
+              Open Pipeline
+              <ArrowUpRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+          <div className="mt-5 space-y-4">
+            {summary.funnelData.map((stage) => (
+              <Link
+                key={stage.stage}
+                href={`/pipeline?view=segments&stage=${stage.stage}`}
+                className="glass-card block rounded-2xl p-4 transition hover:-translate-y-0.5"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <span className="h-3 w-3 rounded-full" style={{ backgroundColor: STAGE_META[stage.stage].color }} />
+                    <div>
+                      <p className="text-sm font-semibold text-white">{STAGE_META[stage.stage].label}</p>
+                      <p className="text-xs uppercase tracking-[0.14em] text-slate-400">
+                        {stage.count} leads{stage.stage !== "closed-won" ? ` · ${stage.conversionRate}% to next stage` : ""}
+                      </p>
+                    </div>
+                  </div>
+                  <p className="text-xl font-bold text-white">{stage.count}</p>
+                </div>
+                <div className="mt-3 h-2 rounded-full bg-white/6">
+                  <div
+                    className="h-2 rounded-full transition-all"
+                    style={{
+                      width: `${Math.max((stage.count / funnelMax) * 100, stage.count ? 10 : 0)}%`,
+                      backgroundColor: STAGE_META[stage.stage].color,
+                    }}
+                  />
+                </div>
+              </Link>
+            ))}
+          </div>
+        </article>
+
+        <article className="glass-panel rounded-[24px] p-5 sm:p-6">
+          <div className="flex items-center justify-between gap-4">
+            {sectionTitle(MapPinned, "Geographic Breakdown")}
+            <div className="glass-card inline-flex rounded-full p-1">
+              <button
+                type="button"
+                onClick={() => setGeographyMode("city")}
+                className={`rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] transition ${geographyMode === "city" ? "bg-[linear-gradient(135deg,#2093FF,#0026FF)] text-white" : "text-slate-300"}`}
+              >
+                View by City
+              </button>
+              <button
+                type="button"
+                onClick={() => setGeographyMode("state")}
+                className={`rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] transition ${geographyMode === "state" ? "bg-[linear-gradient(135deg,rgba(32,147,255,0.22),rgba(0,38,255,0.18))] text-white" : "text-slate-300"}`}
+              >
+                View by State
+              </button>
+            </div>
+          </div>
+          <div className="mt-5 space-y-3">
+            {geographyRows.length ? (
+              geographyRows.map((row) => (
+                <Link
+                  key={row.label}
+                  href={geographyMode === "city" ? `/pipeline?view=segments&city=${encodeURIComponent(row.label)}` : `/pipeline?view=segments&state=${encodeURIComponent(row.label)}`}
+                  className="glass-card block rounded-2xl px-4 py-3 transition hover:-translate-y-0.5"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-sm font-semibold text-white">{row.label}</p>
+                    <p className="text-sm text-slate-300">{row.count}</p>
+                  </div>
+                  <div className="mt-3 h-2 rounded-full bg-white/6">
+                    <div
+                      className="h-2 rounded-full bg-[linear-gradient(90deg,#2093FF,#58B8FF,#0026FF)]"
+                      style={{ width: `${(row.count / geographyMax) * 100}%` }}
+                    />
+                  </div>
+                </Link>
+              ))
+            ) : (
+              <div className="glass-card rounded-2xl px-4 py-5 text-sm text-slate-300">No geography data available yet.</div>
+            )}
+          </div>
+        </article>
+      </section>
+
+      <section className="glass-panel rounded-[24px] p-5 sm:p-6">
+        <div className="flex items-center justify-between gap-4">
+          {sectionTitle(Building2, "Campaign Performance")}
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Sorted by most recent activity</p>
+        </div>
+        <div className="mt-5 overflow-x-auto">
+          <table className="min-w-full text-left text-sm">
+            <thead>
+              <tr className="border-b border-white/10 text-xs uppercase tracking-[0.16em] text-slate-400">
+                <th className="px-3 py-3">Campaign Name</th>
+                <th className="px-3 py-3">Total Leads</th>
+                <th className="px-3 py-3">Interested</th>
+                <th className="px-3 py-3">Reply Rate</th>
+                <th className="px-3 py-3">Last Import</th>
+                <th className="px-3 py-3">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {summary.campaignStats.length ? (
+                summary.campaignStats.map((campaign) => (
+                  <tr key={campaign.campaign} className="border-b border-white/6 last:border-none">
+                    <td className="px-3 py-4 text-white">{campaign.campaign}</td>
+                    <td className="px-3 py-4 text-slate-200">{campaign.total}</td>
+                    <td className="px-3 py-4 text-slate-200">{campaign.interested}</td>
+                    <td className="px-3 py-4 text-slate-200">{campaign.replyRate}%</td>
+                    <td className="px-3 py-4 text-slate-300">{formatDate(campaign.lastImport)}</td>
+                    <td className="px-3 py-4">
+                      <span className={`inline-flex rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] ${campaignStatusClass(campaign.status)}`}>
+                        {campaign.status}
+                      </span>
+                    </td>
+                  </tr>
                 ))
               ) : (
-                <div className="glass-card rounded-2xl px-4 py-5 text-sm text-slate-400">No upcoming events.</div>
+                <tr>
+                  <td colSpan={6} className="px-3 py-6 text-slate-300">
+                    No campaign data yet.
+                  </td>
+                </tr>
               )}
-            </div>
-          </article>
-            </div>
-          </section>
-        )}
-      </div>
-    </ErrorBoundary>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
   );
 }

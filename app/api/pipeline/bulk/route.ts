@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { appendPipelineActivity, createStageChangedActivity } from "@/lib/pipeline-activity";
 import { getPipelineDeals, writePipelineDeals } from "@/lib/pipeline-store";
 import { PIPELINE_STAGES, PipelineDeal, PipelineStage } from "@/lib/pipeline-types";
 
@@ -64,6 +65,7 @@ export async function PATCH(request: Request) {
     const deals = await getPipelineDeals();
     const targetIds = new Set(ids);
     const matchingDeals = deals.filter((deal) => targetIds.has(deal.id));
+    const activityEntries = [];
 
     if (!matchingDeals.length) {
       return NextResponse.json({ error: "No matching contacts found." }, { status: 404 });
@@ -93,6 +95,12 @@ export async function PATCH(request: Request) {
               stageUpdatedAt: deal.stage === nextStage ? deal.stageUpdatedAt ?? deal.createdAt : today,
             },
       );
+      matchingDeals
+        .filter((deal) => deal.stage !== nextStage)
+        .forEach((deal) => {
+          const nextDeal = nextDeals.find((entry) => entry.id === deal.id);
+          if (nextDeal) activityEntries.push(createStageChangedActivity(deal, nextDeal));
+        });
     }
 
     if (action === "tag") {
@@ -112,6 +120,9 @@ export async function PATCH(request: Request) {
     }
 
     await writePipelineDeals(nextDeals);
+    if (activityEntries.length) {
+      await appendPipelineActivity(activityEntries);
+    }
     return NextResponse.json({ ok: true, count: matchingDeals.length });
   } catch {
     return NextResponse.json({ error: "Unable to update selected contacts." }, { status: 500 });

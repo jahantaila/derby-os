@@ -468,11 +468,19 @@ export async function upsertPipelineDealByEmail(
 
 export async function bulkImportPipelineDeals(
   inputs: PipelineDealUpsertInput[],
-): Promise<{ imported: number; updated: number; skipped: number }> {
+): Promise<{
+  imported: number;
+  updated: number;
+  skipped: number;
+  createdDeals: PipelineDeal[];
+  updatedDeals: Array<{ previous: PipelineDeal; next: PipelineDeal }>;
+}> {
   const deals = await getPipelineDeals();
   let imported = 0;
   let updated = 0;
   let skipped = 0;
+  const createdDeals: PipelineDeal[] = [];
+  const updatedDeals: Array<{ previous: PipelineDeal; next: PipelineDeal }> = [];
 
   for (const input of inputs) {
     const normalizedEmail = normalizeEmail(input.email);
@@ -485,7 +493,10 @@ export async function bulkImportPipelineDeals(
     if (normalizedEmail) {
       const existingIndex = deals.findIndex((deal) => normalizeEmail(deal.email) === normalizedEmail);
       if (existingIndex >= 0) {
-        deals[existingIndex] = mergeDeal(deals[existingIndex], input);
+        const previous = deals[existingIndex];
+        const next = mergeDeal(previous, input);
+        deals[existingIndex] = next;
+        updatedDeals.push({ previous, next });
         updated += 1;
         continue;
       }
@@ -498,9 +509,10 @@ export async function bulkImportPipelineDeals(
     }
 
     deals.push(createdDeal);
+    createdDeals.push(createdDeal);
     imported += 1;
   }
 
   await writePipelineDeals(deals);
-  return { imported, updated, skipped };
+  return { imported, updated, skipped, createdDeals, updatedDeals };
 }

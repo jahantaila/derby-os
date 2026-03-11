@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { appendPipelineActivity, createEnrichmentActivity } from "@/lib/pipeline-activity";
 import { getPipelineDeals, writePipelineDeals } from "@/lib/pipeline-store";
 import { EnrichmentData, PipelineDeal } from "@/lib/pipeline-types";
 
@@ -76,6 +77,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
 
     deals[index] = enriched;
     await writePipelineDeals(deals);
+    await appendPipelineActivity(createEnrichmentActivity(current, enriched));
     return NextResponse.json(enriched);
   } catch {
     return NextResponse.json({ error: "Unable to enrich deal." }, { status: 500 });

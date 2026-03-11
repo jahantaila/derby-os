@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { appendPipelineActivity, createStageChangedActivity } from "@/lib/pipeline-activity";
 import { getPipelineDeals, writePipelineDeals } from "@/lib/pipeline-store";
 import {
   EnrichmentStatus,
@@ -135,6 +136,9 @@ export async function PATCH(request: Request, { params }: { params: { id: string
 
     deals[index] = updated;
     await writePipelineDeals(deals);
+    if (stageChanged) {
+      await appendPipelineActivity(createStageChangedActivity(current, updated));
+    }
     return NextResponse.json(updated);
   } catch {
     return NextResponse.json({ error: "Unable to update deal." }, { status: 500 });

@@ -269,8 +269,8 @@ const STAGE_META: Record<PipelineStage, { label: string; color: string; pill: st
   },
   negotiating: {
     label: "Negotiating",
-    color: "#8B5CF6",
-    pill: "border-violet-400/30 bg-violet-500/15 text-violet-100",
+    color: "#2563EB",
+    pill: "border-blue-400/30 bg-blue-500/15 text-blue-100",
   },
   "closed-won": {
     label: "Closed Won",
@@ -1356,7 +1356,19 @@ export default function PipelinePage() {
     const params = new URLSearchParams(window.location.search);
     const requestedView = params.get("view");
     const requestedContact = params.get("contact");
+    const requestedStage = params.get("stage");
+    const requestedCity = params.get("city");
+    const requestedState = params.get("state");
     if (requestedView === "contacts") setActiveSubview("contacts");
+    if (requestedView === "segments") {
+      setActiveSubview("segments");
+      setSegmentsFilters({
+        ...cloneSegmentsFilters(EMPTY_SEGMENTS_FILTERS),
+        ...(requestedStage && PIPELINE_STAGES.includes(requestedStage as PipelineStage) ? { stage: requestedStage as PipelineStage } : {}),
+        ...(requestedCity ? { city: requestedCity } : {}),
+        ...(requestedState ? { state: requestedState } : {}),
+      });
+    }
     if (requestedContact && deals.some((deal) => deal.id === requestedContact)) {
       setSelectedId(requestedContact);
       setMobileOpenId(requestedContact);
