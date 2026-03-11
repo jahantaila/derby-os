@@ -228,8 +228,18 @@ const easternMonthFormatter = new Intl.DateTimeFormat("en-US", {
   timeZone: "America/New_York",
 });
 
+const easternMonthDayFormatter = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  timeZone: "America/New_York",
+});
+
 function easternToday() {
   return new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+}
+
+function easternTodayDate() {
+  return new Date(`${easternToday()}T12:00:00.000Z`);
 }
 
 function fullName(contact?: Pick<RolodexContact, "firstName" | "lastName" | "nickname"> | null) {
@@ -273,6 +283,72 @@ function relativeTimeFromDate(date?: string) {
   if (days < 30) return `${Math.floor(days / 7)}w ago`;
   if (days < 365) return `${Math.floor(days / 30)}mo ago`;
   return `${Math.floor(days / 365)}y ago`;
+}
+
+function daysSinceDate(date?: string) {
+  if (!date) return null;
+  const target = new Date(`${date}T12:00:00.000Z`).getTime();
+  const today = easternTodayDate().getTime();
+  if (Number.isNaN(target) || Number.isNaN(today)) return null;
+  return Math.max(0, Math.floor((today - target) / 86400000));
+}
+
+function reminderFrequencyDays(reminder?: StayInTouchReminder) {
+  if (!reminder) return undefined;
+  if (reminder.frequency === "weekly") return 7;
+  if (reminder.frequency === "biweekly") return 14;
+  if (reminder.frequency === "monthly") return 30;
+  if (reminder.frequency === "quarterly") return 90;
+  if (reminder.frequency === "yearly") return 365;
+  if (reminder.frequency === "custom") return reminder.customDays && reminder.customDays > 0 ? reminder.customDays : undefined;
+  return undefined;
+}
+
+function startOfWeek(date = easternTodayDate()) {
+  const start = new Date(date);
+  const day = (start.getUTCDay() + 6) % 7;
+  start.setUTCDate(start.getUTCDate() - day);
+  start.setUTCHours(12, 0, 0, 0);
+  return start;
+}
+
+function shiftDays(date: Date, days: number) {
+  const next = new Date(date);
+  next.setUTCDate(next.getUTCDate() + days);
+  return next;
+}
+
+function shiftWeeks(date: Date, weeks: number) {
+  return shiftDays(date, weeks * 7);
+}
+
+function weekLabel(date: Date) {
+  return easternMonthDayFormatter.format(date);
+}
+
+function nextBirthdayOccurrence(birthday?: string) {
+  if (!birthday) return null;
+  const today = easternTodayDate();
+  const monthDay = birthday.slice(5);
+  const currentYear = today.getUTCFullYear();
+  const thisYear = new Date(`${currentYear}-${monthDay}T12:00:00.000Z`);
+  if (Number.isNaN(thisYear.getTime())) return null;
+  if (thisYear.getTime() >= today.getTime()) return thisYear;
+  const nextYear = new Date(`${currentYear + 1}-${monthDay}T12:00:00.000Z`);
+  return Number.isNaN(nextYear.getTime()) ? null : nextYear;
+}
+
+function formatTrendArrow(delta: number) {
+  if (delta > 0) return "↑";
+  if (delta < 0) return "↓";
+  return "→";
+}
+
+function interactionTrendArrow(interactions: Interaction[]) {
+  const latestSentiment = interactions[0]?.sentiment;
+  if (latestSentiment === "positive") return "↑";
+  if (latestSentiment === "negative") return "↓";
+  return "→";
 }
 
 function scoreRingColor(score: number) {
@@ -970,15 +1046,28 @@ function ActivityHeatmap({
 
 function TimelineItemCard({
   interaction,
+  onOpen,
   onDelete,
 }: {
   interaction: Interaction;
+  onOpen: () => void;
   onDelete: () => void;
 }) {
   const Icon = interactionIcon(interaction.type);
 
   return (
-    <div className="group rounded-2xl border border-white/10 bg-white/[0.02] p-4 transition hover:border-white/20">
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={onOpen}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onOpen();
+        }
+      }}
+      className="group cursor-pointer rounded-2xl border border-white/10 bg-white/[0.02] p-4 transition hover:border-white/20 hover:bg-white/[0.04]"
+    >
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-slate-950/60">
@@ -1003,12 +1092,292 @@ function TimelineItemCard({
           </div>
           <button
             type="button"
-            onClick={onDelete}
+            onClick={(event) => {
+              event.stopPropagation();
+              onDelete();
+            }}
             className="opacity-0 transition group-hover:opacity-100 rounded-xl border border-white/10 bg-white/[0.03] p-2 text-slate-400 hover:text-rose-300"
           >
             <Trash2 className="h-4 w-4" />
           </button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function InteractionDetailModal({
+  open,
+  interaction,
+  editing,
+  draft,
+  onDraftChange,
+  onStartEdit,
+  onCancelEdit,
+  onSave,
+  onDelete,
+  onClose,
+}: {
+  open: boolean;
+  interaction: Interaction | null;
+  editing: boolean;
+  draft: Pick<QuickLogDraft, "summary" | "details" | "sentiment">;
+  onDraftChange: (patch: Partial<Pick<QuickLogDraft, "summary" | "details" | "sentiment">>) => void;
+  onStartEdit: () => void;
+  onCancelEdit: () => void;
+  onSave: () => void;
+  onDelete: () => void;
+  onClose: () => void;
+}) {
+  const [detailsExpanded, setDetailsExpanded] = useState(false);
+
+  useEffect(() => {
+    if (open) setDetailsExpanded(false);
+  }, [open, interaction?.id]);
+
+  if (!open || !interaction) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-md">
+      <div className="w-full max-w-2xl rounded-[32px] border border-white/10 bg-[#08101f]/95 p-6 shadow-[0_24px_80px_rgba(2,6,23,0.6)]">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-[11px] font-medium uppercase tracking-[0.16em] text-slate-300">
+                {INTERACTION_TYPE_LABELS[interaction.type]}
+              </span>
+              {interaction.sentiment ? (
+                <span className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-sm text-slate-200">
+                  {sentimentEmoji(interaction.sentiment)} {interaction.sentiment}
+                </span>
+              ) : null}
+              <span className="text-sm text-slate-400">{formatDate(interaction.date)}</span>
+            </div>
+            <p className="mt-4 text-2xl font-semibold text-white">{editing ? "Edit interaction" : interaction.summary}</p>
+            <p className="mt-2 text-sm text-slate-500">{formatDateTime(interaction.createdAt)}</p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-slate-300 transition hover:text-white"
+          >
+            Close
+          </button>
+        </div>
+
+        <div className="mt-6 space-y-5">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Summary</p>
+            {editing ? (
+              <input
+                value={draft.summary}
+                onChange={(event) => onDraftChange({ summary: event.target.value })}
+                className="mt-3 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-sky-400/60"
+              />
+            ) : (
+              <p className="mt-3 text-lg text-white">{interaction.summary}</p>
+            )}
+          </div>
+
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Details</p>
+              <button
+                type="button"
+                onClick={() => setDetailsExpanded((state) => !state)}
+                className="text-sm text-slate-300 transition hover:text-white"
+              >
+                {detailsExpanded ? "Collapse" : "Expand"}
+              </button>
+            </div>
+            {editing ? (
+              <textarea
+                value={draft.details}
+                onChange={(event) => onDraftChange({ details: event.target.value })}
+                className="mt-3 min-h-[140px] w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-sky-400/60"
+              />
+            ) : (
+              <p className={cn("mt-3 whitespace-pre-wrap text-sm text-slate-300", detailsExpanded ? "" : "line-clamp-4")}>
+                {interaction.details || "No extra details logged yet."}
+              </p>
+            )}
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Sentiment</p>
+              {editing ? (
+                <label className="relative mt-3 block">
+                  <select
+                    value={draft.sentiment}
+                    onChange={(event) => onDraftChange({ sentiment: event.target.value as SentimentValue })}
+                    className="w-full appearance-none rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 pr-10 text-sm text-white outline-none transition focus:border-sky-400/60"
+                  >
+                    <option value="">Not set</option>
+                    <option value="positive">😊 Positive</option>
+                    <option value="neutral">😐 Neutral</option>
+                    <option value="negative">😟 Negative</option>
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-3 top-3.5 h-4 w-4 text-slate-400" />
+                </label>
+              ) : (
+                <p className="mt-3 text-sm text-white">{interaction.sentiment ? `${sentimentEmoji(interaction.sentiment)} ${interaction.sentiment}` : "Not set"}</p>
+              )}
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Attachments</p>
+              <p className="mt-3 text-sm text-slate-400">Linked emails, files, and synced assets will appear here.</p>
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Full Email Content</p>
+              <p className="mt-3 text-sm text-slate-400">Connect Gmail to see full email content.</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+          <button
+            type="button"
+            onClick={onDelete}
+            className="rounded-2xl border border-rose-400/30 bg-rose-500/10 px-4 py-2 text-sm text-rose-200 transition hover:bg-rose-500/20"
+          >
+            Delete
+          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            {editing ? (
+              <>
+                <button
+                  type="button"
+                  onClick={onCancelEdit}
+                  className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-slate-300 transition hover:text-white"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={onSave}
+                  className="rounded-2xl bg-[linear-gradient(135deg,_#38bdf8,_#2563eb)] px-4 py-2 text-sm font-medium text-white transition hover:brightness-110"
+                >
+                  Save changes
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={onStartEdit}
+                className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-slate-300 transition hover:text-white"
+              >
+                Edit
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function QuickActionLogModal({
+  open,
+  contacts,
+  selectedContactId,
+  draft,
+  onContactChange,
+  onDraftChange,
+  onClose,
+  onSubmit,
+}: {
+  open: boolean;
+  contacts: RolodexContact[];
+  selectedContactId: string;
+  draft: QuickLogDraft;
+  onContactChange: (value: string) => void;
+  onDraftChange: (patch: Partial<QuickLogDraft>) => void;
+  onClose: () => void;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+}) {
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-md">
+      <div className="w-full max-w-2xl rounded-[32px] border border-white/10 bg-[#08101f]/95 p-6 shadow-[0_24px_80px_rgba(2,6,23,0.6)]">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-xl font-semibold text-white">Log a Call</p>
+            <p className="mt-1 text-sm text-slate-400">Pick a contact and add the call summary without leaving Home.</p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-slate-300 transition hover:text-white"
+          >
+            Close
+          </button>
+        </div>
+
+        <form onSubmit={onSubmit} className="mt-6 space-y-4">
+          <label className="block">
+            <span className="text-sm text-slate-400">Contact</span>
+            <select
+              value={selectedContactId}
+              onChange={(event) => onContactChange(event.target.value)}
+              className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-sky-400/60"
+            >
+              <option value="">Select a contact</option>
+              {contacts.map((contact) => (
+                <option key={contact.id} value={contact.id}>
+                  {fullName(contact)}{contact.company ? ` • ${contact.company}` : ""}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <input
+            value={draft.summary}
+            onChange={(event) => onDraftChange({ summary: event.target.value })}
+            placeholder="Call summary"
+            className="w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-sky-400/60"
+          />
+
+          <textarea
+            value={draft.details}
+            onChange={(event) => onDraftChange({ details: event.target.value })}
+            placeholder="Optional details"
+            className="min-h-[120px] w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-sky-400/60"
+          />
+
+          <label className="relative block">
+            <select
+              value={draft.sentiment}
+              onChange={(event) => onDraftChange({ sentiment: event.target.value as SentimentValue })}
+              className="w-full appearance-none rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 pr-10 text-sm text-white outline-none transition focus:border-sky-400/60"
+            >
+              <option value="">Sentiment</option>
+              <option value="positive">😊 Positive</option>
+              <option value="neutral">😐 Neutral</option>
+              <option value="negative">😟 Negative</option>
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-3 top-3.5 h-4 w-4 text-slate-400" />
+          </label>
+
+          <div className="flex items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-slate-300 transition hover:text-white"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="rounded-2xl bg-[linear-gradient(135deg,_#38bdf8,_#2563eb)] px-4 py-2 text-sm font-medium text-white transition hover:brightness-110"
+            >
+              Log call
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
@@ -2010,8 +2379,20 @@ export default function RolodexPage() {
   const [homeAiHistory, setHomeAiHistory] = useState<AiMessage[]>([]);
   const [homeAiExpanded, setHomeAiExpanded] = useState(true);
   const [homeHistoryOpen, setHomeHistoryOpen] = useState(false);
+  const [quickActionLogOpen, setQuickActionLogOpen] = useState(false);
+  const [quickActionContactId, setQuickActionContactId] = useState("");
+  const [quickActionDraft, setQuickActionDraft] = useState<QuickLogDraft>({ ...EMPTY_QUICK_LOG, type: "call" });
+  const [selectedTimelineInteractionId, setSelectedTimelineInteractionId] = useState<string | null>(null);
+  const [timelineDetailEditing, setTimelineDetailEditing] = useState(false);
+  const [timelineDetailDraft, setTimelineDetailDraft] = useState<Pick<QuickLogDraft, "summary" | "details" | "sentiment">>({
+    summary: "",
+    details: "",
+    sentiment: "",
+  });
   const deferredSearch = useDeferredValue(search);
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const contactsSearchRef = useRef<HTMLInputElement | null>(null);
+  const shouldFocusContactsSearchRef = useRef(false);
 
   async function fetchContacts(options?: { seedIfEmpty?: boolean }) {
     const response = await fetch("/api/rolodex", { cache: "no-store" });
@@ -2111,6 +2492,13 @@ export default function RolodexPage() {
       }
     }
   }, [contacts, currentView, selectedContactId]);
+
+  useEffect(() => {
+    if (currentView !== "contacts" || !shouldFocusContactsSearchRef.current) return;
+    contactsSearchRef.current?.focus();
+    contactsSearchRef.current?.select();
+    shouldFocusContactsSearchRef.current = false;
+  }, [currentView]);
 
   const filteredContacts = useMemo(() => {
     return [...contacts]
@@ -2265,6 +2653,18 @@ export default function RolodexPage() {
 
   const visibleTimeline = useMemo(() => timelineItems.slice(0, visibleTimelineCount), [timelineItems, visibleTimelineCount]);
 
+  const selectedTimelineInteraction = useMemo(() => {
+    if (!selectedContact || !selectedTimelineInteractionId) return null;
+    return selectedContact.interactions.find((entry) => entry.id === selectedTimelineInteractionId) ?? null;
+  }, [selectedContact, selectedTimelineInteractionId]);
+
+  useEffect(() => {
+    if (!selectedTimelineInteractionId) return;
+    if (selectedTimelineInteraction) return;
+    setSelectedTimelineInteractionId(null);
+    setTimelineDetailEditing(false);
+  }, [selectedTimelineInteraction, selectedTimelineInteractionId]);
+
   const interactionStats = useMemo(() => {
     if (!selectedContact) {
       return {
@@ -2305,6 +2705,215 @@ export default function RolodexPage() {
 
   const footerSyncLabel = lastSyncedAt ? `Last synced ${secondsSinceSync}s ago` : "Not synced yet";
   const detailSyncLabel = lastSyncedAt ? `${secondsSinceSync}s since sync` : "waiting to sync";
+
+  const weekStart = useMemo(() => startOfWeek(), []);
+  const nextWeekStart = useMemo(() => shiftWeeks(weekStart, 1), [weekStart]);
+  const lastWeekStart = useMemo(() => shiftWeeks(weekStart, -1), [weekStart]);
+
+  const contactsAddedThisWeek = useMemo(
+    () =>
+      contacts.filter((contact) => {
+        const createdAt = Date.parse(contact.createdAt);
+        return !Number.isNaN(createdAt) && createdAt >= weekStart.getTime() && createdAt < nextWeekStart.getTime();
+      }),
+    [contacts, nextWeekStart, weekStart],
+  );
+
+  const contactsAddedLastWeek = useMemo(
+    () =>
+      contacts.filter((contact) => {
+        const createdAt = Date.parse(contact.createdAt);
+        return !Number.isNaN(createdAt) && createdAt >= lastWeekStart.getTime() && createdAt < weekStart.getTime();
+      }),
+    [contacts, lastWeekStart, weekStart],
+  );
+
+  const thisWeekInteractions = useMemo(
+    () =>
+      contacts.flatMap((contact) =>
+        contact.interactions
+          .filter((interaction) => {
+            const createdAt = Date.parse(interaction.createdAt);
+            return !Number.isNaN(createdAt) && createdAt >= weekStart.getTime() && createdAt < nextWeekStart.getTime();
+          })
+          .map((interaction) => ({ interaction, contact })),
+      ),
+    [contacts, nextWeekStart, weekStart],
+  );
+
+  const lastWeekInteractions = useMemo(
+    () =>
+      contacts.flatMap((contact) =>
+        contact.interactions
+          .filter((interaction) => {
+            const createdAt = Date.parse(interaction.createdAt);
+            return !Number.isNaN(createdAt) && createdAt >= lastWeekStart.getTime() && createdAt < weekStart.getTime();
+          })
+          .map((interaction) => ({ interaction, contact })),
+      ),
+    [contacts, lastWeekStart, weekStart],
+  );
+
+  const weeklyFollowUpsCompleted = useMemo(
+    () =>
+      contacts.filter((contact) => {
+        const hasReminder = Boolean(contact.stayInTouch || contact.nextFollowUp);
+        const touchedThisWeek = contact.interactions.some((interaction) => {
+          const createdAt = Date.parse(interaction.createdAt);
+          return !Number.isNaN(createdAt) && createdAt >= weekStart.getTime() && createdAt < nextWeekStart.getTime();
+        });
+        return hasReminder && touchedThisWeek;
+      }).length,
+    [contacts, nextWeekStart, weekStart],
+  );
+
+  const lastWeekFollowUpsCompleted = useMemo(
+    () =>
+      contacts.filter((contact) => {
+        const hasReminder = Boolean(contact.stayInTouch || contact.nextFollowUp);
+        const touchedLastWeek = contact.interactions.some((interaction) => {
+          const createdAt = Date.parse(interaction.createdAt);
+          return !Number.isNaN(createdAt) && createdAt >= lastWeekStart.getTime() && createdAt < weekStart.getTime();
+        });
+        return hasReminder && touchedLastWeek;
+      }).length,
+    [contacts, lastWeekStart, weekStart],
+  );
+
+  const networkGrowth = useMemo(() => {
+    const firstWeek = shiftWeeks(weekStart, -7);
+    return Array.from({ length: 8 }, (_, index) => {
+      const bucketStart = shiftWeeks(firstWeek, index);
+      const bucketEnd = shiftWeeks(bucketStart, 1);
+      const count = contacts.filter((contact) => {
+        const createdAt = Date.parse(contact.createdAt);
+        return !Number.isNaN(createdAt) && createdAt >= bucketStart.getTime() && createdAt < bucketEnd.getTime();
+      }).length;
+      return {
+        label: weekLabel(bucketStart),
+        count,
+      };
+    });
+  }, [contacts, weekStart]);
+
+  const upcomingBirthdays = useMemo(
+    () =>
+      contacts
+        .map((contact) => {
+          const nextBirthday = nextBirthdayOccurrence(contact.birthday);
+          if (!nextBirthday) return null;
+          const daysAway = Math.ceil((nextBirthday.getTime() - easternTodayDate().getTime()) / 86400000);
+          if (daysAway < 0 || daysAway > 14) return null;
+          return {
+            contact,
+            date: nextBirthday.toISOString().slice(0, 10),
+            daysAway,
+          };
+        })
+        .filter((entry): entry is { contact: RolodexContact; date: string; daysAway: number } => entry !== null)
+        .sort((left, right) => left.daysAway - right.daysAway),
+    [contacts],
+  );
+
+  const scoreDroppedContacts = useMemo(
+    () =>
+      contacts
+        .filter((contact) => {
+          const recentNegative = contact.interactions.some((interaction) => {
+            const days = daysSinceDate(interaction.date);
+            return days !== null && days <= 21 && interaction.sentiment === "negative";
+          });
+          return recentNegative || (contact.relationshipScore < 45 && (daysSinceDate(contact.lastContactedAt) ?? 999) > 21);
+        })
+        .sort((left, right) => left.relationshipScore - right.relationshipScore)
+        .slice(0, 3),
+    [contacts],
+  );
+
+  const todayCallOrMeetingContacts = useMemo(
+    () =>
+      contacts
+        .flatMap((contact) =>
+          contact.interactions
+            .filter((interaction) => interaction.date === easternToday() && (interaction.type === "call" || interaction.type === "meeting"))
+            .map((interaction) => ({ contact, interaction })),
+        )
+        .slice(0, 4),
+    [contacts],
+  );
+
+  const dailyBriefing = useMemo(() => {
+    const sentences: string[] = [`${greetingForHour()}, Jahan.`];
+
+    if (todayCallOrMeetingContacts.length) {
+      sentences.push(
+        `Today includes ${todayCallOrMeetingContacts
+          .map(({ contact, interaction }) => `${interaction.type === "meeting" ? "a meeting with" : "a call with"} ${fullName(contact)}`)
+          .join(", ")}.`,
+      );
+    } else {
+      sentences.push("There are no calls or meetings logged for today yet.");
+    }
+
+    if (overdueContacts.length) {
+      sentences.push(
+        `The most overdue follow-ups are ${overdueContacts
+          .slice(0, 3)
+          .map((contact) => `${fullName(contact)} (${contact.nextFollowUp ? formatDate(contact.nextFollowUp) : relativeTimeFromDate(contact.lastContactedAt)})`)
+          .join(", ")}.`,
+      );
+    }
+
+    if (scoreDroppedContacts.length) {
+      sentences.push(`Relationship momentum slipped for ${scoreDroppedContacts.map((contact) => fullName(contact)).join(", ")}.`);
+    }
+
+    if (contactsAddedThisWeek.length) {
+      sentences.push(
+        `You added ${contactsAddedThisWeek.length} new contact${contactsAddedThisWeek.length === 1 ? "" : "s"} this week, including ${contactsAddedThisWeek
+          .slice(0, 3)
+          .map((contact) => fullName(contact))
+          .join(", ")}.`,
+      );
+    }
+
+    if (upcomingBirthdays.length) {
+      sentences.push(
+        `Upcoming birthdays in the next two weeks: ${upcomingBirthdays
+          .slice(0, 3)
+          .map(({ contact, date }) => `${fullName(contact)} on ${formatDate(date)}`)
+          .join(", ")}.`,
+      );
+    }
+
+    return sentences.join(" ");
+  }, [contactsAddedThisWeek, overdueContacts, scoreDroppedContacts, todayCallOrMeetingContacts, upcomingBirthdays]);
+
+  const goingColdContacts = useMemo(
+    () =>
+      contacts
+        .map((contact) => {
+          const daysSince = daysSinceDate(contact.lastContactedAt);
+          const reminderDays = reminderFrequencyDays(contact.stayInTouch);
+          const coldByReminder =
+            reminderDays !== undefined &&
+            daysSince !== null &&
+            daysSince > reminderDays * 2 &&
+            (!contact.stayInTouch?.snoozedUntil || contact.stayInTouch.snoozedUntil <= easternToday());
+          const coldByScore = contact.relationshipScore < 30 && contact.interactions.length > 0;
+          if (!coldByReminder && !coldByScore) return null;
+          return {
+            contact,
+            daysSince: daysSince ?? 0,
+            trend: interactionTrendArrow(contact.interactions),
+            priority: Math.max(daysSince ?? 0, contact.relationshipScore <= 30 ? 60 - contact.relationshipScore : 0),
+          };
+        })
+        .filter((entry): entry is { contact: RolodexContact; daysSince: number; trend: string; priority: number } => entry !== null)
+        .sort((left, right) => right.priority - left.priority)
+        .slice(0, 5),
+    [contacts],
+  );
 
   function navigateTo(view: ViewMode, contactId?: string | null) {
     const hash = buildHash(view, contactId);
@@ -2429,39 +3038,8 @@ export default function RolodexPage() {
 
   async function submitQuickLog(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!selectedContact || !quickLog?.summary.trim()) return;
-
-    const interaction: Interaction = {
-      id: `ri_local_${Date.now().toString(36)}`,
-      type: quickLog.type,
-      date: easternToday(),
-      summary: quickLog.summary.trim(),
-      details: quickLog.details.trim() || undefined,
-      sentiment: quickLog.sentiment || undefined,
-      createdAt: new Date().toISOString(),
-    };
-
-    await optimisticContactMutation(
-      selectedContact.id,
-      (current) => ({
-        ...current,
-        interactions: [interaction, ...current.interactions].sort((left, right) => right.date.localeCompare(left.date)),
-        lastContactedAt: interaction.date,
-      }),
-      () =>
-        fetch(`/api/rolodex/${selectedContact.id}/interactions`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            type: quickLog.type,
-            date: easternToday(),
-            summary: quickLog.summary,
-            details: quickLog.details,
-            sentiment: quickLog.sentiment || undefined,
-          }),
-        }),
-    );
-
+    if (!selectedContact || !quickLog) return;
+    await createInteractionForContact(selectedContact.id, quickLog);
     setQuickLog(null);
   }
 
@@ -2477,6 +3055,72 @@ export default function RolodexPage() {
       () =>
         fetch(`/api/rolodex/${selectedContact.id}/interactions/${interactionId}`, {
           method: "DELETE",
+        }),
+    );
+  }
+
+  async function createInteractionForContact(contactId: string, draft: QuickLogDraft) {
+    if (!draft.summary.trim()) return;
+
+    const interaction: Interaction = {
+      id: `ri_local_${Date.now().toString(36)}`,
+      type: draft.type,
+      date: easternToday(),
+      summary: draft.summary.trim(),
+      details: draft.details.trim() || undefined,
+      sentiment: draft.sentiment || undefined,
+      createdAt: new Date().toISOString(),
+    };
+
+    await optimisticContactMutation(
+      contactId,
+      (current) => ({
+        ...current,
+        interactions: [interaction, ...current.interactions].sort((left, right) => right.date.localeCompare(left.date)),
+        lastContactedAt: interaction.date,
+      }),
+      () =>
+        fetch(`/api/rolodex/${contactId}/interactions`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: draft.type,
+            date: easternToday(),
+            summary: draft.summary,
+            details: draft.details,
+            sentiment: draft.sentiment || undefined,
+          }),
+        }),
+    );
+  }
+
+  async function updateInteraction(interactionId: string, patch: Pick<QuickLogDraft, "summary" | "details" | "sentiment">) {
+    if (!selectedContact) return;
+
+    await optimisticContactMutation(
+      selectedContact.id,
+      (current) => ({
+        ...current,
+        interactions: current.interactions.map((entry) =>
+          entry.id === interactionId
+            ? {
+                ...entry,
+                summary: patch.summary.trim(),
+                details: patch.details.trim() || undefined,
+                sentiment: patch.sentiment || undefined,
+              }
+            : entry,
+        ),
+      }),
+      () =>
+        fetch(`/api/rolodex/${selectedContact.id}/interactions/${interactionId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            summary: patch.summary,
+            details: patch.details,
+            sentiment: patch.sentiment || undefined,
+          }),
         }),
     );
   }
@@ -2743,6 +3387,57 @@ export default function RolodexPage() {
     setHomeAiExpanded(true);
   }
 
+  function openSearchContacts() {
+    shouldFocusContactsSearchRef.current = true;
+    navigateTo("contacts");
+  }
+
+  function openQuickActionLog() {
+    setQuickActionContactId(selectedContact?.id ?? "");
+    setQuickActionDraft({ ...EMPTY_QUICK_LOG, type: "call" });
+    setQuickActionLogOpen(true);
+  }
+
+  function openTimelineInteraction(interaction: Interaction) {
+    setSelectedTimelineInteractionId(interaction.id);
+    setTimelineDetailEditing(false);
+    setTimelineDetailDraft({
+      summary: interaction.summary,
+      details: interaction.details ?? "",
+      sentiment: interaction.sentiment ?? "",
+    });
+  }
+
+  function closeTimelineInteraction() {
+    setSelectedTimelineInteractionId(null);
+    setTimelineDetailEditing(false);
+  }
+
+  async function submitQuickActionLog(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!quickActionContactId) {
+      setErrorMessage("Select a contact before logging a call.");
+      return;
+    }
+    await createInteractionForContact(quickActionContactId, quickActionDraft);
+    setQuickActionLogOpen(false);
+    setQuickActionDraft({ ...EMPTY_QUICK_LOG, type: "call" });
+    navigateTo("detail", quickActionContactId);
+  }
+
+  async function saveTimelineInteractionChanges() {
+    if (!selectedTimelineInteraction || !timelineDetailDraft.summary.trim()) return;
+    await updateInteraction(selectedTimelineInteraction.id, timelineDetailDraft);
+    setTimelineDetailEditing(false);
+  }
+
+  async function deleteTimelineInteraction() {
+    if (!selectedTimelineInteraction) return;
+    if (!window.confirm("Delete this interaction?")) return;
+    await deleteInteraction(selectedTimelineInteraction.id);
+    closeTimelineInteraction();
+  }
+
   if (loading) {
     return <div className="min-h-screen bg-slate-950 px-6 py-10 text-slate-200">Loading Rolodex…</div>;
   }
@@ -2755,6 +3450,44 @@ export default function RolodexPage() {
         onDraftChange={(patch) => setContactDraft((state) => ({ ...state, ...patch }))}
         onClose={() => setAddContactOpen(false)}
         onSubmit={createContact}
+      />
+      <QuickActionLogModal
+        open={quickActionLogOpen}
+        contacts={contacts}
+        selectedContactId={quickActionContactId}
+        draft={quickActionDraft}
+        onContactChange={setQuickActionContactId}
+        onDraftChange={(patch) => setQuickActionDraft((state) => ({ ...state, ...patch }))}
+        onClose={() => setQuickActionLogOpen(false)}
+        onSubmit={submitQuickActionLog}
+      />
+      <InteractionDetailModal
+        open={Boolean(selectedTimelineInteraction)}
+        interaction={selectedTimelineInteraction}
+        editing={timelineDetailEditing}
+        draft={timelineDetailDraft}
+        onDraftChange={(patch) => setTimelineDetailDraft((state) => ({ ...state, ...patch }))}
+        onStartEdit={() => {
+          if (!selectedTimelineInteraction) return;
+          setTimelineDetailDraft({
+            summary: selectedTimelineInteraction.summary,
+            details: selectedTimelineInteraction.details ?? "",
+            sentiment: selectedTimelineInteraction.sentiment ?? "",
+          });
+          setTimelineDetailEditing(true);
+        }}
+        onCancelEdit={() => {
+          if (!selectedTimelineInteraction) return;
+          setTimelineDetailDraft({
+            summary: selectedTimelineInteraction.summary,
+            details: selectedTimelineInteraction.details ?? "",
+            sentiment: selectedTimelineInteraction.sentiment ?? "",
+          });
+          setTimelineDetailEditing(false);
+        }}
+        onSave={saveTimelineInteractionChanges}
+        onDelete={deleteTimelineInteraction}
+        onClose={closeTimelineInteraction}
       />
 
       <div className="mx-auto flex min-h-screen max-w-[1800px] flex-col px-4 py-5 sm:px-6 lg:px-8">
@@ -2824,6 +3557,44 @@ export default function RolodexPage() {
                   <p className="mt-4 max-w-3xl text-lg text-slate-300">
                     You have {contacts.length} contacts, {overdueContacts.length} need follow-up, and {newThisWeekCount} are new this week.
                   </p>
+
+                  <div className="mt-6 -mx-1 flex gap-3 overflow-x-auto px-1 pb-1">
+                    <button
+                      type="button"
+                      onClick={openQuickActionLog}
+                      className="whitespace-nowrap rounded-full border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-slate-100 transition hover:border-sky-400/40 hover:text-white"
+                    >
+                      📞 Log a Call
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAddContactOpen(true)}
+                      className="whitespace-nowrap rounded-full border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-slate-100 transition hover:border-sky-400/40 hover:text-white"
+                    >
+                      ➕ Add Contact
+                    </button>
+                    <button
+                      type="button"
+                      onClick={importFromPipeline}
+                      className="whitespace-nowrap rounded-full border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-slate-100 transition hover:border-sky-400/40 hover:text-white"
+                    >
+                      📥 Import Pipeline
+                    </button>
+                    <button
+                      type="button"
+                      onClick={openSearchContacts}
+                      className="whitespace-nowrap rounded-full border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-slate-100 transition hover:border-sky-400/40 hover:text-white"
+                    >
+                      🔍 Search Contacts
+                    </button>
+                  </div>
+
+                  <GlassCard className="mt-6 rounded-[28px] border-l-4 border-l-sky-400 p-6">
+                    <div>
+                      {sectionTitle("📋 Daily Briefing")}
+                      <p className="mt-3 text-sm leading-7 text-slate-200">{dailyBriefing}</p>
+                    </div>
+                  </GlassCard>
 
                   <GlassCard className="mt-8 rounded-[28px] p-6">
                     <div className="flex items-start justify-between gap-4">
@@ -3016,6 +3787,99 @@ export default function RolodexPage() {
                 detail="Average relationship strength across your rolodex."
               />
             </section>
+
+            <section className="grid gap-5 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,0.7fr)]">
+              <GlassCard className="rounded-[28px] p-6">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    {sectionTitle("Network Growth")}
+                    <p className="mt-2 text-sm text-slate-400">
+                      {networkGrowth[7]?.count ?? 0} contacts this week vs {networkGrowth[6]?.count ?? 0} last week.
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-6 flex h-56 items-end gap-3">
+                  {networkGrowth.map((entry, index) => {
+                    const max = Math.max(1, ...networkGrowth.map((item) => item.count));
+                    const height = `${Math.max(entry.count > 0 ? 16 : 8, (entry.count / max) * 100)}%`;
+                    return (
+                      <div key={`${entry.label}-${index}`} className="flex flex-1 flex-col items-center gap-3">
+                        <div className="flex h-full w-full items-end">
+                          <div
+                            title={`${entry.count} contact${entry.count === 1 ? "" : "s"} added`}
+                            className="w-full rounded-t-[18px] bg-[linear-gradient(180deg,_rgba(56,189,248,0.95),_rgba(37,99,235,0.45))] transition hover:brightness-110"
+                            style={{ height }}
+                          />
+                        </div>
+                        <span className="text-xs text-slate-500">{entry.label}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </GlassCard>
+
+              <GlassCard className="rounded-[28px] p-6">
+                {sectionTitle("Weekly Digest")}
+                <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">New Contacts</p>
+                    <p className="mt-3 text-2xl font-semibold text-white">{contactsAddedThisWeek.length}</p>
+                    <p className="mt-1 text-sm text-slate-400">
+                      {formatTrendArrow(contactsAddedThisWeek.length - contactsAddedLastWeek.length)} vs last week
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Interactions</p>
+                    <p className="mt-3 text-2xl font-semibold text-white">{thisWeekInteractions.length}</p>
+                    <p className="mt-1 text-sm text-slate-400">
+                      {formatTrendArrow(thisWeekInteractions.length - lastWeekInteractions.length)} vs last week
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Follow-ups Closed</p>
+                    <p className="mt-3 text-2xl font-semibold text-white">{weeklyFollowUpsCompleted}</p>
+                    <p className="mt-1 text-sm text-slate-400">
+                      {formatTrendArrow(weeklyFollowUpsCompleted - lastWeekFollowUpsCompleted)} vs last week
+                    </p>
+                  </div>
+                </div>
+                <p className="mt-4 text-sm text-slate-400">
+                  This week: {contactsAddedThisWeek.length} new contacts, {thisWeekInteractions.length} interactions logged, {weeklyFollowUpsCompleted} follow-ups completed.
+                </p>
+              </GlassCard>
+            </section>
+
+            <section>
+              <GlassCard className="rounded-[28px] p-6">
+                {sectionTitle("🧊 Going Cold")}
+                <div className="mt-5 space-y-3">
+                  {goingColdContacts.map(({ contact, daysSince, trend }) => (
+                    <button
+                      key={contact.id}
+                      type="button"
+                      onClick={() => jumpToContact(contact.id)}
+                      className="flex w-full items-center justify-between gap-4 rounded-[24px] border border-white/10 bg-white/[0.02] p-4 text-left transition hover:border-sky-400/40"
+                    >
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: relationshipDot[contact.relationshipType] }} />
+                          <span className="truncate font-semibold text-white">{fullName(contact)}</span>
+                        </div>
+                        <p className="mt-1 truncate text-sm text-slate-400">{contact.company || "No company listed"}</p>
+                        <p className="mt-2 text-sm text-slate-500">Last contacted {daysSince} day{daysSince === 1 ? "" : "s"} ago</p>
+                      </div>
+                      <div className="shrink-0 text-right">
+                        <p className={cn("text-lg font-semibold", scoreTextTone(contact.relationshipScore))}>
+                          {contact.relationshipScore} <span className="text-sm text-slate-400">{trend}</span>
+                        </p>
+                        <p className="text-xs text-slate-500">Score</p>
+                      </div>
+                    </button>
+                  ))}
+                  {!goingColdContacts.length ? <p className="text-sm text-slate-500">No relationships are showing cold-risk signals right now.</p> : null}
+                </div>
+              </GlassCard>
+            </section>
           </main>
         ) : null}
 
@@ -3027,6 +3891,7 @@ export default function RolodexPage() {
                   <label className="relative flex-1">
                     <Search className="pointer-events-none absolute left-4 top-4 h-4 w-4 text-slate-500" />
                     <input
+                      ref={contactsSearchRef}
                       value={search}
                       onChange={(event) => setSearch(event.target.value)}
                       placeholder="Search name, company, email, tags, notes"
@@ -3444,7 +4309,12 @@ export default function RolodexPage() {
 
                         <div className="mt-4 space-y-3">
                           {visibleTimeline.map((interaction) => (
-                            <TimelineItemCard key={interaction.id} interaction={interaction} onDelete={() => deleteInteraction(interaction.id)} />
+                            <TimelineItemCard
+                              key={interaction.id}
+                              interaction={interaction}
+                              onOpen={() => openTimelineInteraction(interaction)}
+                              onDelete={() => deleteInteraction(interaction.id)}
+                            />
                           ))}
 
                           {!visibleTimeline.length ? (
@@ -3525,11 +4395,6 @@ export default function RolodexPage() {
     </div>
   );
 }
-
-
-
-
-
 
 
 

@@ -575,6 +575,40 @@ export async function deleteRolodexInteraction(contactId: string, interactionId:
   return contacts[index];
 }
 
+export async function updateRolodexInteraction(contactId: string, interactionId: string, input: InteractionInput) {
+  const contacts = await readRolodexFile();
+  const index = contacts.findIndex((contact) => contact.id === contactId);
+  if (index < 0) return null;
+
+  const currentInteraction = contacts[index].interactions.find((interaction) => interaction.id === interactionId);
+  if (!currentInteraction) return null;
+
+  const summary = normalizeString(input.summary ?? currentInteraction.summary);
+  if (!summary) return null;
+
+  const nextInteractions = contacts[index].interactions.map((interaction) =>
+    interaction.id === interactionId
+      ? {
+          ...interaction,
+          type: input.type === undefined ? currentInteraction.type : normalizeInteractionType(input.type),
+          date: normalizeDate(input.date) ?? currentInteraction.date,
+          summary,
+          details: input.details === undefined ? currentInteraction.details : normalizeOptionalString(input.details),
+          sentiment:
+            input.sentiment === undefined
+              ? currentInteraction.sentiment
+              : input.sentiment === "positive" || input.sentiment === "neutral" || input.sentiment === "negative"
+                ? input.sentiment
+                : undefined,
+        }
+      : interaction,
+  );
+
+  contacts[index] = applyPatch(contacts[index], { interactions: nextInteractions });
+  await writeRolodexFile(contacts);
+  return contacts[index];
+}
+
 export async function getRolodexReminders() {
   const today = easternDate();
   const contacts = await getRolodexContacts();
