@@ -1748,13 +1748,249 @@ function AiInsightsTab({
   );
 }
 
+type ViewMode = "home" | "contacts" | "detail";
+type BrowserMode = "grid" | "list";
+
+function easternHour() {
+  return Number(
+    new Intl.DateTimeFormat("en-US", {
+      hour: "numeric",
+      hour12: false,
+      timeZone: "America/New_York",
+    }).format(new Date()),
+  );
+}
+
+function greetingForHour() {
+  const hour = easternHour();
+  if (hour < 12) return "Good morning";
+  if (hour < 18) return "Good afternoon";
+  return "Good evening";
+}
+
+function formatRelativeDateTime(value?: string) {
+  if (!value) return "Just now";
+  const parsed = new Date(value).getTime();
+  if (Number.isNaN(parsed)) return value;
+
+  const deltaMs = Date.now() - parsed;
+  const minutes = Math.max(0, Math.floor(deltaMs / 60000));
+  if (minutes < 1) return "Just now";
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  return formatDateTime(value);
+}
+
+function parseHashState(hashValue: string): { view: ViewMode; selectedContactId: string | null } {
+  const raw = hashValue.replace(/^#/, "").trim();
+  if (!raw || raw === "home") return { view: "home", selectedContactId: null };
+  if (raw === "contacts") return { view: "contacts", selectedContactId: null };
+  if (raw.startsWith("detail/")) {
+    const selectedContactId = raw.slice("detail/".length).split("?")[0].trim();
+    return selectedContactId ? { view: "detail", selectedContactId } : { view: "contacts", selectedContactId: null };
+  }
+  return { view: "home", selectedContactId: null };
+}
+
+function buildHash(view: ViewMode, selectedContactId?: string | null) {
+  if (view === "contacts") return "#contacts";
+  if (view === "detail" && selectedContactId) return `#detail/${selectedContactId}`;
+  return "#home";
+}
+
+function topContactTypes(contacts: RolodexContact[]) {
+  const counts = contacts.reduce<Record<string, number>>((accumulator, contact) => {
+    accumulator[contact.relationshipType] = (accumulator[contact.relationshipType] ?? 0) + 1;
+    return accumulator;
+  }, {});
+
+  const total = contacts.length || 1;
+  return Object.entries(counts)
+    .sort((left, right) => right[1] - left[1])
+    .slice(0, 4)
+    .map(([type, count]) => ({
+      type: type as RelationshipType,
+      count,
+      width: `${Math.max(10, Math.round((count / total) * 100))}%`,
+    }));
+}
+
+function buildNetworkAnswer(prompt: string, contacts: RolodexContact[]) {
+  const lower = prompt.toLowerCase();
+  const sortedByScore = [...contacts].sort((left, right) => right.relationshipScore - left.relationshipScore);
+  const overdue = contacts
+    .filter((contact) => contact.nextFollowUp && contact.nextFollowUp <= easternToday())
+    .sort((left, right) => (left.nextFollowUp ?? "").localeCompare(right.nextFollowUp ?? ""));
+  const recent = contacts
+    .filter((contact) => contact.lastContactedAt)
+    .sort((left, right) => (right.lastContactedAt ?? "").localeCompare(left.lastContactedAt ?? ""));
+
+  if (lower.includes("follow up")) {
+    const people = overdue.slice(0, 4).map((contact) => `${fullName(contact)} (${relativeTimeFromDate(contact.lastContactedAt)})`);
+    return people.length
+      ? `Priority follow-ups: ${people.join(", ")}.`
+      : "No overdue follow-ups are flagged right now. Start with contacts you have not touched in the last two weeks.";
+  }
+
+  if (lower.includes("strongest") || lower.includes("best")) {
+    return `Strongest relationships by score: ${sortedByScore
+      .slice(0, 5)
+      .map((contact) => `${fullName(contact)} (${contact.relationshipScore})`)
+      .join(", ")}.`;
+  }
+
+  if (lower.includes("louisville")) {
+    const matches = contacts.filter((contact) => locationLine(contact).toLowerCase().includes("louisville"));
+    return matches.length
+      ? `Louisville contacts: ${matches.slice(0, 6).map((contact) => fullName(contact)).join(", ")}.`
+      : "No Louisville contacts are currently tagged in the rolodex.";
+  }
+
+  if (lower.includes("restaurant")) {
+    const matches = contacts.filter((contact) => {
+      const haystack = `${contact.company} ${contact.title} ${contact.industry} ${contact.tags.join(" ")}`.toLowerCase();
+      return haystack.includes("restaurant") || haystack.includes("hospitality");
+    });
+    return matches.length
+      ? `Restaurant and hospitality contacts you have not talked to recently: ${matches
+          .sort((left, right) => (left.lastContactedAt ?? "").localeCompare(right.lastContactedAt ?? ""))
+          .slice(0, 5)
+          .map((contact) => `${fullName(contact)} (${relativeTimeFromDate(contact.lastContactedAt)})`)
+          .join(", ")}.`
+      : "I did not find obvious restaurant-owner tags in the current data set.";
+  }
+
+  if (lower.includes("nashville") || lower.includes("introduce")) {
+    const matches = contacts.filter((contact) => locationLine(contact).toLowerCase().includes("nashville"));
+    return matches.length
+      ? `People who may help with a Nashville intro: ${matches
+          .slice(0, 5)
+          .map((contact) => `${fullName(contact)} at ${contact.company || "independent"}`)
+          .join(", ")}.`
+      : "No Nashville-based contacts are obvious from the saved location data.";
+  }
+
+  return `Network snapshot: ${contacts.length} contacts total, ${overdue.length} overdue follow-ups, and most recently touched contacts include ${recent
+    .slice(0, 3)
+    .map((contact) => fullName(contact))
+    .join(", ") || "none yet"}.`;
+}
+
+function ViewTabButton({
+  label,
+  active,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "rounded-full border px-4 py-2.5 text-sm transition",
+        active ? "border-sky-400/40 bg-sky-500/15 text-white" : "border-white/10 bg-white/[0.02] text-slate-400 hover:text-white",
+      )}
+    >
+      {label}
+    </button>
+  );
+}
+
+function HomeMetricCard({
+  title,
+  value,
+  detail,
+  children,
+}: {
+  title: string;
+  value: React.ReactNode;
+  detail: string;
+  children?: React.ReactNode;
+}) {
+  return (
+    <GlassCard className="rounded-[28px] p-6">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">{title}</p>
+      <div className="mt-4 text-3xl font-semibold text-white">{value}</div>
+      <p className="mt-2 text-sm text-slate-400">{detail}</p>
+      {children ? <div className="mt-5">{children}</div> : null}
+    </GlassCard>
+  );
+}
+
+function ContactGridCard({
+  contact,
+  onSelect,
+}: {
+  contact: RolodexContact;
+  onSelect: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      className="group flex h-full flex-col rounded-[28px] border border-white/10 bg-white/[0.03] p-6 text-left transition hover:border-sky-400/40 hover:bg-white/[0.05]"
+    >
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex min-w-0 gap-4">
+          <div
+            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[20px] border border-white/10 text-base font-semibold text-white"
+            style={{ backgroundColor: `${relationshipDot[contact.relationshipType]}22` }}
+          >
+            {initials(contact)}
+          </div>
+          <div className="min-w-0">
+            <p className="truncate text-lg font-semibold text-white">{fullName(contact)}</p>
+            <p className="mt-1 truncate text-sm text-slate-300">{titleLine(contact)}</p>
+          </div>
+        </div>
+        <span className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-[11px] font-medium uppercase tracking-[0.14em] text-slate-300">
+          {RELATIONSHIP_TYPE_LABELS[contact.relationshipType]}
+        </span>
+      </div>
+
+      <div className="mt-6 space-y-3 text-sm text-slate-400">
+        <div className="flex items-center gap-2">
+          <MapPin className="h-4 w-4" />
+          <span>{locationLine(contact) || "No location set"}</span>
+        </div>
+        <div className="flex items-center justify-between gap-3">
+          <span>Last contacted</span>
+          <span className="text-slate-200">{relativeTimeFromDate(contact.lastContactedAt)}</span>
+        </div>
+        <div className="flex items-center justify-between gap-3">
+          <span>Quick actions</span>
+          <div className="flex items-center gap-2 text-slate-300">
+            {contact.phone ? <Phone className="h-4 w-4" /> : null}
+            {contact.email ? <Mail className="h-4 w-4" /> : null}
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-6 h-1.5 overflow-hidden rounded-full bg-slate-800">
+        <div
+          className="h-full rounded-full bg-[linear-gradient(90deg,_#38bdf8,_#22c55e)] transition-all duration-200"
+          style={{ width: `${Math.max(8, contact.relationshipScore)}%` }}
+        />
+      </div>
+    </button>
+  );
+}
+
 export default function RolodexPage() {
   const [contacts, setContacts] = useState<RolodexContact[]>([]);
   const [selectedContactId, setSelectedContactId] = useState("");
   const [loading, setLoading] = useState(true);
+  const [currentView, setCurrentView] = useState<ViewMode>("home");
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<FilterMode>("all");
   const [sort, setSort] = useState<SortMode>("recently-contacted");
+  const [browserMode, setBrowserMode] = useState<BrowserMode>("grid");
   const [activeTab, setActiveTab] = useState<DetailTab>("overview");
   const [timelineFilter, setTimelineFilter] = useState<TimelineFilter>("all");
   const [visibleTimelineCount, setVisibleTimelineCount] = useState(12);
@@ -1770,6 +2006,10 @@ export default function RolodexPage() {
   const [connectionQuery, setConnectionQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [homeAiPrompt, setHomeAiPrompt] = useState("");
+  const [homeAiHistory, setHomeAiHistory] = useState<AiMessage[]>([]);
+  const [homeAiExpanded, setHomeAiExpanded] = useState(true);
+  const [homeHistoryOpen, setHomeHistoryOpen] = useState(false);
   const deferredSearch = useDeferredValue(search);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
@@ -1813,6 +2053,27 @@ export default function RolodexPage() {
   }, []);
 
   useEffect(() => {
+    const applyHash = () => {
+      const next = parseHashState(window.location.hash);
+      setCurrentView(next.view);
+      if (next.selectedContactId) {
+        setSelectedContactId(next.selectedContactId);
+        setActiveTab("overview");
+        setVisibleTimelineCount(12);
+      }
+    };
+
+    if (!window.location.hash) {
+      window.location.hash = "#home";
+    } else {
+      applyHash();
+    }
+
+    window.addEventListener("hashchange", applyHash);
+    return () => window.removeEventListener("hashchange", applyHash);
+  }, []);
+
+  useEffect(() => {
     if (!lastSyncedAt) return;
     const interval = window.setInterval(() => {
       setSecondsSinceSync(Math.max(0, Math.floor((Date.now() - lastSyncedAt.getTime()) / 1000)));
@@ -1837,6 +2098,20 @@ export default function RolodexPage() {
     return () => window.removeEventListener("mousedown", handleClick);
   }, []);
 
+  useEffect(() => {
+    if (!contacts.length) return;
+    if (currentView === "detail" && !contacts.some((contact) => contact.id === selectedContactId)) {
+      const fallbackId = contacts[0]?.id;
+      if (fallbackId) {
+        setSelectedContactId(fallbackId);
+        window.location.hash = buildHash("detail", fallbackId);
+      } else {
+        setCurrentView("home");
+        window.location.hash = "#home";
+      }
+    }
+  }, [contacts, currentView, selectedContactId]);
+
   const filteredContacts = useMemo(() => {
     return [...contacts]
       .filter((contact) => {
@@ -1856,6 +2131,130 @@ export default function RolodexPage() {
     () => contacts.find((contact) => contact.id === selectedContactId) ?? filteredContacts[0] ?? null,
     [contacts, filteredContacts, selectedContactId],
   );
+
+  const overdueContacts = useMemo(
+    () =>
+      [...contacts]
+        .filter((contact) => contact.nextFollowUp && contact.nextFollowUp <= easternToday())
+        .sort((left, right) => (left.nextFollowUp ?? "").localeCompare(right.nextFollowUp ?? "")),
+    [contacts],
+  );
+
+  const newThisWeekCount = useMemo(() => {
+    const weekStart = new Date(`${easternToday()}T12:00:00.000Z`);
+    weekStart.setUTCDate(weekStart.getUTCDate() - 7);
+    return contacts.filter((contact) => Date.parse(contact.createdAt) >= weekStart.getTime()).length;
+  }, [contacts]);
+
+  const thisWeekActivityCount = useMemo(() => {
+    const weekStart = new Date(`${easternToday()}T12:00:00.000Z`);
+    weekStart.setUTCDate(weekStart.getUTCDate() - 7);
+    return contacts.reduce(
+      (count, contact) =>
+        count +
+        contact.interactions.filter((interaction) => {
+          const parsed = Date.parse(interaction.createdAt);
+          return !Number.isNaN(parsed) && parsed >= weekStart.getTime();
+        }).length,
+      0,
+    );
+  }, [contacts]);
+
+  const averageRelationshipScore = useMemo(() => {
+    if (!contacts.length) return 0;
+    return Math.round(contacts.reduce((sum, contact) => sum + contact.relationshipScore, 0) / contacts.length);
+  }, [contacts]);
+
+  const typeBreakdown = useMemo(() => topContactTypes(contacts), [contacts]);
+
+  const recentActivity = useMemo(
+    () =>
+      contacts
+        .flatMap((contact) =>
+          contact.interactions.map((interaction) => ({
+            interaction,
+            contact,
+          })),
+        )
+        .sort((left, right) => Date.parse(right.interaction.createdAt) - Date.parse(left.interaction.createdAt))
+        .slice(0, 10),
+    [contacts],
+  );
+
+  const recommendedNextSteps = useMemo(() => {
+    const now = new Date(`${easternToday()}T12:00:00.000Z`).getTime();
+
+    const items = contacts.flatMap((contact) => {
+      const output: Array<{ id: string; contactId: string; title: string; body: string; priority: number; icon: React.ReactNode }> = [];
+
+      if (contact.nextFollowUp) {
+        const followUpTime = new Date(`${contact.nextFollowUp}T12:00:00.000Z`).getTime();
+        if (!Number.isNaN(followUpTime) && followUpTime <= now) {
+          output.push({
+            id: `${contact.id}-followup`,
+            contactId: contact.id,
+            title: `Follow up with ${fullName(contact)}`,
+            body: `${contact.nextFollowUp === easternToday() ? "Due today" : `Reminder overdue since ${formatDate(contact.nextFollowUp)}`}. Last contacted ${relativeTimeFromDate(contact.lastContactedAt)}.`,
+            priority: 100 - Math.min(90, Math.max(0, Math.floor((now - followUpTime) / 86400000))),
+            icon: <Mail className="h-4 w-4 text-sky-300" />,
+          });
+        }
+      }
+
+      if (contact.birthday) {
+        const currentYear = new Date().getUTCFullYear();
+        const upcoming = new Date(`${currentYear}-${contact.birthday.slice(5)}T12:00:00.000Z`);
+        if (!Number.isNaN(upcoming.getTime())) {
+          const diffDays = Math.ceil((upcoming.getTime() - now) / 86400000);
+          if (diffDays >= 0 && diffDays <= 14) {
+            output.push({
+              id: `${contact.id}-birthday`,
+              contactId: contact.id,
+              title: `${fullName(contact)}'s birthday is coming up`,
+              body: `${formatDate(upcoming.toISOString().slice(0, 10))} is ${diffDays === 0 ? "today" : `in ${diffDays} day${diffDays === 1 ? "" : "s"}`}.`,
+              priority: 70 - diffDays,
+              icon: <Gift className="h-4 w-4 text-amber-300" />,
+            });
+          }
+        }
+      }
+
+      const latest = contact.interactions[0];
+      if (latest && latest.type === "meeting") {
+        const interactionTime = new Date(`${latest.date}T12:00:00.000Z`).getTime();
+        const diffDays = Math.abs(Math.round((interactionTime - now) / 86400000));
+        if (diffDays <= 1) {
+          output.push({
+            id: `${contact.id}-meeting`,
+            contactId: contact.id,
+            title: `Meeting touchpoint for ${fullName(contact)}`,
+            body: `${latest.summary} ${diffDays === 0 ? "is today" : "was logged yesterday"}.`,
+            priority: 65,
+            icon: <Calendar className="h-4 w-4 text-emerald-300" />,
+          });
+        }
+      }
+
+      const lastTouchedDays =
+        contact.lastContactedAt && !Number.isNaN(Date.parse(`${contact.lastContactedAt}T12:00:00.000Z`))
+          ? Math.floor((now - Date.parse(`${contact.lastContactedAt}T12:00:00.000Z`)) / 86400000)
+          : null;
+      if (lastTouchedDays !== null && lastTouchedDays >= 14 && !contact.nextFollowUp) {
+        output.push({
+          id: `${contact.id}-stale`,
+          contactId: contact.id,
+          title: `Call ${fullName(contact)}`,
+          body: `Last contacted ${lastTouchedDays} days ago. Relationship score is ${contact.relationshipScore}.`,
+          priority: Math.min(60, lastTouchedDays),
+          icon: <Phone className="h-4 w-4 text-sky-300" />,
+        });
+      }
+
+      return output;
+    });
+
+    return items.sort((left, right) => right.priority - left.priority).slice(0, 6);
+  }, [contacts]);
 
   const aiConversation = selectedContact ? aiHistory[selectedContact.id] ?? [] : [];
 
@@ -1906,6 +2305,15 @@ export default function RolodexPage() {
 
   const footerSyncLabel = lastSyncedAt ? `Last synced ${secondsSinceSync}s ago` : "Not synced yet";
   const detailSyncLabel = lastSyncedAt ? `${secondsSinceSync}s since sync` : "waiting to sync";
+
+  function navigateTo(view: ViewMode, contactId?: string | null) {
+    const hash = buildHash(view, contactId);
+    setCurrentView(view);
+    if (contactId) setSelectedContactId(contactId);
+    if (view !== "detail") setMenuOpen(false);
+    if (window.location.hash === hash) return;
+    window.location.hash = hash;
+  }
 
   async function optimisticContactMutation(
     contactId: string,
@@ -2204,6 +2612,7 @@ export default function RolodexPage() {
     setActiveTab("overview");
     setAddContactOpen(false);
     setContactDraft(EMPTY_CONTACT_DRAFT);
+    navigateTo("detail", created.id);
   }
 
   async function importFromPipeline() {
@@ -2309,6 +2718,29 @@ export default function RolodexPage() {
     setActiveTab("overview");
     setConnectionQuery("");
     setVisibleTimelineCount(12);
+    navigateTo("detail", id);
+  }
+
+  function submitHomeAi(promptValue: string) {
+    if (!promptValue.trim()) return;
+    const now = new Date().toISOString();
+    setHomeAiHistory((state) => [
+      ...state,
+      {
+        id: `${now}-user`,
+        role: "user",
+        content: promptValue.trim(),
+        createdAt: now,
+      },
+      {
+        id: `${now}-assistant`,
+        role: "assistant",
+        content: buildNetworkAnswer(promptValue.trim(), contacts),
+        createdAt: now,
+      },
+    ]);
+    setHomeAiPrompt("");
+    setHomeAiExpanded(true);
   }
 
   if (loading) {
@@ -2325,67 +2757,35 @@ export default function RolodexPage() {
         onSubmit={createContact}
       />
 
-      <div className="mx-auto flex min-h-screen max-w-[1760px] flex-col px-4 py-4 sm:px-6">
-        <header className="mb-4 rounded-[30px] border border-white/10 bg-white/[0.04] p-4 shadow-[0_24px_80px_rgba(2,6,23,0.42)] backdrop-blur-xl">
-          <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-            <div className="flex min-w-0 flex-1 flex-col gap-3">
-              <div className="flex min-w-0 flex-col gap-3 xl:flex-row xl:items-center">
-                <label className="relative flex-1">
-                  <Search className="pointer-events-none absolute left-4 top-3.5 h-4 w-4 text-slate-500" />
-                  <input
-                    value={search}
-                    onChange={(event) => setSearch(event.target.value)}
-                    placeholder="Search name, company, email, tags, notes"
-                    className="w-full rounded-2xl border border-white/10 bg-slate-950/70 py-3 pl-11 pr-4 text-sm text-white outline-none transition focus:border-sky-400/60"
+      <div className="mx-auto flex min-h-screen max-w-[1800px] flex-col px-4 py-5 sm:px-6 lg:px-8">
+        <header className="mb-6 rounded-[32px] border border-white/10 bg-white/[0.04] p-5 shadow-[0_24px_80px_rgba(2,6,23,0.42)] backdrop-blur-xl">
+          <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Rolodex</p>
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <ViewTabButton label="Home" active={currentView === "home"} onClick={() => navigateTo("home")} />
+                <ViewTabButton label="Contacts" active={currentView === "contacts"} onClick={() => navigateTo("contacts")} />
+                {selectedContact ? (
+                  <ViewTabButton
+                    label={fullName(selectedContact)}
+                    active={currentView === "detail"}
+                    onClick={() => navigateTo("detail", selectedContact.id)}
                   />
-                </label>
-
-                <div className="flex max-w-full items-center gap-2 overflow-x-auto pb-1">
-                  {FILTER_PILLS.map((pill) => (
-                    <button
-                      key={pill.value}
-                      type="button"
-                      onClick={() => setFilter(pill.value)}
-                      className={cn(
-                        "rounded-full border px-3 py-2 text-sm transition",
-                        filter === pill.value ? "border-sky-400/40 bg-sky-500/15 text-white" : "border-white/10 bg-white/[0.02] text-slate-400 hover:text-white",
-                      )}
-                    >
-                      {pill.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-2">
-                  <Filter className="h-3.5 w-3.5" />
-                  Real-time filtering
-                </span>
-                <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-2">
-                  <RefreshCcw className="h-3.5 w-3.5" />
-                  Polling every 15s
-                </span>
-                <SavePill status={saveState} lastSyncedLabel={detailSyncLabel} />
+                ) : null}
               </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <label className="relative">
-                <select
-                  value={sort}
-                  onChange={(event) => setSort(event.target.value as SortMode)}
-                  className="appearance-none rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 pr-10 text-sm text-white outline-none transition focus:border-sky-400/60"
-                >
-                  {SORT_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="pointer-events-none absolute right-3 top-3.5 h-4 w-4 text-slate-400" />
-              </label>
-
+              <button
+                type="button"
+                onClick={() => fetchContacts().catch(() => setErrorMessage("Unable to refresh contacts."))}
+                className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-slate-200 transition hover:border-sky-400/40 hover:text-white"
+              >
+                <span className="inline-flex items-center gap-2">
+                  <RefreshCcw className="h-4 w-4" />
+                  Refresh
+                </span>
+              </button>
               <button
                 type="button"
                 onClick={() => setAddContactOpen(true)}
@@ -2396,7 +2796,6 @@ export default function RolodexPage() {
                   Add Contact
                 </span>
               </button>
-
               <button
                 type="button"
                 onClick={importFromPipeline}
@@ -2404,97 +2803,407 @@ export default function RolodexPage() {
               >
                 Import from Pipeline
               </button>
-
-              <div className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-slate-300">{filteredContacts.length} contacts</div>
+              <SavePill status={saveState} lastSyncedLabel={detailSyncLabel} />
             </div>
           </div>
         </header>
 
         {errorMessage ? (
-          <div className="mb-4 rounded-2xl border border-rose-400/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">{errorMessage}</div>
+          <div className="mb-6 rounded-2xl border border-rose-400/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">{errorMessage}</div>
         ) : null}
 
-        <div className="grid flex-1 gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
-          <aside className="flex min-h-[calc(100vh-188px)] flex-col rounded-[30px] border border-white/10 bg-white/[0.04] p-3 backdrop-blur-xl">
-            <div className="mb-3 flex items-center justify-between px-2">
-              <div>
-                {sectionTitle("Contact List")}
-                <p className="mt-1 text-sm text-slate-500">Left sidebar roster with live updates.</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => fetchContacts().catch(() => setErrorMessage("Unable to refresh contacts."))}
-                className="rounded-full border border-white/10 p-2 text-slate-400 transition hover:text-white"
-              >
-                <RefreshCcw className="h-4 w-4" />
-              </button>
-            </div>
+        {currentView === "home" ? (
+          <main className="space-y-6">
+            <section className="rounded-[32px] border border-white/10 bg-white/[0.04] p-8 shadow-[0_24px_80px_rgba(2,6,23,0.32)] backdrop-blur-xl">
+              <div className="grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_420px]">
+                <div>
+                  <p className="text-sm uppercase tracking-[0.18em] text-slate-500">{easternDateFormatter.format(new Date())}</p>
+                  <h1 className="mt-3 text-4xl font-semibold text-white sm:text-5xl">
+                    {greetingForHour()}, Jahan
+                  </h1>
+                  <p className="mt-4 max-w-3xl text-lg text-slate-300">
+                    You have {contacts.length} contacts, {overdueContacts.length} need follow-up, and {newThisWeekCount} are new this week.
+                  </p>
 
-            <div className="flex-1 space-y-2 overflow-y-auto pr-1">
-              {filteredContacts.map((contact) => (
-                <ContactListCard
-                  key={contact.id}
-                  contact={contact}
-                  selected={selectedContact?.id === contact.id}
-                  onSelect={() => {
-                    setSelectedContactId(contact.id);
-                    setActiveTab("overview");
-                    setVisibleTimelineCount(12);
-                  }}
-                />
-              ))}
+                  <GlassCard className="mt-8 rounded-[28px] p-6">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        {sectionTitle("AI Chat")}
+                        <p className="mt-2 text-sm text-slate-400">Ask anything about your network.</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setHomeAiExpanded((state) => !state)}
+                        className="rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-slate-300 transition hover:text-white"
+                      >
+                        {homeAiExpanded ? "Collapse response" : "Expand response"}
+                      </button>
+                    </div>
+
+                    <div className="mt-5 flex flex-col gap-3">
+                      <div className="flex gap-3">
+                        <input
+                          value={homeAiPrompt}
+                          onChange={(event) => setHomeAiPrompt(event.target.value)}
+                          onKeyDown={(event) => {
+                            if (event.key === "Enter") {
+                              event.preventDefault();
+                              submitHomeAi(homeAiPrompt);
+                            }
+                          }}
+                          placeholder="Ask anything about your network..."
+                          className="flex-1 rounded-[22px] border border-white/10 bg-slate-950/70 px-5 py-4 text-sm text-white outline-none transition focus:border-sky-400/60"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => submitHomeAi(homeAiPrompt)}
+                          className="rounded-[22px] bg-[linear-gradient(135deg,_#38bdf8,_#2563eb)] px-5 py-4 text-sm font-medium text-white transition hover:brightness-110"
+                        >
+                          Ask
+                        </button>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          "Who should I follow up with this week?",
+                          "Show me my strongest relationships",
+                          "Which contacts are in Louisville?",
+                          "Find me restaurant owners I haven't talked to",
+                          "Who can introduce me to someone in Nashville?",
+                        ].map((prompt) => (
+                          <button
+                            key={prompt}
+                            type="button"
+                            onClick={() => submitHomeAi(prompt)}
+                            className="rounded-full border border-white/10 bg-white/[0.02] px-3 py-2 text-sm text-slate-300 transition hover:border-sky-400/40 hover:text-white"
+                          >
+                            {prompt}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {homeAiExpanded ? (
+                      <div className="mt-6 space-y-3">
+                        {homeAiHistory.slice(-2).map((entry) => (
+                          <div
+                            key={entry.id}
+                            className={cn(
+                              "rounded-2xl border p-4",
+                              entry.role === "assistant" ? "border-sky-400/20 bg-sky-500/8" : "border-white/10 bg-white/[0.02]",
+                            )}
+                          >
+                            <div className="flex items-center justify-between gap-3">
+                              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+                                {entry.role === "assistant" ? "AI Response" : "Prompt"}
+                              </p>
+                              <p className="text-xs text-slate-500">{formatRelativeDateTime(entry.createdAt)}</p>
+                            </div>
+                            <div className="mt-3 whitespace-pre-wrap text-sm text-slate-200">{entry.content}</div>
+                          </div>
+                        ))}
+                        {!homeAiHistory.length ? (
+                          <div className="rounded-2xl border border-dashed border-white/10 px-4 py-8 text-center text-sm text-slate-500">
+                            No conversation yet.
+                          </div>
+                        ) : null}
+                      </div>
+                    ) : null}
+
+                    <div className="mt-5 border-t border-white/10 pt-5">
+                      <button
+                        type="button"
+                        onClick={() => setHomeHistoryOpen((state) => !state)}
+                        className="inline-flex items-center gap-2 text-sm text-slate-300 transition hover:text-white"
+                      >
+                        <ChevronDown className={cn("h-4 w-4 transition", homeHistoryOpen ? "rotate-180" : "")} />
+                        Conversation history
+                      </button>
+                      {homeHistoryOpen ? (
+                        <div className="mt-4 space-y-3">
+                          {homeAiHistory.map((entry) => (
+                            <div key={entry.id} className="rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3 text-sm text-slate-300">
+                              <div className="flex items-center justify-between gap-3">
+                                <span className="font-medium text-white">{entry.role === "assistant" ? "AI" : "You"}</span>
+                                <span className="text-xs text-slate-500">{formatRelativeDateTime(entry.createdAt)}</span>
+                              </div>
+                              <p className="mt-2 whitespace-pre-wrap">{entry.content}</p>
+                            </div>
+                          ))}
+                        </div>
+                      ) : null}
+                    </div>
+                  </GlassCard>
+                </div>
+
+                <div className="space-y-4">
+                  <GlassCard className="rounded-[28px] p-6">
+                    {sectionTitle("Recommended Next Steps")}
+                    <div className="mt-5 space-y-3">
+                      {recommendedNextSteps.map((item) => (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => jumpToContact(item.contactId)}
+                          className="flex w-full items-start gap-3 rounded-[24px] border border-white/10 bg-white/[0.02] p-4 text-left transition hover:border-sky-400/40"
+                        >
+                          <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-slate-950/60">
+                            {item.icon}
+                          </span>
+                          <span className="min-w-0">
+                            <span className="block font-semibold text-white">{item.title}</span>
+                            <span className="mt-1 block text-sm text-slate-400">{item.body}</span>
+                          </span>
+                        </button>
+                      ))}
+                      {!recommendedNextSteps.length ? <p className="text-sm text-slate-500">No urgent recommendations right now.</p> : null}
+                    </div>
+                  </GlassCard>
+
+                  <GlassCard className="rounded-[28px] p-6">
+                    {sectionTitle("Recent Activity")}
+                    <div className="mt-5 space-y-3">
+                      {recentActivity.map(({ interaction, contact }) => {
+                        const Icon = interactionIcon(interaction.type);
+                        return (
+                          <button
+                            key={interaction.id}
+                            type="button"
+                            onClick={() => jumpToContact(contact.id)}
+                            className="flex w-full items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3 text-left transition hover:border-sky-400/40"
+                          >
+                            <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-slate-950/60">
+                              <Icon className="h-4 w-4 text-sky-300" />
+                            </span>
+                            <span className="min-w-0">
+                              <span className="block text-sm font-semibold text-white">
+                                {fullName(contact)} - {interaction.summary}
+                              </span>
+                              <span className="mt-1 block text-xs text-slate-500">{formatRelativeDateTime(interaction.createdAt)}</span>
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </GlassCard>
+                </div>
+              </div>
+            </section>
+
+            <section className="grid gap-5 xl:grid-cols-4">
+              <HomeMetricCard title="Total Contacts" value={contacts.length} detail="Current network size across all relationship types.">
+                <div className="space-y-3">
+                  <div className="flex h-2 overflow-hidden rounded-full bg-slate-800">
+                    {typeBreakdown.map((item) => (
+                      <span key={item.type} style={{ width: item.width, backgroundColor: relationshipDot[item.type] }} />
+                    ))}
+                  </div>
+                  <div className="flex flex-wrap gap-2 text-xs text-slate-400">
+                    {typeBreakdown.map((item) => (
+                      <span key={item.type} className="inline-flex items-center gap-2 rounded-full border border-white/10 px-2.5 py-1">
+                        <span className="h-2 w-2 rounded-full" style={{ backgroundColor: relationshipDot[item.type] }} />
+                        {RELATIONSHIP_TYPE_LABELS[item.type]} {item.count}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </HomeMetricCard>
+              <HomeMetricCard title="Needs Attention" value={overdueContacts.length} detail="Contacts with overdue follow-up dates." />
+              <HomeMetricCard title="This Week's Activity" value={thisWeekActivityCount} detail="Interactions logged in the last 7 days." />
+              <HomeMetricCard
+                title="Avg Relationship Score"
+                value={<span className={scoreTextTone(averageRelationshipScore)}>{averageRelationshipScore}</span>}
+                detail="Average relationship strength across your rolodex."
+              />
+            </section>
+          </main>
+        ) : null}
+
+        {currentView === "contacts" ? (
+          <main className="rounded-[32px] border border-white/10 bg-white/[0.04] p-6 shadow-[0_24px_80px_rgba(2,6,23,0.32)] backdrop-blur-xl">
+            <div className="flex flex-col gap-5">
+              <div className="flex flex-col gap-4 2xl:flex-row 2xl:items-center 2xl:justify-between">
+                <div className="flex min-w-0 flex-1 flex-col gap-4 lg:flex-row lg:items-center">
+                  <label className="relative flex-1">
+                    <Search className="pointer-events-none absolute left-4 top-4 h-4 w-4 text-slate-500" />
+                    <input
+                      value={search}
+                      onChange={(event) => setSearch(event.target.value)}
+                      placeholder="Search name, company, email, tags, notes"
+                      className="w-full rounded-[24px] border border-white/10 bg-slate-950/70 py-4 pl-11 pr-4 text-sm text-white outline-none transition focus:border-sky-400/60"
+                    />
+                  </label>
+                  <label className="relative">
+                    <select
+                      value={sort}
+                      onChange={(event) => setSort(event.target.value as SortMode)}
+                      className="appearance-none rounded-[24px] border border-white/10 bg-slate-950/70 px-4 py-4 pr-10 text-sm text-white outline-none transition focus:border-sky-400/60"
+                    >
+                      {SORT_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="pointer-events-none absolute right-3 top-4 h-4 w-4 text-slate-400" />
+                  </label>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="inline-flex rounded-[20px] border border-white/10 bg-white/[0.02] p-1">
+                    <button
+                      type="button"
+                      onClick={() => setBrowserMode("grid")}
+                      className={cn(
+                        "rounded-2xl px-3 py-2 text-sm transition",
+                        browserMode === "grid" ? "bg-sky-500/15 text-white" : "text-slate-400 hover:text-white",
+                      )}
+                    >
+                      <span className="inline-flex items-center gap-2">
+                        <GripHorizontal className="h-4 w-4" />
+                        Grid
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setBrowserMode("list")}
+                      className={cn(
+                        "rounded-2xl px-3 py-2 text-sm transition",
+                        browserMode === "list" ? "bg-sky-500/15 text-white" : "text-slate-400 hover:text-white",
+                      )}
+                    >
+                      <span className="inline-flex items-center gap-2">
+                        <Filter className="h-4 w-4" />
+                        List
+                      </span>
+                    </button>
+                  </div>
+
+                  <div className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-slate-300">
+                    {filteredContacts.length} contacts
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                {FILTER_PILLS.map((pill) => (
+                  <button
+                    key={pill.value}
+                    type="button"
+                    onClick={() => setFilter(pill.value)}
+                    className={cn(
+                      "rounded-full border px-3 py-2 text-sm transition",
+                      filter === pill.value ? "border-sky-400/40 bg-sky-500/15 text-white" : "border-white/10 bg-white/[0.02] text-slate-400 hover:text-white",
+                    )}
+                  >
+                    {pill.label}
+                  </button>
+                ))}
+              </div>
+
+              {browserMode === "grid" ? (
+                <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                  {filteredContacts.map((contact) => (
+                    <ContactGridCard key={contact.id} contact={contact} onSelect={() => jumpToContact(contact.id)} />
+                  ))}
+                </div>
+              ) : (
+                <div className="overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.02]">
+                  <div className="grid grid-cols-[1.4fr_1.1fr_0.8fr_0.9fr_0.9fr_1fr_0.9fr_0.7fr] gap-4 border-b border-white/10 px-5 py-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                    <span>Name</span>
+                    <span>Company</span>
+                    <span>Type</span>
+                    <span>City</span>
+                    <span>Phone</span>
+                    <span>Email</span>
+                    <span>Last Contacted</span>
+                    <span>Score</span>
+                  </div>
+                  {filteredContacts.map((contact) => (
+                    <button
+                      key={contact.id}
+                      type="button"
+                      onClick={() => jumpToContact(contact.id)}
+                      className="grid w-full grid-cols-[1.4fr_1.1fr_0.8fr_0.9fr_0.9fr_1fr_0.9fr_0.7fr] gap-4 border-b border-white/5 px-5 py-4 text-left text-sm text-slate-300 transition hover:bg-white/[0.04] last:border-b-0"
+                    >
+                      <span className="font-semibold text-white">{fullName(contact)}</span>
+                      <span>{contact.company || "-"}</span>
+                      <span>{RELATIONSHIP_TYPE_LABELS[contact.relationshipType]}</span>
+                      <span>{contact.city || "-"}</span>
+                      <span>{contact.phone || "-"}</span>
+                      <span className="truncate">{contact.email || "-"}</span>
+                      <span>{relativeTimeFromDate(contact.lastContactedAt)}</span>
+                      <span className={scoreTextTone(contact.relationshipScore)}>{contact.relationshipScore}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
 
               {!filteredContacts.length ? (
-                <div className="rounded-2xl border border-dashed border-white/10 px-4 py-8 text-center text-sm text-slate-500">
+                <div className="rounded-[28px] border border-dashed border-white/10 px-4 py-12 text-center text-sm text-slate-500">
                   No contacts match the current filters.
                 </div>
               ) : null}
             </div>
-          </aside>
+          </main>
+        ) : null}
 
-          <main className="flex min-h-[calc(100vh-188px)] flex-col overflow-hidden rounded-[30px] border border-white/10 bg-white/[0.04] backdrop-blur-xl">
+        {currentView === "detail" ? (
+          <main className="flex min-h-[calc(100vh-210px)] flex-col overflow-hidden rounded-[32px] border border-white/10 bg-white/[0.04] shadow-[0_24px_80px_rgba(2,6,23,0.32)] backdrop-blur-xl">
             {selectedContact ? (
               <>
-                <div className="border-b border-white/10 p-5">
-                  <div className="flex flex-col gap-5 2xl:flex-row 2xl:items-start 2xl:justify-between">
-                    <div className="flex min-w-0 gap-4">
-                      <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-[28px] border border-white/10 bg-slate-950/60 text-2xl font-semibold text-white">
+                <div className="border-b border-white/10 px-6 pt-6">
+                  <div className="mb-5 flex flex-wrap items-center gap-2 text-sm text-slate-400">
+                    <button type="button" onClick={() => navigateTo("home")} className="transition hover:text-white">
+                      Rolodex
+                    </button>
+                    <span>&gt;</span>
+                    <button type="button" onClick={() => navigateTo("contacts")} className="transition hover:text-white">
+                      Contacts
+                    </button>
+                    <span>&gt;</span>
+                    <span className="text-white">{fullName(selectedContact)}</span>
+                  </div>
+
+                  <div className="flex flex-col gap-6 pb-6 2xl:flex-row 2xl:items-start 2xl:justify-between">
+                    <div className="flex min-w-0 gap-5">
+                      <div className="flex h-28 w-28 shrink-0 items-center justify-center rounded-[30px] border border-white/10 bg-slate-950/60 text-3xl font-semibold text-white">
                         {initials(selectedContact)}
                       </div>
 
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-start gap-3">
                           <div className="min-w-0">
-                            <h1 className="truncate text-3xl font-semibold text-white">{fullName(selectedContact)}</h1>
-                            <p className="mt-1 truncate text-sm text-slate-400">{titleLine(selectedContact)}</p>
-                            <div className="mt-3 flex flex-wrap items-center gap-3">
-                              <label className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-2 text-sm">
-                                <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: relationshipDot[selectedContact.relationshipType] }} />
-                                <select
-                                  value={selectedContact.relationshipType}
-                                  onChange={(event) => patchRelationshipType(event.target.value as RelationshipType)}
-                                  className="bg-transparent text-white outline-none"
-                                >
-                                  {RELATIONSHIP_TYPES.map((type) => (
-                                    <option key={type} value={type} className="bg-slate-950">
-                                      {RELATIONSHIP_TYPE_LABELS[type]}
-                                    </option>
-                                  ))}
-                                </select>
-                              </label>
-
-                              <span className="text-sm text-slate-400">Last contacted {relativeTimeFromDate(selectedContact.lastContactedAt)}</span>
-                              {locationLine(selectedContact) ? (
-                                <span className="inline-flex items-center gap-2 text-sm text-slate-400">
-                                  <MapPin className="h-4 w-4" />
-                                  {locationLine(selectedContact)}
-                                </span>
-                              ) : null}
-                            </div>
+                            <h1 className="truncate text-4xl font-semibold text-white">{fullName(selectedContact)}</h1>
+                            <p className="mt-2 truncate text-base text-slate-400">{titleLine(selectedContact)}</p>
                           </div>
                         </div>
 
-                        <div className="mt-4 flex flex-wrap items-center gap-2">
+                        <div className="mt-4 flex flex-wrap items-center gap-3">
+                          <label className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-2 text-sm">
+                            <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: relationshipDot[selectedContact.relationshipType] }} />
+                            <select
+                              value={selectedContact.relationshipType}
+                              onChange={(event) => patchRelationshipType(event.target.value as RelationshipType)}
+                              className="bg-transparent text-white outline-none"
+                            >
+                              {RELATIONSHIP_TYPES.map((type) => (
+                                <option key={type} value={type} className="bg-slate-950">
+                                  {RELATIONSHIP_TYPE_LABELS[type]}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                          <span className="text-sm text-slate-400">Last contacted {relativeTimeFromDate(selectedContact.lastContactedAt)}</span>
+                          {locationLine(selectedContact) ? (
+                            <span className="inline-flex items-center gap-2 text-sm text-slate-400">
+                              <MapPin className="h-4 w-4" />
+                              {locationLine(selectedContact)}
+                            </span>
+                          ) : null}
+                        </div>
+
+                        <div className="mt-5 flex flex-wrap items-center gap-2">
                           <IconAction href={selectedContact.phone ? `tel:${selectedContact.phone}` : undefined} label="Call">
                             <Phone className="h-4 w-4 text-sky-300" />
                           </IconAction>
@@ -2514,10 +3223,14 @@ export default function RolodexPage() {
                       </div>
                     </div>
 
-                    <div className="flex flex-wrap items-start justify-end gap-4">
+                    <div className="flex flex-wrap items-start gap-4">
                       <div className="grid gap-3 sm:grid-cols-2">
                         <ContactMetric label="Interactions" value={selectedContact.interactions.length} />
-                        <ContactMetric label="Next Follow-up" value={selectedContact.nextFollowUp ? formatDate(selectedContact.nextFollowUp) : "Unscheduled"} tone="text-slate-200" />
+                        <ContactMetric
+                          label="Next Follow-up"
+                          value={selectedContact.nextFollowUp ? formatDate(selectedContact.nextFollowUp) : "Unscheduled"}
+                          tone="text-slate-200"
+                        />
                       </div>
 
                       <ScoreCircle score={selectedContact.relationshipScore} />
@@ -2564,7 +3277,7 @@ export default function RolodexPage() {
                   </div>
                 </div>
 
-                <div className="border-b border-white/10 px-5">
+                <div className="border-b border-white/10 px-6">
                   <div className="flex overflow-x-auto">
                     {DETAIL_TABS.map((tab) => (
                       <button
@@ -2572,7 +3285,7 @@ export default function RolodexPage() {
                         type="button"
                         onClick={() => setActiveTab(tab.value)}
                         className={cn(
-                          "relative px-4 py-4 text-sm transition",
+                          "relative px-4 py-5 text-sm transition",
                           activeTab === tab.value ? "text-white" : "text-slate-400 hover:text-white",
                         )}
                       >
@@ -2588,7 +3301,7 @@ export default function RolodexPage() {
                   </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-5">
+                <div className="flex-1 overflow-y-auto p-6">
                   {activeTab === "overview" ? (
                     <OverviewTab
                       contact={selectedContact}
@@ -2601,7 +3314,7 @@ export default function RolodexPage() {
                   ) : null}
 
                   {activeTab === "activity" ? (
-                    <div className="space-y-4">
+                    <div className="space-y-5">
                       <div className="grid gap-4 xl:grid-cols-4">
                         <ContactMetric label="Total Interactions" value={interactionStats.total} />
                         <ContactMetric label="Last 30 Days" value={interactionStats.last30} />
@@ -2621,7 +3334,7 @@ export default function RolodexPage() {
 
                       <ActivityHeatmap interactions={selectedContact.interactions} />
 
-                      <GlassCard>
+                      <GlassCard className="p-6">
                         <div className="mb-4">
                           {sectionTitle("Quick Log")}
                           <p className="mt-2 text-sm text-slate-400">Fast entry for calls, emails, meetings, notes, gifts, referrals, and deals.</p>
@@ -2700,7 +3413,7 @@ export default function RolodexPage() {
                         ) : null}
                       </GlassCard>
 
-                      <GlassCard>
+                      <GlassCard className="p-6">
                         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
                           <div>
                             {sectionTitle("Timeline")}
@@ -2792,80 +3505,26 @@ export default function RolodexPage() {
               </>
             ) : (
               <div className="flex flex-1 items-center justify-center p-6">
-                <EmptyPanel title="No contact selected" body="Choose a contact from the left sidebar or create a new one." />
+                <EmptyPanel title="No contact selected" body="Choose a contact from Contacts or create a new one." />
               </div>
             )}
           </main>
-        </div>
+        ) : null}
 
-        <footer className="mt-4 flex flex-col gap-3 rounded-[24px] border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-slate-400 sm:flex-row sm:items-center sm:justify-between">
+        <footer className="mt-6 flex flex-col gap-3 rounded-[24px] border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-slate-400 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-4">
-            <span className="inline-flex items-center gap-2">
-              <Link2 className="h-4 w-4" />
-              {contacts.reduce((count, contact) => count + contact.connections.length, 0)} total connections
-            </span>
-            <span className="inline-flex items-center gap-2">
-              <Clock3 className="h-4 w-4" />
-              {footerSyncLabel}
-            </span>
+            <span>{contacts.length} contacts</span>
+            <span>{contacts.reduce((count, contact) => count + contact.connections.length, 0)} total connections</span>
           </div>
-          <div className="flex flex-wrap items-center gap-4">
-            <span>{contacts.length} contacts in memory</span>
-            <span>{selectedContact ? `${selectedContact.interactions.length} interactions on selected contact` : "No contact selected"}</span>
+          <div className="flex items-center gap-2">
+            <Clock3 className="h-4 w-4" />
+            <span>{footerSyncLabel}</span>
           </div>
         </footer>
       </div>
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
