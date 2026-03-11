@@ -1792,7 +1792,7 @@ export default function PipelinePage() {
                     <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                       <div>
                         <p className="text-[11px] uppercase tracking-[0.24em] text-blue-200/70">Contact Profile</p>
-                        <h2 className="heading-font mt-2 text-3xl font-normal uppercase tracking-[0.04em] text-white sm:text-4xl">
+                        <h2 className="heading-font mt-2 max-w-3xl break-all text-2xl font-normal uppercase leading-tight tracking-[0.04em] text-white md:text-3xl">
                           {getPrimaryName(detailDeal)}
                         </h2>
                         <p className="mt-2 text-sm text-slate-300">{getCompanyName(detailDeal)}</p>
