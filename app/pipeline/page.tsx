@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
+import { type ReactNode, ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import {
@@ -553,12 +553,14 @@ function TagInput({
   onRemove,
   placeholder,
   suggestions = TAG_SUGGESTIONS,
+  alwaysShowSuggestions = false,
 }: {
   tags: string[];
   onAdd: (value: string) => void;
   onRemove: (value: string) => void;
   placeholder: string;
   suggestions?: readonly string[];
+  alwaysShowSuggestions?: boolean;
 }) {
   const [draft, setDraft] = useState("");
   const [focused, setFocused] = useState(false);
@@ -623,7 +625,7 @@ function TagInput({
         </button>
       </div>
 
-      {focused && visibleSuggestions.length ? (
+      {(alwaysShowSuggestions || focused) && visibleSuggestions.length ? (
         <div className="flex flex-wrap gap-2">
           {visibleSuggestions.map((suggestion, index) => (
             <button
@@ -796,6 +798,8 @@ export default function PipelinePage() {
   );
   const [draggedDealId, setDraggedDealId] = useState("");
   const [dropStage, setDropStage] = useState<PipelineStage | "">("");
+  const [showTagEditor, setShowTagEditor] = useState(false);
+  const tagEditorRef = useRef<HTMLDivElement | null>(null);
   const [kanbanVisibleCounts, setKanbanVisibleCounts] = useState<Record<PipelineStage, number>>({
     "new-lead": 20,
     contacted: 20,
@@ -901,6 +905,23 @@ export default function PipelinePage() {
     setPhoneDateDraft(formatPhoneLogDate());
     setPhoneNotesDraft("");
   }, [selectedDeal]);
+
+  useEffect(() => {
+    setShowTagEditor(false);
+  }, [activeDetailId]);
+
+  useEffect(() => {
+    if (!showTagEditor) return;
+
+    function handlePointerDown(event: MouseEvent) {
+      if (!tagEditorRef.current?.contains(event.target as Node)) {
+        setShowTagEditor(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handlePointerDown);
+    return () => document.removeEventListener("mousedown", handlePointerDown);
+  }, [showTagEditor]);
 
   const selectedNotes = useMemo(
     () => (selectedDeal ? parseNotes(selectedDeal.notes, selectedDeal.createdAt) : EMPTY_NOTES),
@@ -1798,7 +1819,7 @@ export default function PipelinePage() {
                         <p className="mt-2 text-sm text-slate-300">{getCompanyName(detailDeal)}</p>
                       </div>
 
-                      <div className="flex flex-wrap gap-2">
+                      <div ref={tagEditorRef} className="relative flex flex-wrap gap-2">
                         <select
                           value={detailDeal.stage}
                           onChange={(event) => void patchDeal(detailDeal.id, { stage: event.target.value as PipelineStage })}
@@ -1809,21 +1830,62 @@ export default function PipelinePage() {
                         <span className="rounded-full border border-blue-300/25 bg-blue-500/10 px-3 py-2 text-xs uppercase tracking-[0.16em] text-blue-100">
                           {formatSourceLabel(detailDeal.source)}
                         </span>
-                        {detailDeal.tags.slice(0, 3).map((tag) => (
-                          <span
-                            key={tag}
-                            className={cn("rounded-full border px-3 py-2 text-xs uppercase tracking-[0.16em]", HEADER_TAG_PILL_CLASS)}
+                        {detailDeal.tags.length ? (
+                          detailDeal.tags.slice(0, 3).map((tag) => (
+                            <button
+                              key={tag}
+                              type="button"
+                              onClick={() => setShowTagEditor((current) => !current)}
+                              className={cn(
+                                "rounded-full border px-3 py-2 text-xs uppercase tracking-[0.16em] transition hover:border-red-300/60 hover:bg-red-500/30",
+                                HEADER_TAG_PILL_CLASS,
+                              )}
+                            >
+                              {tag}
+                            </button>
+                          ))
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setShowTagEditor(true)}
+                            className="rounded-full border border-red-400/40 bg-red-500/10 px-3 py-2 text-xs uppercase tracking-[0.16em] text-red-200 transition hover:bg-red-500/20"
                           >
-                            {tag}
-                          </span>
-                        ))}
+                            + Tag
+                          </button>
+                        )}
+                        {showTagEditor ? (
+                          <div className="absolute left-0 top-full z-20 mt-2 w-full min-w-[280px] max-w-md rounded-2xl border border-white/10 bg-[#05070d] p-4 shadow-[0_18px_50px_rgba(0,0,0,0.45)]">
+                            <div className="flex items-center justify-between gap-3">
+                              <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Manage Tags</p>
+                              {workingDealId === detailDeal.id ? (
+                                <span className="text-xs uppercase tracking-[0.16em] text-blue-200">Saving</span>
+                              ) : null}
+                            </div>
+                            <div className="mt-3">
+                              <TagInput
+                                key={`header-tags-${detailDeal.id}`}
+                                tags={detailDeal.tags}
+                                placeholder="Add tag..."
+                                alwaysShowSuggestions
+                                onAdd={(value) => {
+                                  const nextTags = addTag(detailDeal.tags, value);
+                                  if (nextTags === detailDeal.tags) return;
+                                  void patchDeal(detailDeal.id, { tags: nextTags });
+                                }}
+                                onRemove={(value) => {
+                                  void patchDeal(detailDeal.id, { tags: removeTag(detailDeal.tags, value) });
+                                }}
+                              />
+                            </div>
+                          </div>
+                        ) : null}
                       </div>
                     </div>
                   </div>
                 </section>
 
                 <section className="glass-panel p-5 sm:p-6">
-                  <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+                  <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
                     <div className="glass-card rounded-2xl p-4">
                       <div className="flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-slate-400">
                         <Mail size={14} className="text-blue-200" />
@@ -1850,7 +1912,7 @@ export default function PipelinePage() {
                         <MapPin size={14} className="text-blue-200" />
                         City
                       </div>
-                      <p className="mt-2 text-sm text-white">{formatLocation(detailDeal.city, detailDeal.state) || "No city"}</p>
+                      <p className="mt-2 text-sm text-white">{detailDeal.city || "No city"}</p>
                     </div>
                     <div className="glass-card rounded-2xl p-4">
                       <div className="flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-slate-400">
@@ -1859,31 +1921,6 @@ export default function PipelinePage() {
                       </div>
                       <p className="mt-2 text-sm text-white">{detailDeal.state || "No state"}</p>
                     </div>
-                  </div>
-                </section>
-
-                <section className="glass-panel p-5 sm:p-6">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="section-title">Tags</p>
-                      <p className="mt-1 text-sm text-slate-400">Add fast labels for source, urgency, and follow-up status.</p>
-                    </div>
-                    {workingDealId === detailDeal.id ? <span className="text-xs uppercase tracking-[0.16em] text-blue-200">Saving</span> : null}
-                  </div>
-                  <div className="mt-4">
-                    <TagInput
-                      key={detailDeal.id}
-                      tags={detailDeal.tags}
-                      placeholder="Add tag..."
-                      onAdd={(value) => {
-                        const nextTags = addTag(detailDeal.tags, value);
-                        if (nextTags === detailDeal.tags) return;
-                        void patchDeal(detailDeal.id, { tags: nextTags });
-                      }}
-                      onRemove={(value) => {
-                        void patchDeal(detailDeal.id, { tags: removeTag(detailDeal.tags, value) });
-                      }}
-                    />
                   </div>
                 </section>
 
