@@ -89,6 +89,18 @@ type InsightResponse = {
   contacts?: string[];
 };
 
+type EnrichResponse = {
+  enriched: number;
+  failed: number;
+  results: Array<{
+    id: string;
+    name: string;
+    city: string | null;
+    state: string | null;
+    error?: string;
+  }>;
+};
+
 type ActivityEntry = {
   id: string;
   type: "created" | "stage-change";
@@ -297,6 +309,10 @@ function getWebsite(deal: PipelineDeal) {
 function formatLocation(city?: string, state?: string) {
   const parts = [city?.trim(), state?.trim()].filter(Boolean);
   return parts.join(", ");
+}
+
+function canAutoDetectLocation(deal: PipelineDeal) {
+  return Boolean(getWebsite(deal)) && (!deal.city?.trim() || !deal.state?.trim());
 }
 
 function formatSourceLabel(source: string) {
@@ -834,6 +850,7 @@ export default function PipelinePage() {
   const [deals, setDeals] = useState<PipelineDeal[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [activeSubview, setActiveSubview] = useState<PipelineSubview>("dashboard");
   const [activeSource, setActiveSource] = useState("all");
   const [activeTagFilter, setActiveTagFilter] = useState("");
@@ -860,6 +877,8 @@ export default function PipelinePage() {
   const [importPreviewError, setImportPreviewError] = useState("");
   const [importing, setImporting] = useState(false);
   const [workingDealId, setWorkingDealId] = useState("");
+  const [enrichingAll, setEnrichingAll] = useState(false);
+  const [enrichingDealId, setEnrichingDealId] = useState("");
   const [convertingDealId, setConvertingDealId] = useState("");
   const [insightsQuery, setInsightsQuery] = useState("");
   const [insightsLoading, setInsightsLoading] = useState(false);
@@ -1136,6 +1155,7 @@ export default function PipelinePage() {
     [segmentsFilters],
   );
   const totalContacts = deals.length;
+  const enrichableDealsCount = useMemo(() => deals.filter((deal) => canAutoDetectLocation(deal)).length, [deals]);
   const newThisWeek = useMemo(() => deals.filter((deal) => isWithinLastSevenDays(deal.createdAt)).length, [deals]);
   const wonThisMonth = useMemo(
     () => deals.filter((deal) => deal.stage === "closed-won" && isCurrentEasternMonth(deal.stageUpdatedAt ?? deal.createdAt)).length,
@@ -1194,6 +1214,56 @@ export default function PipelinePage() {
       return null;
     } finally {
       setWorkingDealId("");
+    }
+  }
+
+  async function enrichDeals(payload: { all: true } | { dealId: string }) {
+    const response = await fetch("/api/pipeline/enrich", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const data = (await response.json()) as EnrichResponse | { error?: string };
+
+    if (!response.ok) {
+      throw new Error("error" in data && data.error ? data.error : "Unable to enrich leads.");
+    }
+
+    return data as EnrichResponse;
+  }
+
+  async function handleEnrichAll() {
+    if (!enrichableDealsCount) return;
+
+    setEnrichingAll(true);
+    setError("");
+    setSuccessMessage("");
+
+    try {
+      const result = await enrichDeals({ all: true });
+      setSuccessMessage(`Enriched ${result.enriched} leads, ${result.failed} failed.`);
+      await loadDeals();
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : "Unable to enrich leads.");
+    } finally {
+      setEnrichingAll(false);
+    }
+  }
+
+  async function handleEnrichDeal(dealId: string) {
+    setEnrichingDealId(dealId);
+    setError("");
+    setSuccessMessage("");
+
+    try {
+      const result = await enrichDeals({ dealId });
+      setSuccessMessage(`Enriched ${result.enriched} leads, ${result.failed} failed.`);
+      await loadDeals();
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : "Unable to enrich lead.");
+    } finally {
+      setEnrichingDealId("");
     }
   }
 
@@ -1723,6 +1793,11 @@ export default function PipelinePage() {
       </div>
 
       {error ? <div className="glass-card rounded-2xl border border-red-400/25 bg-red-500/10 px-4 py-3 text-sm text-red-100">{error}</div> : null}
+      {successMessage ? (
+        <div className="glass-card rounded-2xl border border-emerald-400/25 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
+          {successMessage}
+        </div>
+      ) : null}
 
       {activeSubview === "dashboard" ? (
         <div className="space-y-4">
@@ -1744,6 +1819,24 @@ export default function PipelinePage() {
               </article>
             ))}
           </div>
+
+          <section className="glass-panel p-5 sm:p-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="section-title">Lead Enrichment</p>
+                <p className="mt-1 text-sm text-slate-400">Scrape company websites to auto-detect missing city and state data.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => void handleEnrichAll()}
+                disabled={enrichingAll || !enrichableDealsCount}
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-blue-300/30 bg-[linear-gradient(135deg,rgba(32,147,255,0.2),rgba(0,38,255,0.18))] px-4 py-2 text-sm font-semibold text-blue-50 transition hover:border-blue-300/60 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {enrichingAll ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" /> : <Sparkles size={16} />}
+                {enrichingAll ? `Enriching ${enrichableDealsCount} leads...` : `Enrich All Leads (${enrichableDealsCount})`}
+              </button>
+            </div>
+          </section>
 
           <section className="glass-panel p-5 sm:p-6">
             <div className="flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-blue-200">
@@ -2447,9 +2540,26 @@ export default function PipelinePage() {
                       <p className="mt-2 break-all text-sm text-white">{getWebsite(detailDeal) || "No website"}</p>
                     </div>
                     <div className="glass-card rounded-2xl p-4">
-                      <div className="flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-slate-400">
-                        <MapPin size={14} className="text-blue-200" />
-                        City
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-slate-400">
+                          <MapPin size={14} className="text-blue-200" />
+                          City
+                        </div>
+                        {canAutoDetectLocation(detailDeal) ? (
+                          <button
+                            type="button"
+                            onClick={() => void handleEnrichDeal(detailDeal.id)}
+                            disabled={enrichingDealId === detailDeal.id}
+                            className="inline-flex items-center gap-1 rounded-full border border-blue-300/30 bg-blue-500/10 px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-blue-100 transition hover:border-blue-300/60 disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            {enrichingDealId === detailDeal.id ? (
+                              <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-blue-100/30 border-t-blue-100" />
+                            ) : (
+                              <MapPin size={12} />
+                            )}
+                            {enrichingDealId === detailDeal.id ? "Detecting..." : "Auto-detect location"}
+                          </button>
+                        ) : null}
                       </div>
                       <p className="mt-2 text-sm text-white">{detailDeal.city || "No city"}</p>
                     </div>
