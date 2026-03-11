@@ -32,6 +32,13 @@ export type Interaction = {
   createdAt: string;
 };
 
+export type RolodexNote = {
+  id: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type StayInTouchReminder = {
   frequency: "weekly" | "biweekly" | "monthly" | "quarterly" | "yearly" | "custom";
   customDays?: number;
@@ -72,6 +79,8 @@ export type RolodexContact = {
   twitter?: string;
   facebook?: string;
   interactions: Interaction[];
+  notes: RolodexNote[];
+  connections: string[];
   stayInTouch?: StayInTouchReminder;
   relationshipScore: number;
   lastContactedAt?: string;

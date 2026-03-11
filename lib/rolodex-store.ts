@@ -5,6 +5,7 @@ import {
   INTERACTION_TYPES,
   Interaction,
   InteractionType,
+  RolodexNote,
   REMINDER_FREQUENCIES,
   RelationshipType,
   RELATIONSHIP_TYPES,
@@ -18,10 +19,12 @@ const VALID_RELATIONSHIP_TYPES = new Set<RelationshipType>(RELATIONSHIP_TYPES);
 const VALID_INTERACTION_TYPES = new Set<InteractionType>(INTERACTION_TYPES);
 const VALID_REMINDER_FREQUENCIES = new Set<string>(REMINDER_FREQUENCIES);
 
-export type RolodexContactInput = Partial<Omit<RolodexContact, "id" | "interactions" | "relationshipScore" | "lastContactedAt" | "nextFollowUp" | "createdAt" | "updatedAt" | "archived" | "stayInTouch">> & {
+export type RolodexContactInput = Partial<Omit<RolodexContact, "id" | "interactions" | "notes" | "connections" | "relationshipScore" | "lastContactedAt" | "nextFollowUp" | "createdAt" | "updatedAt" | "archived" | "stayInTouch">> & {
   firstName?: string;
   lastName?: string;
   interactions?: Interaction[];
+  notes?: RolodexNote[];
+  connections?: string[];
   stayInTouch?: StayInTouchReminder | null;
   archived?: boolean;
 };
@@ -90,6 +93,18 @@ function normalizeTags(value: unknown): string[] {
     });
 }
 
+function normalizeConnections(value: unknown) {
+  if (!Array.isArray(value)) return [];
+  const seen = new Set<string>();
+  return value
+    .map((entry) => normalizeString(entry))
+    .filter((entry) => {
+      if (!entry || seen.has(entry)) return false;
+      seen.add(entry);
+      return true;
+    });
+}
+
 function normalizeReminder(value: unknown): StayInTouchReminder | undefined {
   if (!isRecord(value)) return undefined;
   const frequency = normalizeString(value.frequency);
@@ -124,6 +139,24 @@ function normalizeInteraction(value: unknown): Interaction | null {
     sentiment,
     createdAt: normalizeString(value.createdAt) || isoTimestamp(),
   };
+}
+
+function normalizeNote(value: unknown): RolodexNote | null {
+  if (!isRecord(value)) return null;
+  const id = normalizeString(value.id);
+  const content = normalizeString(value.content);
+  if (!id || !content) return null;
+  const createdAt = normalizeString(value.createdAt) || isoTimestamp();
+  return {
+    id,
+    content,
+    createdAt,
+    updatedAt: normalizeString(value.updatedAt) || createdAt,
+  };
+}
+
+function sortNotes(notes: RolodexNote[]) {
+  return [...notes].sort((left, right) => Date.parse(right.updatedAt) - Date.parse(left.updatedAt));
 }
 
 function sortInteractions(interactions: Interaction[]) {
@@ -259,6 +292,7 @@ function normalizeContact(raw: unknown): RolodexContact | null {
   const interactions = sortInteractions(
     Array.isArray(raw.interactions) ? raw.interactions.map((entry) => normalizeInteraction(entry)).filter((entry): entry is Interaction => entry !== null) : [],
   );
+  const notes = sortNotes(Array.isArray(raw.notes) ? raw.notes.map((entry) => normalizeNote(entry)).filter((entry): entry is RolodexNote => entry !== null) : []);
   const stayInTouch = normalizeReminder(raw.stayInTouch);
   const lastContactedAt = computeLastContactedAt(interactions) ?? normalizeDate(raw.lastContactedAt);
 
@@ -295,6 +329,8 @@ function normalizeContact(raw: unknown): RolodexContact | null {
     twitter: normalizeOptionalString(raw.twitter),
     facebook: normalizeOptionalString(raw.facebook),
     interactions,
+    notes,
+    connections: normalizeConnections(raw.connections).filter((entry) => entry !== id),
     stayInTouch,
     relationshipScore: 0,
     lastContactedAt,
@@ -344,6 +380,9 @@ function createContactFromInput(input: RolodexContactInput): RolodexContact | nu
       ? input.interactions.map((entry) => normalizeInteraction(entry)).filter((entry): entry is Interaction => entry !== null)
       : [],
   );
+  const notes = sortNotes(
+    Array.isArray(input.notes) ? input.notes.map((entry) => normalizeNote(entry)).filter((entry): entry is RolodexNote => entry !== null) : [],
+  );
   const stayInTouch = normalizeReminder(input.stayInTouch);
 
   const contact: RolodexContact = {
@@ -379,6 +418,8 @@ function createContactFromInput(input: RolodexContactInput): RolodexContact | nu
     twitter: normalizeOptionalString(input.twitter),
     facebook: normalizeOptionalString(input.facebook),
     interactions,
+    notes,
+    connections: normalizeConnections(input.connections),
     stayInTouch,
     relationshipScore: 0,
     lastContactedAt: computeLastContactedAt(interactions),
@@ -401,6 +442,10 @@ function applyPatch(current: RolodexContact, patch: RolodexContactInput): Rolode
       : sortInteractions(
           patch.interactions.map((entry) => normalizeInteraction(entry)).filter((entry): entry is Interaction => entry !== null),
         );
+  const notes =
+    patch.notes === undefined
+      ? current.notes
+      : sortNotes(patch.notes.map((entry) => normalizeNote(entry)).filter((entry): entry is RolodexNote => entry !== null));
   const stayInTouch = patch.stayInTouch === undefined ? current.stayInTouch : normalizeReminder(patch.stayInTouch);
 
   const updated: RolodexContact = {
@@ -436,6 +481,8 @@ function applyPatch(current: RolodexContact, patch: RolodexContactInput): Rolode
     twitter: patch.twitter === undefined ? current.twitter : normalizeOptionalString(patch.twitter),
     facebook: patch.facebook === undefined ? current.facebook : normalizeOptionalString(patch.facebook),
     interactions,
+    notes,
+    connections: patch.connections === undefined ? current.connections : normalizeConnections(patch.connections).filter((entry) => entry !== current.id),
     stayInTouch,
     pipelineDealId: patch.pipelineDealId === undefined ? current.pipelineDealId : normalizeOptionalString(patch.pipelineDealId),
     archived: typeof patch.archived === "boolean" ? patch.archived : current.archived,
@@ -543,22 +590,21 @@ export async function deleteRolodexInteraction(contactId: string, interactionId:
 export async function getRolodexReminders() {
   const today = easternDate();
   const contacts = await getRolodexContacts();
+  const reminders: Array<RolodexContact & { nextFollowUp: string; overdueDays: number }> = [];
 
-  return contacts
-    .map((contact) => {
-      if (!contact.stayInTouch) return null;
-      if (contact.stayInTouch.snoozedUntil && contact.stayInTouch.snoozedUntil > today) return null;
-      const dueDate = contact.nextFollowUp ?? computeNextFollowUp(contact.lastContactedAt, contact.stayInTouch, contact.createdAt.slice(0, 10));
-      if (!dueDate) return null;
-      if (dueDate > today) return null;
-      return {
-        ...contact,
-        nextFollowUp: dueDate,
-        overdueDays: Math.max(0, diffDaysFromToday(dueDate)),
-      };
-    })
-    .filter((contact): contact is RolodexContact & { overdueDays: number } => contact !== null)
-    .sort((left, right) => right.overdueDays - left.overdueDays || right.relationshipScore - left.relationshipScore);
+  contacts.forEach((contact) => {
+    if (!contact.stayInTouch) return;
+    if (contact.stayInTouch.snoozedUntil && contact.stayInTouch.snoozedUntil > today) return;
+    const dueDate = contact.nextFollowUp ?? computeNextFollowUp(contact.lastContactedAt, contact.stayInTouch, contact.createdAt.slice(0, 10));
+    if (!dueDate || dueDate > today) return;
+    reminders.push({
+      ...contact,
+      nextFollowUp: dueDate,
+      overdueDays: Math.max(0, diffDaysFromToday(dueDate)),
+    });
+  });
+
+  return reminders.sort((left, right) => right.overdueDays - left.overdueDays || right.relationshipScore - left.relationshipScore);
 }
 
 export async function importPipelineContacts(input?: { dealIds?: string[] }) {
@@ -604,4 +650,426 @@ export async function importPipelineContacts(input?: { dealIds?: string[] }) {
 
   await writeRolodexFile(next);
   return { imported, updated, skipped, createdContacts, updatedContacts };
+}
+
+export async function updateRolodexConnections(contactId: string, input: { add?: string[]; remove?: string[] }) {
+  const contacts = await readRolodexFile();
+  const index = contacts.findIndex((contact) => contact.id === contactId);
+  if (index < 0) return null;
+
+  const existingIds = new Set(contacts.map((contact) => contact.id));
+  const add = normalizeConnections(input.add).filter((entry) => entry !== contactId && existingIds.has(entry));
+  const remove = new Set(normalizeConnections(input.remove));
+  const nextConnections = new Set(contacts[index].connections);
+
+  add.forEach((entry) => {
+    remove.delete(entry);
+    nextConnections.add(entry);
+  });
+  remove.forEach((entry) => nextConnections.delete(entry));
+
+  contacts[index] = applyPatch(contacts[index], { connections: Array.from(nextConnections) });
+
+  contacts.forEach((contact, contactIndex) => {
+    if (contact.id === contactId) return;
+    const peerConnections = new Set(contact.connections);
+    let changed = false;
+
+    if (add.includes(contact.id) && !peerConnections.has(contactId)) {
+      peerConnections.add(contactId);
+      changed = true;
+    }
+
+    if (remove.has(contact.id) && peerConnections.has(contactId)) {
+      peerConnections.delete(contactId);
+      changed = true;
+    }
+
+    if (changed) {
+      contacts[contactIndex] = applyPatch(contact, { connections: Array.from(peerConnections) });
+    }
+  });
+
+  await writeRolodexFile(contacts);
+  return contacts[index];
+}
+
+function seedNote(content: string, createdAt: string): RolodexNote {
+  return {
+    id: buildId("rn"),
+    content,
+    createdAt,
+    updatedAt: createdAt,
+  };
+}
+
+function seedInteraction(input: Omit<Interaction, "id" | "createdAt"> & { createdAt?: string }): Interaction {
+  const createdAt = input.createdAt ?? new Date(`${input.date}T14:00:00.000Z`).toISOString();
+  return {
+    id: buildId("ri"),
+    type: input.type,
+    date: input.date,
+    summary: input.summary,
+    details: input.details,
+    sentiment: input.sentiment,
+    createdAt,
+  };
+}
+
+function daysAgo(days: number) {
+  return addDays(easternDate(), -days) ?? easternDate();
+}
+
+function seedContact(input: RolodexContactInput) {
+  return createContactFromInput(input);
+}
+
+export async function seedRolodexContacts() {
+  const existing = await readRolodexFile();
+  if (existing.length > 0) {
+    return { seeded: false, contacts: existing };
+  }
+
+  const seeded = [
+    seedContact({
+      firstName: "Marcus",
+      lastName: "Thompson",
+      email: "marcus@thompsonelectric.com",
+      phone: "(502) 555-0101",
+      company: "Thompson Electric LLC",
+      title: "Owner",
+      industry: "Electrical Services",
+      website: "https://thompsonelectric.example.com",
+      city: "Louisville",
+      state: "KY",
+      country: "USA",
+      relationshipType: "client",
+      tags: ["electrical", "home services", "louisville"],
+      howWeMet: "Referred by a roofing client",
+      metDate: daysAgo(84),
+      birthday: "1985-06-14",
+      spouse: "Dana",
+      children: "2 boys",
+      interests: "Fishing, bourbon trail weekends",
+      favoriteFood: "Hot chicken",
+      personalNotes: "Prefers calls before 8am. Expanding into commercial installs.",
+      linkedin: "https://linkedin.com/in/marcus-thompson-electric",
+      stayInTouch: { frequency: "monthly" },
+      interactions: [
+        seedInteraction({ type: "call", date: daysAgo(2), summary: "Reviewed office rewiring scope", details: "He wants pricing by Friday for the second floor.", sentiment: "positive" }),
+        seedInteraction({ type: "email", date: daysAgo(8), summary: "Sent revised proposal", details: "Included alternate panel upgrade option.", sentiment: "neutral" }),
+        seedInteraction({ type: "meeting", date: daysAgo(13), summary: "Walkthrough at warehouse", details: "Met on site with facilities manager.", sentiment: "positive" }),
+        seedInteraction({ type: "text", date: daysAgo(21), summary: "Confirmed permit status", sentiment: "neutral" }),
+        seedInteraction({ type: "call", date: daysAgo(29), summary: "Inbound call about emergency job", details: "He replied quickly and approved overtime.", sentiment: "positive" }),
+        seedInteraction({ type: "email", date: daysAgo(37), summary: "Shared invoice package", sentiment: "neutral" }),
+        seedInteraction({ type: "meeting", date: daysAgo(46), summary: "Lunch after referral", details: "Introduced a GC who may need estimating help.", sentiment: "positive" }),
+        seedInteraction({ type: "referral", date: daysAgo(54), summary: "Introduced me to a general contractor", sentiment: "positive" }),
+        seedInteraction({ type: "deal", date: daysAgo(61), summary: "Closed maintenance retainer", sentiment: "positive" }),
+        seedInteraction({ type: "note", date: daysAgo(73), summary: "Mentioned daughter starts kindergarten this fall", sentiment: "neutral" }),
+        seedInteraction({ type: "call", date: daysAgo(80), summary: "Initial intro call", sentiment: "positive" }),
+        seedInteraction({ type: "email", date: daysAgo(88), summary: "Shared capabilities deck", sentiment: "neutral" }),
+      ],
+      notes: [
+        seedNote("Send bourbon trail recommendations before his anniversary trip.", new Date(`${daysAgo(18)}T15:00:00.000Z`).toISOString()),
+        seedNote("Strong referral source if commercial quote turnaround stays tight.", new Date(`${daysAgo(6)}T16:15:00.000Z`).toISOString()),
+      ],
+    }),
+    seedContact({
+      firstName: "Sarah",
+      lastName: "Chen",
+      email: "sarah@chenmarketing.com",
+      phone: "(917) 555-0133",
+      company: "Chen Marketing Group",
+      title: "Founder",
+      industry: "Marketing Consulting",
+      website: "https://chenmarketing.example.com",
+      city: "New York",
+      state: "NY",
+      country: "USA",
+      relationshipType: "partner",
+      tags: ["marketing", "agency", "partner"],
+      howWeMet: "Met at a growth operators dinner",
+      metDate: daysAgo(70),
+      interests: "Pilates, coffee roasting",
+      favoriteFood: "Dumplings",
+      linkedin: "https://linkedin.com/in/sarah-chen-growth",
+      twitter: "https://x.com/sarahchen",
+      stayInTouch: { frequency: "biweekly" },
+      interactions: [
+        seedInteraction({ type: "email", date: daysAgo(5), summary: "Swapped landing page feedback", sentiment: "positive" }),
+        seedInteraction({ type: "meeting", date: daysAgo(17), summary: "Joint partner strategy session", details: "Mapped Q2 webinar collaboration.", sentiment: "positive" }),
+        seedInteraction({ type: "call", date: daysAgo(24), summary: "Discussed retainer referral structure", sentiment: "neutral" }),
+        seedInteraction({ type: "email", date: daysAgo(31), summary: "She replied with intros to two SaaS founders", sentiment: "positive" }),
+        seedInteraction({ type: "text", date: daysAgo(43), summary: "Confirmed NYC trip schedule", sentiment: "neutral" }),
+        seedInteraction({ type: "meeting", date: daysAgo(58), summary: "Coffee in SoHo", sentiment: "positive" }),
+        seedInteraction({ type: "referral", date: daysAgo(64), summary: "Introduced me to a podcast producer", sentiment: "positive" }),
+        seedInteraction({ type: "email", date: daysAgo(77), summary: "Initial follow-up from dinner", sentiment: "neutral" }),
+      ],
+      notes: [seedNote("Worth inviting into Louisville workshop series.", new Date(`${daysAgo(7)}T13:00:00.000Z`).toISOString())],
+    }),
+    seedContact({
+      firstName: "David",
+      lastName: "Park",
+      email: "david@parksitaliankitchen.com",
+      phone: "(615) 555-0182",
+      company: "Park's Italian Kitchen",
+      title: "Owner",
+      industry: "Restaurant",
+      city: "Nashville",
+      state: "TN",
+      country: "USA",
+      relationshipType: "prospect",
+      tags: ["restaurant", "hospitality", "prospect"],
+      howWeMet: "Inbound website lead",
+      metDate: daysAgo(45),
+      favoriteFood: "Espresso and cannoli",
+      personalNotes: "Interested in loyalty campaigns but budget-sensitive.",
+      stayInTouch: { frequency: "monthly" },
+      interactions: [
+        seedInteraction({ type: "call", date: daysAgo(6), summary: "Discovery call for spring promo support", sentiment: "neutral" }),
+        seedInteraction({ type: "email", date: daysAgo(19), summary: "Sent sample campaign ideas", sentiment: "positive" }),
+        seedInteraction({ type: "note", date: daysAgo(41), summary: "Scheduled initial call from website inquiry", sentiment: "neutral" }),
+      ],
+      notes: [seedNote("Follow up after March revenue review.", new Date(`${daysAgo(4)}T11:30:00.000Z`).toISOString())],
+    }),
+    seedContact({
+      firstName: "Emily",
+      lastName: "Rodriguez",
+      email: "emily.rodriguez@example.com",
+      phone: "(512) 555-0147",
+      title: "Community Producer",
+      city: "Austin",
+      state: "TX",
+      country: "USA",
+      relationshipType: "friend",
+      tags: ["sxsw", "community", "friend"],
+      howWeMet: "Met at SXSW 2025",
+      metDate: "2025-03-10",
+      birthday: "1991-09-02",
+      interests: "Live music, trail running, documentaries",
+      favoriteFood: "Breakfast tacos",
+      instagram: "https://instagram.com/emilyrodriguez",
+      personalNotes: "Always knows the best community events in Austin.",
+      stayInTouch: { frequency: "monthly" },
+      interactions: [
+        seedInteraction({ type: "text", date: daysAgo(1), summary: "Shared Austin recommendations for April trip", sentiment: "positive" }),
+        seedInteraction({ type: "call", date: daysAgo(4), summary: "Catch-up call after conference season", sentiment: "positive" }),
+        seedInteraction({ type: "meeting", date: daysAgo(9), summary: "Breakfast at Cosmic Coffee", sentiment: "positive" }),
+        seedInteraction({ type: "text", date: daysAgo(14), summary: "She replied with venue list", sentiment: "positive" }),
+        seedInteraction({ type: "email", date: daysAgo(20), summary: "Sent photos from SXSW panel", sentiment: "neutral" }),
+        seedInteraction({ type: "meeting", date: daysAgo(27), summary: "Met friends after showcase", sentiment: "positive" }),
+        seedInteraction({ type: "gift", date: daysAgo(35), summary: "Mailed derby hat thank-you", sentiment: "positive" }),
+        seedInteraction({ type: "text", date: daysAgo(43), summary: "Checked in after her half marathon", sentiment: "positive" }),
+        seedInteraction({ type: "note", date: daysAgo(52), summary: "Mentioned planning a documentary club", sentiment: "neutral" }),
+        seedInteraction({ type: "call", date: daysAgo(60), summary: "Booked SXSW meetup", sentiment: "positive" }),
+        seedInteraction({ type: "meeting", date: daysAgo(68), summary: "Coffee during Austin work trip", sentiment: "positive" }),
+        seedInteraction({ type: "text", date: daysAgo(74), summary: "Shared taco list", sentiment: "positive" }),
+        seedInteraction({ type: "social", date: daysAgo(79), summary: "Commented on her event recap post", sentiment: "neutral" }),
+        seedInteraction({ type: "email", date: daysAgo(83), summary: "Sent intros for a community role", sentiment: "positive" }),
+        seedInteraction({ type: "meeting", date: daysAgo(89), summary: "SXSW 2025 intro meetup", sentiment: "positive" }),
+      ],
+      notes: [
+        seedNote("Ask about documentary club and whether she still needs sponsors.", new Date(`${daysAgo(12)}T19:00:00.000Z`).toISOString()),
+        seedNote("Potential connector for Austin founder dinners.", new Date(`${daysAgo(2)}T10:20:00.000Z`).toISOString()),
+      ],
+    }),
+    seedContact({
+      firstName: "James",
+      lastName: "Wilson",
+      email: "james@wilsondesign.co",
+      company: "Wilson Design Co",
+      title: "Lead Designer",
+      industry: "Web Design",
+      website: "https://wilsondesign.example.com",
+      city: "Remote",
+      country: "USA",
+      relationshipType: "vendor",
+      tags: ["design", "web", "contractor"],
+      howWeMet: "Dribbble referral",
+      metDate: daysAgo(95),
+      interests: "Typography, cycling",
+      personalNotes: "Fast turnaround, but prefers async feedback.",
+      stayInTouch: { frequency: "quarterly" },
+      interactions: [
+        seedInteraction({ type: "email", date: daysAgo(11), summary: "Reviewed homepage revisions", sentiment: "positive" }),
+        seedInteraction({ type: "meeting", date: daysAgo(22), summary: "Weekly design review", sentiment: "neutral" }),
+        seedInteraction({ type: "deal", date: daysAgo(30), summary: "Approved sprint extension", sentiment: "positive" }),
+        seedInteraction({ type: "text", date: daysAgo(44), summary: "Sent Figma link updates", sentiment: "neutral" }),
+        seedInteraction({ type: "call", date: daysAgo(63), summary: "Project kickoff", sentiment: "positive" }),
+        seedInteraction({ type: "email", date: daysAgo(86), summary: "Initial intro and portfolio review", sentiment: "neutral" }),
+      ],
+      notes: [seedNote("Could help with future dashboard reskins if availability opens up.", new Date(`${daysAgo(15)}T09:15:00.000Z`).toISOString())],
+    }),
+    seedContact({
+      firstName: "Mike",
+      lastName: "O'Brien",
+      email: "mike@obriengaragedoors.com",
+      phone: "(502) 555-0171",
+      company: "O'Brien Garage Doors",
+      title: "Owner",
+      industry: "Home Services",
+      city: "Louisville",
+      state: "KY",
+      country: "USA",
+      relationshipType: "client",
+      tags: ["garage doors", "home services", "client"],
+      howWeMet: "Introduced by Marcus Thompson",
+      metDate: daysAgo(66),
+      introducedBy: "Marcus Thompson",
+      interests: "Golf, UK basketball",
+      favoriteFood: "Steak",
+      stayInTouch: { frequency: "monthly" },
+      interactions: [
+        seedInteraction({ type: "call", date: daysAgo(3), summary: "Campaign performance check-in", sentiment: "positive" }),
+        seedInteraction({ type: "email", date: daysAgo(10), summary: "Sent March lead report", sentiment: "positive" }),
+        seedInteraction({ type: "meeting", date: daysAgo(18), summary: "Quarterly planning session", sentiment: "positive" }),
+        seedInteraction({ type: "text", date: daysAgo(26), summary: "Confirmed photo shoot time", sentiment: "neutral" }),
+        seedInteraction({ type: "deal", date: daysAgo(33), summary: "Renewed service agreement", sentiment: "positive" }),
+        seedInteraction({ type: "call", date: daysAgo(41), summary: "Inbound call about emergency ad spend", sentiment: "neutral" }),
+        seedInteraction({ type: "email", date: daysAgo(50), summary: "Shared customer review highlights", sentiment: "positive" }),
+        seedInteraction({ type: "referral", date: daysAgo(59), summary: "Introduced me to a fencing company owner", sentiment: "positive" }),
+        seedInteraction({ type: "meeting", date: daysAgo(67), summary: "Lunch intro with Marcus", sentiment: "positive" }),
+        seedInteraction({ type: "call", date: daysAgo(75), summary: "Discovery call", sentiment: "positive" }),
+      ],
+      notes: [seedNote("Strong case study candidate once spring install season closes.", new Date(`${daysAgo(8)}T14:45:00.000Z`).toISOString())],
+    }),
+    seedContact({
+      firstName: "Lisa",
+      lastName: "Chang",
+      email: "lisa@sequoiacapital.example.com",
+      company: "Sequoia Capital",
+      title: "Advisor",
+      industry: "Venture Capital",
+      website: "https://sequoiacapital.example.com",
+      city: "San Francisco",
+      state: "CA",
+      country: "USA",
+      relationshipType: "mentor",
+      tags: ["mentor", "investing", "advice"],
+      howWeMet: "Introduced through founder office hours",
+      metDate: daysAgo(102),
+      interests: "Board games, hiking",
+      linkedin: "https://linkedin.com/in/lisa-chang-advisor",
+      stayInTouch: { frequency: "quarterly" },
+      interactions: [
+        seedInteraction({ type: "meeting", date: daysAgo(16), summary: "Monthly advising session", details: "Focused on pricing and hiring cadence.", sentiment: "positive" }),
+        seedInteraction({ type: "email", date: daysAgo(28), summary: "She replied with hiring memo", sentiment: "positive" }),
+        seedInteraction({ type: "call", date: daysAgo(49), summary: "Discussed board deck structure", sentiment: "neutral" }),
+        seedInteraction({ type: "meeting", date: daysAgo(71), summary: "Office hours follow-up", sentiment: "positive" }),
+      ],
+      notes: [seedNote("Ask her for feedback before the next strategic planning offsite.", new Date(`${daysAgo(13)}T12:10:00.000Z`).toISOString())],
+    }),
+    seedContact({
+      firstName: "Ahmed",
+      lastName: "Hassan",
+      email: "ahmed@hassanpainting.com",
+      phone: "(859) 555-0124",
+      company: "Hassan Painting Co",
+      title: "Owner",
+      industry: "Painting Contractor",
+      city: "Lexington",
+      state: "KY",
+      country: "USA",
+      relationshipType: "industry",
+      tags: ["painting", "contractor", "industry"],
+      howWeMet: "Met at contractor breakfast",
+      metDate: daysAgo(58),
+      interests: "Soccer, grilling",
+      personalNotes: "Curious about local SEO and recruiting painters.",
+      stayInTouch: { frequency: "monthly" },
+      interactions: [
+        seedInteraction({ type: "call", date: daysAgo(7), summary: "Talked through referral partnership", sentiment: "positive" }),
+        seedInteraction({ type: "meeting", date: daysAgo(20), summary: "Contractor breakfast catch-up", sentiment: "positive" }),
+        seedInteraction({ type: "email", date: daysAgo(34), summary: "Sent local SEO checklist", sentiment: "neutral" }),
+        seedInteraction({ type: "text", date: daysAgo(47), summary: "Confirmed quote handoff", sentiment: "neutral" }),
+        seedInteraction({ type: "note", date: daysAgo(57), summary: "Mentioned seasonal hiring pain", sentiment: "neutral" }),
+      ],
+      notes: [seedNote("Possible referral exchange with Marcus and Mike.", new Date(`${daysAgo(5)}T17:40:00.000Z`).toISOString())],
+    }),
+    seedContact({
+      firstName: "Rachel",
+      lastName: "Kim",
+      email: "rachel@derbydigital.com",
+      phone: "(502) 555-0168",
+      company: "Derby Digital",
+      title: "Marketing Coordinator",
+      industry: "Marketing",
+      city: "Louisville",
+      state: "KY",
+      country: "USA",
+      relationshipType: "team",
+      tags: ["team", "operations", "marketing"],
+      howWeMet: "Joined Derby Digital",
+      metDate: daysAgo(180),
+      birthday: "1996-11-19",
+      interests: "Pilates, matcha, road trips",
+      favoriteFood: "Sushi",
+      personalNotes: "Keeps client onboarding running smoothly.",
+      stayInTouch: { frequency: "weekly" },
+      interactions: [
+        seedInteraction({ type: "meeting", date: daysAgo(1), summary: "Daily standup", sentiment: "positive" }),
+        seedInteraction({ type: "text", date: daysAgo(2), summary: "Shared launch checklist", sentiment: "positive" }),
+        seedInteraction({ type: "meeting", date: daysAgo(4), summary: "Campaign review", sentiment: "positive" }),
+        seedInteraction({ type: "email", date: daysAgo(6), summary: "Sent revised briefs", sentiment: "neutral" }),
+        seedInteraction({ type: "call", date: daysAgo(9), summary: "Client prep on the way to site visit", sentiment: "positive" }),
+        seedInteraction({ type: "meeting", date: daysAgo(12), summary: "Ops sync", sentiment: "positive" }),
+        seedInteraction({ type: "text", date: daysAgo(16), summary: "Confirmed event logistics", sentiment: "neutral" }),
+        seedInteraction({ type: "meeting", date: daysAgo(21), summary: "Workshop retro", sentiment: "positive" }),
+        seedInteraction({ type: "email", date: daysAgo(28), summary: "Shared pipeline export", sentiment: "neutral" }),
+        seedInteraction({ type: "meeting", date: daysAgo(32), summary: "Content planning", sentiment: "positive" }),
+        seedInteraction({ type: "call", date: daysAgo(39), summary: "Handled client escalation", sentiment: "positive" }),
+        seedInteraction({ type: "meeting", date: daysAgo(44), summary: "Training session", sentiment: "positive" }),
+        seedInteraction({ type: "text", date: daysAgo(52), summary: "Checked in on event RSVPs", sentiment: "neutral" }),
+        seedInteraction({ type: "email", date: daysAgo(60), summary: "Sent process notes", sentiment: "neutral" }),
+        seedInteraction({ type: "meeting", date: daysAgo(67), summary: "Weekly planning", sentiment: "positive" }),
+        seedInteraction({ type: "text", date: daysAgo(73), summary: "Shared client gift ideas", sentiment: "positive" }),
+        seedInteraction({ type: "meeting", date: daysAgo(79), summary: "Quarter kickoff", sentiment: "positive" }),
+        seedInteraction({ type: "email", date: daysAgo(84), summary: "Built internal handoff doc", sentiment: "neutral" }),
+        seedInteraction({ type: "meeting", date: daysAgo(87), summary: "Onboarding prep", sentiment: "positive" }),
+        seedInteraction({ type: "call", date: daysAgo(90), summary: "First project sync", sentiment: "positive" }),
+      ],
+      notes: [seedNote("Candidate to own more client communication this quarter.", new Date(`${daysAgo(3)}T08:55:00.000Z`).toISOString())],
+    }),
+    seedContact({
+      firstName: "George",
+      lastName: "Papadopoulos",
+      email: "george@athenagreekrestaurant.com",
+      phone: "(419) 555-0196",
+      company: "Athena Greek Restaurant",
+      title: "Owner",
+      industry: "Restaurant",
+      city: "Mansfield",
+      state: "OH",
+      country: "USA",
+      relationshipType: "prospect",
+      tags: ["restaurant", "prospect", "ohio"],
+      howWeMet: "Cold outreach reply",
+      metDate: daysAgo(12),
+      interests: "Local sports, grilling",
+      stayInTouch: { frequency: "monthly" },
+      interactions: [seedInteraction({ type: "call", date: daysAgo(2), summary: "Scheduled intro call for next week", details: "He asked for examples from other family restaurants.", sentiment: "neutral" })],
+      notes: [seedNote("Very early stage. Bring localized examples and simple pricing.", new Date(`${daysAgo(1)}T18:20:00.000Z`).toISOString())],
+    }),
+  ].filter((entry): entry is RolodexContact => entry !== null);
+
+  const byName = new Map(seeded.map((contact) => [`${contact.firstName} ${contact.lastName}`.trim(), contact.id]));
+  const link = async (name: string, others: string[]) => {
+    const id = byName.get(name);
+    if (!id) return;
+    const add = others.map((entry) => byName.get(entry)).filter((entry): entry is string => Boolean(entry));
+    if (add.length) {
+      const index = seeded.findIndex((contact) => contact.id === id);
+      seeded[index] = applyPatch(seeded[index], { connections: Array.from(new Set([...seeded[index].connections, ...add])) });
+    }
+  };
+
+  await link("Marcus Thompson", ["Mike O'Brien", "Ahmed Hassan"]);
+  await link("Mike O'Brien", ["Marcus Thompson", "Rachel Kim"]);
+  await link("Sarah Chen", ["Lisa Chang", "Rachel Kim"]);
+  await link("Emily Rodriguez", ["Sarah Chen"]);
+  await link("Ahmed Hassan", ["Marcus Thompson"]);
+  await link("Rachel Kim", ["Sarah Chen", "Mike O'Brien"]);
+
+  await writeRolodexFile(seeded);
+  return { seeded: true, contacts: seeded };
 }
