@@ -708,6 +708,7 @@ export default function PipelinePage() {
   const [activeTagFilter, setActiveTagFilter] = useState("");
   const [search, setSearch] = useState("");
   const [sortMode, setSortMode] = useState<SortMode>("newest");
+  const [visibleCount, setVisibleCount] = useState(25);
   const [selectedId, setSelectedId] = useState("");
   const [mobileOpenId, setMobileOpenId] = useState("");
   const [rolodexDraft, setRolodexDraft] = useState("");
@@ -731,6 +732,16 @@ export default function PipelinePage() {
   );
   const [draggedDealId, setDraggedDealId] = useState("");
   const [dropStage, setDropStage] = useState<PipelineStage | "">("");
+  const [kanbanVisibleCounts, setKanbanVisibleCounts] = useState<Record<PipelineStage, number>>({
+    "new-lead": 20,
+    contacted: 20,
+    interested: 20,
+    "scheduled-meeting": 20,
+    "attended-meeting": 20,
+    negotiating: 20,
+    "closed-won": 20,
+    "closed-lost": 20,
+  });
 
   async function loadDeals() {
     setLoading(true);
@@ -765,6 +776,23 @@ export default function PipelinePage() {
 
     return sortDeals(filtered, sortMode);
   }, [activeSource, activeTagFilter, deals, search, sortMode]);
+
+  useEffect(() => {
+    setVisibleCount(25);
+  }, [activeSource, activeTagFilter, search, sortMode]);
+
+  useEffect(() => {
+    setKanbanVisibleCounts({
+      "new-lead": 20,
+      contacted: 20,
+      interested: 20,
+      "scheduled-meeting": 20,
+      "attended-meeting": 20,
+      negotiating: 20,
+      "closed-won": 20,
+      "closed-lost": 20,
+    });
+  }, [deals]);
 
   useEffect(() => {
     if (activeTagFilter && !availableTags.some((tag) => tag.toLowerCase() === activeTagFilter.toLowerCase())) {
@@ -1430,6 +1458,8 @@ export default function PipelinePage() {
               {stageDistribution.map(({ stage, count }) => {
                 const stageDeals = deals.filter((deal) => deal.stage === stage);
                 const isDropTarget = dropStage === stage;
+                const visibleStageCount = kanbanVisibleCounts[stage] ?? 20;
+                const visibleStageDeals = stageDeals.slice(0, visibleStageCount);
 
                 return (
                   <div
@@ -1465,7 +1495,7 @@ export default function PipelinePage() {
 
                     <div className="mt-4 space-y-3">
                       {stageDeals.length ? (
-                        stageDeals.map((deal) => (
+                        visibleStageDeals.map((deal) => (
                           <button
                             key={deal.id}
                             type="button"
@@ -1499,6 +1529,20 @@ export default function PipelinePage() {
                           Drop contacts here.
                         </div>
                       )}
+                      {stageDeals.length > visibleStageCount ? (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setKanbanVisibleCounts((current) => ({
+                              ...current,
+                              [stage]: visibleStageCount + 20,
+                            }))
+                          }
+                          className="glass-card w-full rounded-2xl py-3 text-sm text-blue-200 transition hover:bg-white/5"
+                        >
+                          Show More ({visibleStageCount} of {stageDeals.length})
+                        </button>
+                      ) : null}
                     </div>
                   </div>
                 );
@@ -1598,7 +1642,7 @@ export default function PipelinePage() {
 
               <div className="max-h-[calc(100vh-24rem)] space-y-2 overflow-y-auto pr-1">
                 {filteredDeals.length ? (
-                  filteredDeals.map((deal) => {
+                  filteredDeals.slice(0, visibleCount).map((deal) => {
                     const active = deal.id === activeDetailId;
                     return (
                       <button
@@ -1645,6 +1689,16 @@ export default function PipelinePage() {
                   <div className="glass-card rounded-2xl p-5 text-sm text-slate-400">No contacts match the current filters.</div>
                 )}
               </div>
+
+              {filteredDeals.length > visibleCount ? (
+                <button
+                  type="button"
+                  onClick={() => setVisibleCount((current) => current + 25)}
+                  className="glass-card w-full rounded-2xl py-3 text-sm text-blue-200 transition hover:bg-white/5"
+                >
+                  Load More (showing {Math.min(visibleCount, filteredDeals.length)} of {filteredDeals.length})
+                </button>
+              ) : null}
 
               <div className="flex items-center justify-between border-t border-white/8 pt-3 text-xs uppercase tracking-[0.16em] text-slate-400">
                 <span>Total</span>
