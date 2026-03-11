@@ -110,6 +110,12 @@ type SegmentsFilters = {
 type SegmentsSortKey = "name" | "company" | "email" | "city" | "state" | "tags" | "stage" | "source" | "created";
 type SegmentsSortDirection = "asc" | "desc";
 type BulkAction = "stage" | "tag" | "delete";
+type SavedSegmentsView = {
+  id: string;
+  name: string;
+  filters: SegmentsFilters;
+  search: string;
+};
 
 const EASTERN_TIME_ZONE = "America/New_York";
 const SOURCE_TABS_CONFIG = [
@@ -149,6 +155,7 @@ const EMPTY_SEGMENTS_FILTERS: SegmentsFilters = {
   dateFrom: "",
   dateTo: "",
 };
+const SAVED_SEGMENTS_VIEWS_KEY = "derby-os-saved-views";
 const TAG_SUGGESTIONS = ["SpotHopper", "BentoBox", "Owner.com", "Popmenu", "Fisherman", "Hot Lead", "Follow Up", "VIP"] as const;
 const TAG_PILL_STYLES = [
   "border-blue-300/30 bg-blue-500/15 text-blue-100",
@@ -274,6 +281,12 @@ const easternDateTimeFormatter = new Intl.DateTimeFormat("en-US", {
 
 function easternDateOnly(value = new Date()) {
   return value.toLocaleDateString("en-CA", { timeZone: EASTERN_TIME_ZONE });
+}
+
+function easternDateDaysAgo(days: number, value = new Date()) {
+  const anchor = new Date(value);
+  anchor.setDate(anchor.getDate() - days);
+  return easternDateOnly(anchor);
 }
 
 function makeId(prefix: string) {
@@ -558,6 +571,56 @@ function getDateOnlyValue(value?: string) {
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return "";
   return easternDateOnly(parsed);
+}
+
+function cloneSegmentsFilters(filters: SegmentsFilters): SegmentsFilters {
+  return { ...filters };
+}
+
+function areSegmentsFiltersEqual(left: SegmentsFilters, right: SegmentsFilters) {
+  return (
+    left.city === right.city &&
+    left.state === right.state &&
+    left.tag === right.tag &&
+    left.source === right.source &&
+    left.stage === right.stage &&
+    left.dateFrom === right.dateFrom &&
+    left.dateTo === right.dateTo
+  );
+}
+
+function parseSavedSegmentsViews(value: string | null): SavedSegmentsView[] {
+  if (!value) return [];
+
+  try {
+    const parsed = JSON.parse(value) as unknown;
+    if (!Array.isArray(parsed)) return [];
+
+    return parsed
+      .map((entry) => {
+        if (!entry || typeof entry !== "object") return null;
+        const candidate = entry as Partial<SavedSegmentsView> & { filters?: Partial<SegmentsFilters> };
+        if (typeof candidate.id !== "string" || typeof candidate.name !== "string") return null;
+
+        return {
+          id: candidate.id,
+          name: candidate.name.trim(),
+          search: typeof candidate.search === "string" ? candidate.search : "",
+          filters: {
+            city: typeof candidate.filters?.city === "string" ? candidate.filters.city : "",
+            state: typeof candidate.filters?.state === "string" ? candidate.filters.state : "",
+            tag: typeof candidate.filters?.tag === "string" ? candidate.filters.tag : "",
+            source: typeof candidate.filters?.source === "string" ? candidate.filters.source : "",
+            stage: typeof candidate.filters?.stage === "string" ? candidate.filters.stage : "",
+            dateFrom: typeof candidate.filters?.dateFrom === "string" ? candidate.filters.dateFrom : "",
+            dateTo: typeof candidate.filters?.dateTo === "string" ? candidate.filters.dateTo : "",
+          },
+        };
+      })
+      .filter((entry): entry is SavedSegmentsView => Boolean(entry?.name));
+  } catch {
+    return [];
+  }
 }
 
 function csvEscape(value: unknown) {
@@ -986,6 +1049,7 @@ export default function PipelinePage() {
   const [segmentsVisibleCount, setSegmentsVisibleCount] = useState(50);
   const [segmentsSortKey, setSegmentsSortKey] = useState<SegmentsSortKey>("created");
   const [segmentsSortDirection, setSegmentsSortDirection] = useState<SegmentsSortDirection>("desc");
+  const [savedSegmentsViews, setSavedSegmentsViews] = useState<SavedSegmentsView[]>([]);
   const [selectedSegmentIds, setSelectedSegmentIds] = useState<string[]>([]);
   const [bulkStageValue, setBulkStageValue] = useState("");
   const [bulkTagValue, setBulkTagValue] = useState("");
@@ -1021,6 +1085,16 @@ export default function PipelinePage() {
   useEffect(() => {
     void loadDeals();
   }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    setSavedSegmentsViews(parseSavedSegmentsViews(window.localStorage.getItem(SAVED_SEGMENTS_VIEWS_KEY)));
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(SAVED_SEGMENTS_VIEWS_KEY, JSON.stringify(savedSegmentsViews));
+  }, [savedSegmentsViews]);
 
   const sourceTabs = useMemo(() => getSourceTabs(deals), [deals]);
   const availableTags = useMemo(() => getUniqueTags(deals), [deals]);
@@ -1180,6 +1254,60 @@ export default function PipelinePage() {
   const segmentStates = useMemo(() => getUniqueValues(deals.map((deal) => deal.state)), [deals]);
   const segmentTags = useMemo(() => getCompetitorTagOptions(deals), [deals]);
   const segmentSources = useMemo(() => getUniqueValues(deals.map((deal) => normalizeSourceValue(deal.source))), [deals]);
+  const builtInSegmentsViews = useMemo(
+    () => [
+      {
+        id: "all-contacts",
+        name: "All Contacts",
+        icon: Users,
+        filters: cloneSegmentsFilters(EMPTY_SEGMENTS_FILTERS),
+        search: "",
+      },
+      {
+        id: "new-this-week",
+        name: "New This Week",
+        icon: Sparkles,
+        filters: {
+          ...cloneSegmentsFilters(EMPTY_SEGMENTS_FILTERS),
+          stage: "new-lead",
+          dateFrom: easternDateDaysAgo(7),
+        },
+        search: "",
+      },
+      {
+        id: "interested",
+        name: "Interested",
+        icon: Sparkles,
+        filters: {
+          ...cloneSegmentsFilters(EMPTY_SEGMENTS_FILTERS),
+          stage: "interested",
+        },
+        search: "",
+      },
+      {
+        id: "spothopper",
+        name: "SpotHopper",
+        icon: Sparkles,
+        filters: {
+          ...cloneSegmentsFilters(EMPTY_SEGMENTS_FILTERS),
+          tag: "SpotHopper",
+        },
+        search: "",
+      },
+      {
+        id: "needs-follow-up",
+        name: "Needs Follow-Up",
+        icon: Sparkles,
+        filters: {
+          ...cloneSegmentsFilters(EMPTY_SEGMENTS_FILTERS),
+          stage: "contacted",
+          dateTo: easternDateDaysAgo(7),
+        },
+        search: "",
+      },
+    ],
+    [],
+  );
 
   const segmentedDeals = useMemo(() => {
     const normalizedSegmentsSearch = segmentsSearch.trim().toLowerCase();
@@ -1260,6 +1388,7 @@ export default function PipelinePage() {
   const activeSegmentsFilters = useMemo(
     () =>
       [
+        segmentsSearch.trim() ? { key: "search", label: `Search: ${segmentsSearch.trim()}` } : null,
         segmentsFilters.city ? { key: "city", label: `City: ${segmentsFilters.city}` } : null,
         segmentsFilters.state ? { key: "state", label: `State: ${segmentsFilters.state}` } : null,
         segmentsFilters.tag ? { key: "tag", label: `Competitor/Tag: ${segmentsFilters.tag}` } : null,
@@ -1269,9 +1398,21 @@ export default function PipelinePage() {
           : null,
         segmentsFilters.dateFrom ? { key: "dateFrom", label: `From: ${segmentsFilters.dateFrom}` } : null,
         segmentsFilters.dateTo ? { key: "dateTo", label: `To: ${segmentsFilters.dateTo}` } : null,
-      ].filter((entry): entry is { key: keyof SegmentsFilters; label: string } => entry !== null),
-    [segmentsFilters],
+      ].filter((entry): entry is { key: keyof SegmentsFilters | "search"; label: string } => entry !== null),
+    [segmentsFilters, segmentsSearch],
   );
+  const activeBuiltInSegmentsViewId = useMemo(() => {
+    const matchingView = builtInSegmentsViews.find(
+      (view) => areSegmentsFiltersEqual(view.filters, segmentsFilters) && view.search === segmentsSearch,
+    );
+    return matchingView?.id ?? "";
+  }, [builtInSegmentsViews, segmentsFilters, segmentsSearch]);
+  const activeSavedSegmentsViewId = useMemo(() => {
+    const matchingView = savedSegmentsViews.find(
+      (view) => areSegmentsFiltersEqual(view.filters, segmentsFilters) && view.search === segmentsSearch,
+    );
+    return matchingView?.id ?? "";
+  }, [savedSegmentsViews, segmentsFilters, segmentsSearch]);
   const totalContacts = deals.length;
   const newThisWeek = useMemo(() => deals.filter((deal) => isWithinLastSevenDays(deal.createdAt)).length, [deals]);
   const wonThisMonth = useMemo(
@@ -1485,6 +1626,43 @@ export default function PipelinePage() {
 
   function updateSegmentsFilter<Key extends keyof SegmentsFilters>(key: Key, value: SegmentsFilters[Key]) {
     setSegmentsFilters((current) => ({ ...current, [key]: value }));
+  }
+
+  function applySegmentsView(view: Pick<SavedSegmentsView, "filters" | "search">) {
+    setSegmentsFilters(cloneSegmentsFilters(view.filters));
+    setSegmentsSearch(view.search);
+  }
+
+  function clearSegmentsFilters() {
+    setSegmentsFilters(cloneSegmentsFilters(EMPTY_SEGMENTS_FILTERS));
+    setSegmentsSearch("");
+  }
+
+  function saveCurrentSegmentsView() {
+    const trimmedSearch = segmentsSearch.trim();
+    const hasFilters = Object.values(segmentsFilters).some(Boolean);
+    if (!hasFilters && !trimmedSearch) {
+      setError("Add a search or filter before saving a view.");
+      return;
+    }
+
+    const input = window.prompt("Name this saved view");
+    const name = input?.trim();
+    if (!name) return;
+
+    setSavedSegmentsViews((current) => [
+      ...current,
+      {
+        id: makeId("segments-view"),
+        name,
+        filters: cloneSegmentsFilters(segmentsFilters),
+        search: trimmedSearch,
+      },
+    ]);
+  }
+
+  function deleteSavedSegmentsView(id: string) {
+    setSavedSegmentsViews((current) => current.filter((view) => view.id !== id));
   }
 
   function toggleSegmentsSort(key: SegmentsSortKey) {
@@ -2143,6 +2321,74 @@ export default function PipelinePage() {
               </div>
             </div>
 
+            <div className="-mx-1 mt-5 flex items-center gap-2 overflow-x-auto px-1 pb-1">
+              {builtInSegmentsViews.map((view) => {
+                const Icon = view.icon;
+                const isActive = activeBuiltInSegmentsViewId === view.id;
+
+                return (
+                  <button
+                    key={view.id}
+                    type="button"
+                    onClick={() => applySegmentsView(view)}
+                    className={cn(
+                      "inline-flex shrink-0 items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-medium transition",
+                      isActive
+                        ? "border-blue-300/45 bg-blue-500/15 text-blue-50 shadow-[0_0_0_1px_rgba(96,165,250,0.18)]"
+                        : "border-white/10 bg-white/5 text-slate-200 hover:border-blue-300/30 hover:bg-white/8",
+                    )}
+                  >
+                    <Icon size={14} className={cn("opacity-70", isActive && "opacity-100")} />
+                    <span>{view.name}</span>
+                  </button>
+                );
+              })}
+
+              {savedSegmentsViews.map((view) => {
+                const isActive = activeSavedSegmentsViewId === view.id;
+
+                return (
+                  <div
+                    key={view.id}
+                    className={cn(
+                      "inline-flex shrink-0 items-center rounded-full border transition",
+                      isActive
+                        ? "border-blue-300/45 bg-blue-500/15 text-blue-50 shadow-[0_0_0_1px_rgba(96,165,250,0.18)]"
+                        : "border-white/10 bg-white/5 text-slate-200 hover:border-blue-300/30 hover:bg-white/8",
+                    )}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => applySegmentsView(view)}
+                      className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium"
+                    >
+                      <span>{view.name}</span>
+                    </button>
+                    <button
+                      type="button"
+                      aria-label={`Delete ${view.name}`}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        deleteSavedSegmentsView(view.id);
+                      }}
+                      className="rounded-full p-2 text-slate-400 transition hover:text-white"
+                    >
+                      <X size={13} />
+                    </button>
+                  </div>
+                );
+              })}
+
+              <button
+                type="button"
+                onClick={saveCurrentSegmentsView}
+                className="inline-flex shrink-0 items-center gap-2 rounded-full border border-dashed border-white/20 bg-white/[0.03] px-4 py-2.5 text-sm font-medium text-slate-200 transition hover:border-blue-300/35 hover:text-white"
+              >
+                <Plus size={14} />
+                <span>Save Current Filters</span>
+              </button>
+            </div>
+
             <div className="glass-card mt-5 grid gap-3 rounded-2xl p-4 xl:grid-cols-[repeat(5,minmax(0,1fr))_minmax(0,1.4fr)]">
               <label className="relative xl:col-span-full">
                 <Search size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -2226,7 +2472,13 @@ export default function PipelinePage() {
                   <button
                     key={filter.key}
                     type="button"
-                    onClick={() => updateSegmentsFilter(filter.key, "")}
+                    onClick={() => {
+                      if (filter.key === "search") {
+                        setSegmentsSearch("");
+                        return;
+                      }
+                      updateSegmentsFilter(filter.key as keyof SegmentsFilters, "");
+                    }}
                     className="inline-flex items-center gap-2 rounded-full border border-blue-300/30 bg-blue-500/10 px-3 py-1.5 text-xs uppercase tracking-[0.16em] text-blue-100"
                   >
                     <span>{filter.label}</span>
@@ -2235,7 +2487,7 @@ export default function PipelinePage() {
                 ))}
                 <button
                   type="button"
-                  onClick={() => setSegmentsFilters(EMPTY_SEGMENTS_FILTERS)}
+                  onClick={clearSegmentsFilters}
                   className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs uppercase tracking-[0.16em] text-slate-300"
                 >
                   Clear All
