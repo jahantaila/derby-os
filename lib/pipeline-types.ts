@@ -60,6 +60,8 @@ export type PipelineDeal = {
   conversationHistory?: ConversationHistoryItem[];
   messagedFrom?: string;
   website?: string;
+  city?: string;
+  state?: string;
   rawWebhookData?: unknown;
   stageUpdatedAt?: string;
 };

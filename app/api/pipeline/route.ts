@@ -20,10 +20,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Lead name and client are required." }, { status: 400 });
     }
 
-    return NextResponse.json(
-      { ok: true, dealId: result.deal.id, action: result.action },
-      { status: result.action === "created" ? 201 : 200 },
-    );
+    return NextResponse.json(result.deal, { status: result.action === "created" ? 201 : 200 });
   } catch {
     return NextResponse.json({ error: "Unable to create lead." }, { status: 500 });
   }

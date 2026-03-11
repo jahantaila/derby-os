@@ -39,6 +39,12 @@ function normalizeSource(value: unknown): string | undefined {
   return normalized || undefined;
 }
 
+function normalizeOptionalString(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const normalized = value.trim();
+  return normalized || undefined;
+}
+
 function normalizeEnrichmentStatus(value: unknown): EnrichmentStatus | undefined {
   if (typeof value !== "string") return undefined;
   return VALID_ENRICHMENT_STATUS.has(value as EnrichmentStatus) ? (value as EnrichmentStatus) : undefined;
@@ -121,6 +127,8 @@ export async function PATCH(request: Request, { params }: { params: { id: string
       conversationHistory: patch.conversationHistory === undefined ? current.conversationHistory : patch.conversationHistory,
       messagedFrom: patch.messagedFrom === undefined ? current.messagedFrom : patch.messagedFrom?.trim() || undefined,
       website: patch.website === undefined ? current.website : patch.website?.trim() || undefined,
+      city: patch.city === undefined ? current.city : normalizeOptionalString(patch.city),
+      state: patch.state === undefined ? current.state : normalizeOptionalString(patch.state),
       rawWebhookData: patch.rawWebhookData === undefined ? current.rawWebhookData : patch.rawWebhookData,
       stageUpdatedAt: stageChanged ? today : current.stageUpdatedAt ?? current.createdAt,
     };

@@ -14,6 +14,8 @@ import {
   Globe,
   KanbanSquare,
   Mail,
+  Map as MapIcon,
+  MapPin,
   Phone,
   PhoneCall,
   Plus,
@@ -48,6 +50,8 @@ type AddContactForm = {
   company: string;
   email: string;
   phone: string;
+  city: string;
+  state: string;
   source: string;
   stage: PipelineStage;
   notes: string;
@@ -111,6 +115,8 @@ const EMPTY_ADD_FORM: AddContactForm = {
   company: "",
   email: "",
   phone: "",
+  city: "",
+  state: "",
   source: "manual",
   stage: "new-lead",
   notes: "",
@@ -124,6 +130,59 @@ const TAG_PILL_STYLES = [
   "border-violet-300/30 bg-violet-500/15 text-violet-100",
   "border-cyan-300/30 bg-cyan-500/15 text-cyan-100",
   "border-rose-300/30 bg-rose-500/15 text-rose-100",
+] as const;
+const HEADER_TAG_PILL_CLASS = "border-red-400/40 bg-red-500/20 text-red-200";
+const US_STATES = [
+  "Alabama",
+  "Alaska",
+  "Arizona",
+  "Arkansas",
+  "California",
+  "Colorado",
+  "Connecticut",
+  "Delaware",
+  "Florida",
+  "Georgia",
+  "Hawaii",
+  "Idaho",
+  "Illinois",
+  "Indiana",
+  "Iowa",
+  "Kansas",
+  "Kentucky",
+  "Louisiana",
+  "Maine",
+  "Maryland",
+  "Massachusetts",
+  "Michigan",
+  "Minnesota",
+  "Mississippi",
+  "Missouri",
+  "Montana",
+  "Nebraska",
+  "Nevada",
+  "New Hampshire",
+  "New Jersey",
+  "New Mexico",
+  "New York",
+  "North Carolina",
+  "North Dakota",
+  "Ohio",
+  "Oklahoma",
+  "Oregon",
+  "Pennsylvania",
+  "Rhode Island",
+  "South Carolina",
+  "South Dakota",
+  "Tennessee",
+  "Texas",
+  "Utah",
+  "Vermont",
+  "Virginia",
+  "Washington",
+  "West Virginia",
+  "Wisconsin",
+  "Wyoming",
 ] as const;
 
 const STAGE_META: Record<PipelineStage, { label: string; color: string; pill: string }> = {
@@ -207,6 +266,11 @@ function getPhone(deal: PipelineDeal) {
 
 function getWebsite(deal: PipelineDeal) {
   return deal.website || deal.enrichmentData?.website || "";
+}
+
+function formatLocation(city?: string, state?: string) {
+  const parts = [city?.trim(), state?.trim()].filter(Boolean);
+  return parts.join(", ");
 }
 
 function formatSourceLabel(source: string) {
@@ -1059,6 +1123,8 @@ export default function PipelinePage() {
           client: addForm.company,
           email: addForm.email,
           phone: addForm.phone,
+          city: addForm.city,
+          state: addForm.state,
           source: addForm.source,
           stage: addForm.stage,
           notes: serializeNotes({ rolodex: addForm.notes, quickNotes: [] }),
@@ -1743,18 +1809,21 @@ export default function PipelinePage() {
                         <span className="rounded-full border border-blue-300/25 bg-blue-500/10 px-3 py-2 text-xs uppercase tracking-[0.16em] text-blue-100">
                           {formatSourceLabel(detailDeal.source)}
                         </span>
-                        {detailDeal.competitor ? (
-                          <span className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs uppercase tracking-[0.16em] text-slate-200">
-                            {detailDeal.competitor}
+                        {detailDeal.tags.slice(0, 3).map((tag) => (
+                          <span
+                            key={tag}
+                            className={cn("rounded-full border px-3 py-2 text-xs uppercase tracking-[0.16em]", HEADER_TAG_PILL_CLASS)}
+                          >
+                            {tag}
                           </span>
-                        ) : null}
+                        ))}
                       </div>
                     </div>
                   </div>
                 </section>
 
                 <section className="glass-panel p-5 sm:p-6">
-                  <div className="grid gap-3 md:grid-cols-3">
+                  <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
                     <div className="glass-card rounded-2xl p-4">
                       <div className="flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-slate-400">
                         <Mail size={14} className="text-blue-200" />
@@ -1775,6 +1844,20 @@ export default function PipelinePage() {
                         Website
                       </div>
                       <p className="mt-2 break-all text-sm text-white">{getWebsite(detailDeal) || "No website"}</p>
+                    </div>
+                    <div className="glass-card rounded-2xl p-4">
+                      <div className="flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-slate-400">
+                        <MapPin size={14} className="text-blue-200" />
+                        City
+                      </div>
+                      <p className="mt-2 text-sm text-white">{formatLocation(detailDeal.city, detailDeal.state) || "No city"}</p>
+                    </div>
+                    <div className="glass-card rounded-2xl p-4">
+                      <div className="flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-slate-400">
+                        <MapIcon size={14} className="text-blue-200" />
+                        State
+                      </div>
+                      <p className="mt-2 text-sm text-white">{detailDeal.state || "No state"}</p>
                     </div>
                   </div>
                 </section>
@@ -2069,6 +2152,31 @@ export default function PipelinePage() {
                 onChange={(event) => setAddForm((current) => ({ ...current, source: event.target.value }))}
                 className="w-full rounded-2xl border border-white/10 bg-[#0a0a0f] px-4 py-3 text-sm text-white outline-none focus:border-blue-400/40"
               />
+            </label>
+            <label className="space-y-2">
+              <span className="text-xs uppercase tracking-[0.16em] text-slate-400">City</span>
+              <input
+                value={addForm.city}
+                onChange={(event) => setAddForm((current) => ({ ...current, city: event.target.value }))}
+                className="w-full rounded-2xl border border-white/10 bg-[#0a0a0f] px-4 py-3 text-sm text-white outline-none focus:border-blue-400/40"
+              />
+            </label>
+            <label className="space-y-2">
+              <span className="text-xs uppercase tracking-[0.16em] text-slate-400">State</span>
+              <select
+                value={addForm.state}
+                onChange={(event) => setAddForm((current) => ({ ...current, state: event.target.value }))}
+                className="w-full rounded-2xl border border-white/10 bg-[#0a0a0f] px-4 py-3 text-sm text-white outline-none focus:border-blue-400/40"
+              >
+                <option value="" className="text-black" style={{ color: "black" }}>
+                  Select state
+                </option>
+                {US_STATES.map((state) => (
+                  <option key={state} value={state} className="text-black" style={{ color: "black" }}>
+                    {state}
+                  </option>
+                ))}
+              </select>
             </label>
             <label className="space-y-2">
               <span className="text-xs uppercase tracking-[0.16em] text-slate-400">Stage</span>

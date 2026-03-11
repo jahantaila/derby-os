@@ -29,6 +29,8 @@ export type PipelineDealUpsertInput = {
   email?: string;
   phone?: string;
   website?: string;
+  city?: string;
+  state?: string;
   competitor?: string;
   tags?: string[];
 };
@@ -92,6 +94,11 @@ function normalizeString(value: unknown): string {
 
 function normalizeEmail(value: unknown): string {
   return normalizeString(value).toLowerCase();
+}
+
+function normalizeOptionalString(value: unknown): string | undefined {
+  const normalized = normalizeString(value);
+  return normalized || undefined;
 }
 
 function normalizeTags(value: unknown, competitor?: string): string[] {
@@ -196,6 +203,8 @@ function createDealFromInput(input: PipelineDealUpsertInput): PipelineDeal | nul
     tags: normalizeTags(input.tags, competitor),
     competitor,
     website: website || undefined,
+    city: normalizeOptionalString(input.city),
+    state: normalizeOptionalString(input.state),
     stageUpdatedAt: today,
   };
 }
@@ -243,6 +252,8 @@ function mergeDeal(current: PipelineDeal, input: PipelineDealUpsertInput): Pipel
     conversationHistory: current.conversationHistory,
     messagedFrom: current.messagedFrom,
     website: currentWebsite || incomingWebsite || undefined,
+    city: current.city || normalizeOptionalString(input.city),
+    state: current.state || normalizeOptionalString(input.state),
     rawWebhookData: current.rawWebhookData,
     stageUpdatedAt: stageChanged ? todayIsoDate() : current.stageUpdatedAt ?? current.createdAt,
   };
@@ -400,6 +411,8 @@ function normalizeDeal(raw: unknown): PipelineDeal | null {
     conversationHistory: normalizeConversationHistory(raw.conversationHistory),
     messagedFrom: normalizeString(raw.messagedFrom) || undefined,
     website: normalizeString(raw.website) || undefined,
+    city: normalizeOptionalString(raw.city),
+    state: normalizeOptionalString(raw.state),
     rawWebhookData: raw.rawWebhookData,
     stageUpdatedAt: normalizeDate(raw.stageUpdatedAt ?? createdAt),
   };
