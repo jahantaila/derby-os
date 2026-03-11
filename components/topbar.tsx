@@ -5,10 +5,14 @@ import { useEffect, useState } from "react";
 import { Bell } from "lucide-react";
 
 const TIME_ZONE = "America/New_York";
-const UNREAD_COUNT = 3;
+
+type NotificationsResponse = {
+  unreadCount?: number;
+};
 
 export function TopBar() {
   const [time, setTime] = useState("");
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     const update = () =>
@@ -31,6 +35,32 @@ export function TopBar() {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadUnreadCount = async () => {
+      try {
+        const response = await fetch("/api/notifications", { cache: "no-store" });
+        if (!response.ok) return;
+        const data = (await response.json()) as NotificationsResponse;
+        if (!cancelled) {
+          setUnreadCount(typeof data.unreadCount === "number" ? data.unreadCount : 0);
+        }
+      } catch {
+        if (!cancelled) {
+          setUnreadCount(0);
+        }
+      }
+    };
+
+    loadUnreadCount();
+    const interval = setInterval(loadUnreadCount, 30000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, []);
+
   return (
     <header className="glass-surface soft-ring sticky top-0 z-20 flex min-h-14 items-center justify-between rounded-2xl px-4 py-2 md:px-6">
       <div>
@@ -42,12 +72,12 @@ export function TopBar() {
       <div className="flex items-center gap-3">
         <Link
           href="/notifications"
-          aria-label={`Notifications (${UNREAD_COUNT} unread)`}
+          aria-label={`Notifications (${unreadCount} unread)`}
           className="relative inline-flex h-11 w-11 items-center justify-center rounded-full border border-blue-300/20 bg-white/5 text-blue-50 transition hover:border-blue-300/45 hover:bg-white/10"
         >
           <Bell size={18} />
           <span className="absolute right-1.5 top-1.5 inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-[linear-gradient(135deg,#2093FF,#0026FF)] px-1 text-[10px] font-semibold text-white shadow-[0_0_16px_rgba(32,147,255,0.45)]">
-            {UNREAD_COUNT}
+            {unreadCount}
           </span>
         </Link>
         <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-blue-100/90">{time}</span>

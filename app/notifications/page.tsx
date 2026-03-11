@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Bell, Bot, CalendarDays, CheckCheck, CircleDot, CreditCard, FileText, Funnel, Inbox } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Bell, BookUser, CheckCheck, CircleDot, Funnel, Inbox } from "lucide-react";
 
-type NotificationType = "agent" | "pipeline" | "finance" | "document" | "calendar";
-type NotificationFilter = "all" | "agent" | "pipeline" | "finance" | "document";
+type NotificationType = "pipeline" | "rolodex";
+type NotificationFilter = "all" | NotificationType;
+
 type NotificationRecord = {
   id: string;
   title: string;
@@ -13,33 +14,80 @@ type NotificationRecord = {
   read: boolean;
 };
 
-const INITIAL_NOTIFICATIONS: NotificationRecord[] = [
-  { id: "n1", title: "Kevin completed: Tasks page overhaul", timestamp: "2 hours ago", type: "agent", read: false },
-  { id: "n2", title: "New lead: Chappells Nashville", timestamp: "4 hours ago", type: "pipeline", read: false },
-  { id: "n3", title: "Finance data synced for March", timestamp: "6 hours ago", type: "finance", read: true },
-  { id: "n4", title: "Sabri generated Bluegrass ad copy", timestamp: "8 hours ago", type: "document", read: false },
-  { id: "n5", title: "Calendar: Team sync meeting tomorrow", timestamp: "12 hours ago", type: "calendar", read: true },
-];
+type NotificationsResponse = {
+  notifications?: NotificationRecord[];
+  unreadCount?: number;
+};
 
 const FILTERS: Array<{ key: NotificationFilter; label: string }> = [
   { key: "all", label: "All" },
-  { key: "agent", label: "Agents" },
   { key: "pipeline", label: "Pipeline" },
-  { key: "finance", label: "Finance" },
-  { key: "document", label: "Documents" },
+  { key: "rolodex", label: "Rolodex" },
 ];
 
 const TYPE_META: Record<NotificationType, { label: string; icon: typeof Bell; iconClass: string }> = {
-  agent: { label: "Agent", icon: Bot, iconClass: "text-blue-100 bg-blue-500/12 border-blue-400/30" },
   pipeline: { label: "Pipeline", icon: Funnel, iconClass: "text-cyan-100 bg-cyan-500/12 border-cyan-400/30" },
-  finance: { label: "Finance", icon: CreditCard, iconClass: "text-emerald-100 bg-emerald-500/12 border-emerald-400/30" },
-  document: { label: "Document", icon: FileText, iconClass: "text-indigo-100 bg-indigo-500/12 border-indigo-400/30" },
-  calendar: { label: "Calendar", icon: CalendarDays, iconClass: "text-sky-100 bg-sky-500/12 border-sky-400/30" },
+  rolodex: { label: "Rolodex", icon: BookUser, iconClass: "text-blue-100 bg-blue-500/12 border-blue-400/30" },
 };
+
+const relativeTimeFormatter = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+
+function formatRelativeTime(timestamp: string) {
+  const parsed = Date.parse(timestamp);
+  if (Number.isNaN(parsed)) return "";
+
+  const deltaSeconds = Math.round((parsed - Date.now()) / 1000);
+  const ranges: Array<[Intl.RelativeTimeFormatUnit, number]> = [
+    ["day", 86400],
+    ["hour", 3600],
+    ["minute", 60],
+  ];
+
+  for (const [unit, seconds] of ranges) {
+    if (Math.abs(deltaSeconds) >= seconds || unit === "minute") {
+      return relativeTimeFormatter.format(Math.round(deltaSeconds / seconds), unit);
+    }
+  }
+
+  return "just now";
+}
 
 export default function NotificationsPage() {
   const [filter, setFilter] = useState<NotificationFilter>("all");
-  const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
+  const [notifications, setNotifications] = useState<NotificationRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isMutating, setIsMutating] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadNotifications = async () => {
+      try {
+        const response = await fetch("/api/notifications", { cache: "no-store" });
+        if (!response.ok) return;
+        const data = (await response.json()) as NotificationsResponse;
+        if (!cancelled) {
+          setNotifications(Array.isArray(data.notifications) ? data.notifications : []);
+        }
+      } catch {
+        if (!cancelled) {
+          setNotifications([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadNotifications();
+    const interval = setInterval(loadNotifications, 30000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, []);
 
   const visibleNotifications = useMemo(
     () => notifications.filter((notification) => filter === "all" || notification.type === filter),
@@ -48,8 +96,32 @@ export default function NotificationsPage() {
 
   const unreadCount = notifications.filter((notification) => !notification.read).length;
 
+  async function markRead(ids?: string[], all?: boolean) {
+    setIsMutating(true);
+    try {
+      const response = await fetch("/api/notifications/read", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(all ? { all: true } : { ids }),
+      });
+      if (!response.ok) return;
+      const data = (await response.json()) as NotificationsResponse;
+      setNotifications(Array.isArray(data.notifications) ? data.notifications : []);
+    } finally {
+      setIsMutating(false);
+    }
+  }
+
+  function handleNotificationClick(notification: NotificationRecord) {
+    if (notification.read || isMutating) return;
+    setNotifications((current) => current.map((entry) => (entry.id === notification.id ? { ...entry, read: true } : entry)));
+    void markRead([notification.id]);
+  }
+
   function markAllAsRead() {
+    if (!unreadCount || isMutating) return;
     setNotifications((current) => current.map((notification) => ({ ...notification, read: true })));
+    void markRead(undefined, true);
   }
 
   return (
@@ -59,12 +131,13 @@ export default function NotificationsPage() {
           <div>
             <p className="text-[11px] uppercase tracking-[0.24em] text-blue-200/70">Inbox</p>
             <h1 className="page-title mt-2">Notifications</h1>
-            <p className="mt-2 max-w-2xl text-sm text-slate-300">Agent completions, pipeline alerts, finance syncs, and document activity in one stream.</p>
+            <p className="mt-2 max-w-2xl text-sm text-slate-300">Pipeline alerts and rolodex relationship signals in one stream.</p>
           </div>
           <button
             type="button"
             onClick={markAllAsRead}
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-blue-300/30 bg-[linear-gradient(135deg,rgba(32,147,255,0.2),rgba(0,38,255,0.18))] px-4 py-2 text-sm font-semibold text-blue-50 transition hover:border-blue-300/60 hover:shadow-[0_0_24px_rgba(32,147,255,0.24)]"
+            disabled={!unreadCount || isMutating}
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-blue-300/30 bg-[linear-gradient(135deg,rgba(32,147,255,0.2),rgba(0,38,255,0.18))] px-4 py-2 text-sm font-semibold text-blue-50 transition hover:border-blue-300/60 hover:shadow-[0_0_24px_rgba(32,147,255,0.24)] disabled:cursor-not-allowed disabled:opacity-60"
           >
             <CheckCheck size={16} />
             Mark all as read
@@ -95,9 +168,11 @@ export default function NotificationsPage() {
               const Icon = meta.icon;
 
               return (
-                <article
+                <button
                   key={notification.id}
-                  className="glass-card animate-enter flex items-start gap-4 rounded-2xl p-4"
+                  type="button"
+                  onClick={() => handleNotificationClick(notification)}
+                  className="glass-card animate-enter flex w-full items-start gap-4 rounded-2xl p-4 text-left transition hover:bg-white/[0.07]"
                   style={{ animationDelay: `${100 + index * 60}ms` }}
                 >
                   <div className={`rounded-2xl border p-3 ${meta.iconClass}`}>
@@ -110,13 +185,13 @@ export default function NotificationsPage() {
                         <div className="mt-2 flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.16em] text-slate-500">
                           <span>{meta.label}</span>
                           <span className="text-slate-600">•</span>
-                          <span>{notification.timestamp}</span>
+                          <span>{formatRelativeTime(notification.timestamp)}</span>
                         </div>
                       </div>
                       <CircleDot size={12} className={notification.read ? "text-slate-600" : "text-[#2093FF]"} />
                     </div>
                   </div>
-                </article>
+                </button>
               );
             })
           ) : (
@@ -125,16 +200,18 @@ export default function NotificationsPage() {
                 <Inbox size={22} />
               </div>
               <div>
-                <h2 className="heading-font text-2xl font-normal uppercase tracking-[0.04em] text-white">No Notifications</h2>
-                <p className="mt-2 text-sm text-slate-400">There are no notifications in the current filter.</p>
+                <h2 className="heading-font text-2xl font-normal uppercase tracking-[0.04em] text-white">
+                  {loading ? "Loading Notifications" : "No Notifications"}
+                </h2>
+                <p className="mt-2 text-sm text-slate-400">
+                  {loading ? "Fetching the latest pipeline and rolodex activity." : "There are no notifications in the current filter."}
+                </p>
               </div>
             </div>
           )}
         </div>
 
-        <div className="mt-5 text-xs uppercase tracking-[0.16em] text-slate-500">
-          {unreadCount} unread across all notifications
-        </div>
+        <div className="mt-5 text-xs uppercase tracking-[0.16em] text-slate-500">{unreadCount} unread across all notifications</div>
       </div>
     </section>
   );
