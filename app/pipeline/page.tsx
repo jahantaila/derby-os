@@ -8,6 +8,7 @@ import {
   ArrowUpDown,
   BarChart3,
   Brain,
+  BookUser,
   Check,
   Building2,
   ChevronDown,
@@ -36,6 +37,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PhoneLogEntry, PIPELINE_STAGES, PipelineDeal, PipelineStage } from "@/lib/pipeline-types";
+import { RolodexContact } from "@/lib/rolodex-types";
 
 type SortMode = "newest" | "alphabetical" | "recently-updated" | "stage";
 type PipelineSubview = "dashboard" | "kanban" | "segments" | "contacts";
@@ -1200,6 +1202,7 @@ export default function PipelinePage() {
   const [segmentsSortDirection, setSegmentsSortDirection] = useState<SegmentsSortDirection>("desc");
   const [savedSegmentsViews, setSavedSegmentsViews] = useState<SavedSegmentsView[]>([]);
   const [selectedSegmentIds, setSelectedSegmentIds] = useState<string[]>([]);
+  const [rolodexContacts, setRolodexContacts] = useState<RolodexContact[]>([]);
   const [bulkStageValue, setBulkStageValue] = useState("");
   const [bulkTagValue, setBulkTagValue] = useState("");
   const [bulkWorkingAction, setBulkWorkingAction] = useState<BulkAction | "">("");
@@ -1221,9 +1224,13 @@ export default function PipelinePage() {
     setError("");
 
     try {
-      const response = await fetch("/api/pipeline", { cache: "no-store" });
-      if (!response.ok) throw new Error("Unable to load pipeline.");
-      setDeals((await response.json()) as PipelineDeal[]);
+      const [pipelineResponse, rolodexResponse] = await Promise.all([
+        fetch("/api/pipeline", { cache: "no-store" }),
+        fetch("/api/rolodex", { cache: "no-store" }),
+      ]);
+      if (!pipelineResponse.ok || !rolodexResponse.ok) throw new Error("Unable to load pipeline.");
+      setDeals((await pipelineResponse.json()) as PipelineDeal[]);
+      setRolodexContacts((await rolodexResponse.json()) as RolodexContact[]);
     } catch (caughtError) {
       setError(caughtError instanceof Error ? caughtError.message : "Unable to load pipeline.");
     } finally {
@@ -1407,6 +1414,11 @@ export default function PipelinePage() {
     () => (activeDetailDeal ? parseContactMetadata(activeDetailDeal) : { outreachAccount: "", campaign: "" }),
     [activeDetailDeal],
   );
+  const activeRolodexMatch = useMemo(() => {
+    const email = activeDetailDeal?.email.trim().toLowerCase();
+    if (!email) return null;
+    return rolodexContacts.find((contact) => contact.email?.trim().toLowerCase() === email) ?? null;
+  }, [activeDetailDeal, rolodexContacts]);
   const renderedInsightsResponse = useMemo(
     () => linkifyInsightResponse(insightsResponse, insightHistory.at(-1)?.contacts ?? [], deals),
     [deals, insightHistory, insightsResponse],
@@ -3162,6 +3174,15 @@ export default function PipelinePage() {
                           {getPrimaryName(detailDeal)}
                         </h2>
                         <p className="mt-2 text-sm text-slate-300">{getCompanyName(detailDeal)}</p>
+                        {activeRolodexMatch ? (
+                          <a
+                            href={`/rolodex#detail/${activeRolodexMatch.id}`}
+                            className="mt-3 inline-flex items-center gap-2 text-sm text-blue-100 transition hover:text-white"
+                          >
+                            <BookUser size={14} className="text-blue-200" />
+                            <span>View in Rolodex</span>
+                          </a>
+                        ) : null}
                       </div>
 
                       <div ref={tagEditorRef} className="relative flex max-w-full flex-col items-start gap-3 xl:items-end">

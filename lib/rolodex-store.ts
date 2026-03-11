@@ -486,14 +486,11 @@ function applyPatch(current: RolodexContact, patch: RolodexContactInput): Rolode
 }
 
 function buildPipelineImportContact(deal: Awaited<ReturnType<typeof getPipelineDeals>>[number]): RolodexContactInput | null {
-  const name = normalizeString(deal.contact || deal.name);
+  const name = normalizeString(deal.name);
   if (!name) return null;
-  const parts = name.split(/\s+/).filter(Boolean);
-  const firstName = parts[0];
-  const lastName = parts.slice(1).join(" ") || deal.client || "Contact";
   return {
-    firstName,
-    lastName,
+    firstName: name,
+    lastName: "",
     email: normalizeOptionalString(deal.email),
     phone: normalizeOptionalString(deal.enrichmentData?.phone),
     company: normalizeOptionalString(deal.client),
@@ -501,10 +498,9 @@ function buildPipelineImportContact(deal: Awaited<ReturnType<typeof getPipelineD
     website: normalizeOptionalString(deal.website ?? deal.enrichmentData?.website),
     city: normalizeOptionalString(deal.city),
     state: normalizeOptionalString(deal.state),
-    relationshipType: deal.stage === "closed-won" ? "client" : "prospect",
+    relationshipType: "prospect",
     tags: deal.tags,
-    howWeMet: deal.source ? `Imported from pipeline (${deal.source})` : "Imported from pipeline",
-    metDate: normalizeDate(deal.createdAt),
+    howWeMet: normalizeOptionalString(deal.source),
     personalNotes: normalizeOptionalString(deal.notes),
     pipelineDealId: deal.id,
   };
@@ -634,10 +630,8 @@ export async function importPipelineContacts(input?: { dealIds?: string[] }) {
   const selectedIds = new Set((input?.dealIds ?? []).map((entry) => entry.trim()).filter(Boolean));
   const sourceDeals = selectedIds.size ? deals.filter((deal) => selectedIds.has(deal.id)) : deals;
   let imported = 0;
-  let updated = 0;
   let skipped = 0;
   const createdContacts: RolodexContact[] = [];
-  const updatedContacts: RolodexContact[] = [];
   const next = [...existing];
 
   for (const deal of sourceDeals) {
@@ -647,16 +641,9 @@ export async function importPipelineContacts(input?: { dealIds?: string[] }) {
       continue;
     }
 
-    const byPipelineId = next.findIndex((contact) => contact.pipelineDealId === deal.id);
     const email = payload.email?.toLowerCase();
-    const byEmail = email ? next.findIndex((contact) => contact.email?.toLowerCase() === email) : -1;
-    const targetIndex = byPipelineId >= 0 ? byPipelineId : byEmail;
-
-    if (targetIndex >= 0) {
-      const merged = applyPatch(next[targetIndex], payload);
-      next[targetIndex] = merged;
-      updated += 1;
-      updatedContacts.push(merged);
+    if (email && next.some((contact) => contact.email?.toLowerCase() === email)) {
+      skipped += 1;
       continue;
     }
 
@@ -671,7 +658,7 @@ export async function importPipelineContacts(input?: { dealIds?: string[] }) {
   }
 
   await writeRolodexFile(next);
-  return { imported, updated, skipped, createdContacts, updatedContacts };
+  return { imported, skipped, createdContacts };
 }
 
 export async function updateRolodexConnections(contactId: string, input: { add?: string[]; remove?: string[] }) {

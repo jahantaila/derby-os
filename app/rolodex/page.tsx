@@ -31,6 +31,7 @@ import {
   Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { type PipelineDeal } from "@/lib/pipeline-types";
 import {
   INTERACTION_TYPE_LABELS,
   RELATIONSHIP_TYPE_LABELS,
@@ -76,6 +77,11 @@ type QuickLogDraft = {
   summary: string;
   details: string;
   sentiment: SentimentValue;
+};
+
+type PipelineImportResult = {
+  imported: number;
+  skipped: number;
 };
 
 type SaveState = "idle" | "saving" | "saved" | "error";
@@ -2404,6 +2410,134 @@ function AiInsightsTab({
   );
 }
 
+function ImportPipelineModal({
+  open,
+  deals,
+  selectedDealIds,
+  loading,
+  submitting,
+  existingEmails,
+  onToggleDeal,
+  onToggleAll,
+  onClose,
+  onSubmit,
+}: {
+  open: boolean;
+  deals: PipelineDeal[];
+  selectedDealIds: string[];
+  loading: boolean;
+  submitting: boolean;
+  existingEmails: Set<string>;
+  onToggleDeal: (dealId: string) => void;
+  onToggleAll: () => void;
+  onClose: () => void;
+  onSubmit: () => void;
+}) {
+  if (!open) return null;
+
+  const allSelected = deals.length > 0 && selectedDealIds.length === deals.length;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-md">
+      <div className="w-full max-w-4xl rounded-[32px] border border-white/10 bg-[#08101f]/95 p-6 shadow-[0_24px_80px_rgba(2,6,23,0.6)]">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="text-xl font-semibold text-white">Import from Pipeline</p>
+            <p className="mt-1 text-sm text-slate-400">Select pipeline deals to create Rolodex contacts. Existing emails will be skipped.</p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={submitting}
+            className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-slate-300 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Close
+          </button>
+        </div>
+
+        {loading ? (
+          <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-6 text-sm text-slate-300">Loading pipeline deals…</div>
+        ) : deals.length === 0 ? (
+          <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-6 text-sm text-slate-300">No pipeline deals available to import.</div>
+        ) : (
+          <>
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+              <p className="text-sm text-slate-400">{selectedDealIds.length} of {deals.length} selected</p>
+              <button
+                type="button"
+                onClick={onToggleAll}
+                className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs font-medium uppercase tracking-[0.16em] text-slate-300 transition hover:text-white"
+              >
+                {allSelected ? "Clear all" : "Select all"}
+              </button>
+            </div>
+
+            <div className="mt-4 max-h-[420px] space-y-3 overflow-y-auto pr-1">
+              {deals.map((deal) => {
+                const checked = selectedDealIds.includes(deal.id);
+                const normalizedEmail = deal.email.trim().toLowerCase();
+                const existsInRolodex = Boolean(normalizedEmail) && existingEmails.has(normalizedEmail);
+
+                return (
+                  <label
+                    key={deal.id}
+                    className={cn(
+                      "flex cursor-pointer items-start gap-3 rounded-2xl border p-4 transition",
+                      checked ? "border-sky-400/50 bg-sky-500/10" : "border-white/10 bg-white/[0.03] hover:border-white/20",
+                    )}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => onToggleDeal(deal.id)}
+                      className="mt-1 h-4 w-4 rounded border-white/20 bg-slate-950 text-sky-400 focus:ring-sky-400"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="text-sm font-semibold text-white">{deal.name}</p>
+                        {existsInRolodex ? (
+                          <span className="rounded-full border border-amber-400/30 bg-amber-500/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-amber-200">
+                            Already in Rolodex
+                          </span>
+                        ) : null}
+                      </div>
+                      <p className="mt-1 text-sm text-slate-400">{deal.client}</p>
+                      <div className="mt-3 flex flex-wrap gap-3 text-xs text-slate-500">
+                        <span>{deal.email || "No email"}</span>
+                        <span>{deal.enrichmentData?.phone || "No phone"}</span>
+                        <span>{[deal.city, deal.state].filter(Boolean).join(", ") || "No location"}</span>
+                      </div>
+                    </div>
+                  </label>
+                );
+              })}
+            </div>
+          </>
+        )}
+
+        <div className="mt-6 flex flex-wrap items-center justify-end gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={submitting}
+            className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-slate-300 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={onSubmit}
+            disabled={loading || submitting || selectedDealIds.length === 0}
+            className="rounded-2xl bg-[linear-gradient(135deg,_#38bdf8,_#2563eb)] px-4 py-2 text-sm font-medium text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {submitting ? "Importing..." : "Import Selected"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 type ViewMode = "home" | "contacts" | "detail";
 type BrowserMode = "grid" | "list";
 
@@ -2695,6 +2829,12 @@ export default function RolodexPage() {
   const [quickActionLogOpen, setQuickActionLogOpen] = useState(false);
   const [quickActionContactId, setQuickActionContactId] = useState("");
   const [quickActionDraft, setQuickActionDraft] = useState<QuickLogDraft>({ ...EMPTY_QUICK_LOG, type: "call" });
+  const [pipelineImportOpen, setPipelineImportOpen] = useState(false);
+  const [pipelineImportDeals, setPipelineImportDeals] = useState<PipelineDeal[]>([]);
+  const [pipelineImportSelectedIds, setPipelineImportSelectedIds] = useState<string[]>([]);
+  const [pipelineImportLoading, setPipelineImportLoading] = useState(false);
+  const [pipelineImportSubmitting, setPipelineImportSubmitting] = useState(false);
+  const [pipelineImportResult, setPipelineImportResult] = useState<PipelineImportResult | null>(null);
   const [selectedTimelineInteractionId, setSelectedTimelineInteractionId] = useState<string | null>(null);
   const [timelineDetailEditing, setTimelineDetailEditing] = useState(false);
   const [timelineDetailDraft, setTimelineDetailDraft] = useState<Pick<QuickLogDraft, "summary" | "details" | "sentiment">>({
@@ -2706,6 +2846,10 @@ export default function RolodexPage() {
   const menuRef = useRef<HTMLDivElement | null>(null);
   const contactsSearchRef = useRef<HTMLInputElement | null>(null);
   const shouldFocusContactsSearchRef = useRef(false);
+  const existingContactEmails = useMemo(
+    () => new Set(contacts.map((contact) => contact.email?.trim().toLowerCase()).filter((email): email is string => Boolean(email))),
+    [contacts],
+  );
 
   async function fetchContacts(options?: { seedIfEmpty?: boolean }) {
     const response = await fetch("/api/rolodex", { cache: "no-store" });
@@ -3686,18 +3830,83 @@ export default function RolodexPage() {
   }
 
   async function importFromPipeline() {
-    const response = await fetch("/api/rolodex/import-pipeline", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({}),
-    });
+    setErrorMessage(null);
+    setPipelineImportResult(null);
+    setPipelineImportOpen(true);
+    setPipelineImportLoading(true);
 
-    if (!response.ok) {
-      setErrorMessage("Unable to import contacts from pipeline.");
-      return;
+    try {
+      const response = await fetch("/api/pipeline", { cache: "no-store" });
+      if (!response.ok) throw new Error("Unable to load pipeline deals.");
+      const deals = (await response.json()) as PipelineDeal[];
+      setPipelineImportDeals(deals);
+      setPipelineImportSelectedIds(deals.map((deal) => deal.id));
+    } catch (error) {
+      setPipelineImportOpen(false);
+      setErrorMessage(error instanceof Error ? error.message : "Unable to import contacts from pipeline.");
+    } finally {
+      setPipelineImportLoading(false);
     }
+  }
 
-    await fetchContacts();
+  function togglePipelineImportDeal(dealId: string) {
+    setPipelineImportSelectedIds((current) => (current.includes(dealId) ? current.filter((id) => id !== dealId) : [...current, dealId]));
+  }
+
+  function toggleAllPipelineImportDeals() {
+    setPipelineImportSelectedIds((current) => (current.length === pipelineImportDeals.length ? [] : pipelineImportDeals.map((deal) => deal.id)));
+  }
+
+  async function submitPipelineImport() {
+    setErrorMessage(null);
+    setPipelineImportSubmitting(true);
+
+    try {
+      let imported = 0;
+      let skipped = 0;
+      const selectedDeals = pipelineImportDeals.filter((deal) => pipelineImportSelectedIds.includes(deal.id));
+      const seenEmails = new Set(existingContactEmails);
+
+      for (const deal of selectedDeals) {
+        const normalizedEmail = deal.email.trim().toLowerCase();
+        if (normalizedEmail && seenEmails.has(normalizedEmail)) {
+          skipped += 1;
+          continue;
+        }
+
+        const response = await fetch("/api/rolodex", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            firstName: deal.name,
+            lastName: "",
+            email: deal.email || undefined,
+            phone: deal.enrichmentData?.phone,
+            company: deal.client || undefined,
+            website: deal.website ?? deal.enrichmentData?.website,
+            city: deal.city,
+            state: deal.state,
+            howWeMet: deal.source || undefined,
+            personalNotes: deal.notes || undefined,
+            tags: deal.tags,
+            pipelineDealId: deal.id,
+          }),
+        });
+
+        if (!response.ok) throw new Error("Unable to import contacts from pipeline.");
+
+        imported += 1;
+        if (normalizedEmail) seenEmails.add(normalizedEmail);
+      }
+
+      await fetchContacts();
+      setPipelineImportResult({ imported, skipped });
+      setPipelineImportOpen(false);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Unable to import contacts from pipeline.");
+    } finally {
+      setPipelineImportSubmitting(false);
+    }
   }
 
   async function archiveSelected() {
@@ -3884,6 +4093,21 @@ export default function RolodexPage() {
         onClose={() => setAddContactOpen(false)}
         onSubmit={createContact}
       />
+      <ImportPipelineModal
+        open={pipelineImportOpen}
+        deals={pipelineImportDeals}
+        selectedDealIds={pipelineImportSelectedIds}
+        loading={pipelineImportLoading}
+        submitting={pipelineImportSubmitting}
+        existingEmails={existingContactEmails}
+        onToggleDeal={togglePipelineImportDeal}
+        onToggleAll={toggleAllPipelineImportDeals}
+        onClose={() => {
+          if (pipelineImportSubmitting) return;
+          setPipelineImportOpen(false);
+        }}
+        onSubmit={() => void submitPipelineImport()}
+      />
       <QuickActionLogModal
         open={quickActionLogOpen}
         contacts={contacts}
@@ -3976,6 +4200,11 @@ export default function RolodexPage() {
 
         {errorMessage ? (
           <div className="mb-6 rounded-2xl border border-rose-400/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">{errorMessage}</div>
+        ) : null}
+        {pipelineImportResult ? (
+          <div className="mb-6 rounded-2xl border border-emerald-400/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+            Imported {pipelineImportResult.imported} contact{pipelineImportResult.imported === 1 ? "" : "s"} and skipped {pipelineImportResult.skipped}.
+          </div>
         ) : null}
 
         {currentView === "home" ? (
@@ -4947,13 +5176,6 @@ export default function RolodexPage() {
     </div>
   );
 }
-
-
-
-
-
-
-
 
 
 
