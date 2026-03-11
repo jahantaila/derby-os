@@ -8,10 +8,13 @@ import {
   ArrowUpDown,
   BarChart3,
   Brain,
+  Check,
   Building2,
   ChevronDown,
   ChevronUp,
+  Copy,
   Download,
+  ExternalLink,
   FileSpreadsheet,
   Globe,
   KanbanSquare,
@@ -89,6 +92,23 @@ type InsightResponse = {
   contacts?: string[];
 };
 
+type InsightHistoryItem = {
+  id: string;
+  query: string;
+  response: string;
+  contacts: string[];
+};
+
+type ToastState = {
+  id: string;
+  message: string;
+};
+
+type ParsedContactMetadata = {
+  outreachAccount: string;
+  campaign: string;
+};
+
 type ActivityEntry = {
   id: string;
   type: "created" | "stage-change";
@@ -129,9 +149,11 @@ const SUBVIEW_TABS: SubviewTab[] = [
   { value: "contacts", label: "CONTACTS", icon: Users },
 ];
 const INSIGHT_PROMPTS = [
-  "Meeting prep for [contact name]",
-  "Summary of all interested leads",
-  "Which leads need follow-up?",
+  "Show me hot leads ready to close",
+  "Which cities have the most leads?",
+  "Draft a follow-up email for [contact]",
+  "Find leads I haven't contacted in 2+ weeks",
+  "Summarize this week's pipeline activity",
 ] as const;
 const EMPTY_NOTES: DealNotesState = { rolodex: "", quickNotes: [] };
 const EMPTY_ADD_FORM: AddContactForm = {
@@ -312,6 +334,17 @@ function getWebsite(deal: PipelineDeal) {
   return deal.website || deal.enrichmentData?.website || "";
 }
 
+function normalizeWebsiteUrl(value: string) {
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+  return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+}
+
+function getTelHref(value: string) {
+  const digits = value.replace(/[^\d+]/g, "");
+  return digits ? `tel:${digits}` : "";
+}
+
 function formatLocation(city?: string, state?: string) {
   const parts = [city?.trim(), state?.trim()].filter(Boolean);
   return parts.join(", ");
@@ -319,6 +352,10 @@ function formatLocation(city?: string, state?: string) {
 
 function formatSourceLabel(source: string) {
   return source.trim().toUpperCase() || "UNKNOWN";
+}
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function normalizeSourceValue(source: string) {
@@ -448,6 +485,41 @@ function parseNotes(raw: string, fallbackDate?: string): DealNotesState {
     rolodex: trimmed,
     quickNotes: [],
   };
+}
+
+function parseContactMetadata(deal: PipelineDeal): ParsedContactMetadata {
+  const rolodex = parseNotes(deal.notes, deal.createdAt).rolodex;
+  const outreachMatch = rolodex.match(/Contacted from\s*:?\s*([^\n\r.]+)/i);
+  const campaignMatch =
+    rolodex.match(/Auto-imported from Instantly campaign\s*:?\s*([^\n\r.]+)/i) ||
+    rolodex.match(/Campaign(?: Name)?\s*:?\s*([^\n\r.]+)/i);
+  const rawWebhookData = deal.rawWebhookData && typeof deal.rawWebhookData === "object" ? (deal.rawWebhookData as Record<string, unknown>) : null;
+  const rawCampaign =
+    (typeof rawWebhookData?.campaign_name === "string" && rawWebhookData.campaign_name.trim()) ||
+    (rawWebhookData?.campaign && typeof rawWebhookData.campaign === "object" && typeof (rawWebhookData.campaign as Record<string, unknown>).name === "string"
+      ? ((rawWebhookData.campaign as Record<string, unknown>).name as string).trim()
+      : typeof rawWebhookData?.campaign === "string"
+        ? rawWebhookData.campaign.trim()
+        : "");
+
+  return {
+    outreachAccount: (outreachMatch?.[1]?.trim() || deal.messagedFrom || "").replace(/[.]$/, ""),
+    campaign: (campaignMatch?.[1]?.trim() || rawCampaign || "").replace(/[.]$/, ""),
+  };
+}
+
+function linkifyInsightResponse(response: string, contactNames: string[], deals: PipelineDeal[]) {
+  return contactNames
+    .slice()
+    .sort((left, right) => right.length - left.length)
+    .reduce((current, name) => {
+      const deal = deals.find((entry) => getPrimaryName(entry).toLowerCase() === name.toLowerCase());
+      if (!deal) return current;
+      return current.replace(
+        new RegExp(`\\b${escapeRegExp(name)}\\b`, "g"),
+        `[${name}](/pipeline?view=contacts&contact=${deal.id})`,
+      );
+    }, response);
 }
 
 function serializeNotes(notes: DealNotesState) {
@@ -890,8 +962,10 @@ function AIInsightsPanel({
   onQueryChange,
   onSubmit,
   onPromptSelect,
+  onCopyResponse,
   loading,
   response,
+  history,
   className,
   responseClassName,
 }: {
@@ -899,8 +973,10 @@ function AIInsightsPanel({
   onQueryChange: (value: string) => void;
   onSubmit: () => void;
   onPromptSelect: (value: string) => void;
+  onCopyResponse: () => void;
   loading: boolean;
   response: string;
+  history: InsightHistoryItem[];
   className?: string;
   responseClassName?: string;
 }) {
@@ -948,7 +1024,41 @@ function AIInsightsPanel({
         ))}
       </div>
 
-      <div className={cn("glass-card mt-4 min-h-[180px] rounded-2xl p-4", responseClassName)}>
+      {history.length ? (
+        <div className="glass-card mt-4 rounded-2xl p-4">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Session History</p>
+            <span className="text-xs uppercase tracking-[0.16em] text-blue-100">{history.length} exchanges</span>
+          </div>
+          <div className="mt-3 max-h-56 space-y-3 overflow-y-auto pr-1">
+            {history
+              .slice()
+              .reverse()
+              .map((entry) => (
+                <article key={entry.id} className="rounded-2xl border border-white/8 bg-white/[0.03] p-3">
+                  <p className="text-[11px] uppercase tracking-[0.16em] text-blue-100">You</p>
+                  <p className="mt-1 text-sm text-white">{entry.query}</p>
+                  <p className="mt-3 text-[11px] uppercase tracking-[0.16em] text-slate-400">Assistant</p>
+                  <p className="mt-1 line-clamp-4 whitespace-pre-wrap text-sm text-slate-300">{entry.response}</p>
+                </article>
+              ))}
+          </div>
+        </div>
+      ) : null}
+
+      <div className={cn("glass-card mt-4 min-h-[280px] rounded-2xl p-4", responseClassName)}>
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Latest Response</p>
+          <button
+            type="button"
+            onClick={onCopyResponse}
+            disabled={loading || !response.trim()}
+            className="inline-flex min-h-9 items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs uppercase tracking-[0.16em] text-slate-200 transition hover:border-blue-300/30 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <Copy size={12} />
+            Copy Response
+          </button>
+        </div>
         {loading ? (
           <div className="flex items-center gap-2 text-sm text-blue-100">
             <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-blue-300" />
@@ -956,7 +1066,20 @@ function AIInsightsPanel({
           </div>
         ) : (
           <div className="prose prose-invert prose-sm max-w-none text-slate-200">
-            <ReactMarkdown>{response}</ReactMarkdown>
+            <ReactMarkdown
+              components={{
+                a: ({ href, children }) => (
+                  <a
+                    href={href}
+                    className="font-medium text-blue-200 underline decoration-blue-300/40 underline-offset-4 transition hover:text-white"
+                  >
+                    {children}
+                  </a>
+                ),
+              }}
+            >
+              {response}
+            </ReactMarkdown>
           </div>
         )}
       </div>
@@ -1038,12 +1161,15 @@ export default function PipelinePage() {
   const [convertingDealId, setConvertingDealId] = useState("");
   const [insightsQuery, setInsightsQuery] = useState("");
   const [insightsLoading, setInsightsLoading] = useState(false);
+  const [insightHistory, setInsightHistory] = useState<InsightHistoryItem[]>([]);
   const [insightsResponse, setInsightsResponse] = useState(
     "I can help with meeting prep, lead summaries, and follow-up recommendations. Try asking about a specific contact!",
   );
   const [draggedDealId, setDraggedDealId] = useState("");
   const [dropStage, setDropStage] = useState<PipelineStage | "">("");
-  const [showTagEditor, setShowTagEditor] = useState(false);
+  const [showStageEditor, setShowStageEditor] = useState(false);
+  const [tagDraft, setTagDraft] = useState("");
+  const [toast, setToast] = useState<ToastState | null>(null);
   const [segmentsFilters, setSegmentsFilters] = useState<SegmentsFilters>(EMPTY_SEGMENTS_FILTERS);
   const [segmentsSearch, setSegmentsSearch] = useState("");
   const [segmentsVisibleCount, setSegmentsVisibleCount] = useState(50);
@@ -1197,7 +1323,8 @@ export default function PipelinePage() {
   }, [selectedDeal]);
 
   useEffect(() => {
-    setShowTagEditor(false);
+    setShowStageEditor(false);
+    setTagDraft("");
   }, [activeDetailId]);
 
   useEffect(() => {
@@ -1206,21 +1333,47 @@ export default function PipelinePage() {
   }, [activeDetailId]);
 
   useEffect(() => {
-    if (!showTagEditor) return;
+    if (!showStageEditor) return;
 
     function handlePointerDown(event: MouseEvent) {
       if (!tagEditorRef.current?.contains(event.target as Node)) {
-        setShowTagEditor(false);
+        setShowStageEditor(false);
       }
     }
 
     document.addEventListener("mousedown", handlePointerDown);
     return () => document.removeEventListener("mousedown", handlePointerDown);
-  }, [showTagEditor]);
+  }, [showStageEditor]);
+
+  useEffect(() => {
+    if (!toast) return;
+    const timeout = window.setTimeout(() => setToast(null), 2200);
+    return () => window.clearTimeout(timeout);
+  }, [toast]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const requestedView = params.get("view");
+    const requestedContact = params.get("contact");
+    if (requestedView === "contacts") setActiveSubview("contacts");
+    if (requestedContact && deals.some((deal) => deal.id === requestedContact)) {
+      setSelectedId(requestedContact);
+      setMobileOpenId(requestedContact);
+    }
+  }, [deals]);
 
   const selectedNotes = useMemo(
     () => (selectedDeal ? parseNotes(selectedDeal.notes, selectedDeal.createdAt) : EMPTY_NOTES),
     [selectedDeal],
+  );
+  const detailMetadata = useMemo(
+    () => (activeDetailDeal ? parseContactMetadata(activeDetailDeal) : { outreachAccount: "", campaign: "" }),
+    [activeDetailDeal],
+  );
+  const renderedInsightsResponse = useMemo(
+    () => linkifyInsightResponse(insightsResponse, insightHistory.at(-1)?.contacts ?? [], deals),
+    [deals, insightHistory, insightsResponse],
   );
 
   const phoneLog = useMemo(() => {
@@ -1441,12 +1594,17 @@ export default function PipelinePage() {
 
     setInsightsQuery(query);
     setInsightsLoading(true);
+    setError("");
 
     try {
       const response = await fetch("/api/pipeline/insights", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query, contacts: deals }),
+        body: JSON.stringify({
+          query,
+          contacts: deals,
+          history: insightHistory.map((entry) => ({ query: entry.query, response: entry.response })),
+        }),
       });
 
       if (!response.ok) {
@@ -1455,10 +1613,31 @@ export default function PipelinePage() {
 
       const data = (await response.json()) as InsightResponse;
       setInsightsResponse(data.response);
+      setInsightHistory((current) => [
+        ...current,
+        {
+          id: makeId("insight"),
+          query,
+          response: data.response,
+          contacts: data.contacts ?? [],
+        },
+      ]);
     } catch (caughtError) {
-      setInsightsResponse(caughtError instanceof Error ? caughtError.message : "Unable to generate insights.");
+      const message = caughtError instanceof Error ? caughtError.message : "Unable to generate insights.";
+      setInsightsResponse(message);
     } finally {
       setInsightsLoading(false);
+    }
+  }
+
+  async function copyText(value: string, message: string) {
+    if (!value.trim()) return;
+
+    try {
+      await navigator.clipboard.writeText(value);
+      setToast({ id: makeId("toast"), message });
+    } catch {
+      setError("Unable to copy to clipboard.");
     }
   }
 
@@ -1485,6 +1664,34 @@ export default function PipelinePage() {
     } finally {
       setWorkingDealId("");
     }
+  }
+
+  async function updateDetailStage(deal: PipelineDeal, stage: PipelineStage) {
+    if (deal.stage === stage) {
+      setShowStageEditor(false);
+      return;
+    }
+
+    const updated = await patchDeal(deal.id, { stage });
+    if (updated) setShowStageEditor(false);
+  }
+
+  async function addDetailTag(deal: PipelineDeal) {
+    const nextTag = normalizeTagValue(tagDraft);
+    if (!nextTag) return;
+
+    const nextTags = addTag(deal.tags, nextTag);
+    if (nextTags === deal.tags) {
+      setTagDraft("");
+      return;
+    }
+
+    const updated = await patchDeal(deal.id, { tags: nextTags });
+    if (updated) setTagDraft("");
+  }
+
+  async function removeDetailTag(deal: PipelineDeal, value: string) {
+    await patchDeal(deal.id, { tags: removeTag(deal.tags, value) });
   }
 
   async function saveRolodexNotes() {
@@ -2107,10 +2314,11 @@ export default function PipelinePage() {
                 setInsightsQuery(prompt);
                 void submitInsightsQuery(prompt);
               }}
+              onCopyResponse={() => void copyText(insightsResponse, "AI response copied")}
               loading={insightsLoading}
-              response={insightsResponse}
+              response={renderedInsightsResponse}
+              history={insightHistory}
               className="mt-5 border border-blue-400/15 bg-[linear-gradient(135deg,rgba(32,147,255,0.08),rgba(0,38,255,0.06))]"
-              responseClassName="min-h-[240px]"
             />
           </section>
 
@@ -2878,66 +3086,145 @@ export default function PipelinePage() {
                         <p className="mt-2 text-sm text-slate-300">{getCompanyName(detailDeal)}</p>
                       </div>
 
-                      <div ref={tagEditorRef} className="relative flex flex-wrap gap-2">
-                        <select
-                          value={detailDeal.stage}
-                          onChange={(event) => void patchDeal(detailDeal.id, { stage: event.target.value as PipelineStage })}
-                          className={cn("rounded-full border px-3 py-2 text-xs uppercase tracking-[0.16em] outline-none", STAGE_META[detailDeal.stage].pill)}
-                        >
-                          <SelectOptions values={PIPELINE_STAGES} getLabel={(stage) => STAGE_META[stage as PipelineStage].label} />
-                        </select>
-                        <span className="rounded-full border border-blue-300/25 bg-blue-500/10 px-3 py-2 text-xs uppercase tracking-[0.16em] text-blue-100">
-                          {formatSourceLabel(detailDeal.source)}
-                        </span>
-                        {detailDeal.tags.length ? (
-                          detailDeal.tags.slice(0, 3).map((tag) => (
+                      <div ref={tagEditorRef} className="relative flex max-w-full flex-col items-start gap-3 xl:items-end">
+                        <div className="flex flex-wrap justify-start gap-2 xl:justify-end">
+                          {[
+                            {
+                              label: "Call",
+                              href: getTelHref(getPhone(detailDeal)),
+                              icon: Phone,
+                            },
+                            {
+                              label: "Email",
+                              href: detailDeal.email ? `mailto:${detailDeal.email}` : "",
+                              icon: Mail,
+                            },
+                            {
+                              label: "Visit Website",
+                              href: normalizeWebsiteUrl(getWebsite(detailDeal)),
+                              icon: Globe,
+                              external: true,
+                            },
+                          ].map(({ label, href, icon: Icon, external }) =>
+                            href ? (
+                              <a
+                                key={label}
+                                href={href}
+                                target={external ? "_blank" : undefined}
+                                rel={external ? "noreferrer" : undefined}
+                                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-200 transition hover:border-blue-300/40 hover:text-white"
+                                aria-label={label}
+                                title={label}
+                              >
+                                <Icon size={16} />
+                              </a>
+                            ) : null,
+                          )}
+                          {detailDeal.email ? (
                             <button
-                              key={tag}
                               type="button"
-                              onClick={() => setShowTagEditor((current) => !current)}
+                              onClick={() => void copyText(detailDeal.email, "Email copied")}
+                              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-200 transition hover:border-blue-300/40 hover:text-white"
+                              aria-label="Copy email"
+                              title="Copy email"
+                            >
+                              <Copy size={16} />
+                            </button>
+                          ) : null}
+                        </div>
+
+                        <div className="flex flex-wrap items-start gap-2 xl:justify-end">
+                          <div className="relative">
+                            <button
+                              type="button"
+                              onClick={() => setShowStageEditor((current) => !current)}
                               className={cn(
-                                "rounded-full border px-3 py-2 text-xs uppercase tracking-[0.16em] transition hover:border-red-300/60 hover:bg-red-500/30",
-                                HEADER_TAG_PILL_CLASS,
+                                "inline-flex items-center gap-2 rounded-full border px-3 py-2 text-xs uppercase tracking-[0.16em] transition",
+                                STAGE_META[detailDeal.stage].pill,
                               )}
                             >
-                              {tag}
+                              <span>{STAGE_META[detailDeal.stage].label}</span>
+                              <ChevronDown size={12} />
                             </button>
-                          ))
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => setShowTagEditor(true)}
-                            className="rounded-full border border-red-400/40 bg-red-500/10 px-3 py-2 text-xs uppercase tracking-[0.16em] text-red-200 transition hover:bg-red-500/20"
-                          >
-                            + Tag
-                          </button>
-                        )}
-                        {showTagEditor ? (
-                          <div className="absolute left-0 top-full z-20 mt-2 w-full min-w-[280px] max-w-md rounded-2xl border border-white/10 bg-[#05070d] p-4 shadow-[0_18px_50px_rgba(0,0,0,0.45)]">
-                            <div className="flex items-center justify-between gap-3">
-                              <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Manage Tags</p>
-                              {workingDealId === detailDeal.id ? (
-                                <span className="text-xs uppercase tracking-[0.16em] text-blue-200">Saving</span>
-                              ) : null}
-                            </div>
-                            <div className="mt-3">
-                              <TagInput
-                                key={`header-tags-${detailDeal.id}`}
-                                tags={detailDeal.tags}
-                                placeholder="Add tag..."
-                                alwaysShowSuggestions
-                                onAdd={(value) => {
-                                  const nextTags = addTag(detailDeal.tags, value);
-                                  if (nextTags === detailDeal.tags) return;
-                                  void patchDeal(detailDeal.id, { tags: nextTags });
-                                }}
-                                onRemove={(value) => {
-                                  void patchDeal(detailDeal.id, { tags: removeTag(detailDeal.tags, value) });
-                                }}
-                              />
-                            </div>
+                            {showStageEditor ? (
+                              <div className="absolute right-0 top-full z-20 mt-2 w-56 rounded-2xl border border-white/10 bg-[#05070d] p-2 shadow-[0_18px_50px_rgba(0,0,0,0.45)]">
+                                {PIPELINE_STAGES.map((stage) => (
+                                  <button
+                                    key={stage}
+                                    type="button"
+                                    onClick={() => void updateDetailStage(detailDeal, stage)}
+                                    className={cn(
+                                      "flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-xs uppercase tracking-[0.16em] transition hover:bg-white/5",
+                                      stage === detailDeal.stage ? "text-white" : "text-slate-300",
+                                    )}
+                                  >
+                                    <span>{STAGE_META[stage].label}</span>
+                                    {stage === detailDeal.stage ? <Check size={12} className="text-blue-200" /> : null}
+                                  </button>
+                                ))}
+                              </div>
+                            ) : null}
                           </div>
-                        ) : null}
+                          <span className="rounded-full border border-blue-300/25 bg-blue-500/10 px-3 py-2 text-xs uppercase tracking-[0.16em] text-blue-100">
+                            {formatSourceLabel(detailDeal.source)}
+                          </span>
+                        </div>
+
+                        <div className="w-full max-w-2xl rounded-2xl border border-white/8 bg-white/[0.03] p-3">
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Tags</p>
+                            {workingDealId === detailDeal.id ? (
+                              <span className="text-xs uppercase tracking-[0.16em] text-blue-200">Saving</span>
+                            ) : null}
+                          </div>
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {detailDeal.tags.length ? (
+                              detailDeal.tags.map((tag, index) => (
+                                <span
+                                  key={tag}
+                                  className={cn(
+                                    "inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs uppercase tracking-[0.16em]",
+                                    index === 0 ? HEADER_TAG_PILL_CLASS : getTagPillClass(index),
+                                  )}
+                                >
+                                  <span>{tag}</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => void removeDetailTag(detailDeal, tag)}
+                                    className="inline-flex h-4 w-4 items-center justify-center rounded-full text-current/80 transition hover:text-current"
+                                    aria-label={`Remove ${tag}`}
+                                  >
+                                    <X size={12} />
+                                  </button>
+                                </span>
+                              ))
+                            ) : (
+                              <span className="text-sm text-slate-500">No tags yet.</span>
+                            )}
+                          </div>
+                          <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                            <input
+                              value={tagDraft}
+                              onChange={(event) => setTagDraft(event.target.value)}
+                              onKeyDown={(event) => {
+                                if (event.key === "Enter") {
+                                  event.preventDefault();
+                                  void addDetailTag(detailDeal);
+                                }
+                              }}
+                              placeholder="Add tag..."
+                              className="w-full rounded-2xl border border-white/10 bg-[#0a0a0f] px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-blue-400/40"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => void addDetailTag(detailDeal)}
+                              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-blue-300/30 bg-[linear-gradient(135deg,#2093FF,#0026FF)] px-4 py-2 text-sm font-semibold text-white"
+                            >
+                              <Plus size={16} />
+                              Add Tag
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -2964,7 +3251,33 @@ export default function PipelinePage() {
                         <Globe size={14} className="text-blue-200" />
                         Website
                       </div>
-                      <p className="mt-2 break-all text-sm text-white">{getWebsite(detailDeal) || "No website"}</p>
+                      {getWebsite(detailDeal) ? (
+                        <a
+                          href={normalizeWebsiteUrl(getWebsite(detailDeal))}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="mt-2 inline-flex items-center gap-2 break-all text-sm text-white transition hover:text-blue-100"
+                        >
+                          <span>{getWebsite(detailDeal)}</span>
+                          <ExternalLink size={13} className="shrink-0 text-blue-200" />
+                        </a>
+                      ) : (
+                        <p className="mt-2 break-all text-sm text-white">No website</p>
+                      )}
+                    </div>
+                    <div className="glass-card rounded-2xl p-4">
+                      <div className="flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-slate-400">
+                        <Mail size={14} className="text-blue-200" />
+                        Outreach Account
+                      </div>
+                      <p className="mt-2 text-sm text-blue-100">{detailMetadata.outreachAccount || "Not available"}</p>
+                    </div>
+                    <div className="glass-card rounded-2xl p-4">
+                      <div className="flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-slate-400">
+                        <Sparkles size={14} className="text-blue-200" />
+                        Campaign
+                      </div>
+                      <p className="mt-2 text-sm text-white">{detailMetadata.campaign || "Not available"}</p>
                     </div>
                     <div className="glass-card rounded-2xl p-4">
                       <div className="flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-slate-400">
@@ -3384,8 +3697,10 @@ export default function PipelinePage() {
                   setInsightsQuery(prompt);
                   void submitInsightsQuery(prompt);
                 }}
+                onCopyResponse={() => void copyText(insightsResponse, "AI response copied")}
                 loading={insightsLoading}
-                response={insightsResponse}
+                response={renderedInsightsResponse}
+                history={insightHistory}
               />
             </div>
           </aside>
@@ -3607,6 +3922,14 @@ export default function PipelinePage() {
             </div>
           </div>
         </ModalShell>
+      ) : null}
+
+      {toast ? (
+        <div className="pointer-events-none fixed bottom-6 right-6 z-[60] animate-[toast-in_260ms_ease]">
+          <div className="glass-card rounded-2xl border border-blue-300/20 px-4 py-3 text-sm text-blue-50 shadow-[0_18px_50px_rgba(0,0,0,0.35)]">
+            {toast.message}
+          </div>
+        </div>
       ) : null}
     </section>
   );
