@@ -37,8 +37,9 @@ import {
 import { cn } from "@/lib/utils";
 import { PhoneLogEntry, PIPELINE_STAGES, PipelineDeal, PipelineStage } from "@/lib/pipeline-types";
 
-type SortMode = "newest" | "alphabetical" | "stage";
+type SortMode = "newest" | "alphabetical" | "recently-updated" | "stage";
 type PipelineSubview = "dashboard" | "kanban" | "segments" | "contacts";
+type SegmentsPhoneStatus = "" | "has-phone" | "no-phone";
 
 type QuickNoteEntry = {
   id: string;
@@ -123,6 +124,7 @@ type SegmentsFilters = {
   tag: string;
   source: string;
   stage: string;
+  phoneStatus: SegmentsPhoneStatus;
   dateFrom: string;
   dateTo: string;
 };
@@ -174,6 +176,7 @@ const EMPTY_SEGMENTS_FILTERS: SegmentsFilters = {
   tag: "",
   source: "",
   stage: "",
+  phoneStatus: "",
   dateFrom: "",
   dateTo: "",
 };
@@ -328,6 +331,14 @@ function getCompanyName(deal: PipelineDeal) {
 
 function getPhone(deal: PipelineDeal) {
   return deal.enrichmentData?.phone || "";
+}
+
+function hasEnrichedPhone(deal: PipelineDeal) {
+  return Boolean(getPhone(deal).trim());
+}
+
+function hasContactPhone(deal: PipelineDeal) {
+  return hasEnrichedPhone(deal) || deal.notes.includes("📞");
 }
 
 function getWebsite(deal: PipelineDeal) {
@@ -542,6 +553,12 @@ function sortDeals(deals: PipelineDeal[], sortMode: SortMode) {
     return next.sort((a, b) => getPrimaryName(a).localeCompare(getPrimaryName(b)));
   }
 
+  if (sortMode === "recently-updated") {
+    return next.sort(
+      (a, b) => new Date(b.stageUpdatedAt ?? b.createdAt).getTime() - new Date(a.stageUpdatedAt ?? a.createdAt).getTime(),
+    );
+  }
+
   if (sortMode === "stage") {
     return next.sort((a, b) => {
       const aIndex = PIPELINE_STAGES.indexOf(a.stage);
@@ -656,6 +673,7 @@ function areSegmentsFiltersEqual(left: SegmentsFilters, right: SegmentsFilters) 
     left.tag === right.tag &&
     left.source === right.source &&
     left.stage === right.stage &&
+    left.phoneStatus === right.phoneStatus &&
     left.dateFrom === right.dateFrom &&
     left.dateTo === right.dateTo
   );
@@ -684,6 +702,10 @@ function parseSavedSegmentsViews(value: string | null): SavedSegmentsView[] {
             tag: typeof candidate.filters?.tag === "string" ? candidate.filters.tag : "",
             source: typeof candidate.filters?.source === "string" ? candidate.filters.source : "",
             stage: typeof candidate.filters?.stage === "string" ? candidate.filters.stage : "",
+            phoneStatus:
+              candidate.filters?.phoneStatus === "has-phone" || candidate.filters?.phoneStatus === "no-phone"
+                ? candidate.filters.phoneStatus
+                : "",
             dateFrom: typeof candidate.filters?.dateFrom === "string" ? candidate.filters.dateFrom : "",
             dateTo: typeof candidate.filters?.dateTo === "string" ? candidate.filters.dateTo : "",
           },
@@ -1135,6 +1157,7 @@ export default function PipelinePage() {
   const [activeTagFilter, setActiveTagFilter] = useState("");
   const [search, setSearch] = useState("");
   const [sortMode, setSortMode] = useState<SortMode>("newest");
+  const [contactsPhoneFilter, setContactsPhoneFilter] = useState<"all" | "has-phone">("all");
   const [visibleCount, setVisibleCount] = useState(25);
   const [selectedId, setSelectedId] = useState("");
   const [mobileOpenId, setMobileOpenId] = useState("");
@@ -1231,15 +1254,16 @@ export default function PipelinePage() {
       const sourceMatch = activeSource === "all" || normalizeSourceValue(deal.source) === activeSource;
       const tagMatch = !activeTagFilter || hasTag(deal.tags, activeTagFilter);
       const searchMatch = !normalizedSearch || getSearchableText(deal).includes(normalizedSearch);
-      return sourceMatch && tagMatch && searchMatch;
+      const phoneMatch = contactsPhoneFilter === "all" || hasContactPhone(deal);
+      return sourceMatch && tagMatch && searchMatch && phoneMatch;
     });
 
     return sortDeals(filtered, sortMode);
-  }, [activeSource, activeTagFilter, deals, search, sortMode]);
+  }, [activeSource, activeTagFilter, contactsPhoneFilter, deals, search, sortMode]);
 
   useEffect(() => {
     setVisibleCount(25);
-  }, [activeSource, activeTagFilter, search, sortMode]);
+  }, [activeSource, activeTagFilter, contactsPhoneFilter, search, sortMode]);
 
   useEffect(() => {
     setKanbanVisibleCounts({
@@ -1450,6 +1474,16 @@ export default function PipelinePage() {
         search: "",
       },
       {
+        id: "has-phone",
+        name: "Has Phone",
+        icon: Phone,
+        filters: {
+          ...cloneSegmentsFilters(EMPTY_SEGMENTS_FILTERS),
+          phoneStatus: "has-phone",
+        },
+        search: "",
+      },
+      {
         id: "spothopper",
         name: "SpotHopper",
         icon: Sparkles,
@@ -1485,6 +1519,8 @@ export default function PipelinePage() {
       }
       if (segmentsFilters.source && normalizeSourceValue(deal.source) !== segmentsFilters.source) return false;
       if (segmentsFilters.stage && deal.stage !== segmentsFilters.stage) return false;
+      if (segmentsFilters.phoneStatus === "has-phone" && !hasEnrichedPhone(deal)) return false;
+      if (segmentsFilters.phoneStatus === "no-phone" && hasEnrichedPhone(deal)) return false;
 
       const createdDate = getDateOnlyValue(deal.createdAt);
       if (segmentsFilters.dateFrom && (!createdDate || createdDate < segmentsFilters.dateFrom)) return false;
@@ -1560,6 +1596,12 @@ export default function PipelinePage() {
         segmentsFilters.source ? { key: "source", label: `Source: ${formatSourceLabel(segmentsFilters.source)}` } : null,
         segmentsFilters.stage
           ? { key: "stage", label: `Stage: ${STAGE_META[segmentsFilters.stage as PipelineStage].label}` }
+          : null,
+        segmentsFilters.phoneStatus
+          ? {
+              key: "phoneStatus",
+              label: `Phone Status: ${segmentsFilters.phoneStatus === "has-phone" ? "Has Phone" : "No Phone"}`,
+            }
           : null,
         segmentsFilters.dateFrom ? { key: "dateFrom", label: `From: ${segmentsFilters.dateFrom}` } : null,
         segmentsFilters.dateTo ? { key: "dateTo", label: `To: ${segmentsFilters.dateTo}` } : null,
@@ -2609,7 +2651,7 @@ export default function PipelinePage() {
               </button>
             </div>
 
-            <div className="glass-card mt-5 grid gap-3 rounded-2xl p-4 xl:grid-cols-[repeat(5,minmax(0,1fr))_minmax(0,1.4fr)]">
+            <div className="glass-card mt-5 grid gap-3 rounded-2xl p-4 xl:grid-cols-[repeat(6,minmax(0,1fr))_minmax(0,1.4fr)]">
               <label className="relative xl:col-span-full">
                 <Search size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
@@ -2669,6 +2711,15 @@ export default function PipelinePage() {
                 {PIPELINE_STAGES.map((stage) => (
                   <option key={stage} value={stage} className="text-black">{STAGE_META[stage].label}</option>
                 ))}
+              </select>
+              <select
+                value={segmentsFilters.phoneStatus}
+                onChange={(event) => updateSegmentsFilter("phoneStatus", event.target.value as SegmentsPhoneStatus)}
+                className="rounded-2xl border border-white/10 bg-[#0a0a0f] px-4 py-3 text-sm text-white outline-none focus:border-blue-400/40"
+              >
+                <option value="" className="text-black">Phone Status: All</option>
+                <option value="has-phone" className="text-black">Phone Status: Has Phone</option>
+                <option value="no-phone" className="text-black">Phone Status: No Phone</option>
               </select>
               <div className="grid gap-3 md:grid-cols-2">
                 <input
@@ -2932,7 +2983,7 @@ export default function PipelinePage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-3 gap-2">
                 <select
                   value={sortMode}
                   onChange={(event) => setSortMode(event.target.value as SortMode)}
@@ -2941,11 +2992,26 @@ export default function PipelinePage() {
                   <option value="newest" className="text-black" style={{ color: "black" }}>
                     Newest
                   </option>
+                  <option value="recently-updated" className="text-black" style={{ color: "black" }}>
+                    Recently Updated
+                  </option>
                   <option value="alphabetical" className="text-black" style={{ color: "black" }}>
                     A-Z
                   </option>
                   <option value="stage" className="text-black" style={{ color: "black" }}>
                     Stage
+                  </option>
+                </select>
+                <select
+                  value={contactsPhoneFilter}
+                  onChange={(event) => setContactsPhoneFilter(event.target.value as "all" | "has-phone")}
+                  className="glass-card rounded-2xl px-3 py-3 text-sm text-white outline-none"
+                >
+                  <option value="all" className="text-black" style={{ color: "black" }}>
+                    All Phones
+                  </option>
+                  <option value="has-phone" className="text-black" style={{ color: "black" }}>
+                    Has Phone
                   </option>
                 </select>
                 <button
