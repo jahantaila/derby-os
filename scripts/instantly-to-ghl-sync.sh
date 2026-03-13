@@ -82,10 +82,14 @@ while true; do
     
     response=$(curl -s -H "Authorization: $INSTANTLY_AUTH" "$url")
     
+    # Save response to temp file
+    echo "$response" > "/tmp/page_response.json"
+    
     # Check if we got emails
-    email_count=$(echo "$response" | python3 -c "
-import sys, json
-data = json.load(sys.stdin)
+    email_count=$(python3 -c "
+import json
+with open('/tmp/page_response.json', 'r') as f:
+    data = json.load(f)
 print(len(data.get('items', [])))
 ")
     
@@ -98,14 +102,16 @@ print(len(data.get('items', [])))
     
     # Append emails to our collection
     python3 -c "
-import sys, json
+import json
 
 # Load existing emails
 with open('$all_emails_file', 'r') as f:
     all_emails = json.load(f)
 
 # Load new page
-response = json.loads('''$response''')
+with open('/tmp/page_response.json', 'r') as f:
+    response = json.load(f)
+
 new_emails = response.get('items', [])
 
 # Append new emails
@@ -125,9 +131,10 @@ else:
 "
     
     # Get next starting_after
-    starting_after=$(echo "$response" | python3 -c "
-import sys, json
-data = json.load(sys.stdin)
+    starting_after=$(python3 -c "
+import json
+with open('/tmp/page_response.json', 'r') as f:
+    data = json.load(f)
 print(data.get('next_starting_after', ''))
 ")
     

@@ -16,9 +16,10 @@ const CURRENT_PROVIDER_FIELD_ID = 'gziZOwyG3l2wDoxIyFVM';
 const STATE_FILE = '/home/kim/.openclaw/workspace/mission-control/data/instantly-sync-state.json';
 
 // Rate limiting delays (ms)
-const INSTANTLY_DELAY = 2000; // 2 seconds as specified
+const INSTANTLY_DELAY = 3000; // 3 seconds to avoid rate limits
 const GHL_DELAY = 3000; // 3 seconds as specified
 const RETRY_DELAY = 90000; // 90 seconds if rate limited
+const RATE_LIMIT_RETRY_DELAY = 60000; // 60 seconds for 429 errors
 
 // Parse command line args
 const isDryRun = process.argv.includes('--dry-run');
@@ -99,6 +100,26 @@ function makeRequest(url, options = {}) {
     });
 }
 
+// Rate-limited request for Instantly API
+async function makeInstantlyRequest(url, options = {}, retries = 2) {
+    for (let attempt = 0; attempt <= retries; attempt++) {
+        const response = await makeRequest(url, options);
+        
+        if (response.status === 429) {
+            if (attempt < retries) {
+                console.log(`⏳ Rate limited (429), waiting ${RATE_LIMIT_RETRY_DELAY/1000} seconds before retry ${attempt + 1}/${retries}...`);
+                await sleep(RATE_LIMIT_RETRY_DELAY);
+                continue;
+            } else {
+                console.log(`❌ Rate limited (429) after ${retries} retries, skipping this request`);
+                return { status: 429, data: { items: [] } };
+            }
+        }
+        
+        return response;
+    }
+}
+
 // Instantly API calls using CORRECT endpoints
 async function fetchInstantlyCampaigns() {
     const campaigns = [];
@@ -112,7 +133,7 @@ async function fetchInstantlyCampaigns() {
             url += `?starting_after=${encodeURIComponent(nextCursor)}`;
         }
         
-        const response = await makeRequest(url, {
+        const response = await makeInstantlyRequest(url, {
             headers: {
                 'Authorization': `Bearer ${INSTANTLY_AUTH_TOKEN}`,
                 'Content-Type': 'application/json'
@@ -151,7 +172,7 @@ async function fetchReceivedEmails(campaignId) {
             url += `&starting_after=${encodeURIComponent(nextCursor)}`;
         }
         
-        const response = await makeRequest(url, {
+        const response = await makeInstantlyRequest(url, {
             headers: {
                 'Authorization': `Bearer ${INSTANTLY_AUTH_TOKEN}`,
                 'Content-Type': 'application/json'
@@ -185,7 +206,7 @@ async function fetchAllEmails(campaignId) {
             url += `&starting_after=${encodeURIComponent(nextCursor)}`;
         }
         
-        const response = await makeRequest(url, {
+        const response = await makeInstantlyRequest(url, {
             headers: {
                 'Authorization': `Bearer ${INSTANTLY_AUTH_TOKEN}`,
                 'Content-Type': 'application/json'
