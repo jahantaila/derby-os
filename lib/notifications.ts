@@ -1,5 +1,3 @@
-import { getPipelineActivity } from "@/lib/pipeline-activity";
-import { getPipelineDeals } from "@/lib/pipeline-store";
 import { readPersistentData, writePersistentData } from "@/lib/persistence";
 import { getRolodexContacts } from "@/lib/rolodex-store";
 
@@ -8,7 +6,7 @@ const EASTERN_TIME_ZONE = "America/New_York";
 const COLD_CONTACT_DAYS = 30;
 const MAX_NOTIFICATIONS = 100;
 
-export type MissionNotificationType = "pipeline" | "rolodex";
+export type MissionNotificationType = "rolodex";
 
 export type MissionNotification = {
   id: string;
@@ -118,35 +116,9 @@ function dedupeNotifications(notifications: Omit<MissionNotification, "read">[])
 
 async function buildNotifications() {
   const today = easternDateOnly();
-  const [pipelineDeals, pipelineActivity, contacts] = await Promise.all([
-    getPipelineDeals(),
-    getPipelineActivity(100),
-    getRolodexContacts(),
-  ]);
+  const contacts = await getRolodexContacts();
 
   const notifications: Omit<MissionNotification, "read">[] = [];
-
-  pipelineDeals
-    .filter((deal) => deal.createdAt === today)
-    .forEach((deal) => {
-      notifications.push({
-        id: `pipeline:new-lead:${deal.id}:${deal.createdAt}`,
-        title: `New lead added today: ${deal.name || deal.contact || deal.client}`,
-        timestamp: new Date(`${deal.createdAt}T12:00:00.000Z`).toISOString(),
-        type: "pipeline",
-      });
-    });
-
-  pipelineActivity
-    .filter((entry) => entry.type === "stage-change")
-    .forEach((entry) => {
-      notifications.push({
-        id: `pipeline:stage-change:${entry.id}`,
-        title: entry.message,
-        timestamp: entry.timestamp,
-        type: "pipeline",
-      });
-    });
 
   contacts
     .filter((contact) => contact.createdAt.slice(0, 10) === today)

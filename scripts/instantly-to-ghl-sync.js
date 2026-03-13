@@ -1,463 +1,591 @@
 #!/usr/bin/env node
 
-/**
- * Instantly → GoHighLevel Sync Script
- * 
- * IMPORTANT NOTE: The Instantly API endpoints for fetching leads and emails 
- * are not currently available/working. The script fetches campaigns successfully
- * but uses mock data for interested leads to demonstrate the sync process.
- * 
- * When the API endpoints become available, replace the createMockInterestedLeads
- * function with actual API calls to get leads with status "Interested" and 
- * their email conversations.
- * 
- * Usage: 
- *   node scripts/instantly-to-ghl-sync.js           # Real sync
- *   node scripts/instantly-to-ghl-sync.js --dry-run # Test mode
- */
-
 const https = require('https');
-const fs = require('fs').promises;
+const fs = require('fs');
 const path = require('path');
 
 // Configuration
-const config = {
-  instantly: {
-    baseUrl: 'https://api.instantly.ai/api/v2',
-    headers: {
-      'Authorization': 'Bearer MzQ0ODcyMDktNGYxNC00NTVhLWI4MDUtNDFhM2M2Y2NiYWNlOlpyaUdsSlpGeWdXeg==',
-      'Content-Type': 'application/json'
-    }
-  },
-  ghl: {
-    baseUrl: 'https://services.leadconnectorhq.com',
-    headers: {
-      'Authorization': 'Bearer pit-4ae0985d-8de0-40e6-b688-4e6805e57c58',
-      'User-Agent': 'Mozilla/5.0',
-      'Version': '2021-07-28',
-      'Content-Type': 'application/json'
-    },
-    locationId: '3zMwpehG9y8ETJsZtR3d',
-    pipelineId: 'oNcLIG8SGY8IKvvVbkDe',
-    stageId: '0415b950-1b0e-47be-b7c4-65222923b448',
-    customFields: {
-      leadSource: 'dLDNSAZYHk5qihoOx5oP',
-      currentProvider: 'gziZOwyG3l2wDoxIyFVM'
-    }
-  },
-  stateFile: '/home/kim/.openclaw/workspace/mission-control/data/instantly-sync-state.json'
-};
+const INSTANTLY_AUTH_TOKEN = 'MzQ0ODcyMDktNGYxNC00NTVhLWI4MDUtNDFhM2M2Y2NiYWNlOlpyaUdsSlpGeWdXeg==';
+const GHL_API_KEY = 'pit-4ae0985d-8de0-40e6-b688-4e6805e57c58';
+const GHL_LOCATION_ID = '3zMwpehG9y8ETJsZtR3d';
+const GHL_PIPELINE_ID = 'oNcLIG8SGY8IKvvVbkDe';
+const GHL_STAGE_ID = '0415b950-1b0e-47be-b7c4-65222923b448';
+const LEAD_SOURCE_FIELD_ID = 'dLDNSAZYHk5qihoOx5oP';
+const CURRENT_PROVIDER_FIELD_ID = 'gziZOwyG3l2wDoxIyFVM';
 
-// Rate limiting
-const RATE_LIMIT_DELAY = 3000; // 3 seconds between GHL calls
-const RETRY_DELAY = 90000; // 90 seconds for 403 errors
+const STATE_FILE = '/home/kim/.openclaw/workspace/mission-control/data/instantly-sync-state.json';
+
+// Rate limiting delays (ms)
+const INSTANTLY_DELAY = 2000; // 2 seconds as specified
+const GHL_DELAY = 3000; // 3 seconds as specified
+const RETRY_DELAY = 90000; // 90 seconds if rate limited
+
+// Parse command line args
+const isDryRun = process.argv.includes('--dry-run');
+
+// Load or initialize sync state
+function loadSyncState() {
+    try {
+        // Ensure data directory exists
+        const dataDir = path.dirname(STATE_FILE);
+        if (!fs.existsSync(dataDir)) {
+            fs.mkdirSync(dataDir, { recursive: true });
+        }
+        
+        if (fs.existsSync(STATE_FILE)) {
+            return JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
+        }
+    } catch (error) {
+        console.log('⚠️  Error loading sync state, starting fresh:', error.message);
+    }
+    return { syncedEmails: [] };
+}
+
+// Save sync state
+function saveSyncState(state) {
+    if (isDryRun) {
+        console.log('🔍 [DRY RUN] Would save sync state with', state.syncedEmails.length, 'synced emails');
+        return;
+    }
+    
+    try {
+        const dataDir = path.dirname(STATE_FILE);
+        if (!fs.existsSync(dataDir)) {
+            fs.mkdirSync(dataDir, { recursive: true });
+        }
+        fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2));
+    } catch (error) {
+        console.log('⚠️  Error saving sync state:', error.message);
+    }
+}
+
+// Sleep utility
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// HTTP request utility using built-in https
+function makeRequest(url, options = {}) {
+    return new Promise((resolve, reject) => {
+        const urlObj = new URL(url);
+        const requestOptions = {
+            hostname: urlObj.hostname,
+            port: urlObj.port || 443,
+            path: urlObj.pathname + urlObj.search,
+            method: options.method || 'GET',
+            headers: options.headers || {}
+        };
+
+        const req = https.request(requestOptions, (res) => {
+            let data = '';
+            res.on('data', (chunk) => data += chunk);
+            res.on('end', () => {
+                try {
+                    const jsonData = JSON.parse(data);
+                    resolve({ status: res.statusCode, data: jsonData });
+                } catch (e) {
+                    resolve({ status: res.statusCode, data: data });
+                }
+            });
+        });
+
+        req.on('error', reject);
+        
+        if (options.body) {
+            req.write(typeof options.body === 'string' ? options.body : JSON.stringify(options.body));
+        }
+        
+        req.end();
+    });
+}
+
+// Instantly API calls using CORRECT endpoints
+async function fetchInstantlyCampaigns() {
+    const campaigns = [];
+    let nextCursor = null;
+    
+    do {
+        console.log('📋 Fetching Instantly campaigns...');
+        
+        let url = 'https://api.instantly.ai/api/v2/campaigns';
+        if (nextCursor) {
+            url += `?starting_after=${encodeURIComponent(nextCursor)}`;
+        }
+        
+        const response = await makeRequest(url, {
+            headers: {
+                'Authorization': `Bearer ${INSTANTLY_AUTH_TOKEN}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.status === 401) {
+            throw new Error(`Instantly API authentication failed: ${response.status} - ${JSON.stringify(response.data)}`);
+        }
+        
+        if (response.status !== 200) {
+            throw new Error(`Failed to fetch campaigns: ${response.status} ${JSON.stringify(response.data)}`);
+        }
+        
+        if (response.data.items) {
+            campaigns.push(...response.data.items);
+        }
+        nextCursor = response.data.next_starting_after;
+        
+        await sleep(INSTANTLY_DELAY);
+    } while (nextCursor);
+    
+    console.log(`✅ Found ${campaigns.length} campaigns`);
+    return campaigns;
+}
+
+async function fetchReceivedEmails(campaignId) {
+    const receivedEmails = [];
+    let nextCursor = null;
+    
+    do {
+        console.log(`📧 Fetching received emails for campaign ${campaignId}...`);
+        
+        let url = `https://api.instantly.ai/api/v2/emails?campaign_id=${campaignId}&email_type=received&limit=100`;
+        if (nextCursor) {
+            url += `&starting_after=${encodeURIComponent(nextCursor)}`;
+        }
+        
+        const response = await makeRequest(url, {
+            headers: {
+                'Authorization': `Bearer ${INSTANTLY_AUTH_TOKEN}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.status !== 200) {
+            console.log(`⚠️  Failed to fetch received emails for campaign ${campaignId}: ${response.status}`);
+            break;
+        }
+        
+        if (response.data.items) {
+            receivedEmails.push(...response.data.items);
+        }
+        nextCursor = response.data.next_starting_after;
+        
+        await sleep(INSTANTLY_DELAY);
+    } while (nextCursor);
+    
+    console.log(`Found ${receivedEmails.length} received emails (replies from leads)`);
+    return receivedEmails;
+}
+
+async function fetchAllEmails(campaignId) {
+    const allEmails = [];
+    let nextCursor = null;
+    
+    do {
+        let url = `https://api.instantly.ai/api/v2/emails?campaign_id=${campaignId}&limit=100`;
+        if (nextCursor) {
+            url += `&starting_after=${encodeURIComponent(nextCursor)}`;
+        }
+        
+        const response = await makeRequest(url, {
+            headers: {
+                'Authorization': `Bearer ${INSTANTLY_AUTH_TOKEN}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.status !== 200) {
+            console.log(`⚠️  Failed to fetch all emails for campaign ${campaignId}: ${response.status}`);
+            break;
+        }
+        
+        if (response.data.items) {
+            allEmails.push(...response.data.items);
+        }
+        nextCursor = response.data.next_starting_after;
+        
+        await sleep(INSTANTLY_DELAY);
+    } while (nextCursor);
+    
+    return allEmails;
+}
+
+// Extract lead email from received email
+function extractLeadEmailFromReceivedEmail(receivedEmail) {
+    // The received email should contain from_email or similar field
+    // If not, we need to extract it from email headers or content
+    if (receivedEmail.from_email) {
+        return receivedEmail.from_email;
+    }
+    
+    // Try to extract from headers if available
+    if (receivedEmail.headers && receivedEmail.headers.from) {
+        const fromMatch = receivedEmail.headers.from.match(/<([^>]+)>/);
+        if (fromMatch) {
+            return fromMatch[1];
+        }
+        // If no angle brackets, assume the whole from field is the email
+        return receivedEmail.headers.from.split(' ')[0];
+    }
+    
+    // As fallback, try to parse from email content or other fields
+    console.log(`⚠️  Could not extract lead email from received email:`, JSON.stringify(receivedEmail, null, 2));
+    return null;
+}
+
+// GHL API calls
+async function checkGHLContactExists(email) {
+    const url = `https://services.leadconnectorhq.com/contacts/lookup?locationId=${GHL_LOCATION_ID}&email=${encodeURIComponent(email)}`;
+    
+    const response = await makeRequest(url, {
+        headers: {
+            'Authorization': `Bearer ${GHL_API_KEY}`,
+            'Version': '2021-07-28',
+            'User-Agent': 'Mozilla/5.0'
+        }
+    });
+    
+    return response.status === 200 && response.data;
+}
+
+async function createGHLContact(contactData) {
+    if (isDryRun) {
+        console.log('🔍 [DRY RUN] Would create GHL contact:', JSON.stringify(contactData, null, 2));
+        return { status: 201, data: { contact: { id: 'dry-run-contact-id' } } };
+    }
+    
+    const response = await makeRequest('https://services.leadconnectorhq.com/contacts/', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${GHL_API_KEY}`,
+            'Version': '2021-07-28',
+            'User-Agent': 'Mozilla/5.0',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(contactData)
+    });
+    
+    if (response.status === 403) {
+        console.log('⏳ Rate limited, waiting 90 seconds...');
+        await sleep(RETRY_DELAY);
+        return createGHLContact(contactData);
+    }
+    
+    return response;
+}
+
+async function createGHLOpportunity(opportunityData) {
+    if (isDryRun) {
+        console.log('🔍 [DRY RUN] Would create GHL opportunity:', JSON.stringify(opportunityData, null, 2));
+        return { status: 201, data: { opportunity: { id: 'dry-run-opp-id' } } };
+    }
+    
+    const response = await makeRequest('https://services.leadconnectorhq.com/opportunities/', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${GHL_API_KEY}`,
+            'Version': '2021-07-28',
+            'User-Agent': 'Mozilla/5.0',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(opportunityData)
+    });
+    
+    if (response.status === 403) {
+        console.log('⏳ Rate limited, waiting 90 seconds...');
+        await sleep(RETRY_DELAY);
+        return createGHLOpportunity(opportunityData);
+    }
+    
+    return response;
+}
+
+async function addGHLNote(contactId, noteData) {
+    if (isDryRun) {
+        console.log('🔍 [DRY RUN] Would add GHL note to contact', contactId, ':', JSON.stringify(noteData, null, 2));
+        return { status: 201, data: { note: { id: 'dry-run-note-id' } } };
+    }
+    
+    const response = await makeRequest(`https://services.leadconnectorhq.com/contacts/${contactId}/notes`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${GHL_API_KEY}`,
+            'Version': '2021-07-28',
+            'User-Agent': 'Mozilla/5.0',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(noteData)
+    });
+    
+    if (response.status === 403) {
+        console.log('⏳ Rate limited, waiting 90 seconds...');
+        await sleep(RETRY_DELAY);
+        return addGHLNote(contactId, noteData);
+    }
+    
+    return response;
+}
 
 // Utility functions
-function delay(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-function makeRequest(url, options = {}) {
-  return new Promise((resolve, reject) => {
-    const urlObj = new URL(url);
-    const requestOptions = {
-      hostname: urlObj.hostname,
-      path: urlObj.pathname + urlObj.search,
-      method: options.method || 'GET',
-      headers: options.headers || {},
-      port: 443
-    };
-
-    const req = https.request(requestOptions, (res) => {
-      let data = '';
-      res.on('data', (chunk) => {
-        data += chunk;
-      });
-      res.on('end', () => {
-        try {
-          const parsed = JSON.parse(data);
-          resolve({ status: res.statusCode, data: parsed, headers: res.headers });
-        } catch (e) {
-          resolve({ status: res.statusCode, data: data, headers: res.headers });
-        }
-      });
-    });
-
-    req.on('error', (error) => {
-      console.error('Request error:', error);
-      reject(error);
-    });
-    
-    if (options.body) {
-      const body = typeof options.body === 'string' ? options.body : JSON.stringify(options.body);
-      req.write(body);
-    }
-    
-    req.end();
-  });
-}
-
-async function makeGHLRequest(endpoint, options = {}, retries = 3) {
-  const url = `${config.ghl.baseUrl}${endpoint}`;
-  const requestOptions = {
-    ...options,
-    headers: { ...config.ghl.headers, ...options.headers }
-  };
-
-  for (let i = 0; i < retries; i++) {
-    try {
-      const response = await makeRequest(url, requestOptions);
-      
-      if (response.status === 403 && i < retries - 1) {
-        console.log(`GHL 403 error, waiting ${RETRY_DELAY/1000}s before retry...`);
-        await delay(RETRY_DELAY);
-        continue;
-      }
-      
-      if (response.status === 429 && i < retries - 1) {
-        console.log('Rate limit hit, waiting...');
-        await delay(RATE_LIMIT_DELAY * 2);
-        continue;
-      }
-      
-      return response;
-    } catch (error) {
-      if (i === retries - 1) throw error;
-      await delay(1000);
-    }
-  }
-}
-
-async function loadSyncState() {
-  try {
-    const data = await fs.readFile(config.stateFile, 'utf8');
-    return JSON.parse(data);
-  } catch (error) {
-    return { syncedLeads: new Set() };
-  }
-}
-
-async function saveSyncState(state) {
-  await fs.mkdir(path.dirname(config.stateFile), { recursive: true });
-  // Convert Set to Array for JSON serialization
-  const serializable = {
-    ...state,
-    syncedLeads: Array.from(state.syncedLeads)
-  };
-  await fs.writeFile(config.stateFile, JSON.stringify(serializable, null, 2));
-}
-
 function extractNameFromEmail(email) {
-  const parts = email.split('@')[0].split(/[._-]/);
-  return {
-    firstName: parts[0]?.charAt(0).toUpperCase() + parts[0]?.slice(1).toLowerCase() || '',
-    lastName: parts[1]?.charAt(0).toUpperCase() + parts[1]?.slice(1).toLowerCase() || ''
-  };
+    const localPart = email.split('@')[0];
+    const nameParts = localPart.split(/[._-]+/).map(part => 
+        part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()
+    );
+    
+    return {
+        firstName: nameParts[0] || 'Unknown',
+        lastName: nameParts.slice(1).join(' ') || 'Lead'
+    };
 }
 
-async function getBusinessNameFromDomain(domain) {
-  try {
-    const response = await makeRequest(`https://${domain}`);
-    if (response.data && typeof response.data === 'string') {
-      const titleMatch = response.data.match(/<title[^>]*>([^<]+)</i);
-      if (titleMatch) {
-        return titleMatch[1].trim().replace(/^\w+\s*-\s*/, ''); // Remove site name prefix
-      }
-    }
-  } catch (error) {
-    console.log(`Could not fetch business name for domain ${domain}: ${error.message}`);
-  }
-  return '';
+function extractBusinessName(email) {
+    const domain = email.split('@')[1];
+    if (!domain) return 'Unknown Business';
+    
+    const name = domain.split('.')[0];
+    return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
 }
 
-function extractPhoneFromText(text) {
-  const phoneRegex = /(\+?1?[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})/;
-  const match = text.match(phoneRegex);
-  return match ? match[0].replace(/[^\d+]/g, '') : '';
+function formatOpportunityName(firstName, lastName, businessName) {
+    // Format: "FirstName LastName - BusinessName" in title case
+    const fullName = `${firstName} ${lastName}`;
+    return `${fullName} - ${businessName}`;
 }
 
-async function fetchInstantlyCampaigns() {
-  console.log('Fetching Instantly campaigns...');
-  
-  const response = await makeRequest(`${config.instantly.baseUrl}/campaigns`, {
-    headers: config.instantly.headers
-  });
-  
-  if (response.status !== 200) {
-    throw new Error(`Failed to fetch campaigns: ${response.status} - ${JSON.stringify(response.data)}`);
-  }
-  
-  console.log(`Found ${response.data.items?.length || 0} campaigns`);
-  return response.data.items || [];
-}
-
-async function checkContactExistsInGHL(email) {
-  const response = await makeGHLRequest(
-    `/contacts/lookup?locationId=${config.ghl.locationId}&email=${encodeURIComponent(email)}`
-  );
-  
-  return response.status === 200 && response.data?.contact;
-}
-
-async function createContactInGHL(contactData, isDryRun = false) {
-  if (isDryRun) {
-    console.log(`[DRY RUN] Would create contact:`, contactData);
-    return { id: 'dry-run-contact-id' };
-  }
-
-  await delay(RATE_LIMIT_DELAY);
-  
-  const response = await makeGHLRequest('/contacts/', {
-    method: 'POST',
-    body: {
-      ...contactData,
-      locationId: config.ghl.locationId,
-      customFields: [
-        { id: config.ghl.customFields.leadSource, value: 'Cold Email' },
-        ...(contactData.customFields || [])
-      ]
-    }
-  });
-  
-  if (response.status === 201 || response.status === 200) {
-    console.log(`✓ Created contact: ${contactData.email}`);
-    return response.data.contact || response.data;
-  } else {
-    throw new Error(`Failed to create contact: ${response.status} - ${JSON.stringify(response.data)}`);
-  }
-}
-
-async function createOpportunityInGHL(contactId, name, isDryRun = false) {
-  if (isDryRun) {
-    console.log(`[DRY RUN] Would create opportunity: ${name} for contact ${contactId}`);
-    return { id: 'dry-run-opportunity-id' };
-  }
-
-  await delay(RATE_LIMIT_DELAY);
-  
-  const response = await makeGHLRequest('/opportunities/', {
-    method: 'POST',
-    body: {
-      pipelineId: config.ghl.pipelineId,
-      locationId: config.ghl.locationId,
-      name: name,
-      pipelineStageId: config.ghl.stageId,
-      status: 'open',
-      contactId: contactId
-    }
-  });
-  
-  if (response.status === 201 || response.status === 200) {
-    console.log(`✓ Created opportunity: ${name}`);
-    return response.data;
-  } else {
-    throw new Error(`Failed to create opportunity: ${response.status} - ${JSON.stringify(response.data)}`);
-  }
-}
-
-async function addNoteToContact(contactId, noteText, isDryRun = false) {
-  if (isDryRun) {
-    console.log(`[DRY RUN] Would add note to contact ${contactId}:`, noteText.substring(0, 100) + '...');
-    return;
-  }
-
-  await delay(RATE_LIMIT_DELAY);
-  
-  const response = await makeGHLRequest(`/contacts/${contactId}/notes`, {
-    method: 'POST',
-    body: {
-      body: noteText,
-      locationId: config.ghl.locationId
-    }
-  });
-  
-  if (response.status === 201 || response.status === 200) {
-    console.log(`✓ Added note to contact`);
-  } else {
-    console.error(`Failed to add note: ${response.status} - ${JSON.stringify(response.data)}`);
-  }
-}
-
-// Mock function for leads since API endpoints are not available
-function createMockInterestedLeads(campaigns) {
-  // This simulates what we would get from the API if the endpoints worked
-  const mockLeads = [];
-  
-  campaigns.forEach(campaign => {
-    // Mock some interested leads based on the email list
-    const emails = campaign.email_list || [];
-    emails.slice(0, 2).forEach(email => { // Just take first 2 emails as "interested"
-      mockLeads.push({
-        email: email,
-        campaign_id: campaign.id,
-        campaign_name: campaign.name,
-        status: 'Interested',
-        firstName: '',
-        lastName: '',
-        // Mock conversation history
-        emails: [
-          {
-            date: '2026-03-13',
-            subject: `Re: ${campaign.sequences[0]?.steps[0]?.variants[0]?.subject || 'Our offer'}`,
-            body: 'Hi, I\'m interested in learning more about your restaurant services. Can you send me more details?',
-            direction: 'received',
-            sender: email
-          },
-          {
-            date: '2026-03-12',
-            subject: campaign.sequences[0]?.steps[0]?.variants[0]?.subject || 'Our offer',
-            body: campaign.sequences[0]?.steps[0]?.variants[0]?.body || 'Initial outreach',
-            direction: 'sent',
-            sender: 'kimberly@derbydigitalrestaurants.com'
-          }
-        ]
-      });
+function groupEmailsByConversation(emails, leadEmail) {
+    // Group emails by conversation thread for a specific lead
+    const conversationEmails = emails.filter(email => {
+        // Include emails that are to/from the lead
+        const isToLead = email.to_address_email_list && email.to_address_email_list.includes(leadEmail);
+        const isFromLead = email.from_email === leadEmail;
+        return isToLead || isFromLead;
     });
-  });
-  
-  return mockLeads;
+    
+    // Sort by timestamp
+    return conversationEmails.sort((a, b) => new Date(a.timestamp_email) - new Date(b.timestamp_email));
 }
 
-async function main() {
-  const isDryRun = process.argv.includes('--dry-run');
-  
-  if (isDryRun) {
-    console.log('🏃 DRY RUN MODE - No actual data will be created\n');
-  }
-  
-  try {
-    // Load sync state
-    const state = await loadSyncState();
-    if (Array.isArray(state.syncedLeads)) {
-      state.syncedLeads = new Set(state.syncedLeads);
+// Main sync function
+async function syncInstantlyToGHL() {
+    console.log('🚀 Starting Instantly → GHL sync...');
+    if (isDryRun) {
+        console.log('🔍 DRY RUN MODE - No changes will be made to GHL');
     }
     
-    console.log(`Previous sync state loaded: ${state.syncedLeads.size} leads already synced`);
-    
-    // Fetch campaigns
-    const campaigns = await fetchInstantlyCampaigns();
-    
-    if (campaigns.length === 0) {
-      console.log('No campaigns found');
-      return;
+    const syncState = loadSyncState();
+    // Ensure syncedEmails is an array
+    if (!syncState.syncedEmails || !Array.isArray(syncState.syncedEmails)) {
+        syncState.syncedEmails = [];
     }
     
-    // NOTE: The Instantly API doesn't expose the leads/emails endpoints we need
-    // This is a mock implementation showing how it would work
-    console.log('\n⚠️  Note: Instantly API leads/emails endpoints are not available');
-    console.log('Using mock data to demonstrate the sync process\n');
+    let newLeadsCount = 0;
+    const foundLeads = [];
     
-    const interestedLeads = createMockInterestedLeads(campaigns);
-    console.log(`Found ${interestedLeads.length} interested leads (simulated)`);
-    
-    let processedCount = 0;
-    let skippedCount = 0;
-    let createdCount = 0;
-    
-    for (const lead of interestedLeads) {
-      console.log(`\nProcessing lead: ${lead.email}`);
-      
-      // Check if already synced
-      if (state.syncedLeads.has(lead.email)) {
-        console.log('  ⏭️  Already synced, skipping');
-        skippedCount++;
-        continue;
-      }
-      
-      // Check if exists in GHL
-      const existingContact = await checkContactExistsInGHL(lead.email);
-      if (existingContact) {
-        console.log('  ⏭️  Contact already exists in GHL, skipping');
-        state.syncedLeads.add(lead.email);
-        skippedCount++;
-        continue;
-      }
-      
-      // Extract contact info
-      const domain = lead.email.split('@')[1];
-      const nameFromEmail = extractNameFromEmail(lead.email);
-      const businessName = await getBusinessNameFromDomain(domain);
-      
-      // Extract phone from email content
-      const emailText = lead.emails.map(e => e.body).join(' ');
-      const phone = extractPhoneFromText(emailText);
-      
-      // Create contact data
-      const contactData = {
-        firstName: lead.firstName || nameFromEmail.firstName,
-        lastName: lead.lastName || nameFromEmail.lastName,
-        email: lead.email,
-        phone: phone || '',
-        companyName: businessName || domain
-      };
-      
-      // Detect current provider from campaign name
-      let currentProvider = '';
-      const campaignNameLower = lead.campaign_name.toLowerCase();
-      if (campaignNameLower.includes('spothopper')) currentProvider = 'SpotHopper';
-      else if (campaignNameLower.includes('owner')) currentProvider = 'Owner.com';
-      else if (campaignNameLower.includes('fisherman')) currentProvider = 'Fisherman';
-      
-      if (currentProvider) {
-        contactData.customFields = [
-          { id: config.ghl.customFields.currentProvider, value: currentProvider }
-        ];
-      }
-      
-      // Create contact
-      const contact = await createContactInGHL(contactData, isDryRun);
-      
-      // Create opportunity
-      const opportunityName = `${contactData.firstName} ${contactData.lastName} - ${contactData.companyName}`.trim();
-      await createOpportunityInGHL(contact.id, opportunityName, isDryRun);
-      
-      // Group emails by date and create notes
-      const emailsByDate = {};
-      lead.emails.forEach(email => {
-        if (!emailsByDate[email.date]) {
-          emailsByDate[email.date] = [];
-        }
-        emailsByDate[email.date].push(email);
-      });
-      
-      for (const [date, dayEmails] of Object.entries(emailsByDate)) {
-        const noteText = `Date: ${date}\n\n` +
-          dayEmails.map(email => 
-            `${email.direction.toUpperCase()}: ${email.sender}\n` +
-            `Subject: ${email.subject}\n` +
-            `${email.body}\n`
-          ).join('\n---\n');
+    try {
+        // Fetch all campaigns
+        const campaigns = await fetchInstantlyCampaigns();
         
-        await addNoteToContact(contact.id, noteText, isDryRun);
-      }
-      
-      // Mark as synced
-      state.syncedLeads.add(lead.email);
-      processedCount++;
-      createdCount++;
-      
-      console.log(`  ✅ Successfully processed: ${lead.email}`);
+        // Process each campaign
+        for (const campaign of campaigns) {
+            console.log(`\n📋 Processing campaign: ${campaign.name} (${campaign.id})`);
+            
+            // Fetch received emails for this campaign (these are replies from leads)
+            const receivedEmails = await fetchReceivedEmails(campaign.id);
+            
+            if (receivedEmails.length === 0) {
+                console.log('No received emails (replies) found for this campaign');
+                continue;
+            }
+            
+            // Extract unique lead emails from received emails
+            const leadEmails = new Set();
+            for (const receivedEmail of receivedEmails) {
+                const leadEmail = extractLeadEmailFromReceivedEmail(receivedEmail);
+                if (leadEmail) {
+                    leadEmails.add(leadEmail);
+                }
+            }
+            
+            console.log(`Found ${leadEmails.size} unique leads who replied`);
+            
+            // Fetch ALL emails for this campaign to get conversation history
+            const allEmails = await fetchAllEmails(campaign.id);
+            console.log(`Fetched ${allEmails.length} total emails for conversation context`);
+            
+            // Process each unique lead
+            for (const leadEmail of leadEmails) {
+                console.log(`\n👤 Processing lead: ${leadEmail}`);
+                foundLeads.push({ email: leadEmail, campaign: campaign.name });
+                
+                // Skip if already synced
+                if (syncState.syncedEmails.includes(leadEmail)) {
+                    console.log(`⏭️  Already synced, skipping`);
+                    continue;
+                }
+                
+                // Check if contact exists in GHL
+                const existingContact = await checkGHLContactExists(leadEmail);
+                if (existingContact) {
+                    console.log(`⏭️  Contact already exists in GHL, marking as synced`);
+                    syncState.syncedEmails.push(leadEmail);
+                    continue;
+                }
+                
+                await sleep(GHL_DELAY);
+                
+                // Get full conversation for this lead
+                const conversationEmails = groupEmailsByConversation(allEmails, leadEmail);
+                console.log(`Found ${conversationEmails.length} emails in conversation with this lead`);
+                
+                // Extract contact info
+                const { firstName, lastName } = extractNameFromEmail(leadEmail);
+                const businessName = extractBusinessName(leadEmail);
+                
+                // Create GHL contact
+                const contactData = {
+                    firstName,
+                    lastName,
+                    email: leadEmail,
+                    companyName: businessName,
+                    locationId: GHL_LOCATION_ID,
+                    customFields: [
+                        {
+                            key: LEAD_SOURCE_FIELD_ID,
+                            field_value: 'Cold Email'
+                        },
+                        {
+                            key: CURRENT_PROVIDER_FIELD_ID,
+                            field_value: leadEmail.split('@')[1]
+                        }
+                    ]
+                };
+                
+                console.log(`📝 Creating GHL contact: ${firstName} ${lastName} (${leadEmail})`);
+                const contactResponse = await createGHLContact(contactData);
+                
+                if (contactResponse.status !== 200 && contactResponse.status !== 201) {
+                    console.log(`❌ Failed to create contact: ${contactResponse.status}`);
+                    continue;
+                }
+                
+                const contactId = contactResponse.data.contact.id;
+                console.log(`✅ Created contact with ID: ${contactId}`);
+                
+                await sleep(GHL_DELAY);
+                
+                // Create opportunity with correct naming format
+                const opportunityTitle = formatOpportunityName(firstName, lastName, businessName);
+                const opportunityData = {
+                    title: opportunityTitle,
+                    pipelineId: GHL_PIPELINE_ID,
+                    stageId: GHL_STAGE_ID,
+                    status: 'open',
+                    contactId,
+                    locationId: GHL_LOCATION_ID
+                };
+                
+                console.log(`💼 Creating opportunity: ${opportunityTitle}`);
+                const oppResponse = await createGHLOpportunity(opportunityData);
+                
+                if (oppResponse.status === 200 || oppResponse.status === 201) {
+                    console.log(`✅ Created opportunity`);
+                } else {
+                    console.log(`⚠️  Failed to create opportunity: ${oppResponse.status}`);
+                }
+                
+                await sleep(GHL_DELAY);
+                
+                // Add email conversation as note
+                if (conversationEmails.length > 0) {
+                    let noteContent = `Email conversation from Instantly campaign: ${campaign.name}\n\n`;
+                    
+                    conversationEmails.forEach((email, index) => {
+                        const timestamp = new Date(email.timestamp_email).toLocaleString();
+                        const isFromLead = email.from_email === leadEmail;
+                        const direction = isFromLead ? 'FROM lead' : 'TO lead';
+                        
+                        noteContent += `${index + 1}. [${timestamp}] ${direction}\n`;
+                        noteContent += `   Subject: ${email.subject || 'No subject'}\n`;
+                        
+                        if (email.body) {
+                            let content = '';
+                            if (email.body.html) {
+                                // Strip HTML tags for cleaner notes
+                                content = email.body.html.replace(/<[^>]*>/g, '').trim();
+                            } else if (email.body.text) {
+                                content = email.body.text.trim();
+                            }
+                            
+                            if (content) {
+                                noteContent += `   Content: ${content.substring(0, 300)}${content.length > 300 ? '...' : ''}\n\n`;
+                            }
+                        }
+                    });
+                    
+                    const noteData = {
+                        body: noteContent,
+                        userId: contactId
+                    };
+                    
+                    console.log(`📝 Adding conversation note (${conversationEmails.length} emails)`);
+                    const noteResponse = await addGHLNote(contactId, noteData);
+                    
+                    if (noteResponse.status === 200 || noteResponse.status === 201) {
+                        console.log(`✅ Added conversation note`);
+                    } else {
+                        console.log(`⚠️  Failed to add note: ${noteResponse.status}`);
+                    }
+                    
+                    await sleep(GHL_DELAY);
+                }
+                
+                // Mark as synced
+                syncState.syncedEmails.push(leadEmail);
+                newLeadsCount++;
+                
+                console.log(`✅ Synced: ${leadEmail} → Created contact + opportunity + notes`);
+            }
+        }
+        
+        // Save sync state
+        saveSyncState(syncState);
+        
+        console.log(`\n🎉 Sync complete!`);
+        console.log(`📊 Stats:`);
+        console.log(`   - ${foundLeads.length} total leads found who replied to campaigns`);
+        console.log(`   - ${newLeadsCount} new leads ${isDryRun ? 'would be' : ''} pushed to GHL`);
+        console.log(`   - ${syncState.syncedEmails.length} total leads in sync state`);
+        
+        if (foundLeads.length > 0) {
+            console.log(`\n📋 Found leads:`);
+            foundLeads.forEach(lead => {
+                console.log(`   - ${lead.email} (${lead.campaign})`);
+            });
+        }
+        
+        return { newLeadsCount, totalFoundLeads: foundLeads.length, foundLeads };
+        
+    } catch (error) {
+        console.log(`❌ Sync failed: ${error.message}`);
+        console.error(error);
+        throw error;
     }
-    
-    // Save state
-    await saveSyncState(state);
-    
-    console.log(`\n📊 Sync Summary:`);
-    console.log(`  • Total leads processed: ${processedCount}`);
-    console.log(`  • New contacts created: ${createdCount}`);
-    console.log(`  • Skipped (already synced/exists): ${skippedCount}`);
-    console.log(`  • Total synced leads in state: ${state.syncedLeads.size}`);
-    
-  } catch (error) {
-    console.error('❌ Error during sync:', error.message);
-    console.error(error.stack);
-    process.exit(1);
-  }
 }
 
-// Handle command line execution
+// Run the sync
 if (require.main === module) {
-  main();
+    syncInstantlyToGHL()
+        .then((results) => {
+            if (isDryRun) {
+                console.log(`\n✨ DRY RUN complete: Found ${results.totalFoundLeads} leads, would sync ${results.newLeadsCount} new ones`);
+            } else {
+                console.log(`\n✨ Successfully synced ${results.newLeadsCount} new leads from Instantly to GHL`);
+            }
+            process.exit(0);
+        })
+        .catch((error) => {
+            console.log(`\n💥 Sync failed: ${error.message}`);
+            process.exit(1);
+        });
 }
 
-module.exports = { main, config };
+module.exports = { syncInstantlyToGHL };

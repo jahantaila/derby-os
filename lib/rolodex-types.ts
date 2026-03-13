@@ -85,7 +85,6 @@ export type RolodexContact = {
   relationshipScore: number;
   lastContactedAt?: string;
   nextFollowUp?: string;
-  pipelineDealId?: string;
   createdAt: string;
   updatedAt: string;
   archived: boolean;

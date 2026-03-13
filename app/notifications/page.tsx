@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Bell, BookUser, CheckCheck, CircleDot, Funnel, Inbox } from "lucide-react";
+import { Bell, BookUser, CheckCheck, CircleDot, Inbox } from "lucide-react";
 
-type NotificationType = "pipeline" | "rolodex";
+type NotificationType = "rolodex";
 type NotificationFilter = "all" | NotificationType;
 
 type NotificationRecord = {
@@ -21,12 +21,10 @@ type NotificationsResponse = {
 
 const FILTERS: Array<{ key: NotificationFilter; label: string }> = [
   { key: "all", label: "All" },
-  { key: "pipeline", label: "Pipeline" },
   { key: "rolodex", label: "Rolodex" },
 ];
 
 const TYPE_META: Record<NotificationType, { label: string; icon: typeof Bell; iconClass: string }> = {
-  pipeline: { label: "Pipeline", icon: Funnel, iconClass: "text-cyan-100 bg-cyan-500/12 border-cyan-400/30" },
   rolodex: { label: "Rolodex", icon: BookUser, iconClass: "text-blue-100 bg-blue-500/12 border-blue-400/30" },
 };
 
@@ -131,7 +129,7 @@ export default function NotificationsPage() {
           <div>
             <p className="text-[11px] uppercase tracking-[0.24em] text-blue-200/70">Inbox</p>
             <h1 className="page-title mt-2">Notifications</h1>
-            <p className="mt-2 max-w-2xl text-sm text-slate-300">Pipeline alerts and rolodex relationship signals in one stream.</p>
+            <p className="mt-2 max-w-2xl text-sm text-slate-300">Rolodex reminders, birthdays, and relationship signals in one stream.</p>
           </div>
           <button
             type="button"
@@ -204,7 +202,7 @@ export default function NotificationsPage() {
                   {loading ? "Loading Notifications" : "No Notifications"}
                 </h2>
                 <p className="mt-2 text-sm text-slate-400">
-                  {loading ? "Fetching the latest pipeline and rolodex activity." : "There are no notifications in the current filter."}
+                  {loading ? "Fetching the latest rolodex activity." : "There are no notifications in the current filter."}
                 </p>
               </div>
             </div>

@@ -1,5 +1,4 @@
 import { readPersistentData, writePersistentData } from "@/lib/persistence";
-import { getPipelineDeals } from "@/lib/pipeline-store";
 import {
   INTERACTION_TYPES,
   Interaction,
@@ -333,7 +332,6 @@ function normalizeContact(raw: unknown): RolodexContact | null {
     relationshipScore: 0,
     lastContactedAt,
     nextFollowUp: undefined,
-    pipelineDealId: normalizeOptionalString(raw.pipelineDealId),
     createdAt,
     updatedAt: normalizeString(raw.updatedAt) || createdAt,
     archived: Boolean(raw.archived),
@@ -412,7 +410,6 @@ function createContactFromInput(input: RolodexContactInput): RolodexContact | nu
     relationshipScore: 0,
     lastContactedAt: computeLastContactedAt(interactions),
     nextFollowUp: undefined,
-    pipelineDealId: normalizeOptionalString(input.pipelineDealId),
     createdAt: now,
     updatedAt: now,
     archived: false,
@@ -472,7 +469,6 @@ function applyPatch(current: RolodexContact, patch: RolodexContactInput): Rolode
     notes,
     connections: patch.connections === undefined ? current.connections : normalizeConnections(patch.connections).filter((entry) => entry !== current.id),
     stayInTouch,
-    pipelineDealId: patch.pipelineDealId === undefined ? current.pipelineDealId : normalizeOptionalString(patch.pipelineDealId),
     archived: typeof patch.archived === "boolean" ? patch.archived : current.archived,
     updatedAt: isoTimestamp(),
     relationshipScore: 0,
@@ -483,27 +479,6 @@ function applyPatch(current: RolodexContact, patch: RolodexContactInput): Rolode
   updated.relationshipScore = computeRelationshipScore(updated);
   updated.nextFollowUp = computeNextFollowUp(updated.lastContactedAt, stayInTouch, updated.createdAt.slice(0, 10));
   return updated;
-}
-
-function buildPipelineImportContact(deal: Awaited<ReturnType<typeof getPipelineDeals>>[number]): RolodexContactInput | null {
-  const name = normalizeString(deal.name);
-  if (!name) return null;
-  return {
-    firstName: name,
-    lastName: "",
-    email: normalizeOptionalString(deal.email),
-    phone: normalizeOptionalString(deal.enrichmentData?.phone),
-    company: normalizeOptionalString(deal.client),
-    title: undefined,
-    website: normalizeOptionalString(deal.website ?? deal.enrichmentData?.website),
-    city: normalizeOptionalString(deal.city),
-    state: normalizeOptionalString(deal.state),
-    relationshipType: "prospect",
-    tags: deal.tags,
-    howWeMet: normalizeOptionalString(deal.source),
-    personalNotes: normalizeOptionalString(deal.notes),
-    pipelineDealId: deal.id,
-  };
 }
 
 export async function getRolodexContacts(options?: { includeArchived?: boolean }) {
@@ -623,42 +598,6 @@ export async function getRolodexReminders() {
   });
 
   return reminders.sort((left, right) => right.overdueDays - left.overdueDays || right.relationshipScore - left.relationshipScore);
-}
-
-export async function importPipelineContacts(input?: { dealIds?: string[] }) {
-  const [deals, existing] = await Promise.all([getPipelineDeals(), readRolodexFile()]);
-  const selectedIds = new Set((input?.dealIds ?? []).map((entry) => entry.trim()).filter(Boolean));
-  const sourceDeals = selectedIds.size ? deals.filter((deal) => selectedIds.has(deal.id)) : deals;
-  let imported = 0;
-  let skipped = 0;
-  const createdContacts: RolodexContact[] = [];
-  const next = [...existing];
-
-  for (const deal of sourceDeals) {
-    const payload = buildPipelineImportContact(deal);
-    if (!payload) {
-      skipped += 1;
-      continue;
-    }
-
-    const email = payload.email?.toLowerCase();
-    if (email && next.some((contact) => contact.email?.toLowerCase() === email)) {
-      skipped += 1;
-      continue;
-    }
-
-    const created = createContactFromInput(payload);
-    if (!created) {
-      skipped += 1;
-      continue;
-    }
-    next.push(created);
-    imported += 1;
-    createdContacts.push(created);
-  }
-
-  await writeRolodexFile(next);
-  return { imported, skipped, createdContacts };
 }
 
 export async function updateRolodexConnections(contactId: string, input: { add?: string[]; remove?: string[] }) {
