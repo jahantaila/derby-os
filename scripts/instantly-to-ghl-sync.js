@@ -210,10 +210,19 @@ async function fetchAllEmails(campaignId) {
 
 // Extract lead email from received email
 function extractLeadEmailFromReceivedEmail(receivedEmail) {
-    // The received email should contain from_email or similar field
-    // If not, we need to extract it from email headers or content
+    // Try from_address_email first (this is the correct field)
+    if (receivedEmail.from_address_email) {
+        return receivedEmail.from_address_email;
+    }
+    
+    // Fallback to from_email if available
     if (receivedEmail.from_email) {
         return receivedEmail.from_email;
+    }
+    
+    // Try to extract from from_address_json if available
+    if (receivedEmail.from_address_json && receivedEmail.from_address_json.length > 0) {
+        return receivedEmail.from_address_json[0].address;
     }
     
     // Try to extract from headers if available
