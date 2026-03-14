@@ -1,35 +1,31 @@
-import { NextResponse } from "next/server";
-import { archiveRolodexContact, getRolodexContactById, updateRolodexContact, type RolodexContactInput } from "@/lib/rolodex-store";
+import { NextRequest, NextResponse } from "next/server";
+import { getContact, updateContact, deleteContact } from "@/lib/rolodex-store";
 
-export async function GET(_: Request, { params }: { params: { id: string } }) {
-  const contact = await getRolodexContactById(params.id);
-  if (!contact) {
-    return NextResponse.json({ error: "Contact not found." }, { status: 404 });
-  }
-  return NextResponse.json(contact);
+// GET /api/rolodex/:id
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const contact = getContact(id);
+  if (!contact) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  return NextResponse.json({ contact });
 }
 
-export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+// PUT /api/rolodex/:id — update contact
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   try {
-    const patch = (await request.json()) as RolodexContactInput;
-    const contact = await updateRolodexContact(params.id, patch);
-    if (!contact) {
-      return NextResponse.json({ error: "Contact not found." }, { status: 404 });
-    }
-    return NextResponse.json(contact);
-  } catch {
-    return NextResponse.json({ error: "Unable to update contact." }, { status: 500 });
+    const data = await req.json();
+    const contact = updateContact(id, data);
+    if (!contact) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json({ contact });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message ?? "Invalid request" }, { status: 400 });
   }
 }
 
-export async function DELETE(_: Request, { params }: { params: { id: string } }) {
-  try {
-    const archived = await archiveRolodexContact(params.id);
-    if (!archived) {
-      return NextResponse.json({ error: "Contact not found." }, { status: 404 });
-    }
-    return NextResponse.json({ ok: true, contact: archived });
-  } catch {
-    return NextResponse.json({ error: "Unable to archive contact." }, { status: 500 });
-  }
+// DELETE /api/rolodex/:id
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const success = deleteContact(id);
+  if (!success) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  return NextResponse.json({ success: true });
 }

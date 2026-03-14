@@ -1,15 +1,15 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import {
-  ArrowLeft, BookUser, Briefcase, Calendar, ChevronRight,
-  Clock3, ExternalLink, FileText, Globe, Heart,
+  ArrowLeft, BookUser, Briefcase, Calendar, Check, ChevronRight,
+  Clock3, Edit3, ExternalLink, FileText, Globe, Heart,
   Layers, Lightbulb, Mail, MapPin, MessageSquare,
-  Phone, Plus, Search, Sparkles, Star,
-  StickyNote, Target, TrendingUp, Users, X,
+  Pencil, Phone, Plus, Save, Search, Sparkles, Star,
+  StickyNote, Target, Trash2, TrendingUp, Users, X,
   Image as ImageIcon, Activity, Brain, Gift,
   ChevronDown, Hash, Filter, Camera, BarChart3,
 } from "lucide-react";
@@ -204,19 +204,85 @@ function ScoreBreakdown({ signals }: { signals: { label: string; value: number; 
   );
 }
 
+// ─── Editable Field ───
+function EditableField({ label, value, field, editing, draft, setDraft, type = "text" }: {
+  label: string; value?: string; field: string; editing: boolean;
+  draft: Record<string, any>; setDraft: (d: Record<string, any>) => void; type?: string;
+}) {
+  if (editing) {
+    return (
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-[11px] text-slate-500 shrink-0">{label}</span>
+        <input type={type} value={draft[field] ?? value ?? ""}
+          onChange={e => setDraft({ ...draft, [field]: e.target.value })}
+          className="text-[12px] text-white bg-white/[0.06] border border-white/[0.1] rounded px-2 py-1 text-right max-w-[60%] outline-none focus:border-blue-500/40" />
+      </div>
+    );
+  }
+  if (!value) return null;
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-[11px] text-slate-500">{label}</span>
+      <span className="text-[11px] text-slate-300 text-right max-w-[60%]">{value}</span>
+    </div>
+  );
+}
+
 // ─── Main Contact Page ───
 export default function ContactPage() {
   const params = useParams();
   const router = useRouter();
   const contactId = params.id as string;
-  const contact = SEED_CONTACTS.find(c => c.id === contactId);
+  const [contact, setContact] = useState<RolodexContact | null>(null);
+  const [allContacts, setAllContacts] = useState<RolodexContact[]>([]);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabId>("overview");
   const [showScoreDetail, setShowScoreDetail] = useState(false);
   const [activityFilter, setActivityFilter] = useState<InteractionType | "all">("all");
   const [activitySort, setActivitySort] = useState<"newest" | "oldest">("newest");
   const [noteSearch, setNoteSearch] = useState("");
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState<Record<string, any>>({});
+  const [saving, setSaving] = useState(false);
+
+  // Fetch contact data
+  useEffect(() => {
+    Promise.all([
+      fetch(`/api/rolodex/${contactId}`).then(r => r.json()),
+      fetch("/api/rolodex").then(r => r.json()),
+    ]).then(([single, all]) => {
+      setContact(single.contact ?? null);
+      setAllContacts(all.contacts ?? []);
+      setLoading(false);
+    }).catch(() => setLoading(false));
+  }, [contactId]);
+
+  const saveEdits = useCallback(async () => {
+    if (!contact) return;
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/rolodex/${contact.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(draft),
+      });
+      const data = await res.json();
+      if (data.contact) setContact(data.contact);
+      setEditing(false);
+      setDraft({});
+    } catch (e) { console.error(e); }
+    setSaving(false);
+  }, [contact, draft]);
 
   const scoreData = useMemo(() => contact ? calculateScore(contact) : null, [contact]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-[80vh]">
+        <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   if (!contact || !scoreData) {
     return (
@@ -236,7 +302,7 @@ export default function ContactPage() {
   const meetings = contact.interactions.filter(i => i.type === "meeting");
   const photos = contact.interactions.filter(i => i.type === "photo");
   const totalCallTime = calls.reduce((s, c) => s + (c.duration ?? 0), 0);
-  const connectedContacts = SEED_CONTACTS.filter(c => contact.connections.includes(c.id));
+  const connectedContacts = allContacts.filter(c => contact.connections.includes(c.id));
 
   const filteredActivity = contact.interactions
     .filter(i => activityFilter === "all" || i.type === activityFilter)
@@ -265,6 +331,25 @@ export default function ContactPage() {
           </Link>
           <ChevronRight size={12} className="text-slate-600" />
           <span className="text-[13px] text-white font-medium">{getFullName(contact)}</span>
+          <div className="ml-auto flex items-center gap-2">
+            {editing ? (
+              <>
+                <button onClick={() => { setEditing(false); setDraft({}); }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] text-slate-400 hover:text-white border border-white/[0.08] transition-colors">
+                  <X size={13} /> Cancel
+                </button>
+                <button onClick={saveEdits} disabled={saving}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] bg-blue-600 hover:bg-blue-500 text-white transition-colors disabled:opacity-50">
+                  <Save size={13} /> {saving ? "Saving..." : "Save"}
+                </button>
+              </>
+            ) : (
+              <button onClick={() => setEditing(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] text-slate-400 hover:text-white border border-white/[0.08] hover:border-white/[0.15] transition-colors">
+                <Pencil size={13} /> Edit
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -279,12 +364,28 @@ export default function ContactPage() {
                 {getInitials(contact)}
               </div>
               <div className="flex-1 min-w-0">
-                <h1 className="text-[24px] font-bold text-white tracking-tight">{getFullName(contact)}</h1>
-                {(contact.title || contact.company) && (
+                {editing ? (
+                  <div className="flex gap-2 mb-1">
+                    <input value={draft.firstName ?? contact.firstName} onChange={e => setDraft({ ...draft, firstName: e.target.value })}
+                      className="text-[22px] font-bold text-white bg-white/[0.06] border border-white/[0.1] rounded px-2 py-0.5 outline-none focus:border-blue-500/40 w-[45%]" placeholder="First" />
+                    <input value={draft.lastName ?? contact.lastName} onChange={e => setDraft({ ...draft, lastName: e.target.value })}
+                      className="text-[22px] font-bold text-white bg-white/[0.06] border border-white/[0.1] rounded px-2 py-0.5 outline-none focus:border-blue-500/40 w-[45%]" placeholder="Last" />
+                  </div>
+                ) : (
+                  <h1 className="text-[24px] font-bold text-white tracking-tight">{getFullName(contact)}</h1>
+                )}
+                {editing ? (
+                  <div className="flex gap-2 mt-1">
+                    <input value={draft.title ?? contact.title ?? ""} onChange={e => setDraft({ ...draft, title: e.target.value })}
+                      placeholder="Title" className="text-[13px] text-slate-300 bg-white/[0.06] border border-white/[0.1] rounded px-2 py-1 outline-none focus:border-blue-500/40 w-[40%]" />
+                    <input value={draft.company ?? contact.company ?? ""} onChange={e => setDraft({ ...draft, company: e.target.value })}
+                      placeholder="Company" className="text-[13px] text-slate-300 bg-white/[0.06] border border-white/[0.1] rounded px-2 py-1 outline-none focus:border-blue-500/40 w-[50%]" />
+                  </div>
+                ) : (contact.title || contact.company) ? (
                   <p className="text-[14px] text-slate-400 mt-1">
                     {contact.title}{contact.title && contact.company ? " at " : ""}{contact.company}
                   </p>
-                )}
+                ) : null}
                 <div className="flex items-center gap-2.5 mt-2.5 flex-wrap">
                   <span className="px-2.5 py-1 rounded-md text-[11px] font-medium"
                     style={{ backgroundColor: `${RELATIONSHIP_TYPE_COLORS[contact.relationshipType]}15`, color: RELATIONSHIP_TYPE_COLORS[contact.relationshipType] }}>
@@ -308,15 +409,32 @@ export default function ContactPage() {
                 </div>
                 {/* Contact links */}
                 <div className="flex items-center gap-3 mt-3 flex-wrap">
-                  {contact.email && (
-                    <a href={`mailto:${contact.email}`} className="flex items-center gap-1.5 text-[12px] text-slate-400 hover:text-blue-400 transition-colors">
-                      <Mail size={12} /> {contact.email}
-                    </a>
-                  )}
-                  {contact.phone && (
-                    <a href={`tel:${contact.phone}`} className="flex items-center gap-1.5 text-[12px] text-slate-400 hover:text-green-400 transition-colors">
-                      <Phone size={12} /> {contact.phone}
-                    </a>
+                  {editing ? (
+                    <>
+                      <div className="flex items-center gap-1.5">
+                        <Mail size={12} className="text-slate-500" />
+                        <input value={draft.email ?? contact.email ?? ""} onChange={e => setDraft({ ...draft, email: e.target.value })}
+                          placeholder="email" className="text-[12px] text-slate-300 bg-white/[0.06] border border-white/[0.1] rounded px-2 py-1 outline-none focus:border-blue-500/40 w-48" />
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Phone size={12} className="text-slate-500" />
+                        <input value={draft.phone ?? contact.phone ?? ""} onChange={e => setDraft({ ...draft, phone: e.target.value })}
+                          placeholder="phone" className="text-[12px] text-slate-300 bg-white/[0.06] border border-white/[0.1] rounded px-2 py-1 outline-none focus:border-blue-500/40 w-36" />
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      {contact.email && (
+                        <a href={`mailto:${contact.email}`} className="flex items-center gap-1.5 text-[12px] text-slate-400 hover:text-blue-400 transition-colors">
+                          <Mail size={12} /> {contact.email}
+                        </a>
+                      )}
+                      {contact.phone && (
+                        <a href={`tel:${contact.phone}`} className="flex items-center gap-1.5 text-[12px] text-slate-400 hover:text-green-400 transition-colors">
+                          <Phone size={12} /> {contact.phone}
+                        </a>
+                      )}
+                    </>
                   )}
                 </div>
                 {/* Social links */}
@@ -376,30 +494,20 @@ export default function ContactPage() {
                 <span className="text-[11px] text-slate-500">Updated</span>
                 <span className="text-[11px] text-slate-300">{timeAgo(contact.updatedAt)}</span>
               </div>
-              {contact.nextFollowUp && (
-                <div className="flex justify-between">
-                  <span className="text-[11px] text-slate-500">Follow Up</span>
-                  <span className={cn("text-[11px]", new Date(contact.nextFollowUp) <= new Date() ? "text-amber-400 font-medium" : "text-slate-300")}>{timeAgo(contact.nextFollowUp)}</span>
-                </div>
-              )}
-              {contact.introducedBy && (
-                <div className="flex justify-between">
-                  <span className="text-[11px] text-slate-500">Introduced By</span>
-                  <span className="text-[11px] text-blue-400">{contact.introducedBy}</span>
-                </div>
-              )}
-              {contact.howWeMet && (
-                <div className="flex justify-between">
-                  <span className="text-[11px] text-slate-500">How We Met</span>
-                  <span className="text-[11px] text-slate-300 text-right max-w-[60%]">{contact.howWeMet.length > 40 ? contact.howWeMet.slice(0, 40) + "…" : contact.howWeMet}</span>
-                </div>
-              )}
-              {contact.source && (
-                <div className="flex justify-between">
-                  <span className="text-[11px] text-slate-500">Source</span>
-                  <span className="text-[11px] text-slate-300">{contact.source}</span>
-                </div>
-              )}
+              <EditableField label="Follow Up" value={contact.nextFollowUp?.split("T")[0]} field="nextFollowUp" editing={editing} draft={draft} setDraft={setDraft} type="date" />
+              <EditableField label="Introduced By" value={contact.introducedBy} field="introducedBy" editing={editing} draft={draft} setDraft={setDraft} />
+              <EditableField label="How We Met" value={contact.howWeMet} field="howWeMet" editing={editing} draft={draft} setDraft={setDraft} />
+              <EditableField label="Source" value={contact.source} field="source" editing={editing} draft={draft} setDraft={setDraft} />
+              <EditableField label="City" value={contact.city} field="city" editing={editing} draft={draft} setDraft={setDraft} />
+              <EditableField label="State" value={contact.state} field="state" editing={editing} draft={draft} setDraft={setDraft} />
+              <EditableField label="Birthday" value={contact.birthday} field="birthday" editing={editing} draft={draft} setDraft={setDraft} type="date" />
+              <EditableField label="College" value={contact.college} field="college" editing={editing} draft={draft} setDraft={setDraft} />
+              <EditableField label="Spouse" value={contact.spouse} field="spouse" editing={editing} draft={draft} setDraft={setDraft} />
+              <EditableField label="Website" value={contact.website} field="website" editing={editing} draft={draft} setDraft={setDraft} />
+              <EditableField label="LinkedIn" value={contact.linkedin} field="linkedin" editing={editing} draft={draft} setDraft={setDraft} />
+              <EditableField label="Instagram" value={contact.instagram} field="instagram" editing={editing} draft={draft} setDraft={setDraft} />
+              <EditableField label="Twitter" value={contact.twitter} field="twitter" editing={editing} draft={draft} setDraft={setDraft} />
+              <EditableField label="Interests" value={contact.interests} field="interests" editing={editing} draft={draft} setDraft={setDraft} />
             </div>
 
             {/* Mutual connections */}

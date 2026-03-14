@@ -1,5 +1,5 @@
 import { readPersistentData, writePersistentData } from "@/lib/persistence";
-import { getRolodexContacts } from "@/lib/rolodex-store";
+import { getAllContacts as getRolodexContacts } from "@/lib/rolodex-store";
 
 const NOTIFICATIONS_FILE = "notifications.json";
 const EASTERN_TIME_ZONE = "America/New_York";
@@ -116,7 +116,7 @@ function dedupeNotifications(notifications: Omit<MissionNotification, "read">[])
 
 async function buildNotifications() {
   const today = easternDateOnly();
-  const contacts = await getRolodexContacts();
+  const contacts = getRolodexContacts();
 
   const notifications: Omit<MissionNotification, "read">[] = [];
 

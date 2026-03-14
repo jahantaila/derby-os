@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import {
@@ -239,7 +239,15 @@ function ScoreBreakdown({ signals }: { signals: { label: string; value: number; 
 
 // ─── Main Page ───
 export default function RolodexPage() {
-  const [contacts] = useState<RolodexContact[]>(SEED_CONTACTS);
+  const [contacts, setContacts] = useState<RolodexContact[]>([]);
+  const [loadingContacts, setLoadingContacts] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/rolodex").then(r => r.json()).then(data => {
+      setContacts(data.contacts ?? []);
+      setLoadingContacts(false);
+    }).catch(() => setLoadingContacts(false));
+  }, []);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("table");
   const [search, setSearch] = useState("");

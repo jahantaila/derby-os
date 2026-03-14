@@ -1,33 +1,21 @@
-import { NextResponse } from "next/server";
-import { deleteRolodexInteraction, type InteractionInput, updateRolodexInteraction } from "@/lib/rolodex-store";
+import { NextRequest, NextResponse } from "next/server";
+import { getContact, updateContact } from "@/lib/rolodex-store";
 
-export async function PATCH(request: Request, { params }: { params: { id: string; interactionId: string } }) {
-  try {
-    const body = (await request.json()) as InteractionInput | null;
-    if (!body || typeof body !== "object") {
-      return NextResponse.json({ error: "Invalid interaction payload." }, { status: 400 });
-    }
-    if ("summary" in body && !body.summary?.trim()) {
-      return NextResponse.json({ error: "Interaction summary is required." }, { status: 400 });
-    }
-    const contact = await updateRolodexInteraction(params.id, params.interactionId, body);
-    if (!contact) {
-      return NextResponse.json({ error: "Interaction not found." }, { status: 404 });
-    }
-    return NextResponse.json(contact);
-  } catch {
-    return NextResponse.json({ error: "Unable to update interaction." }, { status: 500 });
-  }
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string; interactionId: string }> }) {
+  const { id, interactionId } = await params;
+  const contact = getContact(id);
+  if (!contact) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  const data = await req.json();
+  const interactions = contact.interactions.map(i => i.id === interactionId ? { ...i, ...data } : i);
+  const updated = updateContact(id, { interactions });
+  return NextResponse.json({ contact: updated });
 }
 
-export async function DELETE(_: Request, { params }: { params: { id: string; interactionId: string } }) {
-  try {
-    const contact = await deleteRolodexInteraction(params.id, params.interactionId);
-    if (!contact) {
-      return NextResponse.json({ error: "Interaction not found." }, { status: 404 });
-    }
-    return NextResponse.json(contact);
-  } catch {
-    return NextResponse.json({ error: "Unable to delete interaction." }, { status: 500 });
-  }
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string; interactionId: string }> }) {
+  const { id, interactionId } = await params;
+  const contact = getContact(id);
+  if (!contact) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  const interactions = contact.interactions.filter(i => i.id !== interactionId);
+  const updated = updateContact(id, { interactions });
+  return NextResponse.json({ contact: updated });
 }

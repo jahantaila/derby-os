@@ -1,18 +1,15 @@
-import { NextResponse } from "next/server";
-import { addRolodexInteraction, type InteractionInput } from "@/lib/rolodex-store";
+import { NextRequest, NextResponse } from "next/server";
+import { getContact, updateContact } from "@/lib/rolodex-store";
 
-export async function POST(request: Request, { params }: { params: { id: string } }) {
-  try {
-    const body = (await request.json()) as InteractionInput;
-    if (!body.summary?.trim()) {
-      return NextResponse.json({ error: "Interaction summary is required." }, { status: 400 });
-    }
-    const result = await addRolodexInteraction(params.id, body);
-    if (!result) {
-      return NextResponse.json({ error: "Contact not found." }, { status: 404 });
-    }
-    return NextResponse.json(result, { status: 201 });
-  } catch {
-    return NextResponse.json({ error: "Unable to add interaction." }, { status: 500 });
-  }
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const contact = getContact(id);
+  if (!contact) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  const data = await req.json();
+  const interaction = { id: crypto.randomUUID(), ...data, createdAt: new Date().toISOString() };
+  const updated = updateContact(id, {
+    interactions: [...contact.interactions, interaction],
+    lastContactedAt: data.date ?? new Date().toISOString(),
+  });
+  return NextResponse.json({ contact: updated, interaction }, { status: 201 });
 }

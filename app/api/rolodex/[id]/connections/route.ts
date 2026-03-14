@@ -1,20 +1,11 @@
-import { NextResponse } from "next/server";
-import { updateRolodexConnections } from "@/lib/rolodex-store";
+import { NextRequest, NextResponse } from "next/server";
+import { getContact, updateContact } from "@/lib/rolodex-store";
 
-type ConnectionsBody = {
-  add?: string[];
-  remove?: string[];
-};
-
-export async function PATCH(request: Request, { params }: { params: { id: string } }) {
-  try {
-    const body = (await request.json().catch(() => ({}))) as ConnectionsBody;
-    const contact = await updateRolodexConnections(params.id, body);
-    if (!contact) {
-      return NextResponse.json({ error: "Contact not found." }, { status: 404 });
-    }
-    return NextResponse.json(contact);
-  } catch {
-    return NextResponse.json({ error: "Unable to update connections." }, { status: 500 });
-  }
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const contact = getContact(id);
+  if (!contact) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  const { connections } = await req.json();
+  const updated = updateContact(id, { connections });
+  return NextResponse.json({ contact: updated });
 }
