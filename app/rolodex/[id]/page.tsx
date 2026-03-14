@@ -1,17 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import {
-  ArrowLeft, BookUser, Briefcase, Calendar, Check, ChevronRight,
-  Clock3, Edit3, ExternalLink, FileText, Globe, Heart,
-  Layers, Lightbulb, Mail, MapPin, MessageSquare,
-  Pencil, Phone, Plus, Save, Search, Sparkles, Star,
-  StickyNote, Target, Trash2, TrendingUp, Users, X,
-  Image as ImageIcon, Activity, Brain, Gift,
-  ChevronDown, Hash, Filter, Camera, BarChart3,
+  ArrowLeft, BookUser, Briefcase, Calendar, ChevronDown, ChevronRight,
+  Clock3, ExternalLink, Globe, Heart, Lightbulb, Mail, MapPin,
+  MessageSquare, Phone, Plus, Search, Sparkles, Star, StickyNote,
+  Target, TrendingUp, Users, Camera, Activity, Brain, Gift,
+  BarChart3, X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -19,7 +17,6 @@ import {
   RELATIONSHIP_TYPE_LABELS, RELATIONSHIP_TYPE_COLORS,
   INTERACTION_TYPE_LABELS,
 } from "@/lib/rolodex-types";
-import { SEED_CONTACTS } from "@/lib/rolodex-seed";
 
 const ReactEChartsCore = dynamic(() => import("echarts-for-react"), { ssr: false });
 
@@ -47,12 +44,8 @@ function calculateScore(c: RolodexContact) {
 }
 
 // ─── Helpers ───
-function getInitials(c: RolodexContact) {
-  return `${c.firstName?.[0] ?? ""}${c.lastName?.[0] ?? ""}`.toUpperCase() || "?";
-}
-function getFullName(c: RolodexContact) {
-  return `${c.firstName} ${c.lastName}`.trim() || "Unknown";
-}
+function getInitials(c: RolodexContact) { return `${c.firstName?.[0] ?? ""}${c.lastName?.[0] ?? ""}`.toUpperCase() || "?"; }
+function getFullName(c: RolodexContact) { return `${c.firstName} ${c.lastName}`.trim() || "Unknown"; }
 function timeAgo(date?: string) {
   if (!date) return "Never";
   const diff = Date.now() - new Date(date).getTime();
@@ -65,124 +58,121 @@ function timeAgo(date?: string) {
   if (days < 365) return `${Math.floor(days / 30)}mo ago`;
   return `${Math.floor(days / 365)}y ago`;
 }
-function formatDate(date: string) {
-  return new Date(date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-}
-function formatDuration(seconds?: number) {
-  if (!seconds) return "";
-  const m = Math.floor(seconds / 60);
-  if (m < 60) return `${m}m`;
-  return `${Math.floor(m / 60)}h ${m % 60}m`;
-}
+function formatDate(d: string) { return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }); }
+function formatDuration(s?: number) { if (!s) return ""; const m = Math.floor(s / 60); return m < 60 ? `${m}m` : `${Math.floor(m / 60)}h ${m % 60}m`; }
 function scoreColor(s: number) { return s >= 75 ? "text-emerald-400" : s >= 50 ? "text-blue-400" : s >= 25 ? "text-amber-400" : "text-slate-500"; }
-function scoreBg(s: number) { return s >= 75 ? "bg-emerald-400/10" : s >= 50 ? "bg-blue-400/10" : s >= 25 ? "bg-amber-400/10" : "bg-slate-500/10"; }
 function scoreLabel(s: number) { return s >= 75 ? "Strong" : s >= 50 ? "Moderate" : s >= 25 ? "Weak" : "Cold"; }
 
 function interactionIcon(type: InteractionType) {
-  switch (type) {
-    case "call": return <Phone size={13} />;
-    case "email": return <Mail size={13} />;
-    case "meeting": return <Users size={13} />;
-    case "text": return <MessageSquare size={13} />;
-    case "social": return <Globe size={13} />;
-    case "event": return <Calendar size={13} />;
-    case "note": return <StickyNote size={13} />;
-    case "gift": return <Gift size={13} />;
-    case "referral": return <ArrowLeft size={13} />;
-    case "deal": return <Briefcase size={13} />;
-    case "photo": return <Camera size={13} />;
-    case "milestone": return <Star size={13} />;
-    default: return <Activity size={13} />;
-  }
+  const map: Record<string, React.ReactNode> = {
+    call: <Phone size={13} />, email: <Mail size={13} />, meeting: <Users size={13} />,
+    text: <MessageSquare size={13} />, social: <Globe size={13} />, event: <Calendar size={13} />,
+    note: <StickyNote size={13} />, gift: <Gift size={13} />, referral: <ArrowLeft size={13} />,
+    deal: <Briefcase size={13} />, photo: <Camera size={13} />, milestone: <Star size={13} />,
+  };
+  return map[type] || <Activity size={13} />;
 }
 function interactionColor(type: InteractionType) {
-  switch (type) {
-    case "call": return "bg-green-500/10 text-green-400";
-    case "email": return "bg-blue-500/10 text-blue-400";
-    case "meeting": return "bg-indigo-500/10 text-indigo-400";
-    case "text": return "bg-cyan-500/10 text-cyan-400";
-    case "social": return "bg-pink-500/10 text-pink-400";
-    case "gift": return "bg-amber-500/10 text-amber-400";
-    case "milestone": return "bg-yellow-500/10 text-yellow-400";
-    default: return "bg-white/[0.05] text-slate-400";
-  }
+  const map: Record<string, string> = {
+    call: "bg-green-500/10 text-green-400", email: "bg-blue-500/10 text-blue-400",
+    meeting: "bg-indigo-500/10 text-indigo-400", text: "bg-cyan-500/10 text-cyan-400",
+    social: "bg-pink-500/10 text-pink-400", gift: "bg-amber-500/10 text-amber-400",
+    milestone: "bg-yellow-500/10 text-yellow-400",
+  };
+  return map[type] || "bg-white/[0.05] text-slate-400";
 }
 
-const CITY_COORDS: Record<string, [number, number]> = {
-  "Louisville": [-85.7585, 38.2527], "Charlotte": [-80.8431, 35.2271],
-  "New York": [-74.006, 40.7128], "Remote": [-98.5795, 39.8283],
-  "San Francisco": [-122.4194, 37.7749], "Nashville": [-86.7816, 36.1627],
-};
+// ─── Inline Editable Field ───
+function InlineField({ value, field, onSave, placeholder, className: cls, type = "text" }: {
+  value?: string; field: string; onSave: (field: string, val: string) => void;
+  placeholder?: string; className?: string; type?: string;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value ?? "");
+  const inputRef = useRef<HTMLInputElement>(null);
 
-// ─── All tabs ───
-const TABS = [
-  { id: "overview", label: "Overview", icon: Sparkles },
-  { id: "activity", label: "Activity", icon: Activity },
-  { id: "calls", label: "Calls", icon: Phone },
-  { id: "messages", label: "Messages", icon: MessageSquare },
-  { id: "email", label: "Email", icon: Mail },
-  { id: "photos", label: "Photos", icon: Camera },
-  { id: "calendar", label: "Calendar", icon: Calendar },
-  { id: "weekly", label: "Weekly", icon: BarChart3 },
-  { id: "connections", label: "Connections", icon: Users },
-  { id: "factbook", label: "Fact Book", icon: BookUser },
-  { id: "notes", label: "Notes", icon: StickyNote },
-  { id: "opportunities", label: "Opps", icon: Target },
-  { id: "briefing", label: "AI Briefing", icon: Brain },
-] as const;
+  useEffect(() => { if (editing) { setDraft(value ?? ""); setTimeout(() => inputRef.current?.focus(), 0); } }, [editing, value]);
 
-type TabId = typeof TABS[number]["id"];
-
-// ─── Location Map ───
-function LocationMap({ city }: { city?: string }) {
-  const coords = city ? CITY_COORDS[city] : null;
-  if (!city) return null;
-  const option = {
-    backgroundColor: "transparent",
-    grid: { left: 0, right: 0, top: 0, bottom: 0 },
-    xAxis: { show: false, min: -130, max: -65 },
-    yAxis: { show: false, min: 24, max: 50 },
-    series: [
-      { type: "scatter", data: Array.from({ length: 40 }, () => [-130 + Math.random() * 65, 24 + Math.random() * 26]), symbolSize: 1.5, itemStyle: { color: "rgba(255,255,255,0.06)" }, silent: true },
-      ...(coords ? [{ type: "effectScatter", data: [[coords[0], coords[1]]], symbolSize: 10, rippleEffect: { brushType: "stroke", scale: 5, period: 3 }, itemStyle: { color: "#2093FF", shadowBlur: 20, shadowColor: "#2093FF" }, zlevel: 1 }] : []),
-    ],
+  const commit = () => {
+    setEditing(false);
+    if (draft !== (value ?? "")) onSave(field, draft);
   };
+
+  if (editing) {
+    return (
+      <input ref={inputRef} type={type} value={draft}
+        onChange={e => setDraft(e.target.value)}
+        onBlur={commit}
+        onKeyDown={e => { if (e.key === "Enter") commit(); if (e.key === "Escape") setEditing(false); }}
+        className={cn("bg-white/[0.06] border border-blue-500/30 rounded px-2 py-0.5 outline-none text-white", cls)}
+        placeholder={placeholder}
+      />
+    );
+  }
+
   return (
-    <div className="w-full h-[140px] rounded-lg overflow-hidden bg-gradient-to-b from-white/[0.02] to-transparent border border-white/[0.06] relative">
-      <ReactEChartsCore option={option} style={{ height: "100%", width: "100%" }} opts={{ renderer: "canvas" }} notMerge />
-      <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-[#0a0a0f] to-transparent pointer-events-none" />
-    </div>
+    <span onClick={() => setEditing(true)}
+      className={cn("cursor-pointer hover:bg-white/[0.06] rounded px-1 -mx-1 transition-colors", !value && "text-slate-600 italic", cls)}
+      title="Click to edit">
+      {value || placeholder || "—"}
+    </span>
   );
 }
 
-// ─── Weekly Heatmap ───
-function WeeklyHeatmap({ interactions }: { interactions: RolodexContact["interactions"] }) {
-  // Build 52 weeks of data
+// ─── Activity Sparkline (ECharts) ───
+function ActivityChart({ interactions }: { interactions: RolodexContact["interactions"] }) {
   const now = Date.now();
-  const weeks: number[] = Array(52).fill(0);
-  interactions.forEach(i => {
-    const w = Math.floor((now - new Date(i.date).getTime()) / (7 * 86400000));
-    if (w >= 0 && w < 52) weeks[51 - w]++;
-  });
-  const max = Math.max(...weeks, 1);
-  const dayLabels = ["", "Mon", "", "Wed", "", "Fri", ""];
-  const monthLabels: string[] = [];
-  for (let i = 0; i < 52; i++) {
-    const d = new Date(now - (51 - i) * 7 * 86400000);
-    monthLabels.push(i % 4 === 0 ? d.toLocaleDateString("en-US", { month: "short" }) : "");
+  // Last 12 weeks, one bar per week
+  const weeks: { label: string; count: number }[] = [];
+  for (let i = 11; i >= 0; i--) {
+    const start = now - (i + 1) * 7 * 86400000;
+    const end = now - i * 7 * 86400000;
+    const count = interactions.filter(int => {
+      const t = new Date(int.date).getTime();
+      return t >= start && t < end;
+    }).length;
+    const d = new Date(end);
+    weeks.push({ label: d.toLocaleDateString("en-US", { month: "short", day: "numeric" }), count });
   }
+
   const option = {
     backgroundColor: "transparent",
-    tooltip: { trigger: "item", formatter: (p: { value: number[] }) => `Week ${p.value[0] + 1}: ${p.value[1]} interactions` },
-    grid: { left: 40, right: 10, top: 30, bottom: 20 },
-    xAxis: { type: "category", data: monthLabels, axisLine: { show: false }, axisTick: { show: false }, axisLabel: { color: "#64748B", fontSize: 10 }, splitLine: { show: false } },
-    yAxis: { type: "category", data: [""], axisLine: { show: false }, axisTick: { show: false }, axisLabel: { show: false }, splitLine: { show: false } },
-    visualMap: { min: 0, max, show: false, inRange: { color: ["rgba(32,147,255,0.05)", "rgba(32,147,255,0.2)", "rgba(32,147,255,0.4)", "rgba(32,147,255,0.6)", "#2093FF"] } },
-    series: [{ type: "heatmap", data: weeks.map((v, i) => [i, 0, v]), label: { show: false }, itemStyle: { borderWidth: 2, borderColor: "#0a0a0f", borderRadius: 3 }, emphasis: { itemStyle: { shadowBlur: 10, shadowColor: "#2093FF" } } }],
+    tooltip: { trigger: "axis", backgroundColor: "#1a1a2e", borderColor: "rgba(255,255,255,0.08)", textStyle: { color: "#e2e8f0", fontSize: 11 }, formatter: (p: any[]) => `${p[0].name}<br/>${p[0].value} interactions` },
+    grid: { left: 0, right: 0, top: 8, bottom: 20 },
+    xAxis: { type: "category", data: weeks.map(w => w.label), axisLine: { show: false }, axisTick: { show: false }, axisLabel: { color: "#475569", fontSize: 9, interval: 2 }, splitLine: { show: false } },
+    yAxis: { type: "value", show: false },
+    series: [{
+      type: "bar",
+      data: weeks.map(w => w.count),
+      barWidth: "60%",
+      itemStyle: {
+        borderRadius: [3, 3, 0, 0],
+        color: { type: "linear", x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: "#2093FF" }, { offset: 1, color: "rgba(32,147,255,0.3)" }] }
+      },
+      emphasis: { itemStyle: { color: "#3ba3ff" } },
+    }],
   };
+
+  return <ReactEChartsCore option={option} style={{ height: "100%", width: "100%" }} opts={{ renderer: "canvas" }} notMerge />;
+}
+
+// ─── Score Ring (SVG) ───
+function ScoreRing({ score, size = 72 }: { score: number; size?: number }) {
+  const r = (size - 8) / 2;
+  const circ = 2 * Math.PI * r;
+  const offset = circ * (1 - score / 100);
+  const color = score >= 75 ? "#34D399" : score >= 50 ? "#60A5FA" : score >= 25 ? "#FBBF24" : "#64748B";
   return (
-    <div className="w-full h-[100px]">
-      <ReactEChartsCore option={option} style={{ height: "100%", width: "100%" }} opts={{ renderer: "canvas" }} notMerge />
+    <div className="relative" style={{ width: size, height: size }}>
+      <svg width={size} height={size} className="-rotate-90">
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth={4} />
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth={4}
+          strokeDasharray={circ} strokeDashoffset={offset} strokeLinecap="round"
+          style={{ transition: "stroke-dashoffset 0.6s ease" }} />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="text-[20px] font-bold font-mono" style={{ color }}>{score}</span>
+      </div>
     </div>
   );
 }
@@ -195,7 +185,7 @@ function ScoreBreakdown({ signals }: { signals: { label: string; value: number; 
         <div key={s.label} className="flex items-center gap-3">
           <span className="text-[11px] text-slate-500 w-24">{s.label} ({s.weight}%)</span>
           <div className="flex-1 h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
-            <div className="h-full rounded-full transition-all" style={{ width: `${s.value}%`, backgroundColor: s.value >= 75 ? "#34D399" : s.value >= 50 ? "#60A5FA" : s.value >= 25 ? "#FBBF24" : "#64748B" }} />
+            <div className="h-full rounded-full transition-all duration-500" style={{ width: `${s.value}%`, backgroundColor: s.value >= 75 ? "#34D399" : s.value >= 50 ? "#60A5FA" : s.value >= 25 ? "#FBBF24" : "#64748B" }} />
           </div>
           <span className="text-[11px] text-slate-400 w-8 text-right font-mono">{s.value}</span>
         </div>
@@ -204,31 +194,31 @@ function ScoreBreakdown({ signals }: { signals: { label: string; value: number; 
   );
 }
 
-// ─── Editable Field ───
-function EditableField({ label, value, field, editing, draft, setDraft, type = "text" }: {
-  label: string; value?: string; field: string; editing: boolean;
-  draft: Record<string, any>; setDraft: (d: Record<string, any>) => void; type?: string;
-}) {
-  if (editing) {
-    return (
-      <div className="flex items-center justify-between gap-2">
-        <span className="text-[11px] text-slate-500 shrink-0">{label}</span>
-        <input type={type} value={draft[field] ?? value ?? ""}
-          onChange={e => setDraft({ ...draft, [field]: e.target.value })}
-          className="text-[12px] text-white bg-white/[0.06] border border-white/[0.1] rounded px-2 py-1 text-right max-w-[60%] outline-none focus:border-blue-500/40" />
-      </div>
-    );
-  }
-  if (!value) return null;
+// ─── Location Map ───
+function LocationMap({ city, state }: { city?: string; state?: string }) {
+  if (!city) return null;
+  const query = encodeURIComponent(`${city}${state ? `, ${state}` : ""}`);
   return (
-    <div className="flex items-center justify-between">
-      <span className="text-[11px] text-slate-500">{label}</span>
-      <span className="text-[11px] text-slate-300 text-right max-w-[60%]">{value}</span>
-    </div>
+    <iframe
+      key={`${city}-${state}`}
+      src={`https://www.google.com/maps?q=${query}&output=embed&z=13`}
+      style={{ width: "100%", height: "100%", border: 0, filter: "invert(1) hue-rotate(180deg) brightness(0.8) contrast(1.2) saturate(0.3)" }}
+      loading="lazy" referrerPolicy="no-referrer"
+    />
   );
 }
 
-// ─── Main Contact Page ───
+// ─── Tabs ───
+const TABS = [
+  { id: "overview", label: "Overview", icon: Sparkles },
+  { id: "timeline", label: "Timeline", icon: Activity },
+  { id: "notes", label: "Notes & Facts", icon: BookUser },
+  { id: "connections", label: "Connections", icon: Users },
+  { id: "ai", label: "AI Briefing", icon: Brain },
+] as const;
+type TabId = typeof TABS[number]["id"];
+
+// ─── Main Page ───
 export default function ContactPage() {
   const params = useParams();
   const router = useRouter();
@@ -239,13 +229,9 @@ export default function ContactPage() {
   const [activeTab, setActiveTab] = useState<TabId>("overview");
   const [showScoreDetail, setShowScoreDetail] = useState(false);
   const [activityFilter, setActivityFilter] = useState<InteractionType | "all">("all");
-  const [activitySort, setActivitySort] = useState<"newest" | "oldest">("newest");
   const [noteSearch, setNoteSearch] = useState("");
-  const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState<Record<string, any>>({});
-  const [saving, setSaving] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
 
-  // Fetch contact data
   useEffect(() => {
     Promise.all([
       fetch(`/api/rolodex/${contactId}`).then(r => r.json()),
@@ -257,316 +243,171 @@ export default function ContactPage() {
     }).catch(() => setLoading(false));
   }, [contactId]);
 
-  const saveEdits = useCallback(async () => {
+  // Auto-save any field on blur
+  const saveField = useCallback(async (field: string, value: string) => {
     if (!contact) return;
-    setSaving(true);
+    const updated = { ...contact, [field]: value, updatedAt: new Date().toISOString() };
+    setContact(updated);
     try {
       const res = await fetch(`/api/rolodex/${contact.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(draft),
+        method: "PUT", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ [field]: value }),
       });
       const data = await res.json();
       if (data.contact) setContact(data.contact);
-      setEditing(false);
-      setDraft({});
     } catch (e) { console.error(e); }
-    setSaving(false);
-  }, [contact, draft]);
+  }, [contact]);
+
+  // Generate AI summary
+  const generateSummary = useCallback(async () => {
+    if (!contact) return;
+    setAiLoading(true);
+    try {
+      const res = await fetch(`/api/rolodex/${contact.id}/ai-summary`, { method: "POST" });
+      const data = await res.json();
+      if (data.summary) setContact({ ...contact, aiSummary: data.summary });
+    } catch (e) { console.error(e); }
+    setAiLoading(false);
+  }, [contact]);
 
   const scoreData = useMemo(() => contact ? calculateScore(contact) : null, [contact]);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-[80vh]">
-        <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+  if (loading) return <div className="flex items-center justify-center h-[80vh]"><div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" /></div>;
+  if (!contact || !scoreData) return (
+    <div className="flex items-center justify-center h-[80vh]">
+      <div className="text-center">
+        <Users size={48} className="mx-auto mb-4 text-slate-600" />
+        <p className="text-[16px] text-white mb-2">Person not found</p>
+        <Link href="/rolodex" className="text-[13px] text-blue-400 hover:text-blue-300">← Back to Rolodex</Link>
       </div>
-    );
-  }
-
-  if (!contact || !scoreData) {
-    return (
-      <div className="flex items-center justify-center h-[80vh]">
-        <div className="text-center">
-          <Users size={48} className="mx-auto mb-4 text-slate-600" />
-          <p className="text-[16px] text-white mb-2">Person not found</p>
-          <Link href="/rolodex" className="text-[13px] text-blue-400 hover:text-blue-300">← Back to Rolodex</Link>
-        </div>
-      </div>
-    );
-  }
+    </div>
+  );
 
   const calls = contact.interactions.filter(i => i.type === "call");
-  const emails = contact.interactions.filter(i => i.type === "email");
-  const messages = contact.interactions.filter(i => i.type === "text");
-  const meetings = contact.interactions.filter(i => i.type === "meeting");
-  const photos = contact.interactions.filter(i => i.type === "photo");
   const totalCallTime = calls.reduce((s, c) => s + (c.duration ?? 0), 0);
   const connectedContacts = allContacts.filter(c => contact.connections.includes(c.id));
-
   const filteredActivity = contact.interactions
     .filter(i => activityFilter === "all" || i.type === activityFilter)
-    .sort((a, b) => activitySort === "newest" ? b.date.localeCompare(a.date) : a.date.localeCompare(b.date));
-
+    .sort((a, b) => b.date.localeCompare(a.date));
   const filteredNotes = contact.notes
     .filter(n => !noteSearch || n.content.toLowerCase().includes(noteSearch.toLowerCase()))
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    .sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || b.createdAt.localeCompare(a.createdAt));
 
   const oppStatusColors: Record<string, string> = {
-    open: "text-blue-400 bg-blue-400/10",
-    "in-progress": "text-amber-400 bg-amber-400/10",
-    won: "text-emerald-400 bg-emerald-400/10",
-    lost: "text-red-400 bg-red-400/10",
+    open: "text-blue-400 bg-blue-400/10", "in-progress": "text-amber-400 bg-amber-400/10",
+    won: "text-emerald-400 bg-emerald-400/10", lost: "text-red-400 bg-red-400/10",
     "on-hold": "text-slate-400 bg-slate-400/10",
   };
 
   return (
     <div className="min-h-screen">
-      {/* ─── Back nav ─── */}
+      {/* ─── Breadcrumb ─── */}
       <div className="sticky top-0 z-20 bg-[#0a0a0f]/90 backdrop-blur-md border-b border-white/[0.06]">
         <div className="flex items-center gap-3 px-6 py-3">
           <Link href="/rolodex" className="flex items-center gap-2 text-[13px] text-slate-400 hover:text-white transition-colors">
-            <ArrowLeft size={15} />
-            <span>Rolodex</span>
+            <ArrowLeft size={15} /> Rolodex
           </Link>
           <ChevronRight size={12} className="text-slate-600" />
           <span className="text-[13px] text-white font-medium">{getFullName(contact)}</span>
-          <div className="ml-auto flex items-center gap-2">
-            {editing ? (
-              <>
-                <button onClick={() => { setEditing(false); setDraft({}); }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] text-slate-400 hover:text-white border border-white/[0.08] transition-colors">
-                  <X size={13} /> Cancel
-                </button>
-                <button onClick={saveEdits} disabled={saving}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] bg-blue-600 hover:bg-blue-500 text-white transition-colors disabled:opacity-50">
-                  <Save size={13} /> {saving ? "Saving..." : "Save"}
-                </button>
-              </>
-            ) : (
-              <button onClick={() => setEditing(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] text-slate-400 hover:text-white border border-white/[0.08] hover:border-white/[0.15] transition-colors">
-                <Pencil size={13} /> Edit
-              </button>
-            )}
-          </div>
         </div>
       </div>
 
       <div className="max-w-[1200px] mx-auto px-6 py-6">
-        {/* ═══════ PROFILE HEADER ═══════ */}
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Left: Avatar + core info */}
-          <div className="flex-1">
+        {/* ═══════ HERO HEADER ═══════ */}
+        <div className="flex flex-col lg:flex-row gap-6 mb-6">
+          {/* Left: Identity */}
+          <div className="flex-1 min-w-0">
             <div className="flex items-start gap-5">
-              <div className="w-20 h-20 rounded-2xl flex items-center justify-center text-2xl font-bold shrink-0 border border-white/[0.08]"
+              {/* Avatar */}
+              <div className="w-[72px] h-[72px] rounded-2xl flex items-center justify-center text-[24px] font-bold shrink-0 border border-white/[0.08]"
                 style={{ backgroundColor: `${RELATIONSHIP_TYPE_COLORS[contact.relationshipType]}12`, color: RELATIONSHIP_TYPE_COLORS[contact.relationshipType] }}>
                 {getInitials(contact)}
               </div>
               <div className="flex-1 min-w-0">
-                {editing ? (
-                  <div className="flex gap-2 mb-1">
-                    <input value={draft.firstName ?? contact.firstName} onChange={e => setDraft({ ...draft, firstName: e.target.value })}
-                      className="text-[22px] font-bold text-white bg-white/[0.06] border border-white/[0.1] rounded px-2 py-0.5 outline-none focus:border-blue-500/40 w-[45%]" placeholder="First" />
-                    <input value={draft.lastName ?? contact.lastName} onChange={e => setDraft({ ...draft, lastName: e.target.value })}
-                      className="text-[22px] font-bold text-white bg-white/[0.06] border border-white/[0.1] rounded px-2 py-0.5 outline-none focus:border-blue-500/40 w-[45%]" placeholder="Last" />
-                  </div>
-                ) : (
-                  <h1 className="text-[24px] font-bold text-white tracking-tight">{getFullName(contact)}</h1>
-                )}
-                {editing ? (
-                  <div className="flex gap-2 mt-1">
-                    <input value={draft.title ?? contact.title ?? ""} onChange={e => setDraft({ ...draft, title: e.target.value })}
-                      placeholder="Title" className="text-[13px] text-slate-300 bg-white/[0.06] border border-white/[0.1] rounded px-2 py-1 outline-none focus:border-blue-500/40 w-[40%]" />
-                    <input value={draft.company ?? contact.company ?? ""} onChange={e => setDraft({ ...draft, company: e.target.value })}
-                      placeholder="Company" className="text-[13px] text-slate-300 bg-white/[0.06] border border-white/[0.1] rounded px-2 py-1 outline-none focus:border-blue-500/40 w-[50%]" />
-                  </div>
-                ) : (contact.title || contact.company) ? (
-                  <p className="text-[14px] text-slate-400 mt-1">
-                    {contact.title}{contact.title && contact.company ? " at " : ""}{contact.company}
-                  </p>
-                ) : null}
-                <div className="flex items-center gap-2.5 mt-2.5 flex-wrap">
+                {/* Name — click to edit */}
+                <div className="flex items-baseline gap-2">
+                  <InlineField value={contact.firstName} field="firstName" onSave={saveField} placeholder="First" className="text-[22px] font-bold tracking-tight" />
+                  <InlineField value={contact.lastName} field="lastName" onSave={saveField} placeholder="Last" className="text-[22px] font-bold tracking-tight" />
+                </div>
+                {/* Title & Company */}
+                <div className="flex items-center gap-1 mt-0.5 text-[13px] text-slate-400">
+                  <InlineField value={contact.title} field="title" onSave={saveField} placeholder="Title" className="text-[13px] text-slate-400" />
+                  <span className="text-slate-600">at</span>
+                  <InlineField value={contact.company} field="company" onSave={saveField} placeholder="Company" className="text-[13px] text-slate-400" />
+                </div>
+                {/* Badges */}
+                <div className="flex items-center gap-2 mt-2.5 flex-wrap">
                   <span className="px-2.5 py-1 rounded-md text-[11px] font-medium"
                     style={{ backgroundColor: `${RELATIONSHIP_TYPE_COLORS[contact.relationshipType]}15`, color: RELATIONSHIP_TYPE_COLORS[contact.relationshipType] }}>
                     {RELATIONSHIP_TYPE_LABELS[contact.relationshipType]}
                   </span>
                   {contact.city && (
-                    <span className="flex items-center gap-1 text-[12px] text-slate-500">
-                      <MapPin size={11} /> {contact.city}{contact.state ? `, ${contact.state}` : ""}
+                    <span className="flex items-center gap-1 text-[11px] text-slate-500">
+                      <MapPin size={10} />
+                      <InlineField value={contact.city} field="city" onSave={saveField} placeholder="City" className="text-[11px] text-slate-500" />
+                      {contact.state && <>,&nbsp;<InlineField value={contact.state} field="state" onSave={saveField} placeholder="ST" className="text-[11px] text-slate-500 w-8" /></>}
                     </span>
                   )}
-                  {contact.college && (
-                    <span className="flex items-center gap-1 text-[12px] text-slate-500">
-                      <BookUser size={11} /> {contact.college}
-                    </span>
-                  )}
-                  {contact.spouse && (
-                    <span className="flex items-center gap-1 text-[12px] text-slate-500">
-                      <Heart size={11} /> {contact.spouse}
-                    </span>
-                  )}
+                  {contact.tags.map(t => (
+                    <span key={t} className="px-2 py-0.5 rounded-full bg-white/[0.04] border border-white/[0.06] text-[10px] text-slate-500">{t}</span>
+                  ))}
                 </div>
-                {/* Contact links */}
-                <div className="flex items-center gap-3 mt-3 flex-wrap">
-                  {editing ? (
-                    <>
-                      <div className="flex items-center gap-1.5">
-                        <Mail size={12} className="text-slate-500" />
-                        <input value={draft.email ?? contact.email ?? ""} onChange={e => setDraft({ ...draft, email: e.target.value })}
-                          placeholder="email" className="text-[12px] text-slate-300 bg-white/[0.06] border border-white/[0.1] rounded px-2 py-1 outline-none focus:border-blue-500/40 w-48" />
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <Phone size={12} className="text-slate-500" />
-                        <input value={draft.phone ?? contact.phone ?? ""} onChange={e => setDraft({ ...draft, phone: e.target.value })}
-                          placeholder="phone" className="text-[12px] text-slate-300 bg-white/[0.06] border border-white/[0.1] rounded px-2 py-1 outline-none focus:border-blue-500/40 w-36" />
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      {contact.email && (
-                        <a href={`mailto:${contact.email}`} className="flex items-center gap-1.5 text-[12px] text-slate-400 hover:text-blue-400 transition-colors">
-                          <Mail size={12} /> {contact.email}
-                        </a>
-                      )}
-                      {contact.phone && (
-                        <a href={`tel:${contact.phone}`} className="flex items-center gap-1.5 text-[12px] text-slate-400 hover:text-green-400 transition-colors">
-                          <Phone size={12} /> {contact.phone}
-                        </a>
-                      )}
-                    </>
-                  )}
+                {/* Contact info — all inline editable */}
+                <div className="flex items-center gap-4 mt-3 flex-wrap">
+                  <div className="flex items-center gap-1.5 text-[12px] text-slate-400">
+                    <Mail size={12} className="text-slate-500 shrink-0" />
+                    <InlineField value={contact.email} field="email" onSave={saveField} placeholder="email" className="text-[12px] text-slate-400" />
+                  </div>
+                  <div className="flex items-center gap-1.5 text-[12px] text-slate-400">
+                    <Phone size={12} className="text-slate-500 shrink-0" />
+                    <InlineField value={contact.phone} field="phone" onSave={saveField} placeholder="phone" className="text-[12px] text-slate-400" />
+                  </div>
                 </div>
-                {/* Social links */}
-                <div className="flex items-center gap-2 mt-2">
-                  {contact.website && <a href={contact.website} target="_blank" className="p-1.5 rounded-md bg-white/[0.04] border border-white/[0.06] text-slate-500 hover:text-white transition-colors"><Globe size={13} /></a>}
-                  {contact.linkedin && <a href={`https://${contact.linkedin}`} target="_blank" className="p-1.5 rounded-md bg-white/[0.04] border border-white/[0.06] text-slate-500 hover:text-white transition-colors text-[11px] font-bold">in</a>}
-                  {contact.twitter && <a href={`https://twitter.com/${contact.twitter}`} target="_blank" className="p-1.5 rounded-md bg-white/[0.04] border border-white/[0.06] text-slate-500 hover:text-white transition-colors text-[11px] font-bold">𝕏</a>}
-                  {contact.instagram && <a href={`https://instagram.com/${contact.instagram}`} target="_blank" className="p-1.5 rounded-md bg-white/[0.04] border border-white/[0.06] text-slate-500 hover:text-white transition-colors"><Camera size={13} /></a>}
+                {/* Social icons */}
+                <div className="flex items-center gap-1.5 mt-2">
+                  {contact.website && <a href={contact.website} target="_blank" className="p-1.5 rounded-md bg-white/[0.03] border border-white/[0.06] text-slate-500 hover:text-white transition-colors"><Globe size={12} /></a>}
+                  {contact.linkedin && <a href={`https://${contact.linkedin}`} target="_blank" className="p-1.5 rounded-md bg-white/[0.03] border border-white/[0.06] text-slate-500 hover:text-white transition-colors text-[10px] font-bold">in</a>}
+                  {contact.twitter && <a href={`https://twitter.com/${contact.twitter}`} target="_blank" className="p-1.5 rounded-md bg-white/[0.03] border border-white/[0.06] text-slate-500 hover:text-white transition-colors text-[10px] font-bold">𝕏</a>}
+                  {contact.instagram && <a href={`https://instagram.com/${contact.instagram}`} target="_blank" className="p-1.5 rounded-md bg-white/[0.03] border border-white/[0.06] text-slate-500 hover:text-white transition-colors"><Camera size={12} /></a>}
                 </div>
               </div>
-            </div>
-
-            {/* Tags + Groups */}
-            <div className="flex items-center gap-2 mt-4 flex-wrap">
-              {(contact.groups ?? []).map(g => (
-                <span key={g} className="px-2.5 py-1 rounded-md bg-blue-500/[0.08] border border-blue-500/[0.15] text-[11px] font-medium text-blue-300">{g}</span>
-              ))}
-              {contact.tags.map(t => (
-                <span key={t} className="px-2 py-0.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-[11px] text-slate-400">{t}</span>
-              ))}
             </div>
           </div>
 
-          {/* Right: Score + Meta cards */}
-          <div className="w-full lg:w-[280px] space-y-3 shrink-0">
-            {/* Score card */}
-            <button onClick={() => setShowScoreDetail(!showScoreDetail)}
-              className="w-full p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] text-left hover:border-white/[0.12] transition-all">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className={cn("text-[28px] font-bold font-mono", scoreColor(scoreData.score))}>{scoreData.score}</div>
-                  <div>
-                    <p className="text-[10px] text-slate-500 uppercase tracking-wider">Score</p>
-                    <p className={cn("text-[13px] font-medium", scoreColor(scoreData.score))}>{scoreLabel(scoreData.score)}</p>
-                  </div>
-                </div>
-                <ChevronDown size={14} className={cn("text-slate-500 transition-transform", showScoreDetail && "rotate-180")} />
-              </div>
-              {showScoreDetail && (
-                <div className="mt-3 pt-3 border-t border-white/[0.06]">
-                  <ScoreBreakdown signals={scoreData.signals} />
-                </div>
-              )}
+          {/* Right: Score Ring + Quick Stats */}
+          <div className="flex items-start gap-5 lg:gap-6 shrink-0">
+            <button onClick={() => setShowScoreDetail(!showScoreDetail)} className="flex flex-col items-center gap-1 group">
+              <ScoreRing score={scoreData.score} />
+              <span className={cn("text-[11px] font-medium", scoreColor(scoreData.score))}>{scoreLabel(scoreData.score)}</span>
             </button>
-
-            {/* Meta properties */}
-            <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] space-y-2">
-              <div className="flex justify-between">
-                <span className="text-[11px] text-slate-500">Created</span>
-                <span className="text-[11px] text-slate-300">{formatDate(contact.createdAt)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-[11px] text-slate-500">Last Contact</span>
-                <span className="text-[11px] text-slate-300">{timeAgo(contact.lastContactedAt)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-[11px] text-slate-500">Updated</span>
-                <span className="text-[11px] text-slate-300">{timeAgo(contact.updatedAt)}</span>
-              </div>
-              <EditableField label="Follow Up" value={contact.nextFollowUp?.split("T")[0]} field="nextFollowUp" editing={editing} draft={draft} setDraft={setDraft} type="date" />
-              <EditableField label="Introduced By" value={contact.introducedBy} field="introducedBy" editing={editing} draft={draft} setDraft={setDraft} />
-              <EditableField label="How We Met" value={contact.howWeMet} field="howWeMet" editing={editing} draft={draft} setDraft={setDraft} />
-              <EditableField label="Source" value={contact.source} field="source" editing={editing} draft={draft} setDraft={setDraft} />
-              <EditableField label="City" value={contact.city} field="city" editing={editing} draft={draft} setDraft={setDraft} />
-              <EditableField label="State" value={contact.state} field="state" editing={editing} draft={draft} setDraft={setDraft} />
-              <EditableField label="Birthday" value={contact.birthday} field="birthday" editing={editing} draft={draft} setDraft={setDraft} type="date" />
-              <EditableField label="College" value={contact.college} field="college" editing={editing} draft={draft} setDraft={setDraft} />
-              <EditableField label="Spouse" value={contact.spouse} field="spouse" editing={editing} draft={draft} setDraft={setDraft} />
-              <EditableField label="Website" value={contact.website} field="website" editing={editing} draft={draft} setDraft={setDraft} />
-              <EditableField label="LinkedIn" value={contact.linkedin} field="linkedin" editing={editing} draft={draft} setDraft={setDraft} />
-              <EditableField label="Instagram" value={contact.instagram} field="instagram" editing={editing} draft={draft} setDraft={setDraft} />
-              <EditableField label="Twitter" value={contact.twitter} field="twitter" editing={editing} draft={draft} setDraft={setDraft} />
-              <EditableField label="Interests" value={contact.interests} field="interests" editing={editing} draft={draft} setDraft={setDraft} />
+            <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-[11px]">
+              <div><span className="text-slate-500">Last contact</span><p className="text-white font-medium">{timeAgo(contact.lastContactedAt)}</p></div>
+              <div><span className="text-slate-500">Interactions</span><p className="text-white font-medium">{contact.interactions.length}</p></div>
+              <div><span className="text-slate-500">Follow up</span><p className="text-white font-medium">{contact.nextFollowUp ? formatDate(contact.nextFollowUp) : "—"}</p></div>
+              <div><span className="text-slate-500">Talk time</span><p className="text-white font-medium">{formatDuration(totalCallTime) || "0m"}</p></div>
             </div>
-
-            {/* Mutual connections */}
-            {connectedContacts.length > 0 && (
-              <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-                <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-2">Connections ({connectedContacts.length})</p>
-                <div className="space-y-2">
-                  {connectedContacts.map(cc => (
-                    <Link key={cc.id} href={`/rolodex/${cc.id}`} className="flex items-center gap-2.5 group">
-                      <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-semibold shrink-0"
-                        style={{ backgroundColor: `${RELATIONSHIP_TYPE_COLORS[cc.relationshipType]}15`, color: RELATIONSHIP_TYPE_COLORS[cc.relationshipType] }}>
-                        {getInitials(cc)}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-[12px] text-slate-300 group-hover:text-white truncate transition-colors">{getFullName(cc)}</p>
-                        <p className="text-[10px] text-slate-500">{cc.company || RELATIONSHIP_TYPE_LABELS[cc.relationshipType]}</p>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         </div>
 
-        {/* ═══════ SMART SUMMARY STRIP ═══════ */}
-        {contact.aiBriefing && (
-          <div className="mt-6 p-4 rounded-xl bg-blue-500/[0.04] border border-blue-500/[0.1]">
-            <div className="flex items-center gap-2 mb-2">
-              <Sparkles size={14} className="text-blue-400" />
-              <span className="text-[12px] font-semibold text-blue-400 uppercase tracking-wider">Relationship Briefing</span>
-            </div>
-            <p className="text-[13px] text-slate-300 leading-relaxed">{contact.aiSummary}</p>
-            {/* Open loops / action items */}
-            {contact.aiInsights.filter(i => i.actionable && !i.dismissed).length > 0 && (
-              <div className="mt-3 pt-3 border-t border-blue-500/[0.1] space-y-1.5">
-                {contact.aiInsights.filter(i => i.actionable && !i.dismissed).map(insight => (
-                  <div key={insight.id} className="flex items-start gap-2">
-                    <Lightbulb size={12} className="text-amber-400 shrink-0 mt-0.5" />
-                    <span className="text-[12px] text-slate-300">{insight.content}</span>
-                  </div>
-                ))}
-              </div>
-            )}
+        {/* Score breakdown (expandable) */}
+        {showScoreDetail && (
+          <div className="mb-6 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] max-w-md">
+            <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-3">Score Breakdown</p>
+            <ScoreBreakdown signals={scoreData.signals} />
           </div>
         )}
 
         {/* ═══════ TABS ═══════ */}
-        <div className="mt-6 border-b border-white/[0.06] overflow-x-auto">
-          <div className="flex gap-0 min-w-max">
+        <div className="border-b border-white/[0.06] mb-6">
+          <div className="flex gap-0">
             {TABS.map(tab => {
               const Icon = tab.icon;
               return (
                 <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                  className={cn("flex items-center gap-1.5 px-4 py-3 text-[12px] font-medium border-b-2 transition-all whitespace-nowrap",
+                  className={cn("flex items-center gap-1.5 px-5 py-3 text-[12px] font-medium border-b-2 transition-all",
                     activeTab === tab.id ? "border-blue-500 text-white" : "border-transparent text-slate-500 hover:text-slate-300"
                   )}>
-                  <Icon size={13} />
-                  {tab.label}
+                  <Icon size={13} /> {tab.label}
                 </button>
               );
             })}
@@ -574,22 +415,50 @@ export default function ContactPage() {
         </div>
 
         {/* ═══════ TAB CONTENT ═══════ */}
-        <div className="mt-6 pb-20">
+        <div className="pb-20">
 
           {/* ── OVERVIEW ── */}
           {activeTab === "overview" && (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 space-y-5">
+              {/* Main column */}
+              <div className="lg:col-span-2 space-y-6">
                 {/* AI Summary */}
-                {contact.aiSummary && (
-                  <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-                    <div className="flex items-center gap-1.5 mb-2">
+                <div className="p-4 rounded-xl bg-gradient-to-br from-blue-500/[0.04] to-transparent border border-blue-500/[0.08]">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-1.5">
                       <Sparkles size={13} className="text-blue-400" />
                       <span className="text-[11px] font-semibold text-blue-400 uppercase tracking-wider">AI Overview</span>
                     </div>
-                    <p className="text-[13px] text-slate-300 leading-relaxed">{contact.aiSummary}</p>
+                    <button onClick={generateSummary} disabled={aiLoading}
+                      className="text-[10px] text-slate-500 hover:text-blue-400 transition-colors disabled:opacity-50">
+                      {aiLoading ? "Generating..." : contact.aiSummary ? "Refresh" : "Generate"}
+                    </button>
                   </div>
-                )}
+                  {contact.aiSummary ? (
+                    <p className="text-[13px] text-slate-300 leading-relaxed">{contact.aiSummary}</p>
+                  ) : (
+                    <p className="text-[12px] text-slate-500 italic">Click Generate to create an AI relationship summary.</p>
+                  )}
+                  {/* Action items */}
+                  {contact.aiInsights?.filter(i => i.actionable && !i.dismissed).length > 0 && (
+                    <div className="mt-3 pt-3 border-t border-blue-500/[0.08] space-y-1.5">
+                      {contact.aiInsights.filter(i => i.actionable && !i.dismissed).map(insight => (
+                        <div key={insight.id} className="flex items-start gap-2">
+                          <Lightbulb size={11} className="text-amber-400 shrink-0 mt-0.5" />
+                          <span className="text-[11px] text-slate-400">{insight.content}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Activity Chart */}
+                <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+                  <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-2">Activity — Last 12 Weeks</p>
+                  <div className="h-[120px]">
+                    <ActivityChart interactions={contact.interactions} />
+                  </div>
+                </div>
 
                 {/* Pinned notes */}
                 {contact.notes.filter(n => n.pinned).length > 0 && (
@@ -597,35 +466,39 @@ export default function ContactPage() {
                     <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.1em] mb-2">📌 Pinned Notes</p>
                     <div className="space-y-2">
                       {contact.notes.filter(n => n.pinned).map(note => (
-                        <div key={note.id} className="p-3 rounded-lg bg-amber-500/[0.04] border border-amber-500/[0.1]">
+                        <div key={note.id} className="p-3 rounded-lg bg-amber-500/[0.04] border border-amber-500/[0.08]">
                           <p className="text-[12px] text-slate-300 leading-relaxed">{note.content}</p>
-                          <p className="text-[10px] text-slate-600 mt-2">{timeAgo(note.createdAt)}</p>
+                          <p className="text-[10px] text-slate-600 mt-1.5">{timeAgo(note.createdAt)}</p>
                         </div>
                       ))}
                     </div>
                   </div>
                 )}
 
-                {/* Recent timeline */}
+                {/* Recent activity */}
                 <div>
                   <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.1em] mb-3">Recent Activity</p>
                   <div className="space-y-0.5">
                     {contact.interactions.sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5).map(int => (
-                      <div key={int.id} className="flex gap-3 py-2.5 border-b border-white/[0.04] last:border-0">
-                        <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0", interactionColor(int.type))}>
+                      <div key={int.id} className="flex gap-3 py-2.5 border-b border-white/[0.03] last:border-0">
+                        <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center shrink-0", interactionColor(int.type))}>
                           {interactionIcon(int.type)}
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-[12px] text-white">{int.summary}</p>
                           <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-[11px] text-slate-500">{timeAgo(int.date)}</span>
-                            {int.duration && <span className="text-[11px] text-slate-600">· {formatDuration(int.duration)}</span>}
-                            {int.location && <span className="text-[11px] text-slate-600">· {int.location}</span>}
+                            <span className="text-[10px] text-slate-500">{timeAgo(int.date)}</span>
+                            {int.duration && <span className="text-[10px] text-slate-600">· {formatDuration(int.duration)}</span>}
                           </div>
                         </div>
                       </div>
                     ))}
                   </div>
+                  {contact.interactions.length > 5 && (
+                    <button onClick={() => setActiveTab("timeline")} className="text-[11px] text-blue-400 hover:text-blue-300 mt-2 transition-colors">
+                      View all {contact.interactions.length} interactions →
+                    </button>
+                  )}
                 </div>
 
                 {/* Opportunities */}
@@ -634,13 +507,15 @@ export default function ContactPage() {
                     <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.1em] mb-2">Opportunities</p>
                     <div className="space-y-2">
                       {contact.opportunities.map(opp => (
-                        <div key={opp.id} className="p-3 rounded-lg bg-white/[0.02] border border-white/[0.06]">
-                          <div className="flex items-center justify-between">
+                        <div key={opp.id} className="p-3 rounded-lg bg-white/[0.02] border border-white/[0.06] flex items-center justify-between">
+                          <div>
                             <span className="text-[13px] font-medium text-white">{opp.title}</span>
+                            {opp.nextStep && <p className="text-[11px] text-slate-500 mt-0.5">→ {opp.nextStep}</p>}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {opp.value && <span className="text-[13px] font-bold font-mono text-emerald-400">{opp.value}</span>}
                             <span className={cn("px-2 py-0.5 rounded text-[10px] font-medium", oppStatusColors[opp.status])}>{opp.status}</span>
                           </div>
-                          {opp.value && <p className="text-[12px] text-emerald-400 mt-1">{opp.value}</p>}
-                          {opp.nextStep && <p className="text-[11px] text-slate-400 mt-1">→ {opp.nextStep}</p>}
                         </div>
                       ))}
                     </div>
@@ -648,315 +523,204 @@ export default function ContactPage() {
                 )}
               </div>
 
-              {/* Right column */}
+              {/* Sidebar column */}
               <div className="space-y-5">
+                {/* Details card — all inline editable */}
+                <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] space-y-2.5">
+                  <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Details</p>
+                  {[
+                    { label: "Birthday", field: "birthday", type: "date" },
+                    { label: "Spouse", field: "spouse" },
+                    { label: "College", field: "college" },
+                    { label: "Interests", field: "interests" },
+                    { label: "Source", field: "source" },
+                    { label: "Introduced By", field: "introducedBy" },
+                    { label: "How We Met", field: "howWeMet" },
+                    { label: "Instagram", field: "instagram" },
+                    { label: "LinkedIn", field: "linkedin" },
+                    { label: "Website", field: "website" },
+                  ].map(({ label, field, type }) => (
+                    <div key={field} className="flex items-center justify-between gap-2">
+                      <span className="text-[11px] text-slate-500 shrink-0">{label}</span>
+                      <InlineField
+                        value={(contact as any)[field]}
+                        field={field}
+                        onSave={saveField}
+                        placeholder="—"
+                        className="text-[11px] text-slate-300 text-right"
+                        type={type}
+                      />
+                    </div>
+                  ))}
+                </div>
+
                 {/* Key facts */}
                 {contact.facts.length > 0 && (
                   <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-                    <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.1em] mb-3">Key Facts</p>
+                    <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-2">Key Facts</p>
                     <div className="space-y-2">
-                      {contact.facts.slice(0, 6).map(f => (
-                        <div key={f.id} className="flex justify-between">
+                      {contact.facts.map(f => (
+                        <div key={f.id} className="flex justify-between gap-2">
                           <span className="text-[11px] text-slate-500">{f.label}</span>
-                          <span className="text-[12px] text-slate-300 text-right max-w-[55%]">{f.value}</span>
+                          <span className="text-[11px] text-slate-300 text-right">{f.value}</span>
                         </div>
                       ))}
                     </div>
                   </div>
                 )}
 
-                {/* Location */}
+                {/* Location map */}
                 {contact.city && (
                   <div className="rounded-xl bg-white/[0.02] border border-white/[0.06] overflow-hidden">
                     <div className="px-4 pt-3 pb-2">
-                      <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.1em]">Location</p>
+                      <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Location</p>
                       <p className="text-[12px] text-slate-300 mt-1">{contact.city}{contact.state ? `, ${contact.state}` : ""}</p>
                     </div>
-                    <LocationMap city={contact.city} />
+                    <div className="h-[120px]">
+                      <LocationMap city={contact.city} state={contact.state} />
+                    </div>
                   </div>
                 )}
 
-                {/* Quick stats */}
-                <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-                  <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.1em] mb-3">Activity Stats</p>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <p className="text-[18px] font-bold font-mono text-white">{contact.interactions.length}</p>
-                      <p className="text-[10px] text-slate-500">Interactions</p>
-                    </div>
-                    <div>
-                      <p className="text-[18px] font-bold font-mono text-white">{calls.length}</p>
-                      <p className="text-[10px] text-slate-500">Calls</p>
-                    </div>
-                    <div>
-                      <p className="text-[18px] font-bold font-mono text-white">{contact.notes.length}</p>
-                      <p className="text-[10px] text-slate-500">Notes</p>
-                    </div>
-                    <div>
-                      <p className="text-[18px] font-bold font-mono text-white">{formatDuration(totalCallTime) || "0m"}</p>
-                      <p className="text-[10px] text-slate-500">Talk Time</p>
+                {/* Connections */}
+                {connectedContacts.length > 0 && (
+                  <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+                    <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-2">Connections ({connectedContacts.length})</p>
+                    <div className="space-y-2">
+                      {connectedContacts.map(cc => (
+                        <Link key={cc.id} href={`/rolodex/${cc.id}`} className="flex items-center gap-2.5 group">
+                          <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-semibold shrink-0"
+                            style={{ backgroundColor: `${RELATIONSHIP_TYPE_COLORS[cc.relationshipType]}15`, color: RELATIONSHIP_TYPE_COLORS[cc.relationshipType] }}>
+                            {getInitials(cc)}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-[12px] text-slate-300 group-hover:text-white truncate transition-colors">{getFullName(cc)}</p>
+                            <p className="text-[10px] text-slate-500">{cc.company || RELATIONSHIP_TYPE_LABELS[cc.relationshipType]}</p>
+                          </div>
+                        </Link>
+                      ))}
                     </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           )}
 
-          {/* ── ACTIVITY ── */}
-          {activeTab === "activity" && (
+          {/* ── TIMELINE ── */}
+          {activeTab === "timeline" && (
             <div>
-              <div className="flex items-center gap-3 mb-4 flex-wrap">
-                <div className="flex bg-white/[0.04] rounded-lg border border-white/[0.08] p-0.5 gap-0.5 flex-wrap">
+              {/* Filter bar */}
+              <div className="flex items-center gap-3 mb-5 flex-wrap">
+                <div className="flex bg-white/[0.03] rounded-lg border border-white/[0.06] p-0.5 gap-0.5 flex-wrap">
                   {(["all", "call", "email", "meeting", "text", "social"] as const).map(f => (
                     <button key={f} onClick={() => setActivityFilter(f)}
                       className={cn("px-2.5 py-1 rounded-md text-[11px] transition-all",
-                        activityFilter === f ? "bg-white/[0.1] text-white" : "text-slate-500 hover:text-white"
+                        activityFilter === f ? "bg-white/[0.08] text-white" : "text-slate-500 hover:text-white"
                       )}>
                       {f === "all" ? "All" : INTERACTION_TYPE_LABELS[f]}
                     </button>
                   ))}
                 </div>
-                <button onClick={() => setActivitySort(s => s === "newest" ? "oldest" : "newest")}
-                  className="text-[11px] text-slate-500 hover:text-white transition-colors">
-                  {activitySort === "newest" ? "Newest first ↓" : "Oldest first ↑"}
-                </button>
+                <span className="text-[11px] text-slate-500 ml-auto">{filteredActivity.length} interactions</span>
               </div>
-              <div className="space-y-0.5">
-                {filteredActivity.map(int => (
-                  <div key={int.id} className="flex gap-3 py-3 border-b border-white/[0.04] last:border-0">
-                    <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0", interactionColor(int.type))}>
-                      {interactionIcon(int.type)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] text-slate-500 uppercase">{INTERACTION_TYPE_LABELS[int.type]}</span>
-                        {int.direction && <span className="text-[10px] text-slate-600">· {int.direction}</span>}
-                        {int.sentiment && (
-                          <span className={cn("text-[10px]",
-                            int.sentiment === "positive" ? "text-emerald-400" : int.sentiment === "negative" ? "text-red-400" : "text-slate-500"
-                          )}>· {int.sentiment}</span>
-                        )}
+              {/* Timeline */}
+              <div className="relative">
+                <div className="absolute left-[15px] top-0 bottom-0 w-px bg-white/[0.04]" />
+                <div className="space-y-0">
+                  {filteredActivity.map(int => (
+                    <div key={int.id} className="flex gap-4 py-3 relative">
+                      <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0 z-10 relative", interactionColor(int.type))}>
+                        {interactionIcon(int.type)}
                       </div>
-                      <p className="text-[13px] text-white mt-0.5">{int.summary}</p>
-                      {int.details && <p className="text-[12px] text-slate-400 mt-1 leading-relaxed">{int.details}</p>}
-                      <div className="flex items-center gap-3 mt-1.5">
-                        <span className="text-[11px] text-slate-500">{formatDate(int.date)}</span>
-                        {int.duration && <span className="text-[11px] text-slate-600">{formatDuration(int.duration)}</span>}
-                        {int.location && <span className="text-[11px] text-slate-600 flex items-center gap-1"><MapPin size={10} />{int.location}</span>}
-                        {int.subject && <span className="text-[11px] text-slate-600 flex items-center gap-1"><Mail size={10} />{int.subject}</span>}
+                      <div className="flex-1 min-w-0 pb-3 border-b border-white/[0.03]">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] text-slate-500 uppercase font-medium">{INTERACTION_TYPE_LABELS[int.type]}</span>
+                          {int.direction && <span className="text-[10px] text-slate-600">· {int.direction}</span>}
+                          {int.sentiment && (
+                            <span className={cn("text-[10px]",
+                              int.sentiment === "positive" ? "text-emerald-400" : int.sentiment === "negative" ? "text-red-400" : "text-slate-500"
+                            )}>· {int.sentiment}</span>
+                          )}
+                        </div>
+                        <p className="text-[13px] text-white mt-0.5">{int.summary}</p>
+                        {int.details && <p className="text-[12px] text-slate-400 mt-1 leading-relaxed">{int.details}</p>}
+                        <div className="flex items-center gap-3 mt-1.5">
+                          <span className="text-[10px] text-slate-500">{formatDate(int.date)}</span>
+                          {int.duration && <span className="text-[10px] text-slate-600">{formatDuration(int.duration)}</span>}
+                          {int.location && <span className="text-[10px] text-slate-600 flex items-center gap-1"><MapPin size={9} />{int.location}</span>}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-                {filteredActivity.length === 0 && (
-                  <div className="flex flex-col items-center py-16 text-slate-500">
-                    <Activity size={32} className="mb-3 opacity-30" />
-                    <p className="text-[13px]">No activity matching filter</p>
-                  </div>
-                )}
+                  ))}
+                </div>
               </div>
+              {filteredActivity.length === 0 && (
+                <div className="flex flex-col items-center py-16 text-slate-500">
+                  <Activity size={32} className="mb-3 opacity-30" />
+                  <p className="text-[13px]">No activity matching filter</p>
+                </div>
+              )}
             </div>
           )}
 
-          {/* ── CALLS ── */}
-          {activeTab === "calls" && (
-            <div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-                {[
-                  { label: "Total Calls", value: calls.length.toString() },
-                  { label: "Total Talk Time", value: formatDuration(totalCallTime) || "0m" },
-                  { label: "Inbound", value: calls.filter(c => c.direction === "inbound").length.toString() },
-                  { label: "Outbound", value: calls.filter(c => c.direction === "outbound").length.toString() },
-                ].map(s => (
-                  <div key={s.label} className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-                    <p className="text-[20px] font-bold font-mono text-white">{s.value}</p>
-                    <p className="text-[10px] text-slate-500 uppercase tracking-wider mt-1">{s.label}</p>
+          {/* ── NOTES & FACTS ── */}
+          {activeTab === "notes" && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Notes */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Notes ({contact.notes.length})</p>
+                  <div className="relative">
+                    <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500" />
+                    <input type="text" value={noteSearch} onChange={e => setNoteSearch(e.target.value)}
+                      placeholder="Search..."
+                      className="pl-8 pr-3 py-1.5 bg-white/[0.04] border border-white/[0.06] rounded-lg text-[11px] text-white placeholder:text-slate-500 outline-none focus:border-blue-500/30 w-36" />
                   </div>
-                ))}
-              </div>
-              <div className="space-y-0.5">
-                {calls.sort((a, b) => b.date.localeCompare(a.date)).map(c => (
-                  <div key={c.id} className="flex gap-3 py-3 border-b border-white/[0.04]">
-                    <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0",
-                      c.direction === "missed" ? "bg-red-500/10 text-red-400" :
-                      c.direction === "inbound" ? "bg-blue-500/10 text-blue-400" :
-                      "bg-green-500/10 text-green-400"
+                </div>
+                <div className="space-y-2">
+                  {filteredNotes.map(note => (
+                    <div key={note.id} className={cn("p-3 rounded-lg border",
+                      note.pinned ? "bg-amber-500/[0.04] border-amber-500/[0.08]" : "bg-white/[0.02] border-white/[0.06]"
                     )}>
-                      <Phone size={13} />
+                      {note.pinned && <span className="text-[9px] text-amber-400 font-medium">📌 PINNED</span>}
+                      <p className="text-[12px] text-slate-300 leading-relaxed mt-0.5">{note.content}</p>
+                      <p className="text-[10px] text-slate-600 mt-1.5">{formatDate(note.createdAt)}</p>
                     </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] text-slate-500 uppercase">{c.direction ?? "call"}</span>
-                        {c.duration && <span className="text-[11px] text-slate-500">· {formatDuration(c.duration)}</span>}
+                  ))}
+                  {filteredNotes.length === 0 && (
+                    <div className="flex flex-col items-center py-12 text-slate-500">
+                      <StickyNote size={28} className="mb-2 opacity-30" />
+                      <p className="text-[12px]">{noteSearch ? "No matching notes" : "No notes yet"}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Facts */}
+              <div>
+                <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-3">Fact Book ({contact.facts.length})</p>
+                {contact.facts.length > 0 ? (
+                  <div className="space-y-4">
+                    {Array.from(new Set(contact.facts.map(f => f.category))).map(cat => (
+                      <div key={cat}>
+                        <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-2">{cat}</p>
+                        <div className="rounded-lg bg-white/[0.02] border border-white/[0.06] divide-y divide-white/[0.04]">
+                          {contact.facts.filter(f => f.category === cat).map(f => (
+                            <div key={f.id} className="flex items-center justify-between px-3 py-2.5">
+                              <span className="text-[11px] text-slate-400">{f.label}</span>
+                              <span className="text-[12px] text-white font-medium text-right max-w-[55%]">{f.value}</span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                      <p className="text-[13px] text-white mt-0.5">{c.summary}</p>
-                      <p className="text-[11px] text-slate-500 mt-1">{formatDate(c.date)}</p>
-                    </div>
+                    ))}
                   </div>
-                ))}
-                {calls.length === 0 && (
-                  <div className="flex flex-col items-center py-16 text-slate-500">
-                    <Phone size={32} className="mb-3 opacity-30" />
-                    <p className="text-[13px]">No call history</p>
+                ) : (
+                  <div className="flex flex-col items-center py-12 text-slate-500">
+                    <BookUser size={28} className="mb-2 opacity-30" />
+                    <p className="text-[12px]">No facts recorded</p>
                   </div>
                 )}
-              </div>
-            </div>
-          )}
-
-          {/* ── MESSAGES ── */}
-          {activeTab === "messages" && (
-            <div>
-              <div className="space-y-0.5">
-                {messages.sort((a, b) => b.date.localeCompare(a.date)).map(m => (
-                  <div key={m.id} className="flex gap-3 py-3 border-b border-white/[0.04]">
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-cyan-500/10 text-cyan-400">
-                      <MessageSquare size={13} />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-[13px] text-white">{m.summary}</p>
-                      <p className="text-[11px] text-slate-500 mt-1">{formatDate(m.date)}</p>
-                    </div>
-                  </div>
-                ))}
-                {messages.length === 0 && (
-                  <div className="flex flex-col items-center py-16 text-slate-500">
-                    <MessageSquare size={32} className="mb-3 opacity-30" />
-                    <p className="text-[13px]">No message history</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* ── EMAIL ── */}
-          {activeTab === "email" && (
-            <div>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
-                <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-                  <p className="text-[20px] font-bold font-mono text-white">{emails.length}</p>
-                  <p className="text-[10px] text-slate-500 uppercase tracking-wider mt-1">Total Emails</p>
-                </div>
-                <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-                  <p className="text-[20px] font-bold font-mono text-amber-400">{emails.filter(e => e.needsReply).length}</p>
-                  <p className="text-[10px] text-slate-500 uppercase tracking-wider mt-1">Needs Reply</p>
-                </div>
-                <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-                  <p className="text-[20px] font-bold font-mono text-white">{emails.filter(e => e.hasAttachment).length}</p>
-                  <p className="text-[10px] text-slate-500 uppercase tracking-wider mt-1">With Attachments</p>
-                </div>
-              </div>
-              <div className="space-y-0.5">
-                {emails.sort((a, b) => b.date.localeCompare(a.date)).map(e => (
-                  <div key={e.id} className={cn("flex gap-3 py-3 border-b border-white/[0.04]", e.needsReply && "bg-amber-500/[0.02]")}>
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-blue-500/10 text-blue-400">
-                      <Mail size={13} />
-                    </div>
-                    <div className="flex-1">
-                      {e.subject && <p className="text-[11px] text-slate-500 font-medium">{e.subject}</p>}
-                      <p className="text-[13px] text-white mt-0.5">{e.summary}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-[11px] text-slate-500">{formatDate(e.date)}</span>
-                        {e.needsReply && <span className="text-[10px] text-amber-400 font-medium">⚡ Needs reply</span>}
-                        {e.hasAttachment && <span className="text-[10px] text-slate-500">📎</span>}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                {emails.length === 0 && (
-                  <div className="flex flex-col items-center py-16 text-slate-500">
-                    <Mail size={32} className="mb-3 opacity-30" />
-                    <p className="text-[13px]">No email history</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* ── PHOTOS ── */}
-          {activeTab === "photos" && (
-            <div className="flex flex-col items-center py-16 text-slate-500">
-              <Camera size={40} className="mb-3 opacity-20" />
-              <p className="text-[14px] text-white mb-1">Photos & Memories</p>
-              <p className="text-[12px]">No photos yet. Photos with this person will appear here.</p>
-            </div>
-          )}
-
-          {/* ── CALENDAR ── */}
-          {activeTab === "calendar" && (
-            <div>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
-                <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-                  <p className="text-[20px] font-bold font-mono text-white">{meetings.length}</p>
-                  <p className="text-[10px] text-slate-500 uppercase tracking-wider mt-1">Total Meetings</p>
-                </div>
-                <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-                  <p className="text-[20px] font-bold font-mono text-white">{meetings.filter(m => m.recurring).length}</p>
-                  <p className="text-[10px] text-slate-500 uppercase tracking-wider mt-1">Recurring</p>
-                </div>
-                <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-                  <p className="text-[20px] font-bold font-mono text-white">{formatDuration(meetings.reduce((s, m) => s + (m.duration ?? 0), 0)) || "0m"}</p>
-                  <p className="text-[10px] text-slate-500 uppercase tracking-wider mt-1">Total Time</p>
-                </div>
-              </div>
-              <div className="space-y-0.5">
-                {meetings.sort((a, b) => b.date.localeCompare(a.date)).map(m => (
-                  <div key={m.id} className="flex gap-3 py-3 border-b border-white/[0.04]">
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-indigo-500/10 text-indigo-400">
-                      <Calendar size={13} />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-[13px] text-white">{m.summary}</p>
-                      <div className="flex items-center gap-2 mt-1 flex-wrap">
-                        <span className="text-[11px] text-slate-500">{formatDate(m.date)}</span>
-                        {m.duration && <span className="text-[11px] text-slate-600">{formatDuration(m.duration)}</span>}
-                        {m.location && <span className="text-[11px] text-slate-600 flex items-center gap-1"><MapPin size={10} />{m.location}</span>}
-                        {m.recurring && <span className="text-[10px] text-blue-400">🔁 Recurring</span>}
-                      </div>
-                      {m.attendees && m.attendees.length > 0 && (
-                        <p className="text-[11px] text-slate-500 mt-1">With: {m.attendees.join(", ")}</p>
-                      )}
-                    </div>
-                  </div>
-                ))}
-                {meetings.length === 0 && (
-                  <div className="flex flex-col items-center py-16 text-slate-500">
-                    <Calendar size={32} className="mb-3 opacity-30" />
-                    <p className="text-[13px]">No meeting history</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* ── WEEKLY ACTIVITY ── */}
-          {activeTab === "weekly" && (
-            <div>
-              <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] mb-6">
-                <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-3">52-Week Activity</p>
-                <WeeklyHeatmap interactions={contact.interactions} />
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-                  <p className="text-[20px] font-bold font-mono text-white">{contact.interactions.length}</p>
-                  <p className="text-[10px] text-slate-500 uppercase tracking-wider mt-1">All Time</p>
-                </div>
-                <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-                  <p className="text-[20px] font-bold font-mono text-white">
-                    {contact.interactions.filter(i => (Date.now() - new Date(i.date).getTime()) / 86400000 <= 30).length}
-                  </p>
-                  <p className="text-[10px] text-slate-500 uppercase tracking-wider mt-1">Last 30 Days</p>
-                </div>
-                <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-                  <p className="text-[20px] font-bold font-mono text-white">
-                    {contact.interactions.filter(i => (Date.now() - new Date(i.date).getTime()) / 86400000 <= 7).length}
-                  </p>
-                  <p className="text-[10px] text-slate-500 uppercase tracking-wider mt-1">Last 7 Days</p>
-                </div>
-                <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-                  <p className="text-[20px] font-bold font-mono text-white">{new Set(contact.interactions.map(i => i.type)).size}</p>
-                  <p className="text-[10px] text-slate-500 uppercase tracking-wider mt-1">Channels Used</p>
-                </div>
               </div>
             </div>
           )}
@@ -965,26 +729,19 @@ export default function ContactPage() {
           {activeTab === "connections" && (
             <div>
               {connectedContacts.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                   {connectedContacts.map(cc => (
                     <Link key={cc.id} href={`/rolodex/${cc.id}`}
-                      className="flex items-center gap-4 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.12] transition-all group">
-                      <div className="w-12 h-12 rounded-xl flex items-center justify-center text-[14px] font-bold shrink-0"
+                      className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.12] transition-all group">
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center text-[13px] font-bold shrink-0"
                         style={{ backgroundColor: `${RELATIONSHIP_TYPE_COLORS[cc.relationshipType]}12`, color: RELATIONSHIP_TYPE_COLORS[cc.relationshipType] }}>
                         {getInitials(cc)}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[14px] font-medium text-white group-hover:text-blue-300 transition-colors">{getFullName(cc)}</p>
-                        <p className="text-[12px] text-slate-500">{cc.title ? `${cc.title} at ` : ""}{cc.company || RELATIONSHIP_TYPE_LABELS[cc.relationshipType]}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="px-1.5 py-0.5 rounded text-[10px]"
-                            style={{ backgroundColor: `${RELATIONSHIP_TYPE_COLORS[cc.relationshipType]}15`, color: RELATIONSHIP_TYPE_COLORS[cc.relationshipType] }}>
-                            {RELATIONSHIP_TYPE_LABELS[cc.relationshipType]}
-                          </span>
-                          {cc.city && <span className="text-[10px] text-slate-500">{cc.city}</span>}
-                        </div>
+                        <p className="text-[13px] font-medium text-white group-hover:text-blue-300 transition-colors truncate">{getFullName(cc)}</p>
+                        <p className="text-[11px] text-slate-500 truncate">{cc.title ? `${cc.title} at ` : ""}{cc.company || RELATIONSHIP_TYPE_LABELS[cc.relationshipType]}</p>
                       </div>
-                      <ChevronRight size={14} className="text-slate-600 group-hover:text-white transition-colors" />
+                      <ChevronRight size={13} className="text-slate-600 group-hover:text-white transition-colors shrink-0" />
                     </Link>
                   ))}
                 </div>
@@ -997,127 +754,26 @@ export default function ContactPage() {
             </div>
           )}
 
-          {/* ── FACT BOOK ── */}
-          {activeTab === "factbook" && (
-            <div>
-              {contact.facts.length > 0 ? (
-                <div className="space-y-6">
-                  {Array.from(new Set(contact.facts.map(f => f.category))).map(cat => (
-                    <div key={cat}>
-                      <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.1em] mb-3">{cat}</p>
-                      <div className="rounded-xl bg-white/[0.02] border border-white/[0.06] divide-y divide-white/[0.04]">
-                        {contact.facts.filter(f => f.category === cat).map(f => (
-                          <div key={f.id} className="flex items-center justify-between px-4 py-3">
-                            <span className="text-[12px] text-slate-400">{f.label}</span>
-                            <span className="text-[13px] text-white font-medium text-right max-w-[60%]">{f.value}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="flex flex-col items-center py-16 text-slate-500">
-                  <BookUser size={32} className="mb-3 opacity-30" />
-                  <p className="text-[13px]">No facts recorded yet</p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* ── NOTES ── */}
-          {activeTab === "notes" && (
-            <div>
-              <div className="mb-4">
-                <div className="relative max-w-sm">
-                  <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                  <input type="text" value={noteSearch} onChange={e => setNoteSearch(e.target.value)}
-                    placeholder="Search notes..."
-                    className="w-full pl-9 pr-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-lg text-[12px] text-white placeholder:text-slate-500 outline-none focus:border-blue-500/40" />
-                </div>
-              </div>
-              <div className="space-y-3">
-                {filteredNotes.map(note => (
-                  <div key={note.id} className={cn("p-4 rounded-xl border",
-                    note.pinned ? "bg-amber-500/[0.04] border-amber-500/[0.1]" : "bg-white/[0.02] border-white/[0.06]"
-                  )}>
-                    <div className="flex items-center gap-2 mb-2">
-                      {note.pinned && <span className="text-[10px] text-amber-400 font-medium">📌 Pinned</span>}
-                      {note.category && <span className="px-1.5 py-0.5 rounded text-[10px] bg-white/[0.05] text-slate-400">{note.category}</span>}
-                    </div>
-                    <p className="text-[13px] text-slate-300 leading-relaxed">{note.content}</p>
-                    <p className="text-[11px] text-slate-600 mt-2">{formatDate(note.createdAt)}</p>
-                  </div>
-                ))}
-                {filteredNotes.length === 0 && (
-                  <div className="flex flex-col items-center py-16 text-slate-500">
-                    <StickyNote size={32} className="mb-3 opacity-30" />
-                    <p className="text-[13px]">{noteSearch ? "No matching notes" : "No notes yet"}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* ── OPPORTUNITIES ── */}
-          {activeTab === "opportunities" && (
-            <div>
-              {(contact.opportunities ?? []).length > 0 ? (
-                <div className="space-y-3">
-                  {contact.opportunities.map(opp => (
-                    <div key={opp.id} className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <p className="text-[14px] font-medium text-white">{opp.title}</p>
-                          <div className="flex items-center gap-2 mt-1">
-                            <span className={cn("px-2 py-0.5 rounded text-[10px] font-medium", oppStatusColors[opp.status])}>{opp.status}</span>
-                            <span className="text-[10px] text-slate-500 uppercase">{opp.type}</span>
-                          </div>
-                        </div>
-                        {opp.value && (
-                          <span className="text-[16px] font-bold font-mono text-emerald-400">{opp.value}</span>
-                        )}
-                      </div>
-                      {opp.notes && <p className="text-[12px] text-slate-400 mt-2">{opp.notes}</p>}
-                      {opp.nextStep && (
-                        <div className="flex items-center gap-2 mt-3 pt-2 border-t border-white/[0.06]">
-                          <span className="text-[11px] text-blue-400">→ Next: {opp.nextStep}</span>
-                        </div>
-                      )}
-                      <p className="text-[10px] text-slate-600 mt-2">Updated {timeAgo(opp.updatedAt)}</p>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="flex flex-col items-center py-16 text-slate-500">
-                  <Target size={32} className="mb-3 opacity-30" />
-                  <p className="text-[13px]">No opportunities tracked</p>
-                </div>
-              )}
-            </div>
-          )}
-
           {/* ── AI BRIEFING ── */}
-          {activeTab === "briefing" && (
-            <div>
+          {activeTab === "ai" && (
+            <div className="max-w-2xl">
               {contact.aiBriefing ? (
                 <div className="space-y-5">
-                  <div className="p-5 rounded-xl bg-blue-500/[0.04] border border-blue-500/[0.1]">
+                  <div className="p-5 rounded-xl bg-gradient-to-br from-blue-500/[0.05] to-transparent border border-blue-500/[0.1]">
                     <div className="flex items-center gap-2 mb-3">
-                      <Brain size={16} className="text-blue-400" />
-                      <span className="text-[13px] font-semibold text-blue-400">Pre-Meeting Briefing</span>
+                      <Brain size={15} className="text-blue-400" />
+                      <span className="text-[12px] font-semibold text-blue-400">Pre-Meeting Briefing</span>
                     </div>
-                    <p className="text-[14px] text-slate-300 leading-relaxed whitespace-pre-line">{contact.aiBriefing}</p>
+                    <p className="text-[13px] text-slate-300 leading-relaxed whitespace-pre-line">{contact.aiBriefing}</p>
                   </div>
 
-                  {/* Open loops */}
-                  {contact.aiInsights.filter(i => i.type === "open-loop" || i.actionable).length > 0 && (
+                  {contact.aiInsights.filter(i => i.actionable && !i.dismissed).length > 0 && (
                     <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-                      <p className="text-[10px] font-semibold text-amber-400 uppercase tracking-wider mb-3">⚡ Action Items & Open Loops</p>
+                      <p className="text-[10px] font-semibold text-amber-400 uppercase tracking-wider mb-3">⚡ Action Items</p>
                       <div className="space-y-2">
                         {contact.aiInsights.filter(i => i.actionable && !i.dismissed).map(insight => (
-                          <div key={insight.id} className="flex items-start gap-2.5 py-1.5">
-                            <Lightbulb size={13} className="text-amber-400 shrink-0 mt-0.5" />
+                          <div key={insight.id} className="flex items-start gap-2.5 py-1">
+                            <Lightbulb size={12} className="text-amber-400 shrink-0 mt-0.5" />
                             <div>
                               <p className="text-[12px] text-slate-300">{insight.content}</p>
                               <p className="text-[10px] text-slate-500 mt-0.5">Confidence: {Math.round(insight.confidence * 100)}%</p>
@@ -1128,7 +784,6 @@ export default function ContactPage() {
                     </div>
                   )}
 
-                  {/* Quick facts for the meeting */}
                   {contact.facts.length > 0 && (
                     <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
                       <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-3">📋 Quick Reference</p>
