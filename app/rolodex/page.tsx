@@ -623,83 +623,34 @@ export default function RolodexPage() {
                   )}
                 </div>
 
-                {/* ─── Properties ─── */}
-                <div className="mt-4">
-                  <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.1em] mb-2">Properties</p>
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[12px] text-slate-500">Last Updated</span>
-                      <span className="text-[12px] text-slate-300">{timeAgo(selected.updatedAt)}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[12px] text-slate-500">Created</span>
-                      <span className="text-[12px] text-slate-300">{timeAgo(selected.createdAt)}</span>
-                    </div>
-                    {selected.lastContactedAt && (
-                      <div className="flex items-center justify-between">
-                        <span className="text-[12px] text-slate-500">Last Contact</span>
-                        <span className="text-[12px] text-slate-300">{timeAgo(selected.lastContactedAt)}</span>
-                      </div>
-                    )}
-                    {selected.nextFollowUp && (
-                      <div className="flex items-center justify-between">
-                        <span className="text-[12px] text-slate-500">Follow Up</span>
-                        <span className={cn("text-[12px]", new Date(selected.nextFollowUp) <= new Date() ? "text-amber-400" : "text-slate-300")}>
-                          {timeAgo(selected.nextFollowUp)}
-                        </span>
-                      </div>
-                    )}
-                    {selected.source && (
-                      <div className="flex items-center justify-between">
-                        <span className="text-[12px] text-slate-500">Source</span>
-                        <span className="text-[12px] text-slate-300">{selected.source}</span>
-                      </div>
-                    )}
+                {/* ─── Key Properties (top) ─── */}
+                <div className="mt-4 space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[12px] text-slate-500">Created</span>
+                    <span className="text-[12px] text-slate-300">{timeAgo(selected.createdAt)}</span>
                   </div>
+                  {selected.lastContactedAt && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-[12px] text-slate-500">Last Contact</span>
+                      <span className="text-[12px] text-slate-300">{timeAgo(selected.lastContactedAt)}</span>
+                    </div>
+                  )}
                 </div>
 
-                {/* ─── Groups ─── */}
-                {(selected.groups ?? []).length > 0 && (
-                  <div className="mt-4">
-                    <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.1em] mb-2">Groups</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {(selected.groups ?? []).map(group => (
-                        <span key={group} className="px-2.5 py-1 rounded-md bg-blue-500/[0.08] border border-blue-500/[0.15] text-[11px] font-medium text-blue-300">
-                          {group}
-                        </span>
-                      ))}
+                {/* ─── AI Summary ─── */}
+                {selected.aiSummary && (
+                  <div className="mt-4 p-3 rounded-lg bg-blue-500/[0.06] border border-blue-500/[0.12]">
+                    <div className="flex items-center gap-1.5 mb-1.5">
+                      <Sparkles size={12} className="text-blue-400" />
+                      <span className="text-[11px] font-medium text-blue-400">AI Summary</span>
                     </div>
-                  </div>
-                )}
-
-                {/* ─── Tags ─── */}
-                {selected.tags.length > 0 && (
-                  <div className="mt-3">
-                    <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.1em] mb-2">Tags</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {selected.tags.map(tag => (
-                        <span key={tag} className="px-2 py-0.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-[11px] text-slate-400">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* ─── Location + Map ─── */}
-                {selected.city && (
-                  <div className="mt-4">
-                    <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.1em] mb-2">Location</p>
-                    <p className="text-[12px] text-slate-300 mb-2">
-                      {selected.city}{selected.state ? `, ${selected.state}` : ""}{selected.country ? `, ${selected.country}` : ""}
-                    </p>
-                    <LocationMap city={selected.city} state={selected.state} />
+                    <p className="text-[12px] text-slate-300 leading-relaxed">{selected.aiSummary}</p>
                   </div>
                 )}
               </div>
 
               {/* ─── Tabs ─── */}
-              <div className="flex border-b border-white/[0.06] px-5 mt-4">
+              <div className="flex border-b border-white/[0.06] px-5 mt-0">
                 {(["overview", "activity", "notes", "facts"] as const).map(tab => (
                   <button key={tab} onClick={() => setDrawerTab(tab)}
                     className={cn("px-3 py-2.5 text-[12px] font-medium border-b-2 transition-all capitalize",
@@ -714,16 +665,6 @@ export default function RolodexPage() {
               <div className="px-5 py-4">
                 {drawerTab === "overview" && (
                   <div className="space-y-4">
-                    {selected.aiSummary && (
-                      <div className="p-3 rounded-lg bg-blue-500/[0.06] border border-blue-500/[0.12]">
-                        <div className="flex items-center gap-1.5 mb-1.5">
-                          <Sparkles size={12} className="text-blue-400" />
-                          <span className="text-[11px] font-medium text-blue-400">AI Summary</span>
-                        </div>
-                        <p className="text-[12px] text-slate-300 leading-relaxed">{selected.aiSummary}</p>
-                      </div>
-                    )}
-
                     <div className="space-y-2">
                       <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.1em]">Contact</p>
                       {selected.email && (
@@ -793,6 +734,70 @@ export default function RolodexPage() {
                             <p className="text-[10px] text-slate-600 mt-1.5">{timeAgo(note.createdAt)}</p>
                           </div>
                         ))}
+                      </div>
+                    )}
+
+                    {/* ─── Groups ─── */}
+                    {(selected.groups ?? []).length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.1em]">Groups</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {(selected.groups ?? []).map(group => (
+                            <span key={group} className="px-2.5 py-1 rounded-md bg-blue-500/[0.08] border border-blue-500/[0.15] text-[11px] font-medium text-blue-300">
+                              {group}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* ─── Tags ─── */}
+                    {selected.tags.length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.1em]">Tags</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {selected.tags.map(tag => (
+                            <span key={tag} className="px-2 py-0.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-[11px] text-slate-400">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* ─── Location + Map ─── */}
+                    {selected.city && (
+                      <div className="space-y-2">
+                        <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.1em]">Location</p>
+                        <p className="text-[12px] text-slate-300">
+                          {selected.city}{selected.state ? `, ${selected.state}` : ""}{selected.country ? `, ${selected.country}` : ""}
+                        </p>
+                        <LocationMap city={selected.city} state={selected.state} />
+                      </div>
+                    )}
+
+                    {/* ─── More Properties ─── */}
+                    {(selected.nextFollowUp || selected.source || selected.updatedAt) && (
+                      <div className="space-y-1.5 pt-2 border-t border-white/[0.04]">
+                        <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.1em] mb-1">Details</p>
+                        {selected.nextFollowUp && (
+                          <div className="flex items-center justify-between">
+                            <span className="text-[12px] text-slate-500">Follow Up</span>
+                            <span className={cn("text-[12px]", new Date(selected.nextFollowUp) <= new Date() ? "text-amber-400" : "text-slate-300")}>
+                              {timeAgo(selected.nextFollowUp)}
+                            </span>
+                          </div>
+                        )}
+                        {selected.source && (
+                          <div className="flex items-center justify-between">
+                            <span className="text-[12px] text-slate-500">Source</span>
+                            <span className="text-[12px] text-slate-300">{selected.source}</span>
+                          </div>
+                        )}
+                        <div className="flex items-center justify-between">
+                          <span className="text-[12px] text-slate-500">Last Updated</span>
+                          <span className="text-[12px] text-slate-300">{timeAgo(selected.updatedAt)}</span>
+                        </div>
                       </div>
                     )}
                   </div>
