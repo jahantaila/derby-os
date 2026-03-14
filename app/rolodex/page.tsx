@@ -3,8 +3,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
-  BookUser, Briefcase, Calendar, ChevronRight,
+  BookUser, Briefcase, Calendar, ChevronRight, ExternalLink,
   Clock3, Filter, Globe, Heart, Mail, MapPin, MessageSquare,
   Phone, Plus, Search, Sparkles, Star,
   StickyNote, TrendingUp, Users, X,
@@ -237,6 +238,58 @@ function ScoreBreakdown({ signals }: { signals: { label: string; value: number; 
   );
 }
 
+// ─── Inline Editable Field (click to edit, blur to save) ───
+function InlineField({ label, value, field, contactId, onSaved, type = "text", icon }: {
+  label: string; value?: string; field: string; contactId: string;
+  onSaved: (field: string, value: string) => void; type?: string;
+  icon?: React.ReactNode;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [localVal, setLocalVal] = useState(value ?? "");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => { setLocalVal(value ?? ""); }, [value]);
+  useEffect(() => { if (editing && inputRef.current) inputRef.current.focus(); }, [editing]);
+
+  const save = useCallback(async () => {
+    setEditing(false);
+    if (localVal === (value ?? "")) return;
+    try {
+      await fetch(`/api/rolodex/${contactId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ [field]: localVal || undefined }),
+      });
+      onSaved(field, localVal);
+    } catch {}
+  }, [localVal, value, field, contactId, onSaved]);
+
+  if (editing) {
+    return (
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-[12px] text-slate-500 shrink-0">{label}</span>
+        <input ref={inputRef} type={type} value={localVal}
+          onChange={e => setLocalVal(e.target.value)}
+          onBlur={save}
+          onKeyDown={e => { if (e.key === "Enter") save(); if (e.key === "Escape") { setLocalVal(value ?? ""); setEditing(false); } }}
+          className="text-[12px] text-white bg-white/[0.06] border border-blue-500/30 rounded px-2 py-1 text-right max-w-[60%] outline-none" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center justify-between group cursor-pointer hover:bg-white/[0.03] -mx-1 px-1 rounded transition-colors"
+      onClick={() => setEditing(true)}>
+      <span className="text-[12px] text-slate-500 flex items-center gap-1.5">
+        {icon}{label}
+      </span>
+      <span className="text-[12px] text-slate-300 text-right max-w-[60%]">
+        {value || <span className="text-slate-600 italic text-[11px]">Add...</span>}
+      </span>
+    </div>
+  );
+}
+
 // ─── Main Page ───
 export default function RolodexPage() {
   const [contacts, setContacts] = useState<RolodexContact[]>([]);
@@ -258,6 +311,7 @@ export default function RolodexPage() {
   const [activeRelTypes, setActiveRelTypes] = useState<RelationshipType[]>([]);
   const [drawerTab, setDrawerTab] = useState<"overview" | "activity" | "notes" | "facts">("overview");
   const [showScoreDetail, setShowScoreDetail] = useState(false);
+  const router = useRouter();
   const [showCreate, setShowCreate] = useState(false);
   const [newContact, setNewContact] = useState<Record<string, any>>({});
   const [creating, setCreating] = useState(false);
@@ -291,6 +345,11 @@ export default function RolodexPage() {
   useEffect(() => {
     if (showCreate && newNameRef.current) newNameRef.current.focus();
   }, [showCreate]);
+
+  const onFieldSaved = useCallback((field: string, value: string) => {
+    if (!selectedId) return;
+    setContacts(prev => prev.map(c => c.id === selectedId ? { ...c, [field]: value, updatedAt: new Date().toISOString() } : c));
+  }, [selectedId]);
 
   const selected = useMemo(() => contacts.find(c => c.id === selectedId) ?? null, [contacts, selectedId]);
   const selectedScore = useMemo(() => selected ? calculateScore(selected) : null, [selected]);
@@ -528,7 +587,9 @@ export default function RolodexPage() {
             {viewMode === "table" ? (
               <div className="divide-y divide-white/[0.04]">
                 {filtered.map(c => (
-                  <button key={c.id} onClick={() => { setSelectedId(c.id); setDrawerTab("overview"); setShowScoreDetail(false); }}
+                  <button key={c.id}
+                    onClick={() => { setSelectedId(c.id); setDrawerTab("overview"); setShowScoreDetail(false); }}
+                    onDoubleClick={() => router.push(`/rolodex/${c.id}`)}
                     className={cn("w-full flex items-center gap-4 px-5 py-3 text-left transition-all group",
                       selectedId === c.id ? "bg-blue-500/[0.06]" : "hover:bg-white/[0.03]"
                     )}>
@@ -655,8 +716,14 @@ export default function RolodexPage() {
                   </div>
                 </div>
 
+                {/* View Full Profile link */}
+                <Link href={`/rolodex/${selected.id}`}
+                  className="flex items-center gap-1.5 mt-3 text-[11px] text-blue-400 hover:text-blue-300 transition-colors">
+                  <ExternalLink size={11} /> View Full Profile →
+                </Link>
+
                 {/* ─── Score ─── */}
-                <div className="mt-4 p-3 rounded-lg bg-white/[0.02] border border-white/[0.06]">
+                <div className="mt-3 p-3 rounded-lg bg-white/[0.02] border border-white/[0.06]">
                   <button onClick={() => setShowScoreDetail(!showScoreDetail)} className="w-full flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className={cn("text-[22px] font-bold font-mono", scoreColor(selectedScore.score))}>
@@ -720,65 +787,52 @@ export default function RolodexPage() {
               <div className="px-5 py-4">
                 {drawerTab === "overview" && (
                   <div className="space-y-4">
-                    <div className="space-y-2">
+                    {/* Contact — click to edit */}
+                    <div className="space-y-1.5">
                       <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.1em]">Contact</p>
-                      {selected.email && (
-                        <a href={`mailto:${selected.email}`} className="flex items-center gap-2.5 group">
-                          <Mail size={12} className="text-slate-600 group-hover:text-blue-400 transition-colors" />
-                          <span className="text-[12px] text-slate-300 group-hover:text-white transition-colors">{selected.email}</span>
-                        </a>
-                      )}
-                      {selected.phone && (
-                        <a href={`tel:${selected.phone}`} className="flex items-center gap-2.5 group">
-                          <Phone size={12} className="text-slate-600 group-hover:text-green-400 transition-colors" />
-                          <span className="text-[12px] text-slate-300 group-hover:text-white transition-colors">{selected.phone}</span>
-                        </a>
-                      )}
-                      {selected.website && (
-                        <a href={selected.website} target="_blank" className="flex items-center gap-2.5 group">
-                          <Globe size={12} className="text-slate-600 group-hover:text-blue-400 transition-colors" />
-                          <span className="text-[12px] text-slate-300 group-hover:text-white transition-colors">{selected.website}</span>
-                        </a>
-                      )}
+                      <InlineField label="Email" value={selected.email} field="email" contactId={selected.id} onSaved={onFieldSaved} icon={<Mail size={11} />} />
+                      <InlineField label="Phone" value={selected.phone} field="phone" contactId={selected.id} onSaved={onFieldSaved} icon={<Phone size={11} />} />
+                      <InlineField label="Website" value={selected.website} field="website" contactId={selected.id} onSaved={onFieldSaved} icon={<Globe size={11} />} />
                     </div>
 
-                    {(selected.birthday || selected.spouse || selected.college || selected.interests) && (
-                      <div className="space-y-2">
-                        <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.1em]">Personal</p>
-                        {selected.birthday && (
-                          <div className="flex items-center justify-between">
-                            <span className="text-[12px] text-slate-500">Birthday</span>
-                            <span className="text-[12px] text-slate-300">{selected.birthday}</span>
-                          </div>
-                        )}
-                        {selected.spouse && (
-                          <div className="flex items-center justify-between">
-                            <span className="text-[12px] text-slate-500">Spouse</span>
-                            <span className="text-[12px] text-slate-300">{selected.spouse}</span>
-                          </div>
-                        )}
-                        {selected.college && (
-                          <div className="flex items-center justify-between">
-                            <span className="text-[12px] text-slate-500">College</span>
-                            <span className="text-[12px] text-slate-300">{selected.college}</span>
-                          </div>
-                        )}
-                        {selected.interests && (
-                          <div className="flex items-center justify-between">
-                            <span className="text-[12px] text-slate-500">Interests</span>
-                            <span className="text-[12px] text-slate-300 text-right max-w-[60%]">{selected.interests}</span>
-                          </div>
-                        )}
-                      </div>
-                    )}
+                    {/* Professional — click to edit */}
+                    <div className="space-y-1.5">
+                      <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.1em]">Professional</p>
+                      <InlineField label="Company" value={selected.company} field="company" contactId={selected.id} onSaved={onFieldSaved} />
+                      <InlineField label="Title" value={selected.title} field="title" contactId={selected.id} onSaved={onFieldSaved} />
+                    </div>
 
-                    {selected.howWeMet && (
-                      <div className="space-y-1.5">
-                        <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.1em]">How We Met</p>
-                        <p className="text-[12px] text-slate-300">{selected.howWeMet}</p>
-                        {selected.introducedBy && <p className="text-[11px] text-slate-500">Introduced by {selected.introducedBy}</p>}
-                      </div>
-                    )}
+                    {/* Personal — click to edit */}
+                    <div className="space-y-1.5">
+                      <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.1em]">Personal</p>
+                      <InlineField label="Birthday" value={selected.birthday} field="birthday" contactId={selected.id} onSaved={onFieldSaved} type="date" />
+                      <InlineField label="Spouse" value={selected.spouse} field="spouse" contactId={selected.id} onSaved={onFieldSaved} />
+                      <InlineField label="College" value={selected.college} field="college" contactId={selected.id} onSaved={onFieldSaved} />
+                      <InlineField label="Interests" value={selected.interests} field="interests" contactId={selected.id} onSaved={onFieldSaved} />
+                    </div>
+
+                    {/* Location — click to edit */}
+                    <div className="space-y-1.5">
+                      <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.1em]">Location</p>
+                      <InlineField label="City" value={selected.city} field="city" contactId={selected.id} onSaved={onFieldSaved} />
+                      <InlineField label="State" value={selected.state} field="state" contactId={selected.id} onSaved={onFieldSaved} />
+                    </div>
+
+                    {/* Context — click to edit */}
+                    <div className="space-y-1.5">
+                      <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.1em]">Context</p>
+                      <InlineField label="How We Met" value={selected.howWeMet} field="howWeMet" contactId={selected.id} onSaved={onFieldSaved} />
+                      <InlineField label="Introduced By" value={selected.introducedBy} field="introducedBy" contactId={selected.id} onSaved={onFieldSaved} />
+                      <InlineField label="Source" value={selected.source} field="source" contactId={selected.id} onSaved={onFieldSaved} />
+                    </div>
+
+                    {/* Social — click to edit */}
+                    <div className="space-y-1.5">
+                      <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.1em]">Social</p>
+                      <InlineField label="LinkedIn" value={selected.linkedin} field="linkedin" contactId={selected.id} onSaved={onFieldSaved} />
+                      <InlineField label="Instagram" value={selected.instagram} field="instagram" contactId={selected.id} onSaved={onFieldSaved} />
+                      <InlineField label="Twitter" value={selected.twitter} field="twitter" contactId={selected.id} onSaved={onFieldSaved} />
+                    </div>
 
                     {selected.notes.filter(n => n.pinned).length > 0 && (
                       <div className="space-y-2">
