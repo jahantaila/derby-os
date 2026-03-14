@@ -50,17 +50,6 @@ export const seedClients = [
   { id: "c10", name: "Fresh Garden Cafe", type: "restaurant", monthlyRevenue: 500, services: ["ads", "website"], status: "active", lastContact: "2026-02-27", healthScore: 82, contact: { email: "lisa@freshgarden.com", phone: "555-0110" }, notes: "Organic-focused marketing. Instagram ads doing well." },
 ];
 
-export const seedPipeline = [
-  { id: "d1", name: "Riverside Grill", contact: "Mark Johnson", email: "mark@riversidegrill.com", dealValue: 800, source: "cold-email", stage: "demo-scheduled", daysInStage: 3, notes: "Interested in full website + ads package. Demo on Thursday." },
-  { id: "d2", name: "Thai Orchid", contact: "Suwanna Chen", email: "suwanna@thaiorchid.com", dealValue: 600, source: "referral", stage: "contacted", daysInStage: 5, notes: "Referred by Dragon Palace. Sent initial email." },
-  { id: "d3", name: "Burger Baron", contact: "Dave Smith", email: "dave@burgerbaron.com", dealValue: 1200, source: "cold-email", stage: "proposal-sent", daysInStage: 2, notes: "Multi-location. Wants DerbyFlow + ads for all 3 locations." },
-  { id: "d4", name: "La Maison", contact: "Pierre Dubois", email: "pierre@lamaison.com", dealValue: 900, source: "inbound", stage: "demo-done", daysInStage: 1, notes: "Loved the demo. Sending proposal tomorrow." },
-  { id: "d5", name: "Coast Seafood", contact: "Amy Waters", email: "amy@coastseafood.com", dealValue: 700, source: "cold-email", stage: "lead", daysInStage: 7, notes: "Found via SpotHopper competitor list. High potential." },
-  { id: "d6", name: "Mama Rosa's", contact: "Rosa Martinez", email: "rosa@mamarosas.com", dealValue: 500, source: "referral", stage: "closed-won", daysInStage: 0, notes: "Closed! Starting with website + ads." },
-  { id: "d7", name: "Garden Bistro", contact: "Emily Park", email: "emily@gardenbistro.com", dealValue: 650, source: "cold-email", stage: "closed-lost", daysInStage: 0, notes: "Went with BentoBox. Follow up in 6 months." },
-  { id: "d8", name: "Smoky BBQ House", contact: "Jim Tucker", email: "jim@smokybbq.com", dealValue: 750, source: "inbound", stage: "lead", daysInStage: 2, notes: "Found us on Google. Wants online ordering system." },
-];
-
 export const seedRevenue = {
   mrr: 15000,
   arr: 180000,
