@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import {
   BookUser, Briefcase, Calendar, ChevronRight,
   Clock3, Filter, Globe, Heart, Mail, MapPin, MessageSquare,
@@ -381,6 +382,18 @@ export default function RolodexPage() {
           </div>
         )}
 
+        <div className="px-2 py-1 mt-auto pt-4 border-t border-white/[0.06]">
+          <Link href="/rolodex/groups" className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-[12px] text-slate-500 hover:text-white hover:bg-white/[0.04] transition-all">
+            <Layers size={13} className="opacity-50" /> Groups
+          </Link>
+          <Link href="/rolodex/analytics" className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-[12px] text-slate-500 hover:text-white hover:bg-white/[0.04] transition-all">
+            <TrendingUp size={13} className="opacity-50" /> Analytics
+          </Link>
+          <Link href="/rolodex/reminders" className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-[12px] text-slate-500 hover:text-white hover:bg-white/[0.04] transition-all">
+            <Clock3 size={13} className="opacity-50" /> Reminders
+          </Link>
+        </div>
+
         <div className="px-2 py-1 mt-2">
           <p className="px-2 py-1.5 text-[11px] font-medium text-slate-500 uppercase tracking-wider">Tags</p>
           {Array.from(new Set(contacts.flatMap(c => c.tags))).sort().slice(0, 8).map(tag => (
@@ -580,7 +593,7 @@ export default function RolodexPage() {
                     {getInitials(selected)}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-[16px] font-semibold text-white">{getFullName(selected)}</h3>
+                    <Link href={`/rolodex/${selected.id}`} className="text-[16px] font-semibold text-white hover:text-blue-300 transition-colors">{getFullName(selected)}</Link>
                     {selected.company && (
                       <p className="text-[13px] text-slate-400 mt-0.5">
                         {selected.title ? `${selected.title} at ` : ""}{selected.company}

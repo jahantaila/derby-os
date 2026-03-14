@@ -1,17 +1,8 @@
 // ─── Relationship Types ───
 export type RelationshipType =
-  | "client"
-  | "prospect"
-  | "partner"
-  | "vendor"
-  | "mentor"
-  | "investor"
-  | "friend"
-  | "family"
-  | "industry"
-  | "team"
-  | "school"
-  | "other";
+  | "client" | "prospect" | "partner" | "vendor" | "mentor"
+  | "investor" | "friend" | "family" | "industry" | "team"
+  | "school" | "other";
 
 export const RELATIONSHIP_TYPES: RelationshipType[] = [
   "client", "prospect", "partner", "vendor", "mentor",
@@ -35,17 +26,20 @@ export const RELATIONSHIP_TYPE_COLORS: Record<RelationshipType, string> = {
 // ─── Interaction Types ───
 export type InteractionType =
   | "call" | "email" | "meeting" | "text" | "social"
-  | "event" | "note" | "gift" | "referral" | "deal";
+  | "event" | "note" | "gift" | "referral" | "deal"
+  | "photo" | "reminder" | "milestone";
 
 export const INTERACTION_TYPES: InteractionType[] = [
   "call", "email", "meeting", "text", "social",
   "event", "note", "gift", "referral", "deal",
+  "photo", "reminder", "milestone",
 ];
 
 export const INTERACTION_TYPE_LABELS: Record<InteractionType, string> = {
   call: "Call", email: "Email", meeting: "Meeting", text: "Text",
   social: "Social", event: "Event", note: "Note", gift: "Gift",
-  referral: "Referral", deal: "Deal",
+  referral: "Referral", deal: "Deal", photo: "Photo",
+  reminder: "Reminder", milestone: "Milestone",
 };
 
 // ─── Core Data Types ───
@@ -56,12 +50,28 @@ export type Interaction = {
   summary: string;
   details?: string;
   sentiment?: "positive" | "neutral" | "negative";
+  // Call-specific
+  direction?: "inbound" | "outbound" | "missed";
+  duration?: number; // seconds
+  // Email-specific
+  subject?: string;
+  participants?: string[];
+  hasAttachment?: boolean;
+  needsReply?: boolean;
+  // Meeting-specific
+  location?: string;
+  attendees?: string[];
+  recurring?: boolean;
+  // Photo-specific
+  photoUrl?: string;
+  caption?: string;
   createdAt: string;
 };
 
 export type RolodexNote = {
   id: string;
   content: string;
+  category?: "general" | "personal" | "business" | "follow-up" | "meeting-notes" | "idea";
   pinned?: boolean;
   createdAt: string;
   updatedAt: string;
@@ -79,6 +89,28 @@ export type PersonalFact = {
   category: string;
   label: string;
   value: string;
+};
+
+export type Opportunity = {
+  id: string;
+  title: string;
+  type: "business" | "intro" | "collaboration" | "deal" | "favor" | "strategic";
+  status: "open" | "in-progress" | "won" | "lost" | "on-hold";
+  value?: string;
+  notes?: string;
+  nextStep?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AIInsight = {
+  id: string;
+  type: "fact-extracted" | "follow-up-suggested" | "tag-suggested" | "group-suggested" | "merge-suggested" | "open-loop" | "relationship-insight";
+  content: string;
+  confidence: number; // 0-1
+  actionable: boolean;
+  dismissed?: boolean;
+  createdAt: string;
 };
 
 export type RolodexContact = {
@@ -126,6 +158,8 @@ export type RolodexContact = {
   interactions: Interaction[];
   notes: RolodexNote[];
   facts: PersonalFact[];
+  opportunities: Opportunity[];
+  aiInsights: AIInsight[];
   groups: string[];
   connections: string[];
   stayInTouch?: StayInTouchReminder;
@@ -134,6 +168,7 @@ export type RolodexContact = {
   nextFollowUp?: string;
   source?: string;
   aiSummary?: string;
+  aiBriefing?: string;
   createdAt: string;
   updatedAt: string;
   archived: boolean;
@@ -159,7 +194,7 @@ export type FilterState = {
   companies: string[];
   hasPhone: boolean | null;
   hasEmail: boolean | null;
-  lastContactedWithin: number | null; // days
+  lastContactedWithin: number | null;
   archived: boolean;
 };
 
@@ -177,7 +212,6 @@ export const DEFAULT_FILTERS: FilterState = {
 
 export const REMINDER_FREQUENCIES = ["weekly", "biweekly", "monthly", "quarterly", "yearly", "custom"] as const;
 
-// ─── Smart Groups ───
 export type SmartGroup = {
   id: string;
   name: string;
