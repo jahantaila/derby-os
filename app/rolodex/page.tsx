@@ -780,13 +780,13 @@ export default function RolodexPage() {
 
           {/* ─── Detail Drawer ─── */}
           {selected && selectedScore && (
-            <div className="w-full md:w-[380px] lg:w-[420px] border-l border-white/[0.06] bg-white/[0.015] overflow-y-auto shrink-0">
+            <div className="w-full md:w-[380px] lg:w-[420px] border-l border-white/[0.06] bg-white/[0.015] flex flex-col shrink-0">
               <div className="md:hidden flex justify-end p-2">
                 <button onClick={() => setSelectedId(null)} className="p-2 text-slate-500 hover:text-white"><X size={16} /></button>
               </div>
 
-              {/* ─── Header ─── */}
-              <div className="px-5 pt-5 pb-0">
+              {/* ─── Header (collapsible) ─── */}
+              <div className="px-5 pt-5 pb-0 shrink-0 max-h-[40vh] overflow-y-auto">
                 <div className="flex items-start gap-3.5">
                   <div className="w-14 h-14 rounded-full flex items-center justify-center text-lg font-bold shrink-0"
                     style={{ backgroundColor: `${RELATIONSHIP_TYPE_COLORS[selected.relationshipType]}15`, color: RELATIONSHIP_TYPE_COLORS[selected.relationshipType] }}>
@@ -876,10 +876,10 @@ export default function RolodexPage() {
                 </div>
               </div>
 
-              {/* ─── Tabs ─── */}
-              <div className="flex border-b border-white/[0.06] px-5 mt-0">
+              {/* ─── Tabs (sticky) ─── */}
+              <div className="flex border-b border-white/[0.06] px-5 mt-0 sticky top-0 bg-[#0c0c12] z-10 shrink-0">
                 {(["overview", "activity", "notes", "facts"] as const).map(tab => (
-                  <button key={tab} onClick={() => setDrawerTab(tab)}
+                  <button key={tab} onClick={() => { setDrawerTab(tab); /* scroll tab content into view */ const el = document.getElementById('drawer-tab-content'); if (el) el.scrollTop = 0; }}
                     className={cn("px-3 py-2.5 text-[12px] font-medium border-b-2 transition-all capitalize",
                       drawerTab === tab ? "border-blue-500 text-white" : "border-transparent text-slate-500 hover:text-slate-300"
                     )}>
@@ -889,7 +889,7 @@ export default function RolodexPage() {
               </div>
 
               {/* ─── Tab Content ─── */}
-              <div className="px-5 py-4">
+              <div id="drawer-tab-content" className="px-5 py-4 flex-1 overflow-y-auto">
                 {drawerTab === "overview" && (
                   <div className="space-y-4">
                     {/* Contact — click to edit */}
