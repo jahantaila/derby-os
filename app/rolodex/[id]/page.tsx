@@ -333,7 +333,18 @@ export default function ContactPage() {
   const [activityFilter, setActivityFilter] = useState<InteractionType | "all">("all");
   const [noteSearch, setNoteSearch] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
-  const [newNoteText, setNewNoteText] = useState("");
+
+  // Keyboard shortcuts: J/K for prev/next contact
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.target as HTMLElement).tagName === "INPUT" || (e.target as HTMLElement).tagName === "TEXTAREA") return;
+      const idx = allContacts.findIndex(c => c.id === contactId);
+      if (e.key === "j" && idx < allContacts.length - 1) router.push(`/rolodex/${allContacts[idx + 1].id}`);
+      if (e.key === "k" && idx > 0) router.push(`/rolodex/${allContacts[idx - 1].id}`);
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [allContacts, contactId, router]);
 
   // Handle adding interaction/note to state
   const addInteraction = useCallback((int: any) => {
@@ -408,6 +419,11 @@ export default function ContactPage() {
     "on-hold": "text-slate-400 bg-slate-400/10",
   };
 
+  // Prev/Next navigation
+  const currentIdx = allContacts.findIndex(c => c.id === contact.id);
+  const prevContact = currentIdx > 0 ? allContacts[currentIdx - 1] : null;
+  const nextContact = currentIdx < allContacts.length - 1 ? allContacts[currentIdx + 1] : null;
+
   return (
     <div className="min-h-screen">
       {/* ─── Breadcrumb ─── */}
@@ -418,6 +434,19 @@ export default function ContactPage() {
           </Link>
           <ChevronRight size={12} className="text-slate-600" />
           <span className="text-[13px] text-white font-medium">{getFullName(contact)}</span>
+          <span className="text-[11px] text-slate-600 ml-1">{currentIdx + 1} of {allContacts.length}</span>
+          <div className="ml-auto flex items-center gap-1">
+            {prevContact && (
+              <Link href={`/rolodex/${prevContact.id}`} className="p-1.5 rounded-md text-slate-500 hover:text-white hover:bg-white/[0.06] transition-all" title={getFullName(prevContact)}>
+                <ArrowLeft size={14} />
+              </Link>
+            )}
+            {nextContact && (
+              <Link href={`/rolodex/${nextContact.id}`} className="p-1.5 rounded-md text-slate-500 hover:text-white hover:bg-white/[0.06] transition-all" title={getFullName(nextContact)}>
+                <ChevronRight size={14} />
+              </Link>
+            )}
+          </div>
         </div>
       </div>
 
