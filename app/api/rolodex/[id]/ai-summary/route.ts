@@ -41,27 +41,26 @@ ${facts ? `\nFacts:\n${facts}` : ""}
 
 Write a concise relationship summary — who they are, relationship health, and what to do next. No bullet points. Conversational tone.`;
 
-    const res = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [{ role: "user", content: prompt }],
-        max_tokens: 200,
-        temperature: 0.7,
-      }),
-    });
+    const geminiKey = process.env.GEMINI_API_KEY;
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { maxOutputTokens: 200, temperature: 0.7 },
+        }),
+      }
+    );
     const data = await res.json();
-    
+
     if (!res.ok || data.error) {
-      console.error("OpenAI API error:", JSON.stringify(data));
-      return NextResponse.json({ error: data.error?.message ?? "OpenAI API error", summary: "" }, { status: 502 });
+      console.error("Gemini API error:", JSON.stringify(data));
+      return NextResponse.json({ error: data.error?.message ?? "Gemini API error", summary: "" }, { status: 502 });
     }
-    
-    const summary = data.choices?.[0]?.message?.content?.trim() ?? "";
+
+    const summary = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? "";
 
     // Save it to the contact (may fail on read-only filesystem, that's ok)
     try { updateContact(params.id, { aiSummary: summary }); } catch {}
