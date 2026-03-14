@@ -728,7 +728,10 @@ export default function RolodexPage() {
                     <div className="w-20 shrink-0 text-right">
                       <span className="text-[12px] text-slate-500">{timeAgo(c.lastContactedAt)}</span>
                     </div>
-                    <ChevronRight size={14} className="text-slate-600 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <span onClick={(e) => { e.stopPropagation(); router.push(`/rolodex/${c.id}`); }}
+                      className="text-[10px] text-slate-600 hover:text-blue-400 shrink-0 opacity-0 group-hover:opacity-100 transition-all cursor-pointer">
+                      Open →
+                    </span>
                   </button>
                 ))}
                 {filtered.length === 0 && (
@@ -816,8 +819,8 @@ export default function RolodexPage() {
 
                 {/* View Full Profile link */}
                 <Link href={`/rolodex/${selected.id}`}
-                  className="flex items-center gap-1.5 mt-3 text-[11px] text-blue-400 hover:text-blue-300 transition-colors">
-                  <ExternalLink size={11} /> View Full Profile →
+                  className="flex items-center justify-center gap-1.5 mt-3 px-3 py-2 rounded-lg bg-blue-500/[0.08] border border-blue-500/[0.15] text-[12px] text-blue-400 hover:text-blue-300 hover:bg-blue-500/[0.12] transition-all">
+                  <ExternalLink size={12} /> View Full Profile
                 </Link>
 
                 {/* ─── Score ─── */}
