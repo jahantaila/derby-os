@@ -126,6 +126,7 @@ export type RolodexContact = {
   interactions: Interaction[];
   notes: RolodexNote[];
   facts: PersonalFact[];
+  groups: string[];
   connections: string[];
   stayInTouch?: StayInTouchReminder;
   // Meta
