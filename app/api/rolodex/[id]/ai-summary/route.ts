@@ -55,10 +55,16 @@ Write a concise relationship summary — who they are, relationship health, and 
       }),
     });
     const data = await res.json();
+    
+    if (!res.ok || data.error) {
+      console.error("OpenAI API error:", JSON.stringify(data));
+      return NextResponse.json({ error: data.error?.message ?? "OpenAI API error", summary: "" }, { status: 502 });
+    }
+    
     const summary = data.choices?.[0]?.message?.content?.trim() ?? "";
 
-    // Save it to the contact
-    updateContact(params.id, { aiSummary: summary });
+    // Save it to the contact (may fail on read-only filesystem, that's ok)
+    try { updateContact(params.id, { aiSummary: summary }); } catch {}
 
     return NextResponse.json({ summary });
   } catch (err: any) {
