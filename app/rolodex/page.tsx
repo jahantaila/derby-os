@@ -169,48 +169,20 @@ const CATEGORY_GROUPS = [
 
 // ─── Location Map Component ───
 function LocationMap({ city, state }: { city?: string; state?: string }) {
-  const coords = city ? CITY_COORDS[city] : null;
   if (!city) return null;
-
-  // Simple atmospheric dark map visualization using ECharts canvas
-  const option = {
-    backgroundColor: "transparent",
-    grid: { left: 0, right: 0, top: 0, bottom: 0 },
-    xAxis: { show: false, min: -130, max: -65 },
-    yAxis: { show: false, min: 24, max: 50 },
-    series: [
-      // Subtle grid dots for atmosphere
-      {
-        type: "scatter",
-        data: Array.from({ length: 40 }, () => [
-          -130 + Math.random() * 65,
-          24 + Math.random() * 26,
-        ]),
-        symbolSize: 1.5,
-        itemStyle: { color: "rgba(255,255,255,0.06)" },
-        silent: true,
-      },
-      // Main location pin with glow
-      ...(coords ? [{
-        type: "effectScatter",
-        data: [[coords[0], coords[1]]],
-        symbolSize: 10,
-        rippleEffect: { brushType: "stroke", scale: 5, period: 3 },
-        itemStyle: { color: "#2093FF", shadowBlur: 20, shadowColor: "#2093FF" },
-        zlevel: 1,
-      }] : []),
-    ],
-  };
+  const query = encodeURIComponent(`${city}${state ? `, ${state}` : ""}`);
+  const coords = city ? CITY_COORDS[city] : null;
+  // Use OpenStreetMap embed with dark tiles
+  const lat = coords ? coords[1] : 38.25;
+  const lon = coords ? coords[0] : -85.76;
 
   return (
-    <div className="w-full h-[100px] rounded-lg overflow-hidden bg-gradient-to-b from-white/[0.02] to-transparent border border-white/[0.06] relative">
-      <ReactEChartsCore
-        option={option}
-        style={{ height: "100%", width: "100%" }}
-        opts={{ renderer: "canvas" }}
-        notMerge
+    <div className="w-full h-[120px] rounded-lg overflow-hidden border border-white/[0.06] relative">
+      <iframe
+        src={`https://www.openstreetmap.org/export/embed.html?bbox=${lon-0.05},${lat-0.03},${lon+0.05},${lat+0.03}&layer=mapnik&marker=${lat},${lon}`}
+        style={{ width: "100%", height: "100%", border: 0, filter: "invert(1) hue-rotate(180deg) brightness(0.8) contrast(1.2) saturate(0.3)" }}
+        loading="lazy"
       />
-      <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-[#0a0a0f] to-transparent pointer-events-none" />
     </div>
   );
 }
@@ -548,7 +520,7 @@ export default function RolodexPage() {
   return (
     <div className="flex h-[calc(100vh-1rem)] gap-0">
       {/* ─── Left Sidebar ─── */}
-      <div className="hidden lg:flex w-[220px] flex-col border-r border-white/[0.06] bg-white/[0.02] shrink-0">
+      <div className="hidden lg:flex w-[220px] flex-col border-r border-white/[0.06] bg-white/[0.02] shrink-0 overflow-y-auto overflow-x-hidden">
         <div className="p-4 pb-2">
           <h2 className="text-[13px] font-semibold text-slate-400 uppercase tracking-wider">Rolodex</h2>
         </div>
@@ -602,7 +574,18 @@ export default function RolodexPage() {
           </div>
         )}
 
-        <div className="px-2 py-1 mt-auto pt-4 border-t border-white/[0.06]">
+        <div className="px-2 py-1 mt-2">
+          <p className="px-2 py-1.5 text-[11px] font-medium text-slate-500 uppercase tracking-wider">Tags</p>
+          {Array.from(new Set(contacts.flatMap(c => c.tags))).sort().map(tag => (
+            <button key={tag} onClick={() => { setSearch(tag); setActiveGroup("all"); }}
+              className="w-full flex items-center gap-2.5 px-2.5 py-1 rounded-lg text-[12px] text-slate-500 hover:text-slate-300 hover:bg-white/[0.04] transition-all">
+              <Hash size={11} className="opacity-40" />
+              <span className="truncate">{tag}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="px-2 py-1 mt-4 pt-3 border-t border-white/[0.06]">
           <Link href="/rolodex/groups" className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-[12px] text-slate-500 hover:text-white hover:bg-white/[0.04] transition-all">
             <Layers size={13} className="opacity-50" /> Groups
           </Link>
@@ -612,17 +595,6 @@ export default function RolodexPage() {
           <Link href="/rolodex/reminders" className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-[12px] text-slate-500 hover:text-white hover:bg-white/[0.04] transition-all">
             <Clock3 size={13} className="opacity-50" /> Reminders
           </Link>
-        </div>
-
-        <div className="px-2 py-1 mt-2">
-          <p className="px-2 py-1.5 text-[11px] font-medium text-slate-500 uppercase tracking-wider">Tags</p>
-          {Array.from(new Set(contacts.flatMap(c => c.tags))).sort().slice(0, 8).map(tag => (
-            <button key={tag} onClick={() => { setSearch(tag); setActiveGroup("all"); }}
-              className="w-full flex items-center gap-2.5 px-2.5 py-1 rounded-lg text-[12px] text-slate-500 hover:text-slate-300 hover:bg-white/[0.04] transition-all">
-              <Hash size={11} className="opacity-40" />
-              <span>{tag}</span>
-            </button>
-          ))}
         </div>
       </div>
 
@@ -939,13 +911,6 @@ export default function RolodexPage() {
                       <InlineField label="Interests" value={selected.interests} field="interests" contactId={selected.id} onSaved={onFieldSaved} />
                     </div>
 
-                    {/* Location — click to edit */}
-                    <div className="space-y-1.5">
-                      <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.1em]">Location</p>
-                      <InlineField label="City" value={selected.city} field="city" contactId={selected.id} onSaved={onFieldSaved} />
-                      <InlineField label="State" value={selected.state} field="state" contactId={selected.id} onSaved={onFieldSaved} />
-                    </div>
-
                     {/* Context — click to edit */}
                     <div className="space-y-1.5">
                       <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.1em]">Context</p>
@@ -1037,15 +1002,13 @@ export default function RolodexPage() {
                     </div>
 
                     {/* ─── Location + Map ─── */}
-                    {selected.city && (
-                      <div className="space-y-2">
-                        <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.1em]">Location</p>
-                        <p className="text-[12px] text-slate-300">
-                          {selected.city}{selected.state ? `, ${selected.state}` : ""}{selected.country ? `, ${selected.country}` : ""}
-                        </p>
-                        <LocationMap city={selected.city} state={selected.state} />
-                      </div>
-                    )}
+                    <div className="space-y-2">
+                      <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.1em]">Location</p>
+                      <InlineField label="City" value={selected.city} field="city" contactId={selected.id} onSaved={onFieldSaved} />
+                      <InlineField label="State" value={selected.state} field="state" contactId={selected.id} onSaved={onFieldSaved} />
+                      <InlineField label="Country" value={selected.country} field="country" contactId={selected.id} onSaved={onFieldSaved} />
+                      {selected.city && <LocationMap city={selected.city} state={selected.state} />}
+                    </div>
 
                     {/* ─── Details ─── */}
                     <div className="space-y-1.5 pt-2 border-t border-white/[0.04]">
