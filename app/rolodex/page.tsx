@@ -409,6 +409,48 @@ export default function RolodexPage() {
   const [showAddTag, setShowAddTag] = useState(false);
   const [showAddGroup, setShowAddGroup] = useState(false);
 
+  // Notes
+  const [newNoteInput, setNewNoteInput] = useState("");
+  const addNote = useCallback(async (content: string) => {
+    if (!selectedId || !content.trim()) return;
+    const note = { id: `note-${Date.now()}`, content: content.trim(), pinned: false, createdAt: new Date().toISOString() };
+    setContacts(prev => prev.map(c => {
+      if (c.id !== selectedId) return c;
+      const updated = { ...c, notes: [note, ...c.notes], updatedAt: new Date().toISOString() };
+      fetch(`/api/rolodex/${c.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ notes: updated.notes }) });
+      return updated;
+    }));
+  }, [selectedId]);
+
+  // Facts
+  const [newFactLabel, setNewFactLabel] = useState("");
+  const [newFactValue, setNewFactValue] = useState("");
+  const [showAddFact, setShowAddFact] = useState(false);
+  const addFact = useCallback(async (label: string, value: string) => {
+    if (!selectedId || !label.trim() || !value.trim()) return;
+    const fact = { id: `fact-${Date.now()}`, label: label.trim(), value: value.trim(), source: "manual" as const, createdAt: new Date().toISOString() };
+    setContacts(prev => prev.map(c => {
+      if (c.id !== selectedId) return c;
+      const updated = { ...c, facts: [...(c.facts ?? []), fact], updatedAt: new Date().toISOString() };
+      fetch(`/api/rolodex/${c.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ facts: updated.facts }) });
+      return updated;
+    }));
+  }, [selectedId]);
+
+  // AI Summary
+  const [aiLoading, setAiLoading] = useState(false);
+  const generateAiSummary = useCallback(async () => {
+    if (!selectedId) return;
+    setAiLoading(true);
+    try {
+      const res = await fetch(`/api/rolodex/${selectedId}/ai-summary`, { method: "POST" });
+      const data = await res.json();
+      if (data.summary) {
+        setContacts(prev => prev.map(c => c.id === selectedId ? { ...c, aiSummary: data.summary } : c));
+      }
+    } catch {} finally { setAiLoading(false); }
+  }, [selectedId]);
+
   // Compute scores for all contacts
   const contactsWithScores = useMemo(() =>
     contacts.map(c => ({ ...c, relationshipScore: calculateScore(c).score })),
@@ -815,15 +857,23 @@ export default function RolodexPage() {
                 </div>
 
                 {/* ─── AI Summary ─── */}
-                {selected.aiSummary && (
-                  <div className="mt-4 p-3 rounded-lg bg-blue-500/[0.06] border border-blue-500/[0.12]">
-                    <div className="flex items-center gap-1.5 mb-1.5">
+                <div className="mt-4 p-3 rounded-lg bg-blue-500/[0.06] border border-blue-500/[0.12]">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex items-center gap-1.5">
                       <Sparkles size={12} className="text-blue-400" />
                       <span className="text-[11px] font-medium text-blue-400">AI Summary</span>
                     </div>
-                    <p className="text-[12px] text-slate-300 leading-relaxed">{selected.aiSummary}</p>
+                    <button onClick={generateAiSummary} disabled={aiLoading}
+                      className="text-[10px] text-blue-400 hover:text-blue-300 disabled:opacity-50 transition-colors">
+                      {aiLoading ? "Generating..." : selected.aiSummary ? "↻ Refresh" : "✦ Generate"}
+                    </button>
                   </div>
-                )}
+                  {selected.aiSummary ? (
+                    <p className="text-[12px] text-slate-300 leading-relaxed">{selected.aiSummary}</p>
+                  ) : (
+                    <p className="text-[11px] text-slate-500 italic">Click Generate to create an AI-powered relationship summary</p>
+                  )}
+                </div>
               </div>
 
               {/* ─── Tabs ─── */}
@@ -1022,8 +1072,26 @@ export default function RolodexPage() {
 
                 {drawerTab === "notes" && (
                   <div className="space-y-3">
+                    {/* Add note input — always visible */}
+                    <div className="relative">
+                      <textarea value={newNoteInput} onChange={e => setNewNoteInput(e.target.value)}
+                        placeholder="Write a note..."
+                        rows={2}
+                        onKeyDown={e => {
+                          if (e.key === "Enter" && (e.metaKey || e.ctrlKey) && newNoteInput.trim()) {
+                            addNote(newNoteInput); setNewNoteInput("");
+                          }
+                        }}
+                        className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-lg text-[12px] text-white placeholder:text-slate-600 outline-none focus:border-blue-500/30 resize-none transition-colors" />
+                      {newNoteInput.trim() && (
+                        <button onClick={() => { addNote(newNoteInput); setNewNoteInput(""); }}
+                          className="absolute bottom-2 right-2 px-2.5 py-1 bg-blue-500 hover:bg-blue-400 text-white text-[10px] font-medium rounded transition-colors">
+                          Add ⌘↵
+                        </button>
+                      )}
+                    </div>
                     {selected.notes.length === 0 ? (
-                      <p className="text-[12px] text-slate-500 py-8 text-center">No notes yet</p>
+                      <p className="text-[12px] text-slate-500 py-4 text-center">No notes yet</p>
                     ) : (
                       selected.notes.sort((a, b) => b.createdAt.localeCompare(a.createdAt)).map(note => (
                         <div key={note.id} className={cn("p-3 rounded-lg border",
@@ -1040,10 +1108,36 @@ export default function RolodexPage() {
 
                 {drawerTab === "facts" && (
                   <div className="space-y-3">
-                    {(!selected.facts || selected.facts.length === 0) ? (
-                      <p className="text-[12px] text-slate-500 py-8 text-center">No facts recorded yet</p>
+                    {/* Add fact */}
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.1em]">Fact Book</p>
+                      <button onClick={() => setShowAddFact(!showAddFact)} className="text-[10px] text-blue-400 hover:text-blue-300">+ Add Fact</button>
+                    </div>
+                    {showAddFact && (
+                      <div className="flex gap-2">
+                        <input autoFocus value={newFactLabel} onChange={e => setNewFactLabel(e.target.value)}
+                          placeholder="Label (e.g. Favorite food)"
+                          className="flex-1 px-2.5 py-1.5 bg-white/[0.04] border border-blue-500/30 rounded-lg text-[12px] text-white placeholder:text-slate-600 outline-none" />
+                        <input value={newFactValue} onChange={e => setNewFactValue(e.target.value)}
+                          placeholder="Value"
+                          onKeyDown={e => {
+                            if (e.key === "Enter" && newFactLabel.trim() && newFactValue.trim()) {
+                              addFact(newFactLabel, newFactValue); setNewFactLabel(""); setNewFactValue(""); setShowAddFact(false);
+                            }
+                            if (e.key === "Escape") { setShowAddFact(false); setNewFactLabel(""); setNewFactValue(""); }
+                          }}
+                          className="flex-1 px-2.5 py-1.5 bg-white/[0.04] border border-blue-500/30 rounded-lg text-[12px] text-white placeholder:text-slate-600 outline-none" />
+                        <button onClick={() => {
+                          if (newFactLabel.trim() && newFactValue.trim()) {
+                            addFact(newFactLabel, newFactValue); setNewFactLabel(""); setNewFactValue(""); setShowAddFact(false);
+                          }
+                        }} className="px-2.5 py-1.5 bg-blue-500 hover:bg-blue-400 text-white text-[10px] font-medium rounded-lg transition-colors">Add</button>
+                      </div>
+                    )}
+                    {(!selected.facts || selected.facts.length === 0) && !showAddFact ? (
+                      <p className="text-[12px] text-slate-500 py-4 text-center cursor-pointer hover:text-blue-400 transition-colors" onClick={() => setShowAddFact(true)}>No facts yet — click + Add Fact</p>
                     ) : (
-                      selected.facts.map(fact => (
+                      (selected.facts ?? []).map(fact => (
                         <div key={fact.id} className="flex items-start justify-between py-2 border-b border-white/[0.04] last:border-0">
                           <span className="text-[11px] text-slate-500">{fact.label}</span>
                           <span className="text-[12px] text-slate-300 text-right max-w-[60%]">{fact.value}</span>
