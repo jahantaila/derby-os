@@ -798,6 +798,10 @@ export default function ContactPage() {
                       className="pl-8 pr-3 py-1.5 bg-white/[0.04] border border-white/[0.06] rounded-lg text-[11px] text-white placeholder:text-slate-500 outline-none focus:border-blue-500/30 w-36" />
                   </div>
                 </div>
+                {/* Add note */}
+                <div className="mb-3">
+                  <QuickAddNote contactId={contact.id} onAdded={addInteraction} />
+                </div>
                 <div className="space-y-2">
                   {filteredNotes.map(note => (
                     <div key={note.id} className={cn("p-3 rounded-lg border",
