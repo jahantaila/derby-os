@@ -28,12 +28,12 @@ export function Sidebar() {
 
   return (
     <aside className="sidebar-shell">
-      <div className="flex items-center justify-between gap-3 md:block">
+      {/* Mobile: dropdown */}
+      <div className="flex items-center justify-between gap-3 md:hidden">
         <Link href="/" className="sidebar-logo bg-[linear-gradient(132deg,#ffffff_0%,#9FD2FF_24%,#2093FF_58%,#0026FF_100%)]" aria-label="Derby Digital home">
-          Derby Digital
+          DD
         </Link>
-
-        <label className="block min-w-0 md:hidden">
+        <label className="block min-w-0">
           <span className="sr-only">Navigate to page</span>
           <select
             value={currentHref}
@@ -50,31 +50,63 @@ export function Sidebar() {
         </label>
       </div>
 
-      <nav className="sidebar-nav hidden md:grid" aria-label="Primary">
-        {PRIMARY_NAV_ITEMS.map((item) => {
-          const Icon = item.icon;
-          const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+      {/* Desktop: icon rail */}
+      <div className="hidden md:flex md:flex-col md:items-center md:h-full">
+        {/* Logo mark */}
+        <Link
+          href="/"
+          className="sidebar-logo-mark"
+          aria-label="Derby Digital home"
+        >
+          <span className="text-[11px] font-bold tracking-[0.08em] uppercase bg-[linear-gradient(132deg,#ffffff_0%,#9FD2FF_24%,#2093FF_58%,#0026FF_100%)] bg-clip-text text-transparent">
+            DD
+          </span>
+        </Link>
 
-          return (
-            <Link key={item.href} href={item.href} className={`sidebar-item overflow-hidden ${isActive ? "active" : ""}`}>
-              <Icon size={16} />
-              <span>{item.label}</span>
-            </Link>
-          );
-        })}
-        <div className="mx-1 my-2 h-px bg-white/10" aria-hidden="true" />
-        {SECONDARY_NAV_ITEMS.map((item) => {
-          const Icon = item.icon;
-          const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+        {/* Primary nav */}
+        <nav className="sidebar-rail-nav" aria-label="Primary">
+          {PRIMARY_NAV_ITEMS.map((item) => {
+            const Icon = item.icon;
+            const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
 
-          return (
-            <Link key={item.href} href={item.href} className={`sidebar-item overflow-hidden ${isActive ? "active" : ""}`}>
-              <Icon size={16} />
-              <span>{item.label}</span>
-            </Link>
-          );
-        })}
-      </nav>
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`sidebar-rail-item ${isActive ? "active" : ""}`}
+                aria-label={item.label}
+              >
+                <Icon size={18} />
+                <span className="sidebar-rail-tooltip">{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Spacer */}
+        <div className="flex-1" />
+
+        {/* Secondary nav */}
+        <nav className="sidebar-rail-nav" aria-label="Secondary">
+          <div className="mx-auto mb-2 w-6 h-px bg-white/10" aria-hidden="true" />
+          {SECONDARY_NAV_ITEMS.map((item) => {
+            const Icon = item.icon;
+            const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`sidebar-rail-item ${isActive ? "active" : ""}`}
+                aria-label={item.label}
+              >
+                <Icon size={18} />
+                <span className="sidebar-rail-tooltip">{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
     </aside>
   );
 }
