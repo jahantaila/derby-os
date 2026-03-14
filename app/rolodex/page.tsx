@@ -172,16 +172,22 @@ function LocationMap({ city, state }: { city?: string; state?: string }) {
   if (!city) return null;
   const query = encodeURIComponent(`${city}${state ? `, ${state}` : ""}`);
   const coords = city ? CITY_COORDS[city] : null;
-  // Use OpenStreetMap embed with dark tiles
-  const lat = coords ? coords[1] : 38.25;
-  const lon = coords ? coords[0] : -85.76;
+  const lat = coords ? coords[1] : null;
+  const lon = coords ? coords[0] : null;
+
+  // If we have exact coords, use them. Otherwise use Nominatim search via query string.
+  const src = lat && lon
+    ? `https://www.openstreetmap.org/export/embed.html?bbox=${lon-0.04},${lat-0.025},${lon+0.04},${lat+0.025}&layer=mapnik&marker=${lat},${lon}`
+    : `https://www.google.com/maps?q=${query}&output=embed&z=13`;
 
   return (
     <div className="w-full h-[120px] rounded-lg overflow-hidden border border-white/[0.06] relative">
       <iframe
-        src={`https://www.openstreetmap.org/export/embed.html?bbox=${lon-0.05},${lat-0.03},${lon+0.05},${lat+0.03}&layer=mapnik&marker=${lat},${lon}`}
+        key={`${city}-${state}`}
+        src={src}
         style={{ width: "100%", height: "100%", border: 0, filter: "invert(1) hue-rotate(180deg) brightness(0.8) contrast(1.2) saturate(0.3)" }}
         loading="lazy"
+        referrerPolicy="no-referrer"
       />
     </div>
   );
