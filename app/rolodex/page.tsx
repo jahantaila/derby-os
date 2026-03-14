@@ -349,93 +349,116 @@ export default function RolodexPage() {
   const selected = useMemo(() => contacts.find(c => c.id === selectedId) ?? null, [contacts, selectedId]);
   const selectedScore = useMemo(() => selected ? calculateScore(selected) : null, [selected]);
 
+  // ─── Universal mutation helper: updates contact, logs activity, saves to API ───
+  const mutateContact = useCallback((updater: (c: any) => any, activityMsg: string, apiPayload?: any) => {
+    if (!selectedId) return;
+    const activity = { id: `act-${Date.now()}`, type: "note" as const, date: new Date().toISOString(), summary: activityMsg, createdAt: new Date().toISOString() };
+    setContacts(prev => prev.map(c => {
+      if (c.id !== selectedId) return c;
+      const updated = { ...updater(c), updatedAt: new Date().toISOString(), interactions: [activity, ...c.interactions] };
+      const payload = apiPayload ?? updater(c);
+      const { id: _id, ...rest } = payload;
+      fetch(`/api/rolodex/${c.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(rest) });
+      return updated;
+    }));
+  }, [selectedId]);
+
+  // Field edits
   const onFieldSaved = useCallback((field: string, value: string) => {
     if (!selectedId) return;
-    setContacts(prev => prev.map(c => {
-      if (c.id !== selectedId) return c;
-      const newInteraction = {
-        id: `edit-${Date.now()}`,
-        type: "note" as const,
-        date: new Date().toISOString(),
-        summary: `Updated ${field}: ${value || "(cleared)"}`,
-        createdAt: new Date().toISOString(),
-      };
-      return { ...c, [field]: value, updatedAt: new Date().toISOString(), interactions: [newInteraction, ...c.interactions] };
-    }));
-  }, [selectedId]);
+    mutateContact(c => ({ ...c, [field]: value }), `Updated ${field}: ${value || "(cleared)"}`, { [field]: value });
+  }, [selectedId, mutateContact]);
 
-  const addTag = useCallback(async (tag: string) => {
+  // Tags
+  const addTag = useCallback((tag: string) => {
     if (!selectedId || !tag.trim()) return;
-    setContacts(prev => prev.map(c => {
-      if (c.id !== selectedId) return c;
-      const newTags = [...new Set([...c.tags, tag.trim()])];
-      fetch(`/api/rolodex/${c.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ tags: newTags }) });
-      return { ...c, tags: newTags, updatedAt: new Date().toISOString() };
-    }));
-  }, [selectedId]);
-
-  const removeTag = useCallback(async (tag: string) => {
+    mutateContact(c => ({ ...c, tags: [...new Set([...c.tags, tag.trim()])] }), `Added tag: ${tag.trim()}`);
+  }, [selectedId, mutateContact]);
+  const removeTag = useCallback((tag: string) => {
     if (!selectedId) return;
-    setContacts(prev => prev.map(c => {
-      if (c.id !== selectedId) return c;
-      const newTags = c.tags.filter(t => t !== tag);
-      fetch(`/api/rolodex/${c.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ tags: newTags }) });
-      return { ...c, tags: newTags, updatedAt: new Date().toISOString() };
-    }));
-  }, [selectedId]);
+    mutateContact(c => ({ ...c, tags: c.tags.filter((t: string) => t !== tag) }), `Removed tag: ${tag}`);
+  }, [selectedId, mutateContact]);
 
-  const addGroup = useCallback(async (group: string) => {
+  // Groups
+  const addGroup = useCallback((group: string) => {
     if (!selectedId || !group.trim()) return;
-    setContacts(prev => prev.map(c => {
-      if (c.id !== selectedId) return c;
-      const newGroups = [...new Set([...(c.groups ?? []), group.trim()])];
-      fetch(`/api/rolodex/${c.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ groups: newGroups }) });
-      return { ...c, groups: newGroups, updatedAt: new Date().toISOString() };
-    }));
-  }, [selectedId]);
-
-  const removeGroup = useCallback(async (group: string) => {
+    mutateContact(c => ({ ...c, groups: [...new Set([...(c.groups ?? []), group.trim()])] }), `Added to group: ${group.trim()}`);
+  }, [selectedId, mutateContact]);
+  const removeGroup = useCallback((group: string) => {
     if (!selectedId) return;
-    setContacts(prev => prev.map(c => {
-      if (c.id !== selectedId) return c;
-      const newGroups = (c.groups ?? []).filter(g => g !== group);
-      fetch(`/api/rolodex/${c.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ groups: newGroups }) });
-      return { ...c, groups: newGroups, updatedAt: new Date().toISOString() };
-    }));
-  }, [selectedId]);
+    mutateContact(c => ({ ...c, groups: (c.groups ?? []).filter((g: string) => g !== group) }), `Removed from group: ${group}`);
+  }, [selectedId, mutateContact]);
 
   const [newTagInput, setNewTagInput] = useState("");
   const [newGroupInput, setNewGroupInput] = useState("");
   const [showAddTag, setShowAddTag] = useState(false);
   const [showAddGroup, setShowAddGroup] = useState(false);
 
-  // Notes
+  // ─── Notes: add, edit, pin, delete ───
   const [newNoteInput, setNewNoteInput] = useState("");
-  const addNote = useCallback(async (content: string) => {
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
+  const [editingNoteContent, setEditingNoteContent] = useState("");
+
+  const addNote = useCallback((content: string) => {
     if (!selectedId || !content.trim()) return;
     const note = { id: `note-${Date.now()}`, content: content.trim(), pinned: false, createdAt: new Date().toISOString() };
-    setContacts(prev => prev.map(c => {
-      if (c.id !== selectedId) return c;
-      const updated = { ...c, notes: [note, ...c.notes], updatedAt: new Date().toISOString() };
-      fetch(`/api/rolodex/${c.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ notes: updated.notes }) });
-      return updated;
-    }));
-  }, [selectedId]);
+    mutateContact(c => ({ ...c, notes: [note, ...c.notes] }), `Added note: "${content.trim().slice(0, 50)}${content.length > 50 ? "..." : ""}"`);
+  }, [selectedId, mutateContact]);
 
-  // Facts
+  const editNote = useCallback((noteId: string, newContent: string) => {
+    if (!selectedId || !newContent.trim()) return;
+    mutateContact(
+      c => ({ ...c, notes: c.notes.map((n: any) => n.id === noteId ? { ...n, content: newContent.trim() } : n) }),
+      `Edited note: "${newContent.trim().slice(0, 50)}${newContent.length > 50 ? "..." : ""}"`
+    );
+    setEditingNoteId(null);
+  }, [selectedId, mutateContact]);
+
+  const pinNote = useCallback((noteId: string, pinned: boolean) => {
+    if (!selectedId) return;
+    mutateContact(
+      c => ({ ...c, notes: c.notes.map((n: any) => n.id === noteId ? { ...n, pinned } : n) }),
+      pinned ? "Pinned a note" : "Unpinned a note"
+    );
+  }, [selectedId, mutateContact]);
+
+  const deleteNote = useCallback((noteId: string) => {
+    if (!selectedId) return;
+    mutateContact(
+      c => ({ ...c, notes: c.notes.filter((n: any) => n.id !== noteId) }),
+      "Deleted a note"
+    );
+  }, [selectedId, mutateContact]);
+
+  // ─── Facts: add, edit, delete ───
   const [newFactLabel, setNewFactLabel] = useState("");
   const [newFactValue, setNewFactValue] = useState("");
-  const [showAddFact, setShowAddFact] = useState(false);
-  const addFact = useCallback(async (label: string, value: string) => {
+  const [editingFactId, setEditingFactId] = useState<string | null>(null);
+  const [editingFactLabel, setEditingFactLabel] = useState("");
+  const [editingFactValue, setEditingFactValue] = useState("");
+
+  const addFact = useCallback((label: string, value: string) => {
     if (!selectedId || !label.trim() || !value.trim()) return;
     const fact = { id: `fact-${Date.now()}`, label: label.trim(), value: value.trim(), source: "manual" as const, createdAt: new Date().toISOString() };
-    setContacts(prev => prev.map(c => {
-      if (c.id !== selectedId) return c;
-      const updated = { ...c, facts: [...(c.facts ?? []), fact], updatedAt: new Date().toISOString() };
-      fetch(`/api/rolodex/${c.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ facts: updated.facts }) });
-      return updated;
-    }));
-  }, [selectedId]);
+    mutateContact(c => ({ ...c, facts: [...(c.facts ?? []), fact] }), `Added fact: ${label.trim()} = ${value.trim()}`);
+  }, [selectedId, mutateContact]);
+
+  const editFact = useCallback((factId: string, label: string, value: string) => {
+    if (!selectedId || !label.trim() || !value.trim()) return;
+    mutateContact(
+      c => ({ ...c, facts: (c.facts ?? []).map((f: any) => f.id === factId ? { ...f, label: label.trim(), value: value.trim() } : f) }),
+      `Edited fact: ${label.trim()} = ${value.trim()}`
+    );
+    setEditingFactId(null);
+  }, [selectedId, mutateContact]);
+
+  const deleteFact = useCallback((factId: string) => {
+    if (!selectedId) return;
+    mutateContact(
+      c => ({ ...c, facts: (c.facts ?? []).filter((f: any) => f.id !== factId) }),
+      "Deleted a fact"
+    );
+  }, [selectedId, mutateContact]);
 
   // AI Summary
   const [aiLoading, setAiLoading] = useState(false);
@@ -446,10 +469,10 @@ export default function RolodexPage() {
       const res = await fetch(`/api/rolodex/${selectedId}/ai-summary`, { method: "POST" });
       const data = await res.json();
       if (data.summary) {
-        setContacts(prev => prev.map(c => c.id === selectedId ? { ...c, aiSummary: data.summary } : c));
+        mutateContact(c => ({ ...c, aiSummary: data.summary }), "AI Summary generated");
       }
     } catch {} finally { setAiLoading(false); }
-  }, [selectedId]);
+  }, [selectedId, mutateContact]);
 
   // Compute scores for all contacts
   const contactsWithScores = useMemo(() =>
@@ -1103,12 +1126,53 @@ export default function RolodexPage() {
                     {selected.notes.length === 0 ? (
                       <p className="text-[12px] text-slate-500 py-4 text-center">No notes yet — write one above!</p>
                     ) : (
-                      selected.notes.sort((a, b) => b.createdAt.localeCompare(a.createdAt)).map(note => (
-                        <div key={note.id} className={cn("p-3 rounded-lg border",
+                      [...selected.notes].sort((a, b) => {
+                        if (a.pinned && !b.pinned) return -1;
+                        if (!a.pinned && b.pinned) return 1;
+                        return b.createdAt.localeCompare(a.createdAt);
+                      }).map(note => (
+                        <div key={note.id} className={cn("p-3 rounded-lg border group/note",
                           note.pinned ? "bg-amber-500/[0.05] border-amber-500/[0.1]" : "bg-white/[0.02] border-white/[0.06]"
                         )}>
-                          {note.pinned && <span className="text-[10px] text-amber-400 font-medium">📌 Pinned</span>}
-                          <p className="text-[12px] text-slate-300 leading-relaxed mt-1">{note.content}</p>
+                          {/* Note actions — visible on hover */}
+                          <div className="flex items-center justify-between mb-1">
+                            {note.pinned && <span className="text-[10px] text-amber-400 font-medium">📌 Pinned</span>}
+                            {!note.pinned && <span />}
+                            <div className="flex items-center gap-1 opacity-0 group-hover/note:opacity-100 transition-opacity">
+                              <button onClick={() => pinNote(note.id, !note.pinned)}
+                                className={cn("px-1.5 py-0.5 rounded text-[10px] transition-colors",
+                                  note.pinned ? "text-amber-400 hover:text-amber-300" : "text-slate-500 hover:text-amber-400"
+                                )}>
+                                {note.pinned ? "Unpin" : "📌 Pin"}
+                              </button>
+                              <button onClick={() => { setEditingNoteId(note.id); setEditingNoteContent(note.content); }}
+                                className="px-1.5 py-0.5 rounded text-[10px] text-slate-500 hover:text-blue-400 transition-colors">
+                                Edit
+                              </button>
+                              <button onClick={() => deleteNote(note.id)}
+                                className="px-1.5 py-0.5 rounded text-[10px] text-slate-500 hover:text-red-400 transition-colors">
+                                Delete
+                              </button>
+                            </div>
+                          </div>
+                          {/* Editing mode */}
+                          {editingNoteId === note.id ? (
+                            <div>
+                              <textarea value={editingNoteContent} onChange={e => setEditingNoteContent(e.target.value)}
+                                rows={3} autoFocus
+                                onKeyDown={e => {
+                                  if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { editNote(note.id, editingNoteContent); }
+                                  if (e.key === "Escape") { setEditingNoteId(null); }
+                                }}
+                                className="w-full px-2 py-1.5 bg-white/[0.06] border border-blue-500/30 rounded text-[12px] text-white outline-none resize-none" />
+                              <div className="flex justify-end gap-2 mt-1.5">
+                                <button onClick={() => setEditingNoteId(null)} className="text-[10px] text-slate-500 hover:text-white">Cancel</button>
+                                <button onClick={() => editNote(note.id, editingNoteContent)} className="text-[10px] text-blue-400 hover:text-blue-300 font-medium">Save</button>
+                              </div>
+                            </div>
+                          ) : (
+                            <p className="text-[12px] text-slate-300 leading-relaxed">{note.content}</p>
+                          )}
                           <p className="text-[10px] text-slate-600 mt-2">{timeAgo(note.createdAt)}</p>
                         </div>
                       ))
@@ -1155,9 +1219,36 @@ export default function RolodexPage() {
                     ) : (
                       <div className="space-y-0">
                         {(selected.facts ?? []).map(fact => (
-                          <div key={fact.id} className="flex items-start justify-between py-2.5 border-b border-white/[0.04] last:border-0">
-                            <span className="text-[11px] text-slate-500">{fact.label}</span>
-                            <span className="text-[12px] text-slate-300 text-right max-w-[60%]">{fact.value}</span>
+                          <div key={fact.id} className="group/fact">
+                            {editingFactId === fact.id ? (
+                              <div className="py-2.5 space-y-1.5 border-b border-white/[0.04]">
+                                <input value={editingFactLabel} onChange={e => setEditingFactLabel(e.target.value)}
+                                  className="w-full px-2 py-1 bg-white/[0.06] border border-blue-500/30 rounded text-[12px] text-white outline-none" />
+                                <input value={editingFactValue} onChange={e => setEditingFactValue(e.target.value)}
+                                  onKeyDown={e => {
+                                    if (e.key === "Enter") editFact(fact.id, editingFactLabel, editingFactValue);
+                                    if (e.key === "Escape") setEditingFactId(null);
+                                  }}
+                                  className="w-full px-2 py-1 bg-white/[0.06] border border-blue-500/30 rounded text-[12px] text-white outline-none" />
+                                <div className="flex justify-end gap-2">
+                                  <button onClick={() => setEditingFactId(null)} className="text-[10px] text-slate-500 hover:text-white">Cancel</button>
+                                  <button onClick={() => editFact(fact.id, editingFactLabel, editingFactValue)} className="text-[10px] text-blue-400 hover:text-blue-300 font-medium">Save</button>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="flex items-start justify-between py-2.5 border-b border-white/[0.04] last:border-0">
+                                <span className="text-[11px] text-slate-500">{fact.label}</span>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-[12px] text-slate-300 text-right">{fact.value}</span>
+                                  <div className="flex items-center gap-0.5 opacity-0 group-hover/fact:opacity-100 transition-opacity">
+                                    <button onClick={() => { setEditingFactId(fact.id); setEditingFactLabel(fact.label); setEditingFactValue(fact.value); }}
+                                      className="text-[10px] text-slate-500 hover:text-blue-400 px-1">✎</button>
+                                    <button onClick={() => deleteFact(fact.id)}
+                                      className="text-[10px] text-slate-500 hover:text-red-400 px-1">✕</button>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         ))}
                       </div>
