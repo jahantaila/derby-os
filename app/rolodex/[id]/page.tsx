@@ -114,7 +114,7 @@ function InlineField({ value, field, onSave, placeholder, className: cls, type =
     <span onClick={() => setEditing(true)}
       className={cn(
         "cursor-pointer rounded px-1.5 py-0.5 -mx-1 transition-all border border-transparent",
-        "hover:bg-white/[0.06] hover:border-white/[0.08]",
+        "hover:bg-white/[0.06] hover:border-white/[0.08] hover:border-dashed",
         !value && "text-slate-600 italic",
         cls
       )}
@@ -667,7 +667,7 @@ export default function ContactPage() {
                         value={(contact as any)[field]}
                         field={field}
                         onSave={saveField}
-                        placeholder="—"
+                        placeholder="Add..."
                         className="text-[11px] text-slate-300 text-right"
                         type={type}
                       />
