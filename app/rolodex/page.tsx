@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import dynamic from "next/dynamic";
+import nextDynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -20,7 +20,7 @@ import {
 import { SEED_CONTACTS } from "@/lib/rolodex-seed";
 
 // Lazy load ECharts
-const ReactEChartsCore = dynamic(() => import("echarts-for-react"), { ssr: false });
+const ReactEChartsCore = nextDynamic(() => import("echarts-for-react"), { ssr: false });
 
 // ─── Relationship Score Calculator ───
 function calculateScore(c: RolodexContact): { score: number; signals: { label: string; value: number; weight: number }[] } {
@@ -346,13 +346,68 @@ export default function RolodexPage() {
     if (showCreate && newNameRef.current) newNameRef.current.focus();
   }, [showCreate]);
 
-  const onFieldSaved = useCallback((field: string, value: string) => {
-    if (!selectedId) return;
-    setContacts(prev => prev.map(c => c.id === selectedId ? { ...c, [field]: value, updatedAt: new Date().toISOString() } : c));
-  }, [selectedId]);
-
   const selected = useMemo(() => contacts.find(c => c.id === selectedId) ?? null, [contacts, selectedId]);
   const selectedScore = useMemo(() => selected ? calculateScore(selected) : null, [selected]);
+
+  const onFieldSaved = useCallback((field: string, value: string) => {
+    if (!selectedId) return;
+    setContacts(prev => prev.map(c => {
+      if (c.id !== selectedId) return c;
+      const newInteraction = {
+        id: `edit-${Date.now()}`,
+        type: "note" as const,
+        date: new Date().toISOString(),
+        summary: `Updated ${field}: ${value || "(cleared)"}`,
+        createdAt: new Date().toISOString(),
+      };
+      return { ...c, [field]: value, updatedAt: new Date().toISOString(), interactions: [newInteraction, ...c.interactions] };
+    }));
+  }, [selectedId]);
+
+  const addTag = useCallback(async (tag: string) => {
+    if (!selectedId || !tag.trim()) return;
+    setContacts(prev => prev.map(c => {
+      if (c.id !== selectedId) return c;
+      const newTags = [...new Set([...c.tags, tag.trim()])];
+      fetch(`/api/rolodex/${c.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ tags: newTags }) });
+      return { ...c, tags: newTags, updatedAt: new Date().toISOString() };
+    }));
+  }, [selectedId]);
+
+  const removeTag = useCallback(async (tag: string) => {
+    if (!selectedId) return;
+    setContacts(prev => prev.map(c => {
+      if (c.id !== selectedId) return c;
+      const newTags = c.tags.filter(t => t !== tag);
+      fetch(`/api/rolodex/${c.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ tags: newTags }) });
+      return { ...c, tags: newTags, updatedAt: new Date().toISOString() };
+    }));
+  }, [selectedId]);
+
+  const addGroup = useCallback(async (group: string) => {
+    if (!selectedId || !group.trim()) return;
+    setContacts(prev => prev.map(c => {
+      if (c.id !== selectedId) return c;
+      const newGroups = [...new Set([...(c.groups ?? []), group.trim()])];
+      fetch(`/api/rolodex/${c.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ groups: newGroups }) });
+      return { ...c, groups: newGroups, updatedAt: new Date().toISOString() };
+    }));
+  }, [selectedId]);
+
+  const removeGroup = useCallback(async (group: string) => {
+    if (!selectedId) return;
+    setContacts(prev => prev.map(c => {
+      if (c.id !== selectedId) return c;
+      const newGroups = (c.groups ?? []).filter(g => g !== group);
+      fetch(`/api/rolodex/${c.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ groups: newGroups }) });
+      return { ...c, groups: newGroups, updatedAt: new Date().toISOString() };
+    }));
+  }, [selectedId]);
+
+  const [newTagInput, setNewTagInput] = useState("");
+  const [newGroupInput, setNewGroupInput] = useState("");
+  const [showAddTag, setShowAddTag] = useState(false);
+  const [showAddGroup, setShowAddGroup] = useState(false);
 
   // Compute scores for all contacts
   const contactsWithScores = useMemo(() =>
@@ -846,33 +901,67 @@ export default function RolodexPage() {
                       </div>
                     )}
 
-                    {/* ─── Groups ─── */}
-                    {(selected.groups ?? []).length > 0 && (
-                      <div className="space-y-2">
+                    {/* ─── Groups (editable) ─── */}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
                         <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.1em]">Groups</p>
-                        <div className="flex flex-wrap gap-1.5">
-                          {(selected.groups ?? []).map(group => (
-                            <span key={group} className="px-2.5 py-1 rounded-md bg-blue-500/[0.08] border border-blue-500/[0.15] text-[11px] font-medium text-blue-300">
-                              {group}
-                            </span>
-                          ))}
-                        </div>
+                        <button onClick={() => setShowAddGroup(!showAddGroup)} className="text-[10px] text-blue-400 hover:text-blue-300">+ Add</button>
                       </div>
-                    )}
+                      <div className="flex flex-wrap gap-1.5">
+                        {(selected.groups ?? []).map(group => (
+                          <span key={group} className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-blue-500/[0.08] border border-blue-500/[0.15] text-[11px] font-medium text-blue-300 group/chip">
+                            {group}
+                            <button onClick={() => removeGroup(group)} className="opacity-0 group-hover/chip:opacity-100 text-blue-400 hover:text-white transition-opacity">
+                              <X size={10} />
+                            </button>
+                          </span>
+                        ))}
+                        {(selected.groups ?? []).length === 0 && !showAddGroup && (
+                          <span className="text-[11px] text-slate-600 italic cursor-pointer" onClick={() => setShowAddGroup(true)}>No groups — click + Add</span>
+                        )}
+                      </div>
+                      {showAddGroup && (
+                        <input autoFocus value={newGroupInput} onChange={e => setNewGroupInput(e.target.value)}
+                          placeholder="Group name..."
+                          onKeyDown={e => {
+                            if (e.key === "Enter" && newGroupInput.trim()) { addGroup(newGroupInput); setNewGroupInput(""); }
+                            if (e.key === "Escape") { setShowAddGroup(false); setNewGroupInput(""); }
+                          }}
+                          onBlur={() => { if (newGroupInput.trim()) addGroup(newGroupInput); setNewGroupInput(""); setShowAddGroup(false); }}
+                          className="w-full px-2.5 py-1.5 bg-white/[0.04] border border-blue-500/30 rounded-lg text-[12px] text-white placeholder:text-slate-600 outline-none" />
+                      )}
+                    </div>
 
-                    {/* ─── Tags ─── */}
-                    {selected.tags.length > 0 && (
-                      <div className="space-y-2">
+                    {/* ─── Tags (editable) ─── */}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
                         <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.1em]">Tags</p>
-                        <div className="flex flex-wrap gap-1.5">
-                          {selected.tags.map(tag => (
-                            <span key={tag} className="px-2 py-0.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-[11px] text-slate-400">
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
+                        <button onClick={() => setShowAddTag(!showAddTag)} className="text-[10px] text-blue-400 hover:text-blue-300">+ Add</button>
                       </div>
-                    )}
+                      <div className="flex flex-wrap gap-1.5">
+                        {selected.tags.map(tag => (
+                          <span key={tag} className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-[11px] text-slate-400 group/chip">
+                            {tag}
+                            <button onClick={() => removeTag(tag)} className="opacity-0 group-hover/chip:opacity-100 text-slate-400 hover:text-white transition-opacity">
+                              <X size={10} />
+                            </button>
+                          </span>
+                        ))}
+                        {selected.tags.length === 0 && !showAddTag && (
+                          <span className="text-[11px] text-slate-600 italic cursor-pointer" onClick={() => setShowAddTag(true)}>No tags — click + Add</span>
+                        )}
+                      </div>
+                      {showAddTag && (
+                        <input autoFocus value={newTagInput} onChange={e => setNewTagInput(e.target.value)}
+                          placeholder="Tag name..."
+                          onKeyDown={e => {
+                            if (e.key === "Enter" && newTagInput.trim()) { addTag(newTagInput); setNewTagInput(""); }
+                            if (e.key === "Escape") { setShowAddTag(false); setNewTagInput(""); }
+                          }}
+                          onBlur={() => { if (newTagInput.trim()) addTag(newTagInput); setNewTagInput(""); setShowAddTag(false); }}
+                          className="w-full px-2.5 py-1.5 bg-white/[0.04] border border-blue-500/30 rounded-lg text-[12px] text-white placeholder:text-slate-600 outline-none" />
+                      )}
+                    </div>
 
                     {/* ─── Location + Map ─── */}
                     {selected.city && (
@@ -885,30 +974,19 @@ export default function RolodexPage() {
                       </div>
                     )}
 
-                    {/* ─── More Properties ─── */}
-                    {(selected.nextFollowUp || selected.source || selected.updatedAt) && (
-                      <div className="space-y-1.5 pt-2 border-t border-white/[0.04]">
-                        <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.1em] mb-1">Details</p>
-                        {selected.nextFollowUp && (
-                          <div className="flex items-center justify-between">
-                            <span className="text-[12px] text-slate-500">Follow Up</span>
-                            <span className={cn("text-[12px]", new Date(selected.nextFollowUp) <= new Date() ? "text-amber-400" : "text-slate-300")}>
-                              {timeAgo(selected.nextFollowUp)}
-                            </span>
-                          </div>
-                        )}
-                        {selected.source && (
-                          <div className="flex items-center justify-between">
-                            <span className="text-[12px] text-slate-500">Source</span>
-                            <span className="text-[12px] text-slate-300">{selected.source}</span>
-                          </div>
-                        )}
-                        <div className="flex items-center justify-between">
-                          <span className="text-[12px] text-slate-500">Last Updated</span>
-                          <span className="text-[12px] text-slate-300">{timeAgo(selected.updatedAt)}</span>
-                        </div>
+                    {/* ─── Details ─── */}
+                    <div className="space-y-1.5 pt-2 border-t border-white/[0.04]">
+                      <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.1em] mb-1">Details</p>
+                      <InlineField label="Follow Up" value={selected.nextFollowUp?.split("T")[0]} field="nextFollowUp" contactId={selected.id} onSaved={onFieldSaved} type="date" />
+                      <div className="flex items-center justify-between">
+                        <span className="text-[12px] text-slate-500">Last Edited</span>
+                        <span className="text-[12px] text-slate-300">{timeAgo(selected.updatedAt)}</span>
                       </div>
-                    )}
+                      <div className="flex items-center justify-between">
+                        <span className="text-[12px] text-slate-500">Created</span>
+                        <span className="text-[12px] text-slate-300">{timeAgo(selected.createdAt)}</span>
+                      </div>
+                    </div>
                   </div>
                 )}
 
