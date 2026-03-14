@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
 import { getContact, updateContact } from "@/lib/rolodex-store";
-
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -44,14 +41,21 @@ ${facts ? `\nFacts:\n${facts}` : ""}
 
 Write a concise relationship summary — who they are, relationship health, and what to do next. No bullet points. Conversational tone.`;
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [{ role: "user", content: prompt }],
-      max_tokens: 200,
-      temperature: 0.7,
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        max_tokens: 200,
+        temperature: 0.7,
+      }),
     });
-
-    const summary = completion.choices[0]?.message?.content?.trim() ?? "";
+    const data = await res.json();
+    const summary = data.choices?.[0]?.message?.content?.trim() ?? "";
 
     // Save it to the contact
     updateContact(params.id, { aiSummary: summary });
