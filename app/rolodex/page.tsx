@@ -1072,26 +1072,36 @@ export default function RolodexPage() {
 
                 {drawerTab === "notes" && (
                   <div className="space-y-3">
-                    {/* Add note input — always visible */}
-                    <div className="relative">
+                    {/* Add note — prominent, always first */}
+                    <div className="p-3 rounded-lg bg-blue-500/[0.06] border border-blue-500/[0.15]">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[11px] font-medium text-blue-400 flex items-center gap-1.5">
+                          <StickyNote size={11} /> Quick Note
+                        </span>
+                        <span className="text-[10px] text-slate-600">⌘+Enter to save</span>
+                      </div>
                       <textarea value={newNoteInput} onChange={e => setNewNoteInput(e.target.value)}
-                        placeholder="Write a note..."
-                        rows={2}
+                        placeholder="Write a note about this person..."
+                        rows={3}
                         onKeyDown={e => {
                           if (e.key === "Enter" && (e.metaKey || e.ctrlKey) && newNoteInput.trim()) {
                             addNote(newNoteInput); setNewNoteInput("");
                           }
                         }}
-                        className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-lg text-[12px] text-white placeholder:text-slate-600 outline-none focus:border-blue-500/30 resize-none transition-colors" />
-                      {newNoteInput.trim() && (
-                        <button onClick={() => { addNote(newNoteInput); setNewNoteInput(""); }}
-                          className="absolute bottom-2 right-2 px-2.5 py-1 bg-blue-500 hover:bg-blue-400 text-white text-[10px] font-medium rounded transition-colors">
-                          Add ⌘↵
+                        className="w-full px-3 py-2 bg-white/[0.06] border border-white/[0.1] rounded-md text-[12px] text-white placeholder:text-slate-500 outline-none focus:border-blue-500/40 resize-none transition-colors" />
+                      <div className="flex justify-end mt-2">
+                        <button onClick={() => { if (newNoteInput.trim()) { addNote(newNoteInput); setNewNoteInput(""); } }}
+                          className={cn("px-3 py-1.5 text-[11px] font-medium rounded-md transition-all",
+                            newNoteInput.trim()
+                              ? "bg-blue-500 hover:bg-blue-400 text-white cursor-pointer"
+                              : "bg-white/[0.04] text-slate-600 cursor-not-allowed"
+                          )}>
+                          + Add Note
                         </button>
-                      )}
+                      </div>
                     </div>
                     {selected.notes.length === 0 ? (
-                      <p className="text-[12px] text-slate-500 py-4 text-center">No notes yet</p>
+                      <p className="text-[12px] text-slate-500 py-4 text-center">No notes yet — write one above!</p>
                     ) : (
                       selected.notes.sort((a, b) => b.createdAt.localeCompare(a.createdAt)).map(note => (
                         <div key={note.id} className={cn("p-3 rounded-lg border",
@@ -1108,41 +1118,49 @@ export default function RolodexPage() {
 
                 {drawerTab === "facts" && (
                   <div className="space-y-3">
-                    {/* Add fact */}
-                    <div className="flex items-center justify-between mb-1">
-                      <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.1em]">Fact Book</p>
-                      <button onClick={() => setShowAddFact(!showAddFact)} className="text-[10px] text-blue-400 hover:text-blue-300">+ Add Fact</button>
-                    </div>
-                    {showAddFact && (
-                      <div className="flex gap-2">
-                        <input autoFocus value={newFactLabel} onChange={e => setNewFactLabel(e.target.value)}
-                          placeholder="Label (e.g. Favorite food)"
-                          className="flex-1 px-2.5 py-1.5 bg-white/[0.04] border border-blue-500/30 rounded-lg text-[12px] text-white placeholder:text-slate-600 outline-none" />
+                    {/* Add fact — always visible */}
+                    <div className="p-3 rounded-lg bg-blue-500/[0.06] border border-blue-500/[0.15]">
+                      <span className="text-[11px] font-medium text-blue-400 flex items-center gap-1.5 mb-2">
+                        <BookUser size={11} /> Add Fact
+                      </span>
+                      <div className="space-y-2">
+                        <input value={newFactLabel} onChange={e => setNewFactLabel(e.target.value)}
+                          placeholder="Label (e.g. Favorite food, Kids' names)"
+                          className="w-full px-3 py-2 bg-white/[0.06] border border-white/[0.1] rounded-md text-[12px] text-white placeholder:text-slate-500 outline-none focus:border-blue-500/40 transition-colors" />
                         <input value={newFactValue} onChange={e => setNewFactValue(e.target.value)}
                           placeholder="Value"
                           onKeyDown={e => {
                             if (e.key === "Enter" && newFactLabel.trim() && newFactValue.trim()) {
-                              addFact(newFactLabel, newFactValue); setNewFactLabel(""); setNewFactValue(""); setShowAddFact(false);
+                              addFact(newFactLabel, newFactValue); setNewFactLabel(""); setNewFactValue("");
                             }
-                            if (e.key === "Escape") { setShowAddFact(false); setNewFactLabel(""); setNewFactValue(""); }
+                            if (e.key === "Escape") { setNewFactLabel(""); setNewFactValue(""); }
                           }}
-                          className="flex-1 px-2.5 py-1.5 bg-white/[0.04] border border-blue-500/30 rounded-lg text-[12px] text-white placeholder:text-slate-600 outline-none" />
-                        <button onClick={() => {
-                          if (newFactLabel.trim() && newFactValue.trim()) {
-                            addFact(newFactLabel, newFactValue); setNewFactLabel(""); setNewFactValue(""); setShowAddFact(false);
-                          }
-                        }} className="px-2.5 py-1.5 bg-blue-500 hover:bg-blue-400 text-white text-[10px] font-medium rounded-lg transition-colors">Add</button>
-                      </div>
-                    )}
-                    {(!selected.facts || selected.facts.length === 0) && !showAddFact ? (
-                      <p className="text-[12px] text-slate-500 py-4 text-center cursor-pointer hover:text-blue-400 transition-colors" onClick={() => setShowAddFact(true)}>No facts yet — click + Add Fact</p>
-                    ) : (
-                      (selected.facts ?? []).map(fact => (
-                        <div key={fact.id} className="flex items-start justify-between py-2 border-b border-white/[0.04] last:border-0">
-                          <span className="text-[11px] text-slate-500">{fact.label}</span>
-                          <span className="text-[12px] text-slate-300 text-right max-w-[60%]">{fact.value}</span>
+                          className="w-full px-3 py-2 bg-white/[0.06] border border-white/[0.1] rounded-md text-[12px] text-white placeholder:text-slate-500 outline-none focus:border-blue-500/40 transition-colors" />
+                        <div className="flex justify-end">
+                          <button onClick={() => {
+                            if (newFactLabel.trim() && newFactValue.trim()) {
+                              addFact(newFactLabel, newFactValue); setNewFactLabel(""); setNewFactValue("");
+                            }
+                          }} className={cn("px-3 py-1.5 text-[11px] font-medium rounded-md transition-all",
+                            newFactLabel.trim() && newFactValue.trim()
+                              ? "bg-blue-500 hover:bg-blue-400 text-white cursor-pointer"
+                              : "bg-white/[0.04] text-slate-600 cursor-not-allowed"
+                          )}>+ Add Fact</button>
                         </div>
-                      ))
+                      </div>
+                    </div>
+                    {/* Existing facts */}
+                    {(!selected.facts || selected.facts.length === 0) ? (
+                      <p className="text-[12px] text-slate-500 py-4 text-center">No facts yet — add one above!</p>
+                    ) : (
+                      <div className="space-y-0">
+                        {(selected.facts ?? []).map(fact => (
+                          <div key={fact.id} className="flex items-start justify-between py-2.5 border-b border-white/[0.04] last:border-0">
+                            <span className="text-[11px] text-slate-500">{fact.label}</span>
+                            <span className="text-[12px] text-slate-300 text-right max-w-[60%]">{fact.value}</span>
+                          </div>
+                        ))}
+                      </div>
                     )}
                   </div>
                 )}
