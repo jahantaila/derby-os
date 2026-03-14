@@ -35,6 +35,18 @@ export async function POST(req: NextRequest) {
     if (!data.firstName && !data.lastName && !data.email) {
       return NextResponse.json({ error: "At least firstName, lastName, or email required" }, { status: 400 });
     }
+    // Handle initial note
+    if (data.initialNote) {
+      data.notes = [{
+        id: crypto.randomUUID(),
+        content: data.initialNote,
+        pinned: false,
+        category: "general",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }];
+      delete data.initialNote;
+    }
     const contact = createContact(data);
     return NextResponse.json({ contact }, { status: 201 });
   } catch (err: any) {

@@ -258,6 +258,39 @@ export default function RolodexPage() {
   const [activeRelTypes, setActiveRelTypes] = useState<RelationshipType[]>([]);
   const [drawerTab, setDrawerTab] = useState<"overview" | "activity" | "notes" | "facts">("overview");
   const [showScoreDetail, setShowScoreDetail] = useState(false);
+  const [showCreate, setShowCreate] = useState(false);
+  const [newContact, setNewContact] = useState<Record<string, any>>({});
+  const [creating, setCreating] = useState(false);
+  const newNameRef = useRef<HTMLInputElement>(null);
+
+  const handleCreate = useCallback(async () => {
+    if (!newContact.firstName && !newContact.lastName && !newContact.email) return;
+    setCreating(true);
+    try {
+      const res = await fetch("/api/rolodex", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...newContact,
+          relationshipType: newContact.relationshipType || "other",
+          tags: newContact.tags ? newContact.tags.split(",").map((t: string) => t.trim()).filter(Boolean) : [],
+          groups: newContact.groups ? newContact.groups.split(",").map((g: string) => g.trim()).filter(Boolean) : [],
+        }),
+      });
+      const data = await res.json();
+      if (data.contact) {
+        setContacts(prev => [data.contact, ...prev]);
+        setShowCreate(false);
+        setNewContact({});
+        setSelectedId(data.contact.id);
+      }
+    } catch (e) { console.error(e); }
+    setCreating(false);
+  }, [newContact]);
+
+  useEffect(() => {
+    if (showCreate && newNameRef.current) newNameRef.current.focus();
+  }, [showCreate]);
 
   const selected = useMemo(() => contacts.find(c => c.id === selectedId) ?? null, [contacts, selectedId]);
   const selectedScore = useMemo(() => selected ? calculateScore(selected) : null, [selected]);
@@ -447,7 +480,8 @@ export default function RolodexPage() {
                 <Grid3X3 size={14} />
               </button>
             </div>
-            <button className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[13px] bg-blue-600 hover:bg-blue-500 text-white transition-colors ml-2">
+            <button onClick={() => { setShowCreate(true); setNewContact({}); }}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[13px] bg-blue-600 hover:bg-blue-500 text-white transition-colors ml-2">
               <Plus size={14} />
               <span className="hidden sm:inline">Add Person</span>
             </button>
@@ -891,6 +925,170 @@ export default function RolodexPage() {
           )}
         </div>
       </div>
+
+      {/* ─── Create Contact Slide-over ─── */}
+      {showCreate && (
+        <div className="fixed inset-0 z-50 flex justify-end">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowCreate(false)} />
+          <div className="relative w-full max-w-[480px] bg-[#0c0c12] border-l border-white/[0.06] overflow-y-auto animate-in slide-in-from-right">
+            {/* Header */}
+            <div className="sticky top-0 z-10 bg-[#0c0c12]/95 backdrop-blur-md border-b border-white/[0.06] px-6 py-4 flex items-center justify-between">
+              <h2 className="text-[16px] font-semibold text-white">New Person</h2>
+              <div className="flex items-center gap-2">
+                <button onClick={() => setShowCreate(false)} className="p-2 text-slate-500 hover:text-white transition-colors"><X size={16} /></button>
+              </div>
+            </div>
+
+            <div className="px-6 py-5 space-y-5">
+              {/* Name — the star of the show */}
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <label className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold mb-1.5 block">First Name</label>
+                  <input ref={newNameRef} value={newContact.firstName ?? ""} onChange={e => setNewContact({ ...newContact, firstName: e.target.value })}
+                    placeholder="First name"
+                    className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-lg text-[14px] text-white placeholder:text-slate-600 outline-none focus:border-blue-500/40 transition-colors"
+                    onKeyDown={e => e.key === "Enter" && handleCreate()} />
+                </div>
+                <div className="flex-1">
+                  <label className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold mb-1.5 block">Last Name</label>
+                  <input value={newContact.lastName ?? ""} onChange={e => setNewContact({ ...newContact, lastName: e.target.value })}
+                    placeholder="Last name"
+                    className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-lg text-[14px] text-white placeholder:text-slate-600 outline-none focus:border-blue-500/40 transition-colors" />
+                </div>
+              </div>
+
+              {/* Contact info */}
+              <div className="space-y-3">
+                <label className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold block">Contact</label>
+                <div className="relative">
+                  <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600" />
+                  <input value={newContact.email ?? ""} onChange={e => setNewContact({ ...newContact, email: e.target.value })}
+                    placeholder="Email" type="email"
+                    className="w-full pl-9 pr-3 py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-lg text-[13px] text-white placeholder:text-slate-600 outline-none focus:border-blue-500/40" />
+                </div>
+                <div className="relative">
+                  <Phone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600" />
+                  <input value={newContact.phone ?? ""} onChange={e => setNewContact({ ...newContact, phone: e.target.value })}
+                    placeholder="Phone"
+                    className="w-full pl-9 pr-3 py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-lg text-[13px] text-white placeholder:text-slate-600 outline-none focus:border-blue-500/40" />
+                </div>
+              </div>
+
+              {/* Professional */}
+              <div className="space-y-3">
+                <label className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold block">Professional</label>
+                <div className="flex gap-3">
+                  <input value={newContact.company ?? ""} onChange={e => setNewContact({ ...newContact, company: e.target.value })}
+                    placeholder="Company"
+                    className="flex-1 px-3 py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-lg text-[13px] text-white placeholder:text-slate-600 outline-none focus:border-blue-500/40" />
+                  <input value={newContact.title ?? ""} onChange={e => setNewContact({ ...newContact, title: e.target.value })}
+                    placeholder="Title"
+                    className="flex-1 px-3 py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-lg text-[13px] text-white placeholder:text-slate-600 outline-none focus:border-blue-500/40" />
+                </div>
+              </div>
+
+              {/* Location */}
+              <div className="space-y-3">
+                <label className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold block">Location</label>
+                <div className="flex gap-3">
+                  <input value={newContact.city ?? ""} onChange={e => setNewContact({ ...newContact, city: e.target.value })}
+                    placeholder="City"
+                    className="flex-1 px-3 py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-lg text-[13px] text-white placeholder:text-slate-600 outline-none focus:border-blue-500/40" />
+                  <input value={newContact.state ?? ""} onChange={e => setNewContact({ ...newContact, state: e.target.value })}
+                    placeholder="State"
+                    className="w-24 px-3 py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-lg text-[13px] text-white placeholder:text-slate-600 outline-none focus:border-blue-500/40" />
+                </div>
+              </div>
+
+              {/* Relationship type */}
+              <div>
+                <label className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold mb-1.5 block">Relationship</label>
+                <div className="flex flex-wrap gap-1.5">
+                  {(["client", "prospect", "friend", "family", "team", "investor", "mentor", "partner", "school", "industry", "other"] as const).map(t => (
+                    <button key={t} onClick={() => setNewContact({ ...newContact, relationshipType: t })}
+                      className={cn("px-2.5 py-1.5 rounded-lg text-[12px] border transition-all",
+                        newContact.relationshipType === t
+                          ? "border-blue-500/40 text-white"
+                          : "border-white/[0.06] text-slate-500 hover:text-white hover:border-white/[0.12]"
+                      )}
+                      style={newContact.relationshipType === t ? { backgroundColor: `${RELATIONSHIP_TYPE_COLORS[t]}15`, borderColor: `${RELATIONSHIP_TYPE_COLORS[t]}40` } : {}}>
+                      {RELATIONSHIP_TYPE_LABELS[t]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* How we met + Source */}
+              <div className="space-y-3">
+                <label className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold block">Context</label>
+                <input value={newContact.howWeMet ?? ""} onChange={e => setNewContact({ ...newContact, howWeMet: e.target.value })}
+                  placeholder="How we met"
+                  className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-lg text-[13px] text-white placeholder:text-slate-600 outline-none focus:border-blue-500/40" />
+                <div className="flex gap-3">
+                  <input value={newContact.source ?? ""} onChange={e => setNewContact({ ...newContact, source: e.target.value })}
+                    placeholder="Source (e.g. Event, Referral)"
+                    className="flex-1 px-3 py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-lg text-[13px] text-white placeholder:text-slate-600 outline-none focus:border-blue-500/40" />
+                  <input value={newContact.introducedBy ?? ""} onChange={e => setNewContact({ ...newContact, introducedBy: e.target.value })}
+                    placeholder="Introduced by"
+                    className="flex-1 px-3 py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-lg text-[13px] text-white placeholder:text-slate-600 outline-none focus:border-blue-500/40" />
+                </div>
+              </div>
+
+              {/* Tags + Groups */}
+              <div className="space-y-3">
+                <label className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold block">Organization</label>
+                <input value={newContact.tags ?? ""} onChange={e => setNewContact({ ...newContact, tags: e.target.value })}
+                  placeholder="Tags (comma separated)"
+                  className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-lg text-[13px] text-white placeholder:text-slate-600 outline-none focus:border-blue-500/40" />
+                <input value={newContact.groups ?? ""} onChange={e => setNewContact({ ...newContact, groups: e.target.value })}
+                  placeholder="Groups (comma separated)"
+                  className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-lg text-[13px] text-white placeholder:text-slate-600 outline-none focus:border-blue-500/40" />
+              </div>
+
+              {/* Personal */}
+              <div className="space-y-3">
+                <label className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold block">Personal</label>
+                <div className="flex gap-3">
+                  <input value={newContact.birthday ?? ""} onChange={e => setNewContact({ ...newContact, birthday: e.target.value })}
+                    placeholder="Birthday" type="date"
+                    className="flex-1 px-3 py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-lg text-[13px] text-white placeholder:text-slate-600 outline-none focus:border-blue-500/40" />
+                  <input value={newContact.college ?? ""} onChange={e => setNewContact({ ...newContact, college: e.target.value })}
+                    placeholder="College"
+                    className="flex-1 px-3 py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-lg text-[13px] text-white placeholder:text-slate-600 outline-none focus:border-blue-500/40" />
+                </div>
+                <div className="flex gap-3">
+                  <input value={newContact.linkedin ?? ""} onChange={e => setNewContact({ ...newContact, linkedin: e.target.value })}
+                    placeholder="LinkedIn URL"
+                    className="flex-1 px-3 py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-lg text-[13px] text-white placeholder:text-slate-600 outline-none focus:border-blue-500/40" />
+                  <input value={newContact.website ?? ""} onChange={e => setNewContact({ ...newContact, website: e.target.value })}
+                    placeholder="Website"
+                    className="flex-1 px-3 py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-lg text-[13px] text-white placeholder:text-slate-600 outline-none focus:border-blue-500/40" />
+                </div>
+              </div>
+
+              {/* Initial note */}
+              <div>
+                <label className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold mb-1.5 block">Note</label>
+                <textarea value={newContact.initialNote ?? ""} onChange={e => setNewContact({ ...newContact, initialNote: e.target.value })}
+                  placeholder="Add a note about this person..."
+                  rows={3}
+                  className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-lg text-[13px] text-white placeholder:text-slate-600 outline-none focus:border-blue-500/40 resize-none" />
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="sticky bottom-0 bg-[#0c0c12]/95 backdrop-blur-md border-t border-white/[0.06] px-6 py-4 flex items-center justify-between">
+              <button onClick={() => setShowCreate(false)} className="px-4 py-2 text-[13px] text-slate-400 hover:text-white transition-colors">
+                Cancel
+              </button>
+              <button onClick={handleCreate} disabled={creating || (!newContact.firstName && !newContact.lastName && !newContact.email)}
+                className="px-5 py-2.5 rounded-lg text-[13px] font-medium bg-blue-600 hover:bg-blue-500 text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+                {creating ? "Creating..." : "Create Person"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -335,7 +335,8 @@ def main():
             "name": opp_name,
             "pipelineStageId": STAGE,
             "status": "open",
-            "contactId": cid
+            "contactId": cid,
+            "monetaryValue": 199
         })
         
         # Create notes - one per email

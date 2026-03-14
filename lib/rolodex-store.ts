@@ -11,22 +11,32 @@ function ensureDir() {
 }
 
 function readAll(): RolodexContact[] {
-  ensureDir();
-  if (!fs.existsSync(DATA_FILE)) {
-    // Seed on first run
-    fs.writeFileSync(DATA_FILE, JSON.stringify(SEED_CONTACTS, null, 2));
-    return SEED_CONTACTS;
-  }
   try {
+    ensureDir();
+    if (!fs.existsSync(DATA_FILE)) {
+      // Seed on first run
+      try {
+        fs.writeFileSync(DATA_FILE, JSON.stringify(SEED_CONTACTS, null, 2));
+      } catch {
+        // Read-only filesystem (e.g. Vercel) — return seed data
+        return [...SEED_CONTACTS];
+      }
+      return SEED_CONTACTS;
+    }
     return JSON.parse(fs.readFileSync(DATA_FILE, "utf-8"));
   } catch {
-    return SEED_CONTACTS;
+    return [...SEED_CONTACTS];
   }
 }
 
 function writeAll(contacts: RolodexContact[]) {
-  ensureDir();
-  fs.writeFileSync(DATA_FILE, JSON.stringify(contacts, null, 2));
+  try {
+    ensureDir();
+    fs.writeFileSync(DATA_FILE, JSON.stringify(contacts, null, 2));
+  } catch {
+    // Read-only filesystem — silently fail (Vercel serverless)
+    console.warn("rolodex-store: could not write to disk (read-only fs)");
+  }
 }
 
 export function getAllContacts(): RolodexContact[] {
