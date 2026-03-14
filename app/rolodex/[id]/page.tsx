@@ -104,7 +104,7 @@ function InlineField({ value, field, onSave, placeholder, className: cls, type =
         onChange={e => setDraft(e.target.value)}
         onBlur={commit}
         onKeyDown={e => { if (e.key === "Enter") commit(); if (e.key === "Escape") setEditing(false); }}
-        className={cn("bg-white/[0.06] border border-blue-500/30 rounded px-2 py-0.5 outline-none text-white", cls)}
+        className={cn("bg-white/[0.08] border border-blue-500/40 rounded px-2 py-1 outline-none text-white min-w-[80px]", cls)}
         placeholder={placeholder}
       />
     );
@@ -112,10 +112,112 @@ function InlineField({ value, field, onSave, placeholder, className: cls, type =
 
   return (
     <span onClick={() => setEditing(true)}
-      className={cn("cursor-pointer hover:bg-white/[0.06] rounded px-1 -mx-1 transition-colors", !value && "text-slate-600 italic", cls)}
+      className={cn(
+        "cursor-pointer rounded px-1.5 py-0.5 -mx-1 transition-all border border-transparent",
+        "hover:bg-white/[0.06] hover:border-white/[0.08]",
+        !value && "text-slate-600 italic",
+        cls
+      )}
       title="Click to edit">
-      {value || placeholder || "—"}
+      {value || placeholder || "Add..."}
     </span>
+  );
+}
+
+// ─── Quick Add Note ───
+function QuickAddNote({ contactId, onAdded }: { contactId: string; onAdded: (note: any) => void }) {
+  const [text, setText] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const save = async () => {
+    if (!text.trim()) return;
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/rolodex/${contactId}/interactions`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "note", summary: text.trim(), date: new Date().toISOString() }),
+      });
+      const data = await res.json();
+      if (data.interaction) onAdded(data.interaction);
+      setText("");
+    } catch (e) { console.error(e); }
+    setSaving(false);
+  };
+
+  return (
+    <div className="flex gap-2">
+      <textarea value={text} onChange={e => setText(e.target.value)}
+        placeholder="Quick note... (Cmd+Enter to save)"
+        onKeyDown={e => { if ((e.metaKey || e.ctrlKey) && e.key === "Enter") save(); }}
+        className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-[12px] text-white placeholder:text-slate-500 outline-none focus:border-blue-500/30 resize-none h-[60px]"
+      />
+      <button onClick={save} disabled={!text.trim() || saving}
+        className="px-3 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-medium transition-colors disabled:opacity-30 disabled:cursor-not-allowed shrink-0 self-end h-8">
+        {saving ? "..." : "Save"}
+      </button>
+    </div>
+  );
+}
+
+// ─── Quick Log Interaction ───
+function QuickLogInteraction({ contactId, onAdded }: { contactId: string; onAdded: (int: any) => void }) {
+  const [open, setOpen] = useState(false);
+  const [type, setType] = useState<InteractionType>("call");
+  const [summary, setSummary] = useState("");
+  const [saving, setSaving] = useState(false);
+  const types: InteractionType[] = ["call", "email", "meeting", "text", "social", "gift"];
+
+  const save = async () => {
+    if (!summary.trim()) return;
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/rolodex/${contactId}/interactions`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type, summary: summary.trim(), date: new Date().toISOString() }),
+      });
+      const data = await res.json();
+      if (data.interaction) onAdded(data.interaction);
+      setSummary("");
+      setOpen(false);
+    } catch (e) { console.error(e); }
+    setSaving(false);
+  };
+
+  if (!open) {
+    return (
+      <button onClick={() => setOpen(true)}
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-dashed border-white/[0.1] text-[11px] text-slate-400 hover:text-white hover:border-white/[0.2] transition-all">
+        <Plus size={12} /> Log Interaction
+      </button>
+    );
+  }
+
+  return (
+    <div className="p-3 rounded-lg bg-white/[0.03] border border-white/[0.08] space-y-2">
+      <div className="flex gap-1 flex-wrap">
+        {types.map(t => (
+          <button key={t} onClick={() => setType(t)}
+            className={cn("px-2 py-0.5 rounded text-[10px] transition-all",
+              type === t ? "bg-blue-500/20 text-blue-400 border border-blue-500/30" : "text-slate-500 hover:text-white border border-transparent"
+            )}>
+            {INTERACTION_TYPE_LABELS[t]}
+          </button>
+        ))}
+      </div>
+      <input value={summary} onChange={e => setSummary(e.target.value)}
+        placeholder="What happened?"
+        onKeyDown={e => { if (e.key === "Enter") save(); if (e.key === "Escape") setOpen(false); }}
+        className="w-full bg-white/[0.04] border border-white/[0.08] rounded px-3 py-2 text-[12px] text-white placeholder:text-slate-500 outline-none focus:border-blue-500/30"
+        autoFocus
+      />
+      <div className="flex gap-2 justify-end">
+        <button onClick={() => setOpen(false)} className="px-3 py-1 rounded text-[11px] text-slate-400 hover:text-white transition-colors">Cancel</button>
+        <button onClick={save} disabled={!summary.trim() || saving}
+          className="px-3 py-1 rounded bg-blue-600 text-white text-[11px] font-medium disabled:opacity-30">
+          {saving ? "..." : "Log"}
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -231,6 +333,13 @@ export default function ContactPage() {
   const [activityFilter, setActivityFilter] = useState<InteractionType | "all">("all");
   const [noteSearch, setNoteSearch] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
+  const [newNoteText, setNewNoteText] = useState("");
+
+  // Handle adding interaction/note to state
+  const addInteraction = useCallback((int: any) => {
+    if (!contact) return;
+    setContact({ ...contact, interactions: [int, ...contact.interactions] });
+  }, [contact]);
 
   useEffect(() => {
     Promise.all([
@@ -450,6 +559,18 @@ export default function ContactPage() {
                       ))}
                     </div>
                   )}
+                </div>
+
+                {/* Quick Actions */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-2">Quick Note</p>
+                    <QuickAddNote contactId={contact.id} onAdded={addInteraction} />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-2">Log Activity</p>
+                    <QuickLogInteraction contactId={contact.id} onAdded={addInteraction} />
+                  </div>
                 </div>
 
                 {/* Activity Chart */}
