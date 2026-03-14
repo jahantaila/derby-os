@@ -606,6 +606,39 @@ export default function RolodexPage() {
 
       {/* ─── Main Content ─── */}
       <div className="flex-1 flex flex-col min-w-0">
+        {/* Health Strip */}
+        {(() => {
+          const now = Date.now();
+          const goingCold = contacts.filter(c => !c.archived && c.lastContactedAt && (now - new Date(c.lastContactedAt).getTime()) / 86400000 > 30).length;
+          const overdue = contacts.filter(c => !c.archived && c.nextFollowUp && new Date(c.nextFollowUp) <= new Date()).length;
+          const strongCount = contacts.filter(c => !c.archived && c.relationshipScore >= 75).length;
+          const last7 = contacts.reduce((s, c) => s + c.interactions.filter(i => (now - new Date(i.date).getTime()) / 86400000 <= 7).length, 0);
+          return (
+            <div className="flex items-center gap-5 px-5 py-2 border-b border-white/[0.04] text-[11px]">
+              <div className="flex items-center gap-1.5">
+                <span className="text-slate-500">Strong</span>
+                <span className="font-medium text-emerald-400">{strongCount}</span>
+              </div>
+              {goingCold > 0 && (
+                <div className="flex items-center gap-1.5">
+                  <span className="text-slate-500">Going cold</span>
+                  <span className="font-medium text-amber-400">{goingCold}</span>
+                </div>
+              )}
+              {overdue > 0 && (
+                <div className="flex items-center gap-1.5">
+                  <span className="text-slate-500">Follow-up overdue</span>
+                  <span className="font-medium text-red-400">{overdue}</span>
+                </div>
+              )}
+              <div className="flex items-center gap-1.5">
+                <span className="text-slate-500">This week</span>
+                <span className="font-medium text-blue-400">{last7} interactions</span>
+              </div>
+            </div>
+          );
+        })()}
+
         {/* Header */}
         <div className="flex items-center gap-3 px-5 py-3 border-b border-white/[0.06]">
           <div className="flex-1 flex items-center gap-3">
