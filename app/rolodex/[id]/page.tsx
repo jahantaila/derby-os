@@ -521,7 +521,7 @@ export default function ContactPage() {
             <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-[11px]">
               <div><span className="text-slate-500">Last contact</span><p className="text-white font-medium">{timeAgo(contact.lastContactedAt)}</p></div>
               <div><span className="text-slate-500">Interactions</span><p className="text-white font-medium">{contact.interactions.length}</p></div>
-              <div><span className="text-slate-500">Follow up</span><p className="text-white font-medium">{contact.nextFollowUp ? formatDate(contact.nextFollowUp) : "—"}</p></div>
+              <div><span className="text-slate-500">Follow up</span><p className={cn("font-medium", contact.nextFollowUp && new Date(contact.nextFollowUp) <= new Date() ? "text-red-400" : "text-white")}><InlineField value={contact.nextFollowUp?.split("T")[0]} field="nextFollowUp" onSave={saveField} placeholder="Set date" className="text-[11px]" type="date" /></p></div>
               <div><span className="text-slate-500">Talk time</span><p className="text-white font-medium">{formatDuration(totalCallTime) || "0m"}</p></div>
             </div>
           </div>
