@@ -451,6 +451,25 @@ export default function ContactPage() {
       </div>
 
       <div className="max-w-[1200px] mx-auto px-6 py-6">
+        {/* Cold contact warning */}
+        {contact.lastContactedAt && (Date.now() - new Date(contact.lastContactedAt).getTime()) / 86400000 > 30 && (
+          <div className="mb-4 px-4 py-2.5 rounded-lg bg-amber-500/[0.08] border border-amber-500/[0.15] flex items-center gap-2">
+            <Clock3 size={14} className="text-amber-400 shrink-0" />
+            <span className="text-[12px] text-amber-300">
+              You haven't contacted {contact.firstName} in {Math.floor((Date.now() - new Date(contact.lastContactedAt).getTime()) / 86400000)} days. This relationship is going cold.
+            </span>
+          </div>
+        )}
+        {/* Overdue follow-up warning */}
+        {contact.nextFollowUp && new Date(contact.nextFollowUp) <= new Date() && (
+          <div className="mb-4 px-4 py-2.5 rounded-lg bg-red-500/[0.08] border border-red-500/[0.15] flex items-center gap-2">
+            <Calendar size={14} className="text-red-400 shrink-0" />
+            <span className="text-[12px] text-red-300">
+              Follow-up was due {timeAgo(contact.nextFollowUp)}. Don't leave {contact.firstName} hanging.
+            </span>
+          </div>
+        )}
+
         {/* ═══════ HERO HEADER ═══════ */}
         <div className="flex flex-col lg:flex-row gap-6 mb-6">
           {/* Left: Identity */}
