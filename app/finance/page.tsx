@@ -1,1538 +1,542 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import {
-  Bar,
-  BarChart,
-  Cell,
-  Line,
-  LineChart,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
-import { ArrowLeft, ArrowRight, ChevronDown, Download, Search, Trash2, Upload, X } from "lucide-react";
-import {
-  FinanceClientType,
-  FinanceData,
-  FinanceGeneralMonthData,
-  FinanceLedgerRow,
-  FinanceServiceType,
-} from "@/lib/finance-types";
+  ArrowDown, ArrowUp, Building2, Calendar, ChevronRight, CreditCard,
+  DollarSign, Edit3, Filter, Minus, Plus, Receipt, Search, Target,
+  TrendingDown, TrendingUp, Trash2, Users, X, Zap,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { seedClients, seedRevenue } from "@/lib/seed";
 
-const DEFAULT_GOAL = 15000;
+const ReactEChartsCore = dynamic(() => import("echarts-for-react"), { ssr: false });
 
-type DashboardTab = "revenue" | "expenses" | "clients" | "reports";
-type ExpenseSectionKey = "recurringExpenses" | "employeeExpenses" | "oneTimeExpenses";
-type RevenueSortKey = "clientName" | "service" | "amount" | "recurring" | "date" | "status";
-type ClientSortKey = "name" | "revenue" | "profitMargin";
-type ImportType =
-  | "Client Income"
-  | "Client Expenses"
-  | "General Recurring Expenses"
-  | "General Employee Expenses"
-  | "General One-Time Expenses";
+// ─── Types ───
+type ExpenseCategory = "software" | "payroll" | "marketing" | "operations" | "other";
+type ExpenseFrequency = "monthly" | "one-time";
+type PaymentStatus = "paid" | "pending" | "overdue";
 
-type ParsedCsvPreview = {
-  headers: string[];
-  rows: Record<string, string>[];
-};
-
-type RevenueRow = {
+type Expense = {
   id: string;
-  clientId: string;
-  clientName: string;
-  clientType: FinanceClientType;
-  service: FinanceServiceType;
+  name: string;
   amount: number;
-  recurring: "M" | "1-time";
+  category: ExpenseCategory;
+  frequency: ExpenseFrequency;
   date: string;
-  status: "paid" | "pending";
+  notes?: string;
 };
 
-const money = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-});
+type ClientFinance = {
+  id: string;
+  name: string;
+  type: string;
+  monthlyRevenue: number;
+  services: string[];
+  monthlyCost: number;
+  margin: number;
+  status: string;
+  paymentDay: number;
+  paymentStatus: PaymentStatus;
+  lastPayment?: string;
+};
 
-const compactMoney = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  notation: "compact",
-  maximumFractionDigits: 1,
-});
-
-const percent = new Intl.NumberFormat("en-US", {
-  minimumFractionDigits: 1,
-  maximumFractionDigits: 1,
-});
-
-const SERVICE_OPTIONS: FinanceServiceType[] = [
-  "Website",
-  "SEO",
-  "Social Media",
-  "Google Ads",
-  "Meta Ads",
-  "Software",
-  "Review Automation",
-  "Other",
+// ─── Seed Data ───
+const EXPENSE_CATEGORIES: { id: ExpenseCategory; label: string; color: string }[] = [
+  { id: "software", label: "Software & Tools", color: "#60A5FA" },
+  { id: "payroll", label: "Payroll & Contractors", color: "#F59E0B" },
+  { id: "marketing", label: "Marketing", color: "#EF4444" },
+  { id: "operations", label: "Operations", color: "#8B5CF6" },
+  { id: "other", label: "Other", color: "#6B7280" },
 ];
 
-const CLIENT_TYPE_LABEL: Record<FinanceClientType, string> = {
-  restaurant: "Restaurant",
-  "home-service": "Home Service",
-  gaming: "Gaming",
-  other: "Other",
-};
-
-const SERVICE_COLORS: Record<FinanceServiceType, string> = {
-  Website: "#3b82f6",
-  SEO: "#10b981",
-  "Social Media": "#f59e0b",
-  "Google Ads": "#ef4444",
-  "Meta Ads": "#60a5fa",
-  Software: "#6366f1",
-  "Review Automation": "#14b8a6",
-  Other: "#94a3b8",
-};
-
-const CLIENT_TYPE_COLORS: Record<FinanceClientType, string> = {
-  restaurant: "#2093FF",
-  "home-service": "#10b981",
-  gaming: "#f59e0b",
-  other: "#ef4444",
-};
-
-const IMPORT_TYPES: ImportType[] = [
-  "Client Income",
-  "Client Expenses",
-  "General Recurring Expenses",
-  "General Employee Expenses",
-  "General One-Time Expenses",
+const SEED_EXPENSES: Expense[] = [
+  { id: "e1", name: "GoHighLevel", amount: 297, category: "software", frequency: "monthly", date: "2026-03-01" },
+  { id: "e2", name: "OpenClaw Pro", amount: 49, category: "software", frequency: "monthly", date: "2026-03-01" },
+  { id: "e3", name: "Vercel Pro", amount: 20, category: "software", frequency: "monthly", date: "2026-03-01" },
+  { id: "e4", name: "Instantly", amount: 97, category: "software", frequency: "monthly", date: "2026-03-01" },
+  { id: "e5", name: "Claude Max", amount: 200, category: "software", frequency: "monthly", date: "2026-03-01" },
+  { id: "e6", name: "Hosting (Cloudways)", amount: 35, category: "software", frequency: "monthly", date: "2026-03-01" },
+  { id: "e7", name: "Google Workspace", amount: 14, category: "software", frequency: "monthly", date: "2026-03-01" },
+  { id: "e8", name: "Overseas Team - Fulfillment", amount: 2200, category: "payroll", frequency: "monthly", date: "2026-03-01" },
+  { id: "e9", name: "Hamza - Landing Pages", amount: 500, category: "payroll", frequency: "monthly", date: "2026-03-01" },
+  { id: "e10", name: "Domain Renewals", amount: 120, category: "operations", frequency: "one-time", date: "2026-02-15" },
+  { id: "e11", name: "Cold Email Tool (Smartlead)", amount: 39, category: "marketing", frequency: "monthly", date: "2026-03-01" },
+  { id: "e12", name: "Tavily API", amount: 20, category: "software", frequency: "monthly", date: "2026-03-01" },
 ];
 
-const SERVICE_BADGE_CLASS: Record<FinanceServiceType, string> = {
-  Website: "border-blue-400/40 bg-blue-500/15 text-blue-100",
-  SEO: "border-emerald-400/40 bg-emerald-500/15 text-emerald-100",
-  "Social Media": "border-amber-400/40 bg-amber-500/15 text-amber-100",
-  "Google Ads": "border-rose-400/40 bg-rose-500/15 text-rose-100",
-  "Meta Ads": "border-sky-400/40 bg-sky-500/15 text-sky-100",
-  Software: "border-indigo-400/40 bg-indigo-500/15 text-indigo-100",
-  "Review Automation": "border-teal-400/40 bg-teal-500/15 text-teal-100",
-  Other: "border-slate-400/40 bg-slate-500/15 text-slate-200",
-};
+const SEED_CLIENT_FINANCES: ClientFinance[] = seedClients.map((c, i) => ({
+  id: c.id,
+  name: c.name,
+  type: c.type,
+  monthlyRevenue: c.monthlyRevenue,
+  services: c.services,
+  monthlyCost: Math.round(c.monthlyRevenue * (0.15 + Math.random() * 0.2)),
+  margin: 0,
+  status: c.status,
+  paymentDay: [1, 5, 10, 15, 20, 25][i % 6],
+  paymentStatus: (["paid", "paid", "paid", "pending", "paid"] as PaymentStatus[])[i % 5],
+  lastPayment: `2026-03-${String([1, 5, 10, 15, 20][i % 5]).padStart(2, "0")}`,
+})).map(c => ({ ...c, margin: Math.round(((c.monthlyRevenue - c.monthlyCost) / c.monthlyRevenue) * 100) }));
 
-function formatMoney(value: number) {
-  return money.format(Number.isFinite(value) ? value : 0);
-}
+// ─── Helpers ───
+const money = (n: number) => `$${n.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+const moneyDetail = (n: number) => `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-function formatCompactMoney(value: number) {
-  return compactMoney.format(Number.isFinite(value) ? value : 0);
-}
-
-function formatPercent(value: number) {
-  return `${percent.format(Number.isFinite(value) ? value : 0)}%`;
-}
-
-function monthKey(date = new Date()) {
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone: "America/New_York",
-    year: "numeric",
-    month: "2-digit",
-  }).formatToParts(date);
-  const year = parts.find((p) => p.type === "year")!.value;
-  const month = parts.find((p) => p.type === "month")!.value;
-  return `${year}-${month}`;
-}
-
-function shiftMonth(value: string, delta: number) {
-  const [year, month] = value.split("-").map(Number);
-  const next = new Date(Date.UTC(year, month - 1 + delta, 1));
-  return `${next.getUTCFullYear()}-${String(next.getUTCMonth() + 1).padStart(2, "0")}`;
-}
-
-function monthLabel(value: string) {
-  const [year, month] = value.split("-").map(Number);
-  return new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" }).format(new Date(Date.UTC(year, month - 1, 1)));
-}
-
-function monthShortLabel(value: string) {
-  const [year, month] = value.split("-").map(Number);
-  return new Intl.DateTimeFormat("en-US", { month: "short" }).format(new Date(Date.UTC(year, month - 1, 1)));
-}
-
-function emptyClientMonth(month: string) {
-  return {
-    month,
-    goalAmount: DEFAULT_GOAL,
-    stripeFeeOverride: null,
-    income: [] as FinanceLedgerRow[],
-    expenses: [] as FinanceLedgerRow[],
-  };
-}
-
-function emptyGeneralMonth(month: string): FinanceGeneralMonthData {
-  return {
-    month,
-    goalAmount: DEFAULT_GOAL,
-    recurringExpenses: [],
-    employeeExpenses: [],
-    oneTimeExpenses: [],
-  };
-}
-
-function cloneRecurringRows(rows: FinanceLedgerRow[]): FinanceLedgerRow[] {
-  return rows
-    .filter((row) => row.recurring === "M")
-    .map((row) => ({
-      ...row,
-      id: crypto.randomUUID(),
-    }));
-}
-
-function ensureMonthData(data: FinanceData, month: string): FinanceData {
-  const prev = shiftMonth(month, -1);
-  const nextClients = data.clients.map((client) => {
-    if (client.months[month]) return client;
-
-    const prevMonth = client.months[prev];
-    const nextMonth = prevMonth
-      ? {
-          month,
-          goalAmount: prevMonth.goalAmount,
-          stripeFeeOverride: null,
-          income: cloneRecurringRows(prevMonth.income),
-          expenses: cloneRecurringRows(prevMonth.expenses),
-        }
-      : emptyClientMonth(month);
-
-    return {
-      ...client,
-      months: {
-        ...client.months,
-        [month]: nextMonth,
-      },
-    };
-  });
-
-  const nextGeneralMonths = { ...data.generalData.months };
-  if (!nextGeneralMonths[month]) {
-    const prevGeneral = nextGeneralMonths[prev];
-    nextGeneralMonths[month] = prevGeneral
-      ? {
-          month,
-          goalAmount: prevGeneral.goalAmount,
-          recurringExpenses: cloneRecurringRows(prevGeneral.recurringExpenses),
-          employeeExpenses: cloneRecurringRows(prevGeneral.employeeExpenses),
-          oneTimeExpenses: [],
-        }
-      : emptyGeneralMonth(month);
-  }
-
-  return {
-    ...data,
-    clients: nextClients,
-    generalData: {
-      months: nextGeneralMonths,
-    },
-  };
-}
-
-function totalGeneralExpenses(month: FinanceGeneralMonthData) {
-  return (
-    month.recurringExpenses.reduce((sum, row) => sum + row.amount, 0) +
-    month.employeeExpenses.reduce((sum, row) => sum + row.amount, 0) +
-    month.oneTimeExpenses.reduce((sum, row) => sum + row.amount, 0)
-  );
-}
-
-function inferServiceFromText(value: string): FinanceServiceType {
-  const normalized = value.toLowerCase();
-  if (normalized.includes("review")) return "Review Automation";
-  if (normalized.includes("software") || normalized.includes("saas")) return "Software";
-  if (normalized.includes("meta") || normalized.includes("facebook") || normalized.includes("instagram")) return "Meta Ads";
-  if (normalized.includes("google") || normalized.includes("ppc")) return "Google Ads";
-  if (normalized.includes("social")) return "Social Media";
-  if (normalized.includes("seo")) return "SEO";
-  if (normalized.includes("website") || normalized.includes("hosting") || normalized.includes("site")) return "Website";
-  return "Other";
-}
-
-function compareValue(a: string | number, b: string | number, dir: "asc" | "desc") {
-  const ratio = dir === "asc" ? 1 : -1;
-  if (typeof a === "number" && typeof b === "number") return (a - b) * ratio;
-  return String(a).localeCompare(String(b)) * ratio;
-}
-
-function trailingMonths(month: string, count: number) {
-  return Array.from({ length: count }).map((_, idx) => shiftMonth(month, -(count - idx - 1)));
-}
-
-function statValueClass(value: number) {
-  return value >= 0 ? "text-emerald-200" : "text-rose-200";
-}
-
-function normalizeHeader(value: string) {
-  return value.trim().toLowerCase().replace(/\s+/g, "_");
-}
-
-function parseCsv(text: string): ParsedCsvPreview {
-  const rows: string[][] = [];
-  let current = "";
-  let row: string[] = [];
-  let inQuotes = false;
-
-  for (let index = 0; index < text.length; index += 1) {
-    const character = text[index];
-    const next = text[index + 1];
-
-    if (character === '"') {
-      if (inQuotes && next === '"') {
-        current += '"';
-        index += 1;
-      } else {
-        inQuotes = !inQuotes;
-      }
-      continue;
-    }
-
-    if (character === "," && !inQuotes) {
-      row.push(current.trim());
-      current = "";
-      continue;
-    }
-
-    if ((character === "\n" || character === "\r") && !inQuotes) {
-      if (character === "\r" && next === "\n") index += 1;
-      row.push(current.trim());
-      if (row.some((cell) => cell.length > 0)) rows.push(row);
-      row = [];
-      current = "";
-      continue;
-    }
-
-    current += character;
-  }
-
-  if (current.length > 0 || row.length > 0) {
-    row.push(current.trim());
-    if (row.some((cell) => cell.length > 0)) rows.push(row);
-  }
-
-  if (rows.length === 0) return { headers: [], rows: [] };
-
-  const headers = rows[0].map(normalizeHeader);
-  const previewRows = rows.slice(1).map((cells) =>
-    headers.reduce<Record<string, string>>((accumulator, header, headerIndex) => {
-      accumulator[header] = cells[headerIndex]?.trim() ?? "";
-      return accumulator;
-    }, {}),
-  );
-
-  return { headers, rows: previewRows };
-}
-
-function requiredHeadersForImport(type: ImportType) {
-  if (type === "Client Income" || type === "Client Expenses") {
-    return ["client_name", "amount", "service", "recurring", "notes", "date", "payment_status"];
-  }
-
-  return ["name", "amount", "date", "recurring", "notes", "service"];
-}
-
-function csvTemplateForImport(type: ImportType) {
-  const headers = requiredHeadersForImport(type);
-  const sample =
-    type === "Client Income" || type === "Client Expenses"
-      ? ["Hop Atomica", "750", "SEO", "M", "Imported from CSV", "2026-03-01", "paid"]
-      : ["Adobe Creative Cloud", "89.99", "2026-03-01", type === "General One-Time Expenses" ? "1-time" : "M", "Imported from CSV", "Other"];
-
-  return `${headers.join(",")}\n${sample.join(",")}\n`;
-}
-
-function parseAmount(value: string) {
-  const cleaned = value.replace(/[$,\s]/g, "");
-  const amount = Number(cleaned);
-  return Number.isFinite(amount) ? amount : 0;
-}
-
-function normalizeRecurring(value: string) {
-  const normalized = value.trim().toLowerCase();
-  return normalized === "m" || normalized === "monthly" ? "M" : "1-time";
-}
-
-function normalizePaymentStatus(value: string) {
-  return value.trim().toLowerCase() === "pending" ? "pending" : "paid";
-}
-
-function normalizeService(value: string) {
-  return SERVICE_OPTIONS.includes(value as FinanceServiceType) ? (value as FinanceServiceType) : inferServiceFromText(value);
-}
-
-function MetricCard({ title, value, caption }: { title: string; value: string; caption?: string }) {
-  return (
-    <article className="glass-card relative overflow-hidden rounded-2xl p-3 sm:p-4">
-      <div className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,rgba(32,147,255,0),#2093FF,rgba(0,38,255,0))]" />
-      <p className="text-[11px] uppercase tracking-[0.16em] text-slate-400">{title}</p>
-      <p className="mt-2 text-xl font-semibold tracking-[-0.02em] text-white sm:text-2xl">{value}</p>
-      {caption ? <p className="mt-1 text-sm text-slate-400">{caption}</p> : null}
-    </article>
-  );
-}
-
-function SectionCard({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <section className="glass-panel rounded-2xl p-3 sm:p-4">
-      <h2 className="text-sm font-semibold uppercase tracking-[0.15em] text-slate-200">{title}</h2>
-      <div className="mt-4">{children}</div>
-    </section>
-  );
-}
+type TabId = "overview" | "revenue" | "expenses" | "clients";
+const TABS: { id: TabId; label: string; icon: React.ElementType }[] = [
+  { id: "overview", label: "Overview", icon: TrendingUp },
+  { id: "revenue", label: "Revenue", icon: DollarSign },
+  { id: "expenses", label: "Expenses", icon: Receipt },
+  { id: "clients", label: "Client P&L", icon: Users },
+];
 
 export default function FinancePage() {
-  const [data, setData] = useState<FinanceData | null>(null);
-  const [selectedMonth, setSelectedMonth] = useState(() => monthKey());
-  const [activeTab, setActiveTab] = useState<DashboardTab>("revenue");
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const latestSaveRequest = useRef(0);
+  const [activeTab, setActiveTab] = useState<TabId>("overview");
+  const [expenses, setExpenses] = useState<Expense[]>(SEED_EXPENSES);
+  const [clients] = useState<ClientFinance[]>(SEED_CLIENT_FINANCES);
+  const [showAddExpense, setShowAddExpense] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<string | null>(null);
+  const [expenseFilter, setExpenseFilter] = useState<ExpenseCategory | "all">("all");
 
-  const [revenueSearch, setRevenueSearch] = useState("");
-  const [revenueServiceFilter, setRevenueServiceFilter] = useState<"all" | FinanceServiceType>("all");
-  const [revenueClientTypeFilter, setRevenueClientTypeFilter] = useState<"all" | FinanceClientType>("all");
-  const [revenueRecurringFilter, setRevenueRecurringFilter] = useState<"all" | "M" | "1-time">("all");
-  const [revenueSort, setRevenueSort] = useState<{ key: RevenueSortKey; dir: "asc" | "desc" }>({ key: "amount", dir: "desc" });
+  // Calculations
+  const totalRevenue = seedRevenue.mrr;
+  const recurringExpenses = expenses.filter(e => e.frequency === "monthly").reduce((s, e) => s + e.amount, 0);
+  const oneTimeExpenses = expenses.filter(e => e.frequency === "one-time").reduce((s, e) => s + e.amount, 0);
+  const totalExpenses = recurringExpenses + oneTimeExpenses;
+  const profit = totalRevenue - totalExpenses;
+  const profitMargin = Math.round((profit / totalRevenue) * 100);
+  const stripeFees = Math.round(totalRevenue * 0.029 + clients.length * 0.3);
 
-  const [expensesOpen, setExpensesOpen] = useState<Record<ExpenseSectionKey, boolean>>({
-    recurringExpenses: true,
-    employeeExpenses: true,
-    oneTimeExpenses: true,
+  const expensesByCategory = EXPENSE_CATEGORIES.map(cat => ({
+    ...cat,
+    total: expenses.filter(e => e.category === cat.id).reduce((s, e) => s + e.amount, 0),
+    count: expenses.filter(e => e.category === cat.id).length,
+  })).filter(c => c.total > 0);
+
+  // New expense form
+  const [newExpense, setNewExpense] = useState<Partial<Expense>>({ category: "software", frequency: "monthly" });
+  const addExpense = () => {
+    if (!newExpense.name || !newExpense.amount) return;
+    setExpenses([...expenses, {
+      id: `e${Date.now()}`,
+      name: newExpense.name!,
+      amount: newExpense.amount!,
+      category: newExpense.category as ExpenseCategory || "other",
+      frequency: newExpense.frequency as ExpenseFrequency || "monthly",
+      date: new Date().toISOString().split("T")[0],
+      notes: newExpense.notes,
+    }]);
+    setNewExpense({ category: "software", frequency: "monthly" });
+    setShowAddExpense(false);
+  };
+
+  // Monthly P&L data for chart
+  const monthlyPL = seedRevenue.mrrHistory.map(m => {
+    const expRatio = totalExpenses / totalRevenue;
+    const rev = m.mrr;
+    const exp = Math.round(rev * expRatio);
+    return { month: m.month.split(" ")[0], revenue: rev, expenses: exp, profit: rev - exp };
   });
 
-  const [clientSort, setClientSort] = useState<ClientSortKey>("revenue");
-  const [clientTypeFilter, setClientTypeFilter] = useState<"all" | FinanceClientType>("all");
-  const [clientStatusFilter, setClientStatusFilter] = useState<"all" | "active" | "inactive">("all");
-  const [clientServiceFilter, setClientServiceFilter] = useState<"all" | FinanceServiceType>("all");
-  const [importOpen, setImportOpen] = useState(false);
-  const [importType, setImportType] = useState<ImportType>("Client Income");
-  const [importFileName, setImportFileName] = useState("");
-  const [parsedCsv, setParsedCsv] = useState<ParsedCsvPreview>({ headers: [], rows: [] });
-  const [importError, setImportError] = useState<string | null>(null);
-  const [importMessage, setImportMessage] = useState<string | null>(null);
-
-  async function loadFinance() {
-    try {
-      setLoading(true);
-      const response = await fetch("/api/finance", { cache: "no-store" });
-      if (!response.ok) throw new Error("Failed to load finance");
-
-      const nextData = (await response.json()) as FinanceData;
-      setData(nextData);
-
-      const availableMonths = Object.keys(nextData.generalData.months).sort();
-      const nowMonth = monthKey();
-      const fallback = availableMonths[availableMonths.length - 1] ?? nowMonth;
-      setSelectedMonth((current) => (nextData.generalData.months[current] ? current : nextData.generalData.months[nowMonth] ? nowMonth : fallback));
-
-      setError(null);
-    } catch {
-      setError("Could not load finance data.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function persist(nextData: FinanceData) {
-    const requestId = latestSaveRequest.current + 1;
-    latestSaveRequest.current = requestId;
-
-    try {
-      setSaving(true);
-      const response = await fetch("/api/finance", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(nextData),
-      });
-      if (!response.ok) throw new Error("Failed to save finance");
-      const saved = (await response.json()) as FinanceData;
-      if (requestId !== latestSaveRequest.current) return;
-      setData(saved);
-      setError(null);
-    } catch {
-      if (requestId !== latestSaveRequest.current) return;
-      setError("Could not save finance changes.");
-    } finally {
-      if (requestId !== latestSaveRequest.current) return;
-      setSaving(false);
-    }
-  }
-
-  useEffect(() => {
-    void loadFinance();
-  }, []);
-
-  const monthData = useMemo(() => {
-    if (!data) return null;
-    return ensureMonthData(data, selectedMonth);
-  }, [data, selectedMonth]);
-
-  const generalMonth = useMemo(() => {
-    if (!monthData) return emptyGeneralMonth(selectedMonth);
-    return monthData.generalData.months[selectedMonth] ?? emptyGeneralMonth(selectedMonth);
-  }, [monthData, selectedMonth]);
-
-  function commit(nextData: FinanceData) {
-    setData(nextData);
-    void persist(nextData);
-  }
-
-  function withMonth(updater: (current: FinanceData) => FinanceData) {
-    if (!monthData) return;
-    const next = updater(monthData);
-    commit(next);
-  }
-
-  function changeMonth(delta: number) {
-    const next = shiftMonth(selectedMonth, delta);
-    setSelectedMonth(next);
-
-    if (!data) return;
-    const nextData = ensureMonthData(data, next);
-    if (JSON.stringify(nextData) !== JSON.stringify(data)) {
-      commit(nextData);
-    }
-  }
-
-  function resetImportState() {
-    setImportFileName("");
-    setParsedCsv({ headers: [], rows: [] });
-    setImportError(null);
-  }
-
-  function handleImportFile(file: File | null) {
-    if (!file) {
-      resetImportState();
-      return;
-    }
-
-    setImportFileName(file.name);
-    setImportError(null);
-
-    void file.text().then((text) => {
-      const parsed = parseCsv(text);
-      const requiredHeaders = requiredHeadersForImport(importType);
-      const missing = requiredHeaders.filter((header) => !parsed.headers.includes(header));
-
-      if (missing.length > 0) {
-        setParsedCsv(parsed);
-        setImportError(`Missing required columns: ${missing.join(", ")}`);
-        return;
-      }
-
-      setParsedCsv(parsed);
-    }).catch(() => {
-      setImportError("Could not read CSV file.");
-      setParsedCsv({ headers: [], rows: [] });
-    });
-  }
-
-  function downloadTemplate() {
-    const blob = new Blob([csvTemplateForImport(importType)], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${importType.toLowerCase().replace(/\s+/g, "-")}-template.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
-  }
-
-  function applyCsvImport() {
-    if (!monthData) return;
-    if (parsedCsv.rows.length === 0) {
-      setImportError("Upload a CSV file with at least one data row.");
-      return;
-    }
-
-    const requiredHeaders = requiredHeadersForImport(importType);
-    const missing = requiredHeaders.filter((header) => !parsedCsv.headers.includes(header));
-    if (missing.length > 0) {
-      setImportError(`Missing required columns: ${missing.join(", ")}`);
-      return;
-    }
-
-    const nextData = ensureMonthData(monthData, selectedMonth);
-    let importedCount = 0;
-    let skippedCount = 0;
-
-    if (importType === "Client Income" || importType === "Client Expenses") {
-      const byName = new Map(nextData.clients.map((client) => [client.name.trim().toLowerCase(), client]));
-
-      for (const row of parsedCsv.rows) {
-        const client = byName.get((row.client_name ?? "").trim().toLowerCase());
-        if (!client) {
-          skippedCount += 1;
-          continue;
-        }
-
-        const nextRow: FinanceLedgerRow = {
-          id: crypto.randomUUID(),
-          name: row.service?.trim() || row.notes?.trim() || client.name,
-          amount: parseAmount(row.amount ?? ""),
-          service: normalizeService(row.service ?? ""),
-          recurring: normalizeRecurring(row.recurring ?? ""),
-          notes: row.notes?.trim() ?? "",
-          date: row.date?.trim() ?? "",
-          paymentStatus: normalizePaymentStatus(row.payment_status ?? ""),
-        };
-
-        const month = client.months[selectedMonth] ?? emptyClientMonth(selectedMonth);
-        client.months[selectedMonth] = {
-          ...month,
-          income: importType === "Client Income" ? [...month.income, nextRow] : month.income,
-          expenses: importType === "Client Expenses" ? [...month.expenses, nextRow] : month.expenses,
-        };
-        importedCount += 1;
-      }
-    } else {
-      const section: ExpenseSectionKey =
-        importType === "General Recurring Expenses"
-          ? "recurringExpenses"
-          : importType === "General Employee Expenses"
-            ? "employeeExpenses"
-            : "oneTimeExpenses";
-
-      const currentMonthData = nextData.generalData.months[selectedMonth] ?? emptyGeneralMonth(selectedMonth);
-      const importedRows = parsedCsv.rows.map<FinanceLedgerRow>((row) => ({
-        id: crypto.randomUUID(),
-        name: row.name?.trim() ?? "",
-        amount: parseAmount(row.amount ?? ""),
-        date: row.date?.trim() ?? "",
-        recurring: section === "oneTimeExpenses" ? "1-time" : normalizeRecurring(row.recurring ?? ""),
-        notes: row.notes?.trim() ?? "",
-        service: normalizeService(row.service ?? ""),
-        paymentStatus: "paid",
-      }));
-
-      nextData.generalData.months[selectedMonth] = {
-        ...currentMonthData,
-        [section]: [...currentMonthData[section], ...importedRows],
-      };
-      importedCount = importedRows.length;
-    }
-
-    if (importedCount === 0) {
-      setImportError(skippedCount > 0 ? `No rows were imported. ${skippedCount} rows did not match an existing client name.` : "No rows were imported.");
-      return;
-    }
-
-    commit({
-      ...nextData,
-      clients: [...nextData.clients],
-    });
-    setImportMessage(skippedCount > 0 ? `Imported ${importedCount} rows. Skipped ${skippedCount} unmatched client rows.` : `Imported ${importedCount} rows.`);
-    setImportOpen(false);
-    resetImportState();
-  }
-
-  function updateGeneralMonth(updater: (current: FinanceGeneralMonthData) => FinanceGeneralMonthData) {
-    withMonth((currentData) => ({
-      ...currentData,
-      generalData: {
-        months: {
-          ...currentData.generalData.months,
-          [selectedMonth]: updater(currentData.generalData.months[selectedMonth] ?? emptyGeneralMonth(selectedMonth)),
-        },
-      },
-    }));
-  }
-
-  function addGeneralRow(section: ExpenseSectionKey) {
-    updateGeneralMonth((current) => ({
-      ...current,
-      [section]: [
-        ...current[section],
-        {
-          id: crypto.randomUUID(),
-          name: "",
-          date: "",
-          recurring: section === "oneTimeExpenses" ? "1-time" : "M",
-          notes: "",
-          amount: 0,
-          paymentStatus: "pending",
-          service: "Other",
-        },
-      ],
-    }));
-  }
-
-  function updateGeneralRow(section: ExpenseSectionKey, id: string, updater: (row: FinanceLedgerRow) => FinanceLedgerRow) {
-    updateGeneralMonth((current) => ({
-      ...current,
-      [section]: current[section].map((row) => (row.id === id ? updater(row) : row)),
-    }));
-  }
-
-  function deleteGeneralRow(section: ExpenseSectionKey, id: string) {
-    if (!window.confirm("Delete this row?")) return;
-    updateGeneralMonth((current) => ({
-      ...current,
-      [section]: current[section].filter((row) => row.id !== id),
-    }));
-  }
-
-  const summary = useMemo(() => {
-    if (!monthData) {
-      return {
-        monthlyRevenue: 0,
-        monthlyExpenses: 0,
-        netProfit: 0,
-        profitMargin: 0,
-        mrr: 0,
-        activeClients: 0,
-        goalProgress: 0,
-      };
-    }
-
-    const monthlyRevenue = monthData.clients.reduce(
-      (sum, client) => sum + (client.months[selectedMonth]?.income ?? []).reduce((rowSum, row) => rowSum + row.amount, 0),
-      0,
-    );
-
-    const clientExpenses = monthData.clients.reduce(
-      (sum, client) => sum + (client.months[selectedMonth]?.expenses ?? []).reduce((rowSum, row) => rowSum + row.amount, 0),
-      0,
-    );
-
-    const monthlyExpenses = totalGeneralExpenses(generalMonth) + clientExpenses;
-    const netProfit = monthlyRevenue - monthlyExpenses;
-    const profitMargin = monthlyRevenue > 0 ? (netProfit / monthlyRevenue) * 100 : 0;
-    const mrr = monthData.clients.reduce(
-      (sum, client) =>
-        sum +
-        (client.months[selectedMonth]?.income ?? [])
-          .filter((row) => row.recurring === "M")
-          .reduce((rowSum, row) => rowSum + row.amount, 0),
-      0,
-    );
-    const activeClients = monthData.clients.filter((client) => client.status === "active").length;
-    const goalProgress = Math.max(0, Math.min(100, (netProfit / DEFAULT_GOAL) * 100));
-
-    return {
-      monthlyRevenue,
-      monthlyExpenses,
-      netProfit,
-      profitMargin,
-      mrr,
-      activeClients,
-      goalProgress,
-    };
-  }, [generalMonth, monthData, selectedMonth]);
-
-  const sixMonthSeries = useMemo(() => {
-    if (!monthData) return [];
-    return trailingMonths(selectedMonth, 6).map((month) => {
-      const monthRevenue = monthData.clients.reduce(
-        (sum, client) => sum + (client.months[month]?.income ?? []).reduce((rowSum, row) => rowSum + row.amount, 0),
-        0,
-      );
-      const monthClientExpenses = monthData.clients.reduce(
-        (sum, client) => sum + (client.months[month]?.expenses ?? []).reduce((rowSum, row) => rowSum + row.amount, 0),
-        0,
-      );
-      const monthGeneral = monthData.generalData.months[month] ?? emptyGeneralMonth(month);
-      const monthExpenses = totalGeneralExpenses(monthGeneral) + monthClientExpenses;
-      const profit = monthRevenue - monthExpenses;
-      const margin = monthRevenue > 0 ? (profit / monthRevenue) * 100 : 0;
-
-      return {
-        month,
-        label: monthShortLabel(month),
-        revenue: Number(monthRevenue.toFixed(2)),
-        expenses: Number(monthExpenses.toFixed(2)),
-        margin: Number(margin.toFixed(2)),
-        goalMet: profit >= DEFAULT_GOAL,
-      };
-    });
-  }, [monthData, selectedMonth]);
-
-  const revenueByService = useMemo(() => {
-    if (!monthData) return [];
-    const totals = new Map<FinanceServiceType, number>();
-
-    for (const service of SERVICE_OPTIONS) totals.set(service, 0);
-
-    for (const client of monthData.clients) {
-      const rows = client.months[selectedMonth]?.income ?? [];
-      for (const row of rows) {
-        const service = row.service ?? client.services[0] ?? inferServiceFromText(`${row.name} ${row.notes}`);
-        totals.set(service, (totals.get(service) ?? 0) + row.amount);
-      }
-    }
-
-    return SERVICE_OPTIONS.map((service) => ({
-      name: service,
-      value: Number((totals.get(service) ?? 0).toFixed(2)),
-      color: SERVICE_COLORS[service],
-    })).filter((item) => item.value > 0);
-  }, [monthData, selectedMonth]);
-
-  const revenueByClientType = useMemo(() => {
-    if (!monthData) return [];
-    const totals = new Map<FinanceClientType, number>();
-
-    for (const type of Object.keys(CLIENT_TYPE_LABEL) as FinanceClientType[]) totals.set(type, 0);
-
-    for (const client of monthData.clients) {
-      const revenue = (client.months[selectedMonth]?.income ?? []).reduce((sum, row) => sum + row.amount, 0);
-      totals.set(client.clientType, (totals.get(client.clientType) ?? 0) + revenue);
-    }
-
-    return (Object.keys(CLIENT_TYPE_LABEL) as FinanceClientType[])
-      .map((type) => ({
-        name: CLIENT_TYPE_LABEL[type],
-        value: Number((totals.get(type) ?? 0).toFixed(2)),
-        color: CLIENT_TYPE_COLORS[type],
-      }))
-      .filter((entry) => entry.value > 0);
-  }, [monthData, selectedMonth]);
-
-  const revenueRows = useMemo<RevenueRow[]>(() => {
-    if (!monthData) return [];
-
-    return monthData.clients.flatMap((client) => {
-      const rows = client.months[selectedMonth]?.income ?? [];
-      return rows.map((row) => ({
-        id: row.id,
-        clientId: client.id,
-        clientName: client.name,
-        clientType: client.clientType,
-        service: row.service ?? client.services[0] ?? inferServiceFromText(`${row.name} ${row.notes}`),
-        amount: row.amount,
-        recurring: row.recurring,
-        date: row.date,
-        status: row.paymentStatus ?? "paid",
-      }));
-    });
-  }, [monthData, selectedMonth]);
-
-  const filteredRevenueRows = useMemo(() => {
-    const search = revenueSearch.trim().toLowerCase();
-
-    return [...revenueRows]
-      .filter((row) => {
-        if (search && !`${row.clientName} ${row.service} ${row.date}`.toLowerCase().includes(search)) return false;
-        if (revenueServiceFilter !== "all" && row.service !== revenueServiceFilter) return false;
-        if (revenueClientTypeFilter !== "all" && row.clientType !== revenueClientTypeFilter) return false;
-        if (revenueRecurringFilter !== "all" && row.recurring !== revenueRecurringFilter) return false;
-        return true;
-      })
-      .sort((a, b) => {
-        if (revenueSort.key === "amount") return compareValue(a.amount, b.amount, revenueSort.dir);
-        if (revenueSort.key === "clientName") return compareValue(a.clientName, b.clientName, revenueSort.dir);
-        if (revenueSort.key === "service") return compareValue(a.service, b.service, revenueSort.dir);
-        if (revenueSort.key === "recurring") return compareValue(a.recurring, b.recurring, revenueSort.dir);
-        if (revenueSort.key === "date") return compareValue(a.date, b.date, revenueSort.dir);
-        return compareValue(a.status, b.status, revenueSort.dir);
-      });
-  }, [revenueClientTypeFilter, revenueRecurringFilter, revenueRows, revenueSearch, revenueServiceFilter, revenueSort]);
-
-  const totalFilteredRevenue = useMemo(
-    () => filteredRevenueRows.reduce((sum, row) => sum + row.amount, 0),
-    [filteredRevenueRows],
-  );
-
-  const clientCards = useMemo(() => {
-    if (!monthData) return [];
-
-    const base = monthData.clients.map((client) => {
-      const monthRows = client.months[selectedMonth] ?? emptyClientMonth(selectedMonth);
-      const revenue = monthRows.income.reduce((sum, row) => sum + row.amount, 0);
-      const expenses = monthRows.expenses.reduce((sum, row) => sum + row.amount, 0);
-      const profit = revenue - expenses;
-      const profitMargin = revenue > 0 ? (profit / revenue) * 100 : 0;
-
-      return {
-        client,
-        revenue,
-        profitMargin,
-      };
-    });
-
-    return base
-      .filter((entry) => {
-        if (clientTypeFilter !== "all" && entry.client.clientType !== clientTypeFilter) return false;
-        if (clientStatusFilter !== "all" && entry.client.status !== clientStatusFilter) return false;
-        if (clientServiceFilter !== "all" && !entry.client.services.includes(clientServiceFilter)) return false;
-        return true;
-      })
-      .sort((a, b) => {
-        if (clientSort === "name") return a.client.name.localeCompare(b.client.name);
-        if (clientSort === "profitMargin") return b.profitMargin - a.profitMargin;
-        return b.revenue - a.revenue;
-      });
-  }, [clientServiceFilter, clientSort, clientStatusFilter, clientTypeFilter, monthData, selectedMonth]);
-
-  const reportData = useMemo(() => {
-    if (!monthData) {
-      return {
-        ytdRevenue: 0,
-        ytdExpenses: 0,
-        ytdProfit: 0,
-        topClients: [] as Array<{ name: string; profit: number }>,
-        expenseBreakdown: { recurring: 0, employee: 0, oneTime: 0 },
-      };
-    }
-
-    const [year] = selectedMonth.split("-").map(Number);
-    const monthsInYear = Object.keys(monthData.generalData.months)
-      .filter((month) => month.startsWith(`${year}-`) && month <= selectedMonth)
-      .sort();
-
-    let ytdRevenue = 0;
-    let ytdExpenses = 0;
-
-    for (const month of monthsInYear) {
-      const monthRevenue = monthData.clients.reduce(
-        (sum, client) => sum + (client.months[month]?.income ?? []).reduce((rowSum, row) => rowSum + row.amount, 0),
-        0,
-      );
-
-      const monthClientExpenses = monthData.clients.reduce(
-        (sum, client) => sum + (client.months[month]?.expenses ?? []).reduce((rowSum, row) => rowSum + row.amount, 0),
-        0,
-      );
-
-      const monthGeneral = monthData.generalData.months[month] ?? emptyGeneralMonth(month);
-      ytdRevenue += monthRevenue;
-      ytdExpenses += totalGeneralExpenses(monthGeneral) + monthClientExpenses;
-    }
-
-    const topClients = monthData.clients
-      .map((client) => {
-        const monthRows = client.months[selectedMonth] ?? emptyClientMonth(selectedMonth);
-        const revenue = monthRows.income.reduce((sum, row) => sum + row.amount, 0);
-        const expenses = monthRows.expenses.reduce((sum, row) => sum + row.amount, 0);
-        return { name: client.name, profit: revenue - expenses };
-      })
-      .sort((a, b) => b.profit - a.profit)
-      .slice(0, 8);
-
-    return {
-      ytdRevenue,
-      ytdExpenses,
-      ytdProfit: ytdRevenue - ytdExpenses,
-      topClients,
-      expenseBreakdown: {
-        recurring: generalMonth.recurringExpenses.reduce((sum, row) => sum + row.amount, 0),
-        employee: generalMonth.employeeExpenses.reduce((sum, row) => sum + row.amount, 0),
-        oneTime: generalMonth.oneTimeExpenses.reduce((sum, row) => sum + row.amount, 0),
-      },
-    };
-  }, [generalMonth, monthData, selectedMonth]);
-
-  if (loading && !data) {
-    return <section className="glass-panel rounded-2xl p-6 text-sm text-slate-300">Loading finance dashboard...</section>;
-  }
-
-  if (!monthData) {
-    return <section className="glass-panel rounded-2xl p-6 text-sm text-red-200">Finance data unavailable.</section>;
-  }
-
-  const marginLineColor = sixMonthSeries[sixMonthSeries.length - 1]?.goalMet ? "#10b981" : "#ef4444";
+  const plChartOption = {
+    backgroundColor: "transparent",
+    tooltip: { trigger: "axis", backgroundColor: "#1a1a2e", borderColor: "rgba(255,255,255,0.08)", textStyle: { color: "#e2e8f0", fontSize: 11 },
+      formatter: (p: any[]) => p.map((s: any) => `${s.seriesName}: $${s.value.toLocaleString()}`).join("<br/>") },
+    legend: { data: ["Revenue", "Expenses", "Profit"], textStyle: { color: "#64748b", fontSize: 10 }, top: 0, right: 0 },
+    grid: { left: 50, right: 12, top: 28, bottom: 24 },
+    xAxis: { type: "category", data: monthlyPL.map(m => m.month), axisLine: { show: false }, axisTick: { show: false }, axisLabel: { color: "#475569", fontSize: 9 } },
+    yAxis: { type: "value", axisLabel: { color: "#475569", fontSize: 9, formatter: (v: number) => `$${(v/1000).toFixed(0)}k` }, splitLine: { lineStyle: { color: "rgba(255,255,255,0.04)" } } },
+    series: [
+      { name: "Revenue", type: "bar", data: monthlyPL.map(m => m.revenue), barWidth: "25%", itemStyle: { borderRadius: [3,3,0,0], color: "#2093FF" } },
+      { name: "Expenses", type: "bar", data: monthlyPL.map(m => m.expenses), barWidth: "25%", itemStyle: { borderRadius: [3,3,0,0], color: "#EF4444" } },
+      { name: "Profit", type: "line", data: monthlyPL.map(m => m.profit), smooth: true, showSymbol: false, lineStyle: { color: "#22C55E", width: 2 }, areaStyle: { color: { type: "linear", x:0, y:0, x2:0, y2:1, colorStops: [{ offset: 0, color: "rgba(34,197,94,0.12)" }, { offset: 1, color: "rgba(34,197,94,0)" }] } } },
+    ],
+  };
+
+  const expensePieOption = {
+    backgroundColor: "transparent",
+    tooltip: { trigger: "item", backgroundColor: "#1a1a2e", borderColor: "rgba(255,255,255,0.08)", textStyle: { color: "#e2e8f0", fontSize: 11 }, formatter: (p: any) => `${p.name}: $${p.value.toLocaleString()} (${p.percent}%)` },
+    series: [{
+      type: "pie", radius: ["50%", "75%"], center: ["50%", "50%"],
+      label: { show: false },
+      data: expensesByCategory.map(c => ({ name: c.label, value: c.total, itemStyle: { color: c.color } })),
+      emphasis: { scaleSize: 4 },
+    }],
+  };
 
   return (
-    <section className="animate-enter space-y-5 sm:space-y-6" style={{ animationDelay: "80ms", backgroundColor: "#0a0a0f" }}>
-      <header className="glass-panel page-header mb-4 p-5 sm:p-6">
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+    <div className="space-y-6 animate-enter">
+      {/* Header */}
+      <div className="glass-panel p-5">
+        <div className="flex items-center justify-between">
           <div>
-            <h1 className="page-title">Finance Dashboard</h1>
-            <p className="mt-2 text-sm text-slate-300">QuickBooks-style financial intelligence across revenue, expenses, clients, and reports.</p>
+            <p className="text-[11px] uppercase tracking-[0.24em] text-blue-200/70">Derby Digital</p>
+            <h1 className="text-[20px] font-bold text-white">Finance</h1>
           </div>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <div className="glass-card inline-flex items-center gap-2 self-start rounded-xl px-2 py-2 md:self-auto">
-              <button
-                type="button"
-                onClick={() => changeMonth(-1)}
-                className="min-h-11 rounded-lg border border-white/10 bg-white/5 p-2.5 text-slate-100 transition hover:border-blue-300/40 hover:bg-blue-500/15"
-                aria-label="Previous month"
-              >
-                <ArrowLeft size={16} />
-              </button>
-              <div className="min-w-[8.5rem] text-center text-sm font-semibold text-white sm:min-w-[9rem]">{`< ${monthLabel(selectedMonth)} >`}</div>
-              <button
-                type="button"
-                onClick={() => changeMonth(1)}
-                className="min-h-11 rounded-lg border border-white/10 bg-white/5 p-2.5 text-slate-100 transition hover:border-blue-300/40 hover:bg-blue-500/15"
-                aria-label="Next month"
-              >
-                <ArrowRight size={16} />
-              </button>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                setImportMessage(null);
-                setImportError(null);
-                setImportOpen(true);
-              }}
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-blue-300/30 bg-[linear-gradient(135deg,rgba(32,147,255,0.2),rgba(0,38,255,0.18))] px-4 py-2 text-sm font-semibold text-blue-50 transition hover:border-blue-300/60 hover:shadow-[0_0_24px_rgba(32,147,255,0.24)]"
-            >
-              <Upload size={16} />
-              Import CSV
-            </button>
+          <div className="flex items-center gap-2">
+            <span className="px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.06] text-[11px] text-slate-400">
+              <CreditCard size={12} className="inline mr-1.5" />Stripe: Demo Mode
+            </span>
           </div>
-        </div>
-      </header>
-
-      {error ? <div className="mb-3 rounded-xl border border-red-500/35 bg-red-500/10 px-4 py-2 text-sm text-red-200">{error}</div> : null}
-      {importMessage ? <div className="mb-3 rounded-xl border border-blue-400/35 bg-blue-500/10 px-4 py-2 text-sm text-blue-100">{importMessage}</div> : null}
-      {saving ? <div className="mb-3 text-xs uppercase tracking-[0.18em] text-blue-200/80">Saving finance data...</div> : null}
-
-      <div className="sticky top-2 z-30 mb-5 rounded-2xl border border-white/10 bg-[#0a0a0f]/70 p-2 backdrop-blur-lg">
-        <div className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-7">
-          <MetricCard title="Monthly Revenue" value={formatMoney(summary.monthlyRevenue)} />
-          <MetricCard title="Monthly Expenses" value={formatMoney(summary.monthlyExpenses)} />
-          <MetricCard title="Net Profit" value={formatMoney(summary.netProfit)} caption={summary.netProfit >= 0 ? "Above break-even" : "Under break-even"} />
-          <MetricCard title="Profit Margin" value={formatPercent(summary.profitMargin)} caption={summary.profitMargin >= 30 ? "Healthy margin" : "Below target margin"} />
-          <MetricCard title="MRR" value={formatMoney(summary.mrr)} />
-          <MetricCard title="Active Clients" value={String(summary.activeClients)} />
-          <article className="glass-card relative overflow-hidden rounded-2xl p-3 sm:p-4">
-            <div className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,rgba(32,147,255,0),#2093FF,rgba(0,38,255,0))]" />
-            <p className="text-[11px] uppercase tracking-[0.16em] text-slate-400">Goal Progress</p>
-            <p className={`mt-2 text-xl font-semibold tracking-[-0.02em] sm:text-2xl ${statValueClass(summary.netProfit)}`}>{formatPercent(summary.goalProgress)}</p>
-            <div className="mt-2 h-2 rounded-full bg-white/10">
-              <div
-                className="h-2 rounded-full bg-[linear-gradient(90deg,#2093FF,#0026FF)] transition-all duration-500"
-                style={{ width: `${Math.max(4, Math.min(100, summary.goalProgress))}%` }}
-              />
-            </div>
-            <p className="mt-1 text-sm text-slate-400">Target: {formatMoney(DEFAULT_GOAL)} monthly profit</p>
-          </article>
         </div>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <SectionCard title="Revenue vs Expenses (Last 6 Months)">
-          <div className="h-64 sm:h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={sixMonthSeries}>
-                <XAxis dataKey="label" stroke="#94a3b8" tickLine={false} axisLine={false} />
-                <YAxis stroke="#64748b" tickLine={false} axisLine={false} tickFormatter={(value) => formatCompactMoney(value as number)} />
-                <Tooltip
-                  formatter={(value: number, name: string) => [formatMoney(value), name === "revenue" ? "Revenue" : "Expenses"]}
-                  contentStyle={{ background: "#0f1322", border: "1px solid rgba(148,163,184,0.3)", borderRadius: 10 }}
-                />
-                <Bar dataKey="revenue" radius={[6, 6, 0, 0]} fill="#2093FF" />
-                <Bar dataKey="expenses" radius={[6, 6, 0, 0]} fill="#ef4444" />
-              </BarChart>
-            </ResponsiveContainer>
+      {/* Top Stats */}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+        {[
+          { label: "Revenue", value: money(totalRevenue), sub: "/month", color: "text-blue-400", icon: DollarSign, trend: "+5.6%" },
+          { label: "Expenses", value: money(totalExpenses), sub: "/month", color: "text-red-400", icon: Receipt, trend: null },
+          { label: "Profit", value: money(profit), sub: "/month", color: "text-emerald-400", icon: TrendingUp, trend: "+8.2%" },
+          { label: "Margin", value: `${profitMargin}%`, sub: "net", color: profitMargin >= 50 ? "text-emerald-400" : "text-amber-400", icon: Target, trend: null },
+          { label: "Stripe Fees", value: money(stripeFees), sub: "~2.9%+30¢", color: "text-slate-400", icon: CreditCard, trend: null },
+        ].map(s => (
+          <div key={s.label} className="glass-panel p-4">
+            <div className="flex items-center justify-between">
+              <s.icon size={14} className={cn(s.color, "opacity-60")} />
+              {s.trend && <span className="text-[9px] text-emerald-400 flex items-center gap-0.5"><ArrowUp size={8} />{s.trend}</span>}
+            </div>
+            <p className={cn("text-[22px] font-bold font-mono mt-2", s.color)}>{s.value}</p>
+            <p className="text-[10px] text-slate-500 mt-0.5">{s.label} {s.sub}</p>
           </div>
-        </SectionCard>
-
-        <SectionCard title="Revenue by Service Type">
-          <div className="h-64 sm:h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie data={revenueByService} dataKey="value" nameKey="name" innerRadius={55} outerRadius={86} paddingAngle={2}>
-                  {revenueByService.map((entry) => (
-                    <Cell key={entry.name} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value: number) => formatMoney(value)} contentStyle={{ background: "#0f1322", border: "1px solid rgba(148,163,184,0.3)", borderRadius: 10 }} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="mt-2 flex flex-wrap gap-2 text-sm">
-            {revenueByService.map((item) => (
-              <span key={item.name} className={`rounded-full border px-2 py-1 text-xs ${SERVICE_BADGE_CLASS[item.name as FinanceServiceType]}`}>
-                {item.name}
-              </span>
-            ))}
-          </div>
-        </SectionCard>
-
-        <SectionCard title="Revenue by Client Type">
-          <div className="h-64 sm:h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie data={revenueByClientType} dataKey="value" nameKey="name" innerRadius={55} outerRadius={86} paddingAngle={2}>
-                  {revenueByClientType.map((entry) => (
-                    <Cell key={entry.name} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value: number) => formatMoney(value)} contentStyle={{ background: "#0f1322", border: "1px solid rgba(148,163,184,0.3)", borderRadius: 10 }} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="mt-2 flex flex-wrap gap-2 text-sm text-slate-300">
-            {revenueByClientType.map((item) => (
-              <span key={item.name} className="rounded-full border border-white/20 px-2 py-1">{item.name}</span>
-            ))}
-          </div>
-        </SectionCard>
-
-        <SectionCard title="Profit Margin Trend (Last 6 Months)">
-          <div className="h-64 sm:h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={sixMonthSeries}>
-                <XAxis dataKey="label" stroke="#94a3b8" tickLine={false} axisLine={false} />
-                <YAxis stroke="#64748b" tickLine={false} axisLine={false} tickFormatter={(value) => `${value}%`} />
-                <Tooltip formatter={(value: number) => `${value.toFixed(1)}%`} contentStyle={{ background: "#0f1322", border: "1px solid rgba(148,163,184,0.3)", borderRadius: 10 }} />
-                <Line dataKey="margin" type="monotone" strokeWidth={3} stroke={marginLineColor} dot={{ strokeWidth: 0 }} activeDot={{ r: 6 }} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-          <p className="text-sm text-slate-400">Green when above profit goal, red when below.</p>
-        </SectionCard>
+        ))}
       </div>
 
-      <div className="mt-6">
-        <div className="sticky top-[5.25rem] z-20 -mx-1 mb-3 overflow-x-auto px-1 pb-1 sm:top-2">
-          <div className="flex min-w-max gap-2">
-          {(["revenue", "expenses", "clients", "reports"] as DashboardTab[]).map((tab) => (
-            <button
-              key={tab}
-              type="button"
-              onClick={() => setActiveTab(tab)}
-              className={`min-h-11 rounded-xl border px-4 py-2.5 text-sm font-semibold capitalize transition ${
-                activeTab === tab
-                  ? "border-blue-300/35 bg-[linear-gradient(90deg,rgba(32,147,255,0.28),rgba(0,38,255,0.24))] text-white"
-                  : "border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/[0.08]"
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
-          </div>
+      {/* Tabs */}
+      <div className="border-b border-white/[0.06]">
+        <div className="flex gap-0">
+          {TABS.map(tab => {
+            const Icon = tab.icon;
+            return (
+              <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+                className={cn("flex items-center gap-1.5 px-5 py-3 text-[12px] font-medium border-b-2 transition-all",
+                  activeTab === tab.id ? "border-blue-500 text-white" : "border-transparent text-slate-500 hover:text-slate-300"
+                )}>
+                <Icon size={13} /> {tab.label}
+              </button>
+            );
+          })}
         </div>
+      </div>
 
-        <div key={activeTab} className="animate-[toast-in_260ms_ease]">
-          {activeTab === "revenue" ? (
-            <section className="glass-panel rounded-2xl p-3 sm:p-4">
-              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                <div className="relative w-full lg:max-w-sm">
-                  <Search size={16} className="pointer-events-none absolute left-3 top-2.5 text-slate-400" />
-                  <input
-                    value={revenueSearch}
-                    onChange={(event) => setRevenueSearch(event.target.value)}
-                    placeholder="Search client, service, date"
-                    className="min-h-11 w-full rounded-xl border border-white/10 bg-[#0d111d] px-9 py-2.5 text-sm text-slate-100 outline-none focus:border-blue-300/35"
-                  />
-                </div>
-                <div className="grid gap-2 sm:grid-cols-3 lg:w-[44rem]">
-                  <select value={revenueServiceFilter} onChange={(event) => setRevenueServiceFilter(event.target.value as "all" | FinanceServiceType)} className="min-h-11 rounded-xl border border-white/10 bg-[#0d111d] px-3 py-2.5 text-sm text-slate-100">
-                    <option value="all">All services</option>
-                    {SERVICE_OPTIONS.map((service) => (
-                      <option key={service} value={service}>{service}</option>
-                    ))}
-                  </select>
-                  <select value={revenueClientTypeFilter} onChange={(event) => setRevenueClientTypeFilter(event.target.value as "all" | FinanceClientType)} className="min-h-11 rounded-xl border border-white/10 bg-[#0d111d] px-3 py-2.5 text-sm text-slate-100">
-                    <option value="all">All client types</option>
-                    {(Object.keys(CLIENT_TYPE_LABEL) as FinanceClientType[]).map((type) => (
-                      <option key={type} value={type}>{CLIENT_TYPE_LABEL[type]}</option>
-                    ))}
-                  </select>
-                  <select value={revenueRecurringFilter} onChange={(event) => setRevenueRecurringFilter(event.target.value as "all" | "M" | "1-time")} className="min-h-11 rounded-xl border border-white/10 bg-[#0d111d] px-3 py-2.5 text-sm text-slate-100">
-                    <option value="all">All billing types</option>
-                    <option value="M">Recurring</option>
-                    <option value="1-time">One-time</option>
-                  </select>
-                </div>
-              </div>
+      {/* ═══ OVERVIEW ═══ */}
+      {activeTab === "overview" && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {/* P&L Chart */}
+          <div className="lg:col-span-2 glass-panel p-4">
+            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Monthly P&L</p>
+            <div className="h-[280px]">
+              <ReactEChartsCore option={plChartOption} style={{ height: "100%", width: "100%" }} opts={{ renderer: "canvas" }} notMerge />
+            </div>
+          </div>
 
-              <div className="mt-4 overflow-x-auto rounded-xl border border-white/10">
-                <table className="min-w-[980px] w-full text-sm">
-                  <thead className="bg-white/[0.04] text-left text-xs uppercase tracking-[0.14em] text-slate-400">
-                    <tr>
-                      {[
-                        { key: "clientName", label: "Client Name" },
-                        { key: "service", label: "Service" },
-                        { key: "amount", label: "Amount" },
-                        { key: "recurring", label: "Type" },
-                        { key: "date", label: "Date" },
-                        { key: "status", label: "Status" },
-                      ].map((column) => (
-                        <th key={column.key} className="px-3 py-3">
-                          <button
-                            type="button"
-                            onClick={() => setRevenueSort((current) => ({ key: column.key as RevenueSortKey, dir: current.key === column.key && current.dir === "desc" ? "asc" : "desc" }))}
-                            className="inline-flex min-h-11 items-center gap-1 py-1"
-                          >
-                            {column.label}
-                            <ChevronDown size={12} className={revenueSort.key === column.key && revenueSort.dir === "asc" ? "rotate-180" : ""} />
-                          </button>
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredRevenueRows.map((row) => (
-                      <tr key={row.id} className="border-t border-white/10 text-slate-200 hover:bg-white/[0.03]">
-                        <td className="px-3 py-2">{row.clientName}</td>
-                        <td className="px-3 py-2">
-                          <span className={`rounded-full border px-2 py-1 text-xs ${SERVICE_BADGE_CLASS[row.service]}`}>{row.service}</span>
-                        </td>
-                        <td className="px-3 py-2 font-semibold">{formatMoney(row.amount)}</td>
-                        <td className="px-3 py-2">{row.recurring === "M" ? "Recurring" : "One-time"}</td>
-                        <td className="px-3 py-2">{row.date || "-"}</td>
-                        <td className="px-3 py-2">
-                          <span className={`rounded-full border px-2 py-1 text-xs ${row.status === "paid" ? "border-emerald-400/35 bg-emerald-500/15 text-emerald-100" : "border-amber-400/35 bg-amber-500/15 text-amber-100"}`}>
-                            {row.status === "paid" ? "Paid" : "Pending"}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                  <tfoot>
-                    <tr className="border-t border-white/10 bg-white/[0.03]">
-                      <td colSpan={2} className="px-3 py-3 text-sm font-semibold text-slate-200">Filtered Total</td>
-                      <td className="px-3 py-3 text-sm font-semibold text-white">{formatMoney(totalFilteredRevenue)}</td>
-                      <td colSpan={3} />
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
-            </section>
-          ) : null}
-
-          {activeTab === "expenses" ? (
-            <section className="space-y-4">
-              {(
-                [
-                  { key: "recurringExpenses", title: "Recurring (tools/subscriptions)" },
-                  { key: "employeeExpenses", title: "Employee (salaries + commissions)" },
-                  { key: "oneTimeExpenses", title: "One-Time" },
-                ] as Array<{ key: ExpenseSectionKey; title: string }>
-              ).map((section) => {
-                const rows = generalMonth[section.key];
-                const total = rows.reduce((sum, row) => sum + row.amount, 0);
-                const isOpen = expensesOpen[section.key];
-
-                return (
-                  <div key={section.key} className="glass-panel rounded-2xl p-3 sm:p-4">
-                    <button
-                      type="button"
-                      onClick={() => setExpensesOpen((current) => ({ ...current, [section.key]: !current[section.key] }))}
-                      className="flex min-h-11 w-full items-center justify-between"
-                    >
-                      <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-200">{section.title}</h3>
-                      <ChevronDown size={16} className={isOpen ? "rotate-180" : ""} />
-                    </button>
-
-                    <div className="mt-2 flex flex-col gap-2 text-sm text-slate-300 sm:flex-row sm:items-center sm:justify-between">
-                      <span>Total: <span className="font-semibold text-white">{formatMoney(total)}</span></span>
-                      <button
-                        type="button"
-                        onClick={() => addGeneralRow(section.key)}
-                        className="min-h-11 rounded-lg border border-blue-300/30 bg-blue-500/15 px-3 py-2 text-sm font-semibold text-blue-100"
-                      >
-                        Add Row
-                      </button>
-                    </div>
-
-                    {isOpen ? (
-                      <div className="mt-3 overflow-x-auto rounded-xl border border-white/10">
-                        <table className="min-w-[980px] w-full text-sm">
-                          <thead className="bg-white/[0.04] text-left text-xs uppercase tracking-[0.14em] text-slate-400">
-                            <tr>
-                              <th className="px-3 py-2">Name</th>
-                              <th className="px-3 py-2">Date</th>
-                              <th className="px-3 py-2">Recurring</th>
-                              <th className="px-3 py-2">Notes</th>
-                              <th className="px-3 py-2">Amount</th>
-                              <th className="px-3 py-2">Delete</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {rows.map((row) => (
-                              <tr key={row.id} className="border-t border-white/10 text-slate-200">
-                                <td className="px-2 py-1">
-                                  <input
-                                    value={row.name}
-                                    onChange={(event) => updateGeneralRow(section.key, row.id, (item) => ({ ...item, name: event.target.value }))}
-                                    className="min-h-11 w-full rounded-lg border border-white/10 bg-[#0d111d] px-2 py-2"
-                                  />
-                                </td>
-                                <td className="px-2 py-1">
-                                  <input
-                                    value={row.date}
-                                    onChange={(event) => updateGeneralRow(section.key, row.id, (item) => ({ ...item, date: event.target.value }))}
-                                    className="min-h-11 w-full rounded-lg border border-white/10 bg-[#0d111d] px-2 py-2"
-                                  />
-                                </td>
-                                <td className="px-2 py-1">
-                                  <select
-                                    value={row.recurring}
-                                    onChange={(event) => updateGeneralRow(section.key, row.id, (item) => ({ ...item, recurring: event.target.value as "M" | "1-time" }))}
-                                    className="min-h-11 w-full rounded-lg border border-white/10 bg-[#0d111d] px-2 py-2"
-                                  >
-                                    <option value="M">M</option>
-                                    <option value="1-time">1-time</option>
-                                  </select>
-                                </td>
-                                <td className="px-2 py-1">
-                                  <input
-                                    value={row.notes}
-                                    onChange={(event) => updateGeneralRow(section.key, row.id, (item) => ({ ...item, notes: event.target.value }))}
-                                    className="min-h-11 w-full rounded-lg border border-white/10 bg-[#0d111d] px-2 py-2"
-                                  />
-                                </td>
-                                <td className="px-2 py-1">
-                                  <input
-                                    type="number"
-                                    min={0}
-                                    step="0.01"
-                                    value={Number.isFinite(row.amount) ? row.amount : 0}
-                                    onChange={(event) => updateGeneralRow(section.key, row.id, (item) => ({ ...item, amount: Math.max(0, Number(event.target.value) || 0) }))}
-                                    className="min-h-11 w-full rounded-lg border border-white/10 bg-[#0d111d] px-2 py-2"
-                                  />
-                                </td>
-                                <td className="px-2 py-1">
-                                  <button
-                                    type="button"
-                                    onClick={() => deleteGeneralRow(section.key, row.id)}
-                                    className="min-h-11 rounded-lg border border-rose-400/30 bg-rose-500/10 p-2.5 text-rose-200"
-                                  >
-                                    <Trash2 size={14} />
-                                  </button>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    ) : null}
+          {/* Expense breakdown */}
+          <div className="glass-panel p-4">
+            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Expense Breakdown</p>
+            <div className="h-[160px]">
+              <ReactEChartsCore option={expensePieOption} style={{ height: "100%", width: "100%" }} opts={{ renderer: "canvas" }} notMerge />
+            </div>
+            <div className="space-y-2 mt-2">
+              {expensesByCategory.map(c => (
+                <div key={c.id} className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: c.color }} />
+                    <span className="text-[11px] text-slate-400">{c.label}</span>
                   </div>
-                );
-              })}
-
-              <div className="glass-card rounded-2xl p-4 text-sm text-slate-300">
-                Grand Total: <span className="font-semibold text-white">{formatMoney(totalGeneralExpenses(generalMonth))}</span>
-              </div>
-            </section>
-          ) : null}
-
-          {activeTab === "clients" ? (
-            <section className="space-y-4">
-              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-                <select value={clientSort} onChange={(event) => setClientSort(event.target.value as ClientSortKey)} className="min-h-11 rounded-xl border border-white/10 bg-[#0d111d] px-3 py-2.5 text-sm text-slate-100">
-                  <option value="revenue">Sort: Revenue</option>
-                  <option value="name">Sort: Name</option>
-                  <option value="profitMargin">Sort: Profit Margin</option>
-                </select>
-                <select value={clientTypeFilter} onChange={(event) => setClientTypeFilter(event.target.value as "all" | FinanceClientType)} className="min-h-11 rounded-xl border border-white/10 bg-[#0d111d] px-3 py-2.5 text-sm text-slate-100">
-                  <option value="all">All client types</option>
-                  {(Object.keys(CLIENT_TYPE_LABEL) as FinanceClientType[]).map((type) => (
-                    <option key={type} value={type}>{CLIENT_TYPE_LABEL[type]}</option>
-                  ))}
-                </select>
-                <select value={clientStatusFilter} onChange={(event) => setClientStatusFilter(event.target.value as "all" | "active" | "inactive")} className="min-h-11 rounded-xl border border-white/10 bg-[#0d111d] px-3 py-2.5 text-sm text-slate-100">
-                  <option value="all">All statuses</option>
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                </select>
-                <select value={clientServiceFilter} onChange={(event) => setClientServiceFilter(event.target.value as "all" | FinanceServiceType)} className="min-h-11 rounded-xl border border-white/10 bg-[#0d111d] px-3 py-2.5 text-sm text-slate-100">
-                  <option value="all">All services</option>
-                  {SERVICE_OPTIONS.map((service) => (
-                    <option key={service} value={service}>{service}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-                {clientCards.map((entry) => (
-                  <Link key={entry.client.id} href={`/clients/${entry.client.id}`} className="glass-card rounded-2xl p-4 transition hover:-translate-y-0.5">
-                    <div className="flex items-start justify-between gap-3">
-                      <h3 className="text-base font-semibold text-white">{entry.client.name}</h3>
-                      <span className={`rounded-full border px-2 py-1 text-xs ${entry.client.status === "active" ? "border-emerald-400/35 bg-emerald-500/15 text-emerald-100" : "border-slate-400/35 bg-slate-500/15 text-slate-200"}`}>
-                        {entry.client.status === "active" ? "Active" : "Inactive"}
-                      </span>
-                    </div>
-                    <p className="mt-1 text-sm uppercase tracking-[0.1em] text-slate-400">{CLIENT_TYPE_LABEL[entry.client.clientType]}</p>
-                    <p className="mt-3 text-xl font-semibold text-white sm:text-2xl">{formatMoney(entry.revenue)}</p>
-                    <p className="mt-1 text-sm text-slate-300">Profit Margin: <span className="font-semibold">{formatPercent(entry.profitMargin)}</span></p>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {entry.client.services.map((service) => (
-                        <span key={service} className={`rounded-full border px-2 py-1 text-xs ${SERVICE_BADGE_CLASS[service]}`}>{service}</span>
-                      ))}
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </section>
-          ) : null}
-
-          {activeTab === "reports" ? (
-            <section className="grid gap-4 lg:grid-cols-2">
-              <div className="glass-panel rounded-2xl p-4">
-                <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-200">Monthly P&L ({monthLabel(selectedMonth)})</h3>
-                <div className="mt-3 space-y-2 text-sm text-slate-300">
-                  <p>Revenue: <span className="font-semibold text-white">{formatMoney(summary.monthlyRevenue)}</span></p>
-                  <p>Expenses: <span className="font-semibold text-white">{formatMoney(summary.monthlyExpenses)}</span></p>
-                  <p>Net Profit: <span className={`font-semibold ${summary.netProfit >= 0 ? "text-emerald-200" : "text-rose-200"}`}>{formatMoney(summary.netProfit)}</span></p>
-                  <p>Profit Margin: <span className="font-semibold text-white">{formatPercent(summary.profitMargin)}</span></p>
+                  <span className="text-[11px] text-white font-mono">{money(c.total)}</span>
                 </div>
-              </div>
+              ))}
+            </div>
+          </div>
 
-              <div className="glass-panel rounded-2xl p-4">
-                <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-200">Year-to-Date Summary</h3>
-                <div className="mt-3 space-y-2 text-sm text-slate-300">
-                  <p>YTD Revenue: <span className="font-semibold text-white">{formatMoney(reportData.ytdRevenue)}</span></p>
-                  <p>YTD Expenses: <span className="font-semibold text-white">{formatMoney(reportData.ytdExpenses)}</span></p>
-                  <p>YTD Profit: <span className={`font-semibold ${reportData.ytdProfit >= 0 ? "text-emerald-200" : "text-rose-200"}`}>{formatMoney(reportData.ytdProfit)}</span></p>
-                </div>
-              </div>
-
-              <div className="glass-panel rounded-2xl p-4">
-                <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-200">Client Profitability Ranking</h3>
-                <div className="mt-3 space-y-2 text-sm text-slate-300">
-                  {reportData.topClients.map((entry, index) => (
-                    <div key={entry.name} className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2">
-                      <span>{index + 1}. {entry.name}</span>
-                      <span className="font-semibold text-white">{formatMoney(entry.profit)}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="glass-panel rounded-2xl p-4">
-                <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-200">Expense Category Breakdown</h3>
-                <div className="mt-3 space-y-2 text-sm text-slate-300">
-                  <p>Recurring: <span className="font-semibold text-white">{formatMoney(reportData.expenseBreakdown.recurring)}</span></p>
-                  <p>Employee: <span className="font-semibold text-white">{formatMoney(reportData.expenseBreakdown.employee)}</span></p>
-                  <p>One-Time: <span className="font-semibold text-white">{formatMoney(reportData.expenseBreakdown.oneTime)}</span></p>
-                </div>
-              </div>
-            </section>
-          ) : null}
-        </div>
-      </div>
-
-      {importOpen ? (
-        <div className="fixed inset-0 z-50" role="dialog" aria-modal="true">
-          <button
-            type="button"
-            onClick={() => {
-              setImportOpen(false);
-              resetImportState();
-            }}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            aria-label="Close CSV import"
-          />
-          <div className="absolute left-1/2 top-1/2 w-[min(94vw,980px)] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-white/15 bg-[#0b0d15]/95 p-5 shadow-2xl backdrop-blur-xl">
-            <div className="mb-5 flex items-start justify-between gap-3">
+          {/* ARR Progress */}
+          <div className="lg:col-span-2 glass-panel p-4">
+            <div className="flex justify-between items-center mb-3">
+              <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Path to $1M ARR</p>
+              <span className="text-[11px] text-slate-500">{money(seedRevenue.arr)} / {money(seedRevenue.target)}</span>
+            </div>
+            <div className="h-3 bg-white/[0.06] rounded-full overflow-hidden">
+              <div className="h-full rounded-full bg-gradient-to-r from-blue-500 to-emerald-400 transition-all duration-1000"
+                style={{ width: `${(seedRevenue.arr / seedRevenue.target) * 100}%` }} />
+            </div>
+            <div className="grid grid-cols-3 gap-4 mt-4 text-center">
               <div>
-                <p className="text-xs uppercase tracking-[0.14em] text-blue-200">Finance Import</p>
-                <h2 className="heading-font mt-2 text-3xl font-normal uppercase tracking-[0.04em] text-white">Import CSV</h2>
-                <p className="mt-2 text-sm text-slate-300">Import rows into {monthLabel(selectedMonth)} and save through the finance API.</p>
+                <p className="text-[18px] font-bold font-mono text-blue-400">{money(seedRevenue.arr)}</p>
+                <p className="text-[10px] text-slate-500">Current ARR</p>
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setImportOpen(false);
-                  resetImportState();
-                }}
-                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/12 bg-white/5 px-3 text-slate-200 transition hover:border-blue-300/40 hover:bg-blue-500/10"
-              >
-                <X size={16} />
-              </button>
-            </div>
-
-            <div className="grid gap-5 lg:grid-cols-[0.44fr_0.56fr]">
-              <div className="glass-panel space-y-4 p-4 sm:p-5">
-                <label className="space-y-2">
-                  <span className="text-sm text-slate-300">Import type</span>
-                  <select
-                    value={importType}
-                    onChange={(event) => {
-                      setImportType(event.target.value as ImportType);
-                      resetImportState();
-                    }}
-                    className="min-h-11 w-full rounded-xl border border-white/14 bg-[#101625] px-3 text-sm text-white outline-none transition focus:border-blue-400/60"
-                  >
-                    {IMPORT_TYPES.map((type) => (
-                      <option key={type} value={type}>
-                        {type}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <label className="space-y-2">
-                  <span className="text-sm text-slate-300">CSV file</span>
-                  <input
-                    type="file"
-                    accept=".csv,text/csv"
-                    onChange={(event) => handleImportFile(event.target.files?.[0] ?? null)}
-                    className="block min-h-11 w-full rounded-xl border border-white/14 bg-[#101625] px-3 py-3 text-sm text-slate-200 file:mr-3 file:rounded-lg file:border-0 file:bg-[linear-gradient(135deg,#2093FF,#0026FF)] file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white"
-                  />
-                </label>
-
-                <button type="button" onClick={downloadTemplate} className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-blue-100 transition hover:text-white">
-                  <Download size={16} />
-                  Download Template
-                </button>
-
-                <div className="glass-card rounded-2xl p-4 text-sm text-slate-300">
-                  <p className="text-[11px] uppercase tracking-[0.16em] text-slate-500">Required Columns</p>
-                  <p className="mt-2 break-words text-white">{requiredHeadersForImport(importType).join(", ")}</p>
-                  {importFileName ? <p className="mt-3 text-slate-400">Loaded file: {importFileName}</p> : null}
-                </div>
-
-                {importError ? <div className="rounded-xl border border-red-500/35 bg-red-500/10 px-3 py-2 text-sm text-red-200">{importError}</div> : null}
-
-                <button
-                  type="button"
-                  onClick={applyCsvImport}
-                  disabled={parsedCsv.rows.length === 0 || Boolean(importError)}
-                  className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-blue-300/30 bg-[linear-gradient(135deg,#2093FF,#0026FF)] px-4 py-2 text-sm font-semibold text-white transition hover:shadow-[0_0_24px_rgba(32,147,255,0.24)] disabled:cursor-not-allowed disabled:opacity-70"
-                >
-                  <Upload size={16} />
-                  Import
-                </button>
+              <div>
+                <p className="text-[18px] font-bold font-mono text-amber-400">{money(seedRevenue.target - seedRevenue.arr)}</p>
+                <p className="text-[10px] text-slate-500">Gap to $1M</p>
               </div>
-
-              <div className="glass-panel p-4 sm:p-5">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-200">Preview</h3>
-                    <p className="mt-1 text-sm text-slate-400">Showing the first 5 parsed rows.</p>
-                  </div>
-                  <span className="text-xs uppercase tracking-[0.16em] text-slate-500">{parsedCsv.rows.length} rows parsed</span>
-                </div>
-
-                <div className="mt-4 overflow-x-auto rounded-xl border border-white/10">
-                  <table className="min-w-[680px] w-full text-sm">
-                    <thead className="bg-white/[0.04] text-left text-xs uppercase tracking-[0.14em] text-slate-400">
-                      <tr>
-                        {(parsedCsv.headers.length ? parsedCsv.headers : requiredHeadersForImport(importType)).map((header) => (
-                          <th key={header} className="px-3 py-3">{header}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(parsedCsv.rows.length ? parsedCsv.rows.slice(0, 5) : Array.from({ length: 1 }).map(() => null)).map((row, index) => (
-                        <tr key={index} className="border-t border-white/10 text-slate-200">
-                          {(parsedCsv.headers.length ? parsedCsv.headers : requiredHeadersForImport(importType)).map((header) => (
-                            <td key={header} className="px-3 py-2">{row?.[header] || (row ? "-" : "Upload a CSV to preview rows")}</td>
-                          ))}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+              <div>
+                <p className="text-[18px] font-bold font-mono text-emerald-400">{Math.ceil((seedRevenue.target - seedRevenue.arr) / (seedRevenue.avgRevenuePerClient * 12))}</p>
+                <p className="text-[10px] text-slate-500">Clients needed</p>
               </div>
             </div>
           </div>
+
+          {/* Top clients by revenue */}
+          <div className="glass-panel p-4">
+            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-3">Top Clients by Revenue</p>
+            <div className="space-y-2">
+              {[...clients].sort((a, b) => b.monthlyRevenue - a.monthlyRevenue).slice(0, 6).map(c => (
+                <div key={c.id} className="flex items-center justify-between py-1.5">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />
+                    <span className="text-[11px] text-white truncate">{c.name}</span>
+                  </div>
+                  <span className="text-[11px] text-emerald-400 font-mono shrink-0">{money(c.monthlyRevenue)}/mo</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-      ) : null}
-    </section>
+      )}
+
+      {/* ═══ REVENUE ═══ */}
+      {activeTab === "revenue" && (
+        <div className="space-y-4">
+          <div className="glass-panel p-4">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Monthly Recurring Revenue</p>
+                <p className="text-[28px] font-bold font-mono text-emerald-400 mt-1">{money(totalRevenue)}<span className="text-[14px] text-slate-500">/mo</span></p>
+              </div>
+              <div className="text-right">
+                <p className="text-[10px] text-slate-500">Active clients</p>
+                <p className="text-[18px] font-bold font-mono text-white">{clients.filter(c => c.status === "active").length}</p>
+              </div>
+            </div>
+
+            {/* Revenue by service */}
+            <div className="grid grid-cols-3 gap-3 mt-4">
+              {seedRevenue.byService.map(s => (
+                <div key={s.name} className="p-3 rounded-lg bg-white/[0.03] border border-white/[0.06]">
+                  <p className="text-[10px] text-slate-500">{s.name}</p>
+                  <p className="text-[16px] font-bold font-mono text-white mt-1">{money(s.value)}</p>
+                  <p className="text-[9px] text-slate-600">{Math.round(s.value / totalRevenue * 100)}% of total</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Client payments table */}
+          <div className="glass-panel">
+            <div className="px-4 py-3 border-b border-white/[0.06]">
+              <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Client Payments — March 2026</p>
+            </div>
+            <table className="w-full text-[11px]">
+              <thead>
+                <tr className="border-b border-white/[0.06]">
+                  <th className="text-left px-4 py-2.5 text-slate-500 font-medium">Client</th>
+                  <th className="text-left px-3 py-2.5 text-slate-500 font-medium">Services</th>
+                  <th className="text-right px-3 py-2.5 text-slate-500 font-medium">Amount</th>
+                  <th className="text-center px-3 py-2.5 text-slate-500 font-medium">Pay Day</th>
+                  <th className="text-center px-3 py-2.5 text-slate-500 font-medium">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {clients.map(c => (
+                  <tr key={c.id} className="border-b border-white/[0.03] hover:bg-white/[0.02]">
+                    <td className="px-4 py-2.5">
+                      <p className="text-white font-medium">{c.name}</p>
+                      <p className="text-[10px] text-slate-500 capitalize">{c.type}</p>
+                    </td>
+                    <td className="px-3 py-2.5">
+                      <div className="flex flex-wrap gap-1">
+                        {c.services.map(s => <span key={s} className="px-1.5 py-0.5 rounded bg-white/[0.04] text-[9px] text-slate-400">{s}</span>)}
+                      </div>
+                    </td>
+                    <td className="px-3 py-2.5 text-right font-mono text-emerald-400">{money(c.monthlyRevenue)}</td>
+                    <td className="px-3 py-2.5 text-center text-slate-400">{c.paymentDay}th</td>
+                    <td className="px-3 py-2.5 text-center">
+                      <span className={cn("px-2 py-0.5 rounded-full text-[9px] font-medium",
+                        c.paymentStatus === "paid" ? "bg-emerald-400/10 text-emerald-400" :
+                        c.paymentStatus === "pending" ? "bg-amber-400/10 text-amber-400" :
+                        "bg-red-400/10 text-red-400"
+                      )}>{c.paymentStatus}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr className="border-t border-white/[0.08]">
+                  <td colSpan={2} className="px-4 py-3 text-slate-400 font-medium">Total</td>
+                  <td className="px-3 py-3 text-right font-mono text-[13px] font-bold text-emerald-400">{money(totalRevenue)}</td>
+                  <td colSpan={2}></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* ═══ EXPENSES ═══ */}
+      {activeTab === "expenses" && (
+        <div className="space-y-4">
+          {/* Summary cards */}
+          <div className="grid grid-cols-3 gap-3">
+            <div className="glass-panel p-4">
+              <p className="text-[10px] text-slate-500 uppercase tracking-wider">Recurring</p>
+              <p className="text-[20px] font-bold font-mono text-red-400 mt-1">{money(recurringExpenses)}<span className="text-[12px] text-slate-500">/mo</span></p>
+            </div>
+            <div className="glass-panel p-4">
+              <p className="text-[10px] text-slate-500 uppercase tracking-wider">One-time (this month)</p>
+              <p className="text-[20px] font-bold font-mono text-amber-400 mt-1">{money(oneTimeExpenses)}</p>
+            </div>
+            <div className="glass-panel p-4">
+              <p className="text-[10px] text-slate-500 uppercase tracking-wider">Total</p>
+              <p className="text-[20px] font-bold font-mono text-white mt-1">{money(totalExpenses)}</p>
+            </div>
+          </div>
+
+          {/* Add + Filter */}
+          <div className="flex items-center justify-between">
+            <div className="flex gap-1">
+              {([{ id: "all", label: "All" }, ...EXPENSE_CATEGORIES] as { id: ExpenseCategory | "all"; label: string }[]).map(c => (
+                <button key={c.id} onClick={() => setExpenseFilter(c.id)}
+                  className={cn("px-2.5 py-1 rounded-lg text-[11px] transition-all",
+                    expenseFilter === c.id ? "bg-white/[0.1] text-white" : "text-slate-500 hover:text-white"
+                  )}>{c.label}</button>
+              ))}
+            </div>
+            <button onClick={() => setShowAddExpense(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-medium transition-colors">
+              <Plus size={12} /> Add Expense
+            </button>
+          </div>
+
+          {/* Add expense form */}
+          {showAddExpense && (
+            <div className="glass-panel p-4 border-blue-500/20">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-[12px] font-medium text-white">New Expense</p>
+                <button onClick={() => setShowAddExpense(false)} className="text-slate-500 hover:text-white"><X size={14} /></button>
+              </div>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                <input value={newExpense.name ?? ""} onChange={e => setNewExpense({ ...newExpense, name: e.target.value })}
+                  placeholder="Expense name" className="col-span-2 bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-[12px] text-white placeholder:text-slate-500 outline-none focus:border-blue-500/30" />
+                <input type="number" value={newExpense.amount ?? ""} onChange={e => setNewExpense({ ...newExpense, amount: Number(e.target.value) })}
+                  placeholder="Amount" className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-[12px] text-white placeholder:text-slate-500 outline-none focus:border-blue-500/30" />
+                <select value={newExpense.category} onChange={e => setNewExpense({ ...newExpense, category: e.target.value as ExpenseCategory })}
+                  className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-[12px] text-white outline-none">
+                  {EXPENSE_CATEGORIES.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
+                </select>
+                <select value={newExpense.frequency} onChange={e => setNewExpense({ ...newExpense, frequency: e.target.value as ExpenseFrequency })}
+                  className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-[12px] text-white outline-none">
+                  <option value="monthly">Monthly</option>
+                  <option value="one-time">One-time</option>
+                </select>
+                <button onClick={addExpense} className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[12px] font-medium">Save</button>
+              </div>
+            </div>
+          )}
+
+          {/* Expense list */}
+          <div className="glass-panel">
+            <table className="w-full text-[11px]">
+              <thead>
+                <tr className="border-b border-white/[0.06]">
+                  <th className="text-left px-4 py-2.5 text-slate-500 font-medium">Expense</th>
+                  <th className="text-left px-3 py-2.5 text-slate-500 font-medium">Category</th>
+                  <th className="text-center px-3 py-2.5 text-slate-500 font-medium">Frequency</th>
+                  <th className="text-right px-3 py-2.5 text-slate-500 font-medium">Amount</th>
+                  <th className="text-center px-3 py-2.5 text-slate-500 font-medium w-12"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {expenses.filter(e => expenseFilter === "all" || e.category === expenseFilter).map(e => {
+                  const cat = EXPENSE_CATEGORIES.find(c => c.id === e.category);
+                  return (
+                    <tr key={e.id} className="border-b border-white/[0.03] hover:bg-white/[0.02]">
+                      <td className="px-4 py-2.5 text-white font-medium">{e.name}</td>
+                      <td className="px-3 py-2.5">
+                        <span className="flex items-center gap-1.5">
+                          <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: cat?.color }} />
+                          <span className="text-slate-400">{cat?.label}</span>
+                        </span>
+                      </td>
+                      <td className="px-3 py-2.5 text-center">
+                        <span className={cn("px-2 py-0.5 rounded text-[9px]",
+                          e.frequency === "monthly" ? "bg-blue-400/10 text-blue-400" : "bg-slate-400/10 text-slate-400"
+                        )}>{e.frequency}</span>
+                      </td>
+                      <td className="px-3 py-2.5 text-right font-mono text-red-400">{money(e.amount)}</td>
+                      <td className="px-3 py-2.5 text-center">
+                        <button onClick={() => setExpenses(expenses.filter(x => x.id !== e.id))}
+                          className="text-slate-600 hover:text-red-400 transition-colors"><Trash2 size={12} /></button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+              <tfoot>
+                <tr className="border-t border-white/[0.08]">
+                  <td colSpan={3} className="px-4 py-3 text-slate-400 font-medium">Total</td>
+                  <td className="px-3 py-3 text-right font-mono text-[13px] font-bold text-red-400">
+                    {money(expenses.filter(e => expenseFilter === "all" || e.category === expenseFilter).reduce((s, e) => s + e.amount, 0))}
+                  </td>
+                  <td></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* ═══ CLIENT P&L ═══ */}
+      {activeTab === "clients" && (
+        <div className="space-y-4">
+          <div className="glass-panel p-4">
+            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Client Profitability</p>
+            <p className="text-[12px] text-slate-500">Revenue vs estimated cost to service per client.</p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            {[...clients].sort((a, b) => b.monthlyRevenue - a.monthlyRevenue).map(c => (
+              <button key={c.id} onClick={() => setSelectedClient(selectedClient === c.id ? null : c.id)}
+                className={cn("glass-panel p-4 text-left transition-all",
+                  selectedClient === c.id ? "border-blue-500/30 bg-blue-500/[0.03]" : ""
+                )}>
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-[14px] font-bold text-white">{c.name}</p>
+                    <p className="text-[10px] text-slate-500 capitalize">{c.type} · {c.services.join(", ")}</p>
+                  </div>
+                  <span className={cn("px-2 py-0.5 rounded text-[10px] font-bold font-mono",
+                    c.margin >= 70 ? "bg-emerald-400/10 text-emerald-400" :
+                    c.margin >= 50 ? "bg-blue-400/10 text-blue-400" :
+                    "bg-amber-400/10 text-amber-400"
+                  )}>{c.margin}% margin</span>
+                </div>
+
+                {/* Revenue bar */}
+                <div className="mt-3 space-y-1.5">
+                  <div className="flex justify-between text-[10px]">
+                    <span className="text-slate-500">Revenue</span>
+                    <span className="text-emerald-400 font-mono">{money(c.monthlyRevenue)}</span>
+                  </div>
+                  <div className="h-2 bg-white/[0.06] rounded-full overflow-hidden">
+                    <div className="h-full rounded-full bg-emerald-500" style={{ width: "100%" }} />
+                  </div>
+                  <div className="flex justify-between text-[10px]">
+                    <span className="text-slate-500">Cost</span>
+                    <span className="text-red-400 font-mono">{money(c.monthlyCost)}</span>
+                  </div>
+                  <div className="h-2 bg-white/[0.06] rounded-full overflow-hidden">
+                    <div className="h-full rounded-full bg-red-500" style={{ width: `${(c.monthlyCost / c.monthlyRevenue) * 100}%` }} />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-white/[0.04]">
+                  <span className="text-[10px] text-slate-500">Net profit</span>
+                  <span className="text-[13px] font-bold font-mono text-emerald-400">{money(c.monthlyRevenue - c.monthlyCost)}</span>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
