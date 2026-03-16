@@ -8,8 +8,11 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "email": "info@printograph.com",
     "company": "Printograph",
     "website": "https://w3.org",
-    "relationshipType": "client",
-    "tags": [],
+    "relationshipType": "other",
+    "tags": [
+      "printing",
+      "e-commerce"
+    ],
     "relationshipScore": 100,
     "interactions": [
       {
@@ -313,8 +316,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-0-0",
+        "content": "Printograph appears to be an e-commerce business that sells printed goods, as indicated by the order confirmation and shipping emails.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-0-1",
+        "content": "The emails are all automated transactional messages, suggesting this is likely a customer of some service, or a vendor they purchase from.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-0-0",
+        "category": "business",
+        "label": "Email Domain",
+        "value": "printograph.com"
+      },
+      {
+        "id": "aif-0-1",
+        "category": "business",
+        "label": "Email Content Type",
+        "value": "Transactional (Order Confirmations, Shipping Notifications)"
+      },
+      {
+        "id": "aif-0-2",
+        "category": "business",
+        "label": "Recent Activity",
+        "value": "Multiple orders placed and shipped in late Feb/early March 2026"
+      },
+      {
+        "id": "aif-0-3",
+        "category": "business",
+        "label": "Total Emails",
+        "value": "30"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -323,7 +366,8 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-09-08T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "This contact is for Printograph, an e-commerce business that sells printed goods. The email history consists solely of automated transactional messages related to orders, indicating they are likely a customer or vendor rather than a direct prospect for digital marketing services for restaurants."
   },
   {
     "id": "2",
@@ -333,7 +377,10 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "company": "Insideoutreception",
     "website": "https://email.go.insideoutreception.com",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "hiring",
+      "virtual assistant"
+    ],
     "relationshipScore": 100,
     "interactions": [
       {
@@ -637,8 +684,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-1-0",
+        "content": "Jahan is receiving frequent inbound emails from Insideoutreception, a company offering virtual assistant services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-1-1",
+        "content": "The emails are consistently focused on the benefits of hiring VAs, common hiring mistakes, and the cost of not hiring.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-1-0",
+        "category": "business",
+        "label": "Sender Company",
+        "value": "Insideoutreception"
+      },
+      {
+        "id": "aif-1-1",
+        "category": "business",
+        "label": "Sender Contact",
+        "value": "Chris Martin"
+      },
+      {
+        "id": "aif-1-2",
+        "category": "business",
+        "label": "Email Frequency",
+        "value": "Daily"
+      },
+      {
+        "id": "aif-1-3",
+        "category": "business",
+        "label": "Email Content Theme",
+        "value": "Virtual Assistant Hiring"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -647,17 +734,25 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-01-24T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Jahan Taila is being actively marketed to by Insideoutreception, a virtual assistant placement service, with daily emails highlighting the value and necessity of hiring VAs for business growth and efficiency."
   },
   {
     "id": "3",
-    "firstName": "The",
-    "lastName": "Mayfly",
+    "firstName": "DERBY",
+    "lastName": "DIGITAL CAREERS SYSTEM",
     "email": "themayflynyc@gmail.com",
-    "company": "",
+    "company": "The Mayfly",
     "website": "https://email.emails.themayflynyc.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "reservations",
+      "restaurant",
+      "coupons",
+      "lead generation",
+      "private events",
+      "digital marketing"
+    ],
     "relationshipScore": 100,
     "interactions": [
       {
@@ -961,13 +1056,59 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-2-0",
+        "content": "The Mayfly is actively using online forms for reservations, private parties, and coupon requests, indicating a need for robust digital marketing and lead management.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-2-1",
+        "content": "The email address 'themayflynyc@gmail.com' suggests they might be a smaller operation or could benefit from a more professional email setup and integrated CRM.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-2-2",
+        "content": "The high volume of inbound requests (8 in 3 days) demonstrates strong customer engagement and potential for growth with optimized digital strategies.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "c8dc7cbb24eb",
         "category": "contact",
         "label": "Phone",
         "value": "1516446952"
+      },
+      {
+        "id": "aif-2-1",
+        "category": "business",
+        "label": "Industry",
+        "value": "Restaurant"
+      },
+      {
+        "id": "aif-2-2",
+        "category": "business",
+        "label": "Location (inferred)",
+        "value": "New York, NY"
+      },
+      {
+        "id": "aif-2-3",
+        "category": "business",
+        "label": "Key Services Used",
+        "value": "Online Reservations, Private Event Bookings, Coupon Requests"
+      },
+      {
+        "id": "aif-2-4",
+        "category": "business",
+        "label": "Email Volume (recent)",
+        "value": "8 in 3 days"
       }
     ],
     "opportunities": [],
@@ -978,17 +1119,26 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-09-22T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "Owner/Manager",
+    "city": "New York",
+    "state": "NY",
+    "aiSummary": "The Mayfly is a restaurant in New York, NY, actively generating leads through online forms for reservations, private parties, and coupons. They appear to be a strong prospect for digital marketing services, particularly in lead generation, CRM integration, and potentially website optimization given their use of a generic Gmail address."
   },
   {
     "id": "4",
     "firstName": "DesignRush",
     "lastName": "",
     "email": "info@designrush.co",
-    "company": "Designrush",
+    "company": "DesignRush",
     "website": "https://news.designrush.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "industry",
+    "tags": [
+      "awards",
+      "marketing insights",
+      "podcast",
+      "agency directory"
+    ],
     "relationshipScore": 100,
     "interactions": [
       {
@@ -1038,6 +1188,26 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "summary": "Lead Volume Myth | Podcast #129",
         "subject": "Lead Volume Myth | Podcast #129",
         "details": "[an image of a man and woman with a purple background and a purple banner with the words ads](https://news.designrush.com/leads-vs-sustainable-growth-rohit-bhateja)\r\n\r\nThis week on the DesignRush Podcast, Rohit Bhateja explains why chasing lead volume can create operational problems instead of real growth.\r\n\r\n\u201cMore leads don\u2019t automatically mean more growth.\u201d\r\n\r\n[an image of a man and woman with a purple background and a purple banner with the words ads](https://news.designrush.com/leads-vs-sustainable-growth-rohit-bhateja)\r\n\r\nThis week on the DesignRush Podcast, Rohit Bhateja explains why chasing lead volume can create operational problems instead of real growth.\r\n\r\n\u201cMore leads don\u2019t automatically mean more growth.\u201d\r\n\r\n[company logo arrow] \u00a071% of B2B leads never convert, making volume a weak revenue metric.\r\n\r\n[company logo arrow] \u00a0Demand spikes without operational capacity overwhelm sales teams.\r\n\r\n[company logo arrow] \u00a0AI can 10\u00d7 demand generation speed, but it can\u2019t instantly scale sales processes.\r\n\r\n[company logo arrow] \u00a0Real growth comes\u200bfrom marketing, sales, and ops aligning on shared metrics.\r\n\r\n\u00a071% of B2B leads never convert, making volume a weak revenue metric.\u00a0\r\n\r\n\u00a0Demand spikes without operational capacity overwhelm sales teams.\r\n\r\n\u00a0AI can 10\u00d7 demand generation speed, but it can\u2019t instantly scale sales processes. \u00a0\r\n\r\n\u00a0Real growth comes from marketing, sales, and ops aligning on shared metrics. \u00a0\r\n\r\nhttps://news.designrush.com/leads-vs-sustainable-growth-rohit-bhateja\r\n\r\nhttps://news.designrush.com/leads-vs-sustainable-growth-rohit-bhateja\r\n\r\n[DesignRush](https://www.designrush.com/)\r\nB2B Marketplace Connecting Brands with Agencies\r\n\r\n[Facebook](https://www.facebook.com/designrush/)\r\n[Instagram](https://www.instagram.com/designrushmag/)\r\n[LinkedIn](https://www.linkedin.com/company/designrush/)\r\n[YouTube](https://www.youtube.com/channel/UCHN2TBT_oI6e7IJACULe8Wg)\r\n[X](https://x.com/designrushmag)\r\n[Tiktok](https://www.tiktok.com/@designrushmag)\r\n\r\nDesignRush \u00a9 2026\r\n18117 Biscayne Blvd Miami, Florida 33160\u00a0\r\n\r\nNo longer want to receive these emails?\r\n[Unsubscribe](https://manage.kmail-lists.com/subscriptions/unsubscribe?a=XFxk22&c=01JSQ76QJWVQ52Z6B2Y92WFFEE&k=214330f2d80d9125a809530f5ad34332&m=01KJWZZKT9WSFEZ60YPES18YHM&r=01KJZ9X28X6MQHPG6PE1C1WVFA)",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-65-0",
+        "type": "email",
+        "date": "2026-03-04",
+        "summary": "Top 12 AI Agencies to Hire in 2026",
+        "subject": "Top 12 AI Agencies to Hire in 2026",
+        "details": "[DesignRush - Best Agencies to Hire 2025](https://news.designrush.com/best-ai-agencies-to-hire-2026)\r\n\r\nDesignRush unveils its annual list of\r\nBest AI Agencies to Hire in 2026\r\n\r\nDesignRush unveils its annual list of\u00a0\r\nBest AI Agencies to Hire in 2026Ranked by Reviews & Case Studies\r\n\r\nhttps://news.designrush.com/best-ai-agencies-to-hire-2026\r\n\r\nRanked by reviews and case studies\r\nthis year\u2019s Best AI Agencies include:\r\n\r\nRanked by reviews and case studies, this year\u2019s Best AI Agencies include:\r\n\r\n\u00a0Azumo\r\n\r\n\u00a0ELEKS\r\n\r\n\u00a0Azumo\r\n\r\n\u00a0ELEKS\r\n\r\n\u00a0247 Labs\r\n\r\n\u00a0Talentica Software\u00a0\r\n\r\n\u00a0247 Labs\r\n\r\n\u00a0Talentica Software\u00a0\r\n\r\n\u00a0Diffco\r\n\r\n\u00a0Kanda Software\r\n\r\n\u00a0Diffco\r\n\r\n\u00a0Kanda Software\r\n\r\n\u00a0Fullestop\r\n\r\n\u00a0GenAI Labs\r\n\r\nFullestop\r\n\r\n\u00a0GenAI Labs\r\n\r\nGeomotive\r\n\r\nExaud\r\n\r\n\u00a0Geomotiv\r\n\r\n\u00a0Exaud\r\n\r\n\u00a0Digital Scientists\u00a0\r\n\r\n\u00a0Sketch Development Services\r\n\r\n\u00a0 \u00a0 \u00a0 \u00a0\u00a0 Digital Scientists\u00a0\r\n\r\n\u00a0Sketch Development Services\r\n\r\n\u00a0\r\n\r\n[See the full list](https://news.designrush.com/best-ai-agencies-to-hire-2026)\r\n\r\nHave any questions?\r\nEmail us at\u00a0[sponsor@designrush.com](mailto:sponsor@designrush.com)\r\n\r\n[DesignRush](https://www.designrush.com/)\r\nB2B Marketplace Connecting Brands with Agencies\r\n\r\n[YouTube](https://www.youtube.com/channel/UCHN2TBT_oI6e7IJACULe8Wg)\r\n[LinkedIn](https://www.linkedin.com/company/designrush/)\r\n[Instagram](https://www.instagram.com/designrushmag/)\r\n\r\nDesignRush \u00a9 2026\r\n18117 Biscayne Blvd Miami, Florida 33160\u00a0\r\n\r\nNo longer want to receive these emails?\r\n[Unsubscribe](https://manage.kmail-lists.com/subscriptions/unsubscribe?a=XFxk22&c=01JSQ76QJWVQ52Z6B2Y92WFFEE&k=214330f2d80d9125a809530f5ad34332&m=01KJTD3K1GVMDTB1370RSWCBVX&r=01KJWM2Q6SH0FZW6JWZ79JWR0C)",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-65-1",
+        "type": "email",
+        "date": "2026-03-02",
+        "summary": "Top 12 Software and App Development Agencies to Hire in 2026",
+        "subject": "Top 12 Software and App Development Agencies to Hire in 2026",
+        "details": "[DesignRush - Best Agencies to Hire 2025](https://news.designrush.com/top-software-app-dev-agencies-hire-2026)\r\n\r\nDesignRush unveils its annual list of\u00c2\u00a0\r\nBest Software and App Development\r\nAgencies to Hire in 2026\r\nRanked by Reviews & Case Studies\r\n\r\nDesignRush unveils its annual list of\u00c2\u00a0\r\nBest Software and App Development Agencies to Hire in 2026Ranked by Reviews & Case Studies\r\n\r\nhttps://news.designrush.com/top-software-app-dev-agencies-hire-2026\r\n\r\n[See the full list](https://news.designrush.com/top-software-app-dev-agencies-hire-2026)\r\n\r\nHave any questions?\r\nEmail us at\u00c2\u00a0[sponsor@designrush.com](mailto:sponsor@designrush.com)\r\n\r\n[DesignRush](https://www.designrush.com/)\r\nB2B Marketplace Connecting Brands with Agencies\r\n\r\n[YouTube](https://www.youtube.com/channel/UCHN2TBT_oI6e7IJACULe8Wg)\r\n[LinkedIn](https://www.linkedin.com/company/designrush/)\r\n[Instagram](https://www.instagram.com/designrushmag/)\r\n\r\nDesignRush \u00c2\u00a9 2026\r\n18117 Biscayne Blvd Miami, Florida 33160\u00c2\u00a0\r\n\r\nNo longer want to receive these emails?\r\n[Unsubscribe](https://manage.kmail-lists.com/subscriptions/unsubscribe?a=XFxk22&c=01JSQ76QJWVQ52Z6B2Y92WFFEE&k=214330f2d80d9125a809530f5ad34332&m=01KJG9BF1SKCBE9Q407NRZZ3CY&r=01KJQF92SG4D9MG9M2DWGG30A6)",
         "direction": "inbound",
         "createdAt": "2026-03-16T12:18:59"
       },
@@ -1290,15 +1460,85 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "details": "https://news.designrush.com/colgate-tells-holiday-travel-story-forgotten-toothbrushes\r\n\r\nhttps://news.designrush.com/colgate-tells-holiday-travel-story-forgotten-toothbrushes\r\n\r\nColgate\u2019s holiday campaign stood out by letting products, not people, carry the narrative, using handcrafted Claymation to cut through seasonal noise.\u00a0\r\n\r\nColgate\u2019s holiday campaign stood out by letting products, not people, carry the narrative, using handcrafted Claymation to cut through seasonal noise.\u00a0\r\n\r\n\u00a0Product-led humor improved recall without forced emotion\r\n\r\n\u00a0Handcrafted claymation differentiated in a crowded holiday feed\u00a0\r\n\r\n\u00a0 Object POV kept the brand central, not decorative\r\n\r\n\u00a0Short-form vignettes optimized for social-first distribution\r\n\r\n\u00a0Product-led humor improved recall without forced emotion\r\n\r\n\u00a0Handcrafted claymation differentiated in a crowded holiday feed\r\n\r\n\u00a0Object POV kept the brand central, not decorative\r\n\r\n\u00a0Short-form vignettes optimized for social-first distribution\r\n\r\nhttps://news.designrush.com/colgate-tells-holiday-travel-story-forgotten-toothbrushes\r\n\r\nhttps://news.designrush.com/colgate-tells-holiday-travel-story-forgotten-toothbrushes\r\n\r\n[DesignRush](https://www.designrush.com/)\r\nB2B Marketplace Connecting Brands with Agencies\r\n\r\n[Facebook](https://www.facebook.com/designrush/)\r\n[Instagram](https://www.instagram.com/designrushmag/)\r\n[LinkedIn](https://www.linkedin.com/company/designrush/)\r\n[YouTube](https://www.youtube.com/channel/UCHN2TBT_oI6e7IJACULe8Wg)\r\n[X](https://x.com/designrushmag)\r\n[Tiktok](https://www.tiktok.com/@designrushmag)\r\n\r\nDesignRush \u00a9 2026\r\n18117 Biscayne Blvd Miami, Florida 33160\u00a0\r\n\r\nNo longer want to receive these emails?\r\n[Unsubscribe](https://manage.kmail-lists.com/subscriptions/unsubscribe?a=XFxk22&c=01JSQ76QJWVQ52Z6B2Y92WFFEE&k=214330f2d80d9125a809530f5ad34332&m=01KDDNHK6GKHVEH8T9JX9EY97C&r=01KE4T23ZMY1YTZCD6NWA0QSCJ)",
         "direction": "inbound",
         "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-280-0",
+        "type": "email",
+        "date": "2025-04-15",
+        "summary": "Derby Digital selected among The Best Advertising Agencies in Louisville by DesignRush",
+        "subject": "Derby Digital selected among The Best Advertising Agencies in Louisville by DesignRush",
+        "details": "Hey Jahan,\r\n\r\nI am Marija from\u202fDesignRush. A prominent B2B marketplace where top agencies such as SmartSites, Lounge Lizard, Horizon Media, RNO1, and many others showcase their work.\r\n\r\nWe came across your work and we admire what you\u2019re achieving!\r\n\r\nI was particularly impressed by 'Rodriguez Construction and M & M', which is why we want to include Derby Digital among our Leading Advertising Agencies in Louisville: https://www.designrush.com/agency/ad-agencies/kentucky/louisville\u202f\r\n\r\nThis collaboration comes at no charge \u2014 we only ask that you share our partnership on your website.\r\n\r\nIf interested, kindly get back to this email and I\u2019ll\u202fprovide additional details.\r\n\r\nSincerely,\r\n\r\nMarija Petroska\r\nAgency Relationship Coordinator\r\nDESIGNRUSH | B2B Marketplace Connecting Businesses With Agencies\r\n\r\nIf you don\u2019t wish to hear from me, just let me know.",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "merge-sponsorshi",
+        "content": "Merged with duplicate contact: sponsorship@designrush.co",
+        "category": "general",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "merge-submission",
+        "content": "Merged with duplicate contact: submissions@designrush.org",
+        "category": "general",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-3-2",
+        "content": "DesignRush is a platform that ranks and showcases agencies, offering awards and industry insights through podcasts and articles.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-3-3",
+        "content": "Jahan Taila could consider listing Derby Digital on DesignRush to gain visibility and potentially apply for relevant awards.",
+        "category": "actionable",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-3-4",
+        "content": "The content focuses heavily on agency performance, marketing strategies, and industry trends, which aligns with Derby Digital's services.",
+        "category": "relevance",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "fe158e222e21",
         "category": "contact",
         "label": "Address",
         "value": "2026\r\n18117 Biscayne Blvd Miami, Florida"
+      },
+      {
+        "id": "aif-3-1",
+        "category": "business",
+        "label": "Primary Activity",
+        "value": "Agency ranking, awards, and industry content"
+      },
+      {
+        "id": "aif-3-2",
+        "category": "business",
+        "label": "Content Focus",
+        "value": "Marketing, design, AI, software development, agency operations"
+      },
+      {
+        "id": "aif-3-3",
+        "category": "business",
+        "label": "Engagement Opportunities",
+        "value": "Awards submission, agency listing, podcast consumption"
+      },
+      {
+        "id": "aif-3-4",
+        "category": "business",
+        "label": "Target Audience",
+        "value": "Agencies, businesses seeking agencies"
       }
     ],
     "opportunities": [],
@@ -1309,17 +1549,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-01-04T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "secondaryEmail": "sponsorship@designrush.co",
+    "aiSummary": "DesignRush is an industry platform that ranks agencies, hosts awards, and provides valuable content on marketing and agency operations. For Jahan Taila at Derby Digital, this contact represents an opportunity for industry visibility, potential awards, and staying informed on broader marketing trends relevant to their digital marketing services for restaurants."
   },
   {
     "id": "5",
     "firstName": "Craig",
     "lastName": "Offutt",
     "email": "offuttcraig@yahoo.com",
-    "company": "",
+    "company": "C&C Concerns Inc. / DMC / Reliable Services",
     "website": "https://fabianalexdesigns.co.tz",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "client",
+    "tags": [
+      "web development",
+      "lead generation",
+      "Google My Business"
+    ],
     "relationshipScore": 100,
     "interactions": [
       {
@@ -1613,7 +1859,29 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-4-0",
+        "content": "Craig is an existing client, actively working with Jahan Taila on 'lakereliableservices.com' and potentially other sites.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-4-1",
+        "content": "He seems to be having issues with website functionality (leads, access, reviews) and requires support.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-4-2",
+        "content": "Craig is forwarding emails and actively communicating, indicating engagement and a need for ongoing assistance.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "6ba14b17e3bb",
@@ -1626,6 +1894,30 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "category": "contact",
         "label": "Address",
         "value": "16 Jamaica Ave\r"
+      },
+      {
+        "id": "aif-4-2",
+        "category": "business",
+        "label": "Current Website Project",
+        "value": "lakereliableservices.com"
+      },
+      {
+        "id": "aif-4-3",
+        "category": "contact",
+        "label": "Phone Number",
+        "value": "314-616-0794"
+      },
+      {
+        "id": "aif-4-4",
+        "category": "business",
+        "label": "Email Frequency",
+        "value": "Frequent (29 total, several recent)"
+      },
+      {
+        "id": "aif-4-5",
+        "category": "business",
+        "label": "Service Needs",
+        "value": "Website troubleshooting, lead management, GMB access, reviews"
       }
     ],
     "opportunities": [],
@@ -1636,17 +1928,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-02-08T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Craig Offutt is an active client of Jahan Taila at Derby Digital, currently working on 'lakereliableservices.com' and experiencing various website and digital marketing issues. He frequently communicates seeking assistance with lead generation, website access, and reviews, indicating a need for ongoing support and potentially further digital marketing services."
   },
   {
     "id": "6",
     "firstName": "Rory",
     "lastName": "Galligan",
     "email": "amaondowning@gmail.com",
-    "company": "",
+    "company": "Big Daddy's Crab Shack Vodka and Oyste",
     "website": "https://email.eastemails.amarawbar.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "client",
+    "tags": [
+      "SMS marketing",
+      "A2P compliance",
+      "restaurant"
+    ],
     "relationshipScore": 100,
     "interactions": [
       {
@@ -1660,7 +1957,27 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       },
       {
+        "id": "email-116-0",
+        "type": "email",
+        "date": "2026-03-11",
+        "summary": "A2P Campaign Registration Status Update - Big Daddy's Crab Shack Vodka and Oyster Bar",
+        "subject": "A2P Campaign Registration Status Update - Big Daddy's Crab Shack Vodka and Oyster Bar",
+        "details": "Hello,\r\n\r\nThis is a no-reply email. If you have any questions, please reach out to our support team.\r\n\r\nYour A2P Campaign Registration Status for the below location has a new update.\r\n\r\nLocation Name: Big Daddy's Crab Shack Vodka and Oyster Bar\r\n\r\nLocationID: UcUwxa64T9jt2VFHDpRE\r\n\r\nYour A2P Campaign is approved.",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
         "id": "email-184-1",
+        "type": "email",
+        "date": "2026-03-02",
+        "summary": "A2P Campaign Registration Status Update - Big Daddy's Crab Shack Vodka and Oyster Bar",
+        "subject": "A2P Campaign Registration Status Update - Big Daddy's Crab Shack Vodka and Oyster Bar",
+        "details": "Hello,\r\n\r\nThis is a no-reply email. If you have any questions, please reach out to our support team.\r\n\r\nYour A2P Campaign Registration Status for the below location has a new update.\r\n\r\nLocation Name: Big Daddy's Crab Shack Vodka and Oyster Bar\r\n\r\nLocationID: UcUwxa64T9jt2VFHDpRE\r\n\r\nYour A2P Campaign verification has failed. Please log in to your account and visit the Trust Center page for this location to\r\ncheck the failure reason",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-116-1",
         "type": "email",
         "date": "2026-03-02",
         "summary": "A2P Campaign Registration Status Update - Big Daddy's Crab Shack Vodka and Oyster Bar",
@@ -1690,7 +2007,87 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       },
       {
+        "id": "email-116-2",
+        "type": "email",
+        "date": "2026-02-25",
+        "summary": "Non-compliant Messaging Activity for your sub-account on Wed Feb 25 2026 18:55:29 GMT+0000 (Coordinated Universal Time): Wu Zhao - Temporary Restriction",
+        "subject": "Non-compliant Messaging Activity for your sub-account on Wed Feb 25 2026 18:55:29 GMT+0000 (Coordinated Universal Time): Wu Zhao - Temporary Restriction",
+        "details": "Hi Derby Digital Team,\r\n\r\nThese are no-reply emails, this information is for your consumption to make sure the sub-account is following the SMS best\r\npractices. Replying to these emails will create a ticket but it will be auto-closed with an automated response.\r\n\r\nYou are registered as an admin/owner contact on HighLevel and are receiving email notifications on all updates as requested.\r\n\r\nWe have temporarily restricted SMS sending capabilities for the below sub-account(location) due to continued non-compliant\r\nmessaging activity :\r\n\r\nLocation Name: Wu Zhao\r\n\r\nLocationID: 2m24a7VBKH1GIHBjMv7a\r\n\r\nLocation Email: zhaobentonville@gmail.com\r\n\r\nOpt-Out Rate: 4.69%\r\n\r\nError Rate: 0%\r\n\r\nA High Opt-Out Rate indicates that contacts receiving messages have objected, generated complaints or marked your SMS as spam. A\r\ngood opt-out rate is typically in the range of 0\u20142.0%.\r\n\r\nA High Delivery Error Rate indicates that SMS sent to contacts are no longer in service, are unreachable, or use a non-SMS capable\r\ndevice such as a landline. This may also mean that external carrier filters are refusing to deliver your SMS due to bad sending\r\nbehaviour in the past. A good error rate is typically in the range of 0\u20146.0%.\r\n\r\nWhat should you do now?\r\n\r\nTo avoid future restrictions on the SMS capabilities, make sure to review recent campaigns, workflows and/or bulk messages sent\r\nfrom the sub-account mentioned and make relevant changes ASAP:\r\n\r\n 1. Ensure all upcoming SMS to new contacts have the Opt-out language and sender information. You can enable the same using the\r\n    changelog here [https://email.mg.msgsndr.biz/c/eJxskUGPnDwMhn8NuYFCIEAOOXyjr9OtVttT2-vIxAa8DQkKgWr666tZ9dCV9mbZ0qvHz-tujPZ_833yx7efX7X-dHnRfKFnI9B2PegJBdm675Vsdd9IQSuwv-X7RjbBL0Hh5BTDSiHbLUU8XOYYxGJrmlrjqBtRkhob6sbBNaCoG9zQD8YItkqqTiql60HrRlb1ZAY0EgwqZXTXFq1c52rd5z1gqkb-Lbxdct72ovmvUNdCXReeF08n-cpBCPeKY6GuboEwk4_zY47r5hmCo3KngJQYSwhYxi2X8cilhzAfMFN5bAiZhI9vOtSqWuh_XJ6f6s9fni6vL2cPYqW8RLSwsQgx88QOHq_e9ngkRxY5kcvvT2-W_t2ILcWTkZL1BOhiCORyTCLZV1ggFK1ESuMdeeYMvjp28Tf9XUi2D84PIbN1cb19WOdp1Z8AAAD__8rrp-0].\r\n 2. Enable the number validation feature to avoid future SMS being sent to a non-SMS-capable device such as a landline. You can\r\n    enable the same using the changelog here [https://email.mg.msgsndr.biz/c/eJxskU2P1DAMQH9Nc2vVus2kOeTACIZFq-UEXEdu4mm95KNK06Lh1yNGHFhpr7b89PRsr-zMR_395vdvP79K-en8IvlMz1o4c1Iob06Q6ZSCdpCqbwUFZH8t95VMxl-C4sE5xUCxmDUnt9vCKYrFaKUG6MFOWupR6wFJnciOfQfQq64bBRto4dQCyG6Usm-b7qZHp1vUDkDL01ANbZibsM1bdLmZ-LfwZill3ar-QwWXCi4Lz4ung3xjMcZ7w6mCi10wzuTTXMGlUFhTxnyvXXT1hBu5OsU67mGiXB_o2eHD16dHBwgwoPpxfn7qPn95Or--HApFoLIkZ3BlEVPhG9vHzXVLe7ZkHGey5e3qkef_iVhzOthRNp7Q2RQj2ZKyyOYVF4zV0DrK093xzAV9s2_iH_0NpJi_nu9KFmNTuL77x8PAnwAAAP__9w-j4A].\r\n 3. Get the sub-account registered with A2P if sending to US numbers. You can refer to the changelog here\r\n    [https://email.mg.msgsndr.biz/c/eJxskcuK3DAQRb_G2tnI1ZYfCy3SJJ0Jw2SVZNuopbKtiV5IZYfO1wcPWcxA7y5VcOtwSl-tkZ-nn7Pbfvz-LsSX84uwZ3yemJH9oMRsGMp2GIB3Yjhxhl5Zd",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-116-3",
+        "type": "email",
+        "date": "2026-02-25",
+        "summary": "Non-compliant Messaging Activity for your sub-account on Wed Feb 25 2026 18:55:28 GMT+0000 (Coordinated Universal Time): Wu Zhao - Warning",
+        "subject": "Non-compliant Messaging Activity for your sub-account on Wed Feb 25 2026 18:55:28 GMT+0000 (Coordinated Universal Time): Wu Zhao - Warning",
+        "details": "Hi Derby Digital Team,\r\n\r\nThese are no-reply emails, this information is for your consumption to make sure the sub-account is following the SMS best\r\npractices. Replying to these emails will create a ticket but it will be auto-closed with an automated response.\r\n\r\nYou are registered as an admin/owner contact on HighLevel and are receiving email notifications on all updates as requested.\r\n\r\nWe are seeing non-compliant messaging activity for one of your sub-account(location):\r\n\r\nLocation Name: Wu Zhao\r\n\r\nLocationID: 2m24a7VBKH1GIHBjMv7a\r\n\r\nLocation Email: zhaobentonville@gmail.com\r\n\r\nOpt-Out Rate: 4.69%\r\n\r\nError Rate: 0%\r\n\r\nA High Opt-Out Rate indicates that contacts receiving messages have objected, generated complaints or marked your SMS as spam. A\r\ngood opt-out rate is typically in the range of 0\u20142.0%.\r\n\r\nA High Delivery Error Rate indicates that SMS sent to contacts are no longer in service, are unreachable, or use a non-SMS capable\r\ndevice such as a landline. This may also mean that external carrier filters are refusing to deliver your SMS due to bad sending\r\nbehaviour in the past. A good error rate is typically in the range of 0\u20146.0%.\r\n\r\nWhat should you do now?\r\n\r\nTo avoid future restrictions on the SMS capabilities, make sure to review recent campaigns, workflows and/or bulk messages sent\r\nfrom the sub-account mentioned and make relevant changes ASAP:\r\n\r\n 1. Ensure all upcoming SMS to new contacts have the Opt-out language and sender information. You can enable the same using the\r\n    changelog here [https://email.mg.msgsndr.biz/c/eJxskcGOmzAQhp8G30DEYCAHHxq16Var7antNZp4Bpit8VjGUKVPX2XVw66U22hG-vXN97sLo_18_Dn67cfv78Z8Ob0YPtHzUaHtejAjKrKHvtd1a3o9KFqA_SXfItkEfxSFnZOEhUK2MQluLrMENdvuUIMb4doYTca1A9bQm45Mq50Z-muj2Opad7XW5jAYo4eq6ca6wYHGrmnx2GDR1stULeu0BkzVlf8qb-ec41o0nwp9LvR55mn2tJOvHIRwq1gKfXYzhIm8TPdZlugZgqNypYCUGEsIWErMpWy59BCmDSYqt4iQSXl506EX3UL_6_T8dPj67en0-rL3oBbKs6CFyCpI5pEd3F-9rLIlRxY5kcsfT2-W3m9UTLIzUrKeAJ2EQC5LUsm-wgyhaGukdL0hT5zBV9uq_qd_CMn2zvkQMlsny-VhnbvV_wIAAP__mp6n2g].\r\n 2. Enable the number validation feature to avoid future SMS being sent to a non-SMS-capable device such as a landline. You can\r\n    enable the same using the changelog here [https://email.mg.msgsndr.biz/c/eJxskU2P1DAMQH9Nc2uVpk0_DjkwgmHRajkB15Ebu62XfFRpWjT8esSIAyvt1Zafnp7tjdF8HL_P7vj286vWny4vmi_0PAo0XQ96RkGm7nslW92rQZAHdrd838gk-CUonJxi8BSy2VLEw2aOQaymQW01qGnqZilJjqOyQPM0DnXb9rOtBRslVSeV0vWgtRqqpptlgwPNXdPi2GDRSr9Ufl_2gKma-LdwZs1524vmQ6GuhbquvKyOTnKVhRDuFcdCXe0KYSEXl0JdM_ktJkj3EgOWE-yEZQxlOPxEqTzBMcLD18VHB-VVC_2Py_NT_fnL0-X15exBeMprRAMbixAzz2wfN7c9HsmSQU5k89vVI8__E7GleDJSMo4AbQyBbI5JJPMKK4SilUhpuiMvnMFVxy7-0d9Asvnr-a5kNjb627t_PI36EwAA__-Q8KWq].\r\n 3. Get the sub-account registered with A2P if sending to US numbers. You can refer to the changelog here\r\n    [https://email.mg.msgsndr.biz/c/eJxskcuOnDoQhp8G70BQYKAXXpzWSWei0WSVZNvypQBPfJNdEHWePmKURUaa3a8q6a9PX-m7NeL_y_fF7d9-fuX80_WF2ys-X5gR4yT5YhiKbpqgHfgEM0MvrbvTI6HI8hfDcNgcg8dAIuVodk02BrYJ3l40jMrITulBTWpEqZTsx0GOA-8nxay",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-116-4",
+        "type": "email",
+        "date": "2026-02-09",
+        "summary": "TEST",
+        "subject": "TEST",
+        "details": "TEST EMAIL",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-129-0",
+        "type": "email",
+        "date": "2026-02-06",
+        "summary": "Mayfly Menu Winter 25/26",
+        "subject": "Mayfly Menu Winter 25/26",
+        "details": "",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-129-1",
+        "type": "email",
+        "date": "2026-02-04",
+        "summary": "Mayfly Brunch Menu Winter 25/26",
+        "subject": "Mayfly Brunch Menu Winter 25/26",
+        "details": "",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-129-2",
+        "type": "email",
+        "date": "2026-02-04",
+        "summary": "Mayfly Menu Winter 26/26",
+        "subject": "Mayfly Menu Winter 26/26",
+        "details": "",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-116-5",
+        "type": "email",
+        "date": "2026-02-01",
+        "summary": "Ama Raw Bar - East & West Village Specials",
+        "subject": "Ama Raw Bar - East & West Village Specials",
+        "details": "Hey Jahan!\r\n\r\nAttached here are the two specials for the East & West Village locations.\r\nI'm thinking maybe we can add it next to the menus under the \"Menu\" tab for\r\neach location.\r\n\r\nBest,\r\nCarly",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
         "id": "email-184-4",
+        "type": "email",
+        "date": "2026-01-29",
+        "summary": "A2P Campaign Registration Status Update - Big Daddy's Crab Shack Vodka and Oyster Bar",
+        "subject": "A2P Campaign Registration Status Update - Big Daddy's Crab Shack Vodka and Oyster Bar",
+        "details": "Hello,\r\n\r\nThis is a no-reply email. If you have any questions, please reach out to our support team.\r\n\r\nYour A2P Campaign Registration Status for the below location has a new update.\r\n\r\nLocation Name: Big Daddy's Crab Shack Vodka and Oyster Bar\r\n\r\nLocationID: UcUwxa64T9jt2VFHDpRE\r\n\r\nYour A2P Campaign verification has failed. Please log in to your account and visit the Trust Center page for this location to\r\ncheck the failure reason",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-116-6",
         "type": "email",
         "date": "2026-01-29",
         "summary": "A2P Campaign Registration Status Update - Big Daddy's Crab Shack Vodka and Oyster Bar",
@@ -1721,6 +2118,36 @@ export const SEED_CONTACTS: RolodexContact[] = [
       },
       {
         "id": "email-184-7",
+        "type": "email",
+        "date": "2026-01-28",
+        "summary": "Non-compliant Messaging Activity for your sub-account on Wed Jan 28 2026 17:31:13 GMT+0000 (Coordinated Universal Time): Ama Raw Bar -- EAST - Temporary Restriction",
+        "subject": "Non-compliant Messaging Activity for your sub-account on Wed Jan 28 2026 17:31:13 GMT+0000 (Coordinated Universal Time): Ama Raw Bar -- EAST - Temporary Restriction",
+        "details": "Hi Derby Digital Team,\r\n\r\nThese are no-reply emails, this information is for your consumption to make sure the sub-account is following the SMS best\r\npractices. Replying to these emails will create a ticket but it will be auto-closed with an automated response.\r\n\r\nYou are registered as an admin/owner contact on HighLevel and are receiving email notifications on all updates as requested.\r\n\r\nWe have temporarily restricted SMS sending capabilities for the below sub-account(location) due to continued non-compliant\r\nmessaging activity :\r\n\r\nLocation Name: Ama Raw Bar -- EAST\r\n\r\nLocationID: iRSLyv1lGe7349zmD1Mx\r\n\r\nLocation Email: amarawbar@gmail.com\r\n\r\nOpt-Out Rate: 4.33%\r\n\r\nError Rate: 0%\r\n\r\nA High Opt-Out Rate indicates that contacts receiving messages have objected, generated complaints or marked your SMS as spam. A\r\ngood opt-out rate is typically in the range of 0\u20142.0%.\r\n\r\nA High Delivery Error Rate indicates that SMS sent to contacts are no longer in service, are unreachable, or use a non-SMS capable\r\ndevice such as a landline. This may also mean that external carrier filters are refusing to deliver your SMS due to bad sending\r\nbehaviour in the past. A good error rate is typically in the range of 0\u20146.0%.\r\n\r\nWhat should you do now?\r\n\r\nTo avoid future restrictions on the SMS capabilities, make sure to review recent campaigns, workflows and/or bulk messages sent\r\nfrom the sub-account mentioned and make relevant changes ASAP:\r\n\r\n 1. Ensure all upcoming SMS to new contacts have the Opt-out language and sender information. You can enable the same using the\r\n    changelog here [https://email.eastemails.amarawbar.com/c/eJxskb9u3DAMh5_G2mzYss53GjQ0SK9Dmw79Mx8okWezlUVDlp1en77IoUMCZCNI4MePH8OF0T3an9e4_fj99XD4-PB04Af6bBW6YE3rj4pcdxzsoDs7GEUzcLyU20Iuw7OitHOWNFMqbsmCWygsSU3OEmoYTHfobRv0SfsBbWe878l4bC0pdrrVQ9vpU3fsrTaN73vE03U4eR26_moq0xKs5b5wbWCGDM8echNkVtFNpSxr1X-o9LnS54nHKdJOsQmQ0q1hqfQ5TJBGijK-1DIvkSEFqldKSJmxhoS1LKWWrdQR0rjBSPW2IBRSUe5i-Nv3L7e9i5_o2Bv7d37snv6omcok6GBhlaTwlQO8HH1ZZcuBHHKmUN6O7r5ed9SSZWek7CIBBkmJQpGssvsFE6TKtEjZ35BHLhCbbVX_09-EFHfnfA-yuCDz5d3H7k7_CwAA__9ZyK06].\r\n 2. Enable the number validation feature to avoid future SMS being sent to a non-SMS-capable device such as a landline. You can\r\n    enable the same using the changelog here [https://email.eastemails.amarawbar.com/c/eJxskcuOnDAQRb8G70D4Ad1eeJHRpLNIJos81q3CLqASP5AxTMjXR0JZzEi9rVLdOjrX3smZZ_1z9NuP31-77uPTS0dP-FkzZ6xW7XBhaPil173gulcMA5C_l2NBk-GVYdwppxgwFrPk5DZbKEU2m1FwVE71XYtXq6RsHaieC4kau1ZrxciIVvQtF1d-kVqoZpDSuevYXwdhuRxVpVqEtZwP1wYCZHgdIDc2BebNXMqyVvJDJW6VuM00zR539I2FGI-GUiVudoY4oU9TJW4Fw5Iy5KN20dUDrOjqFOu4hQFzvYMnBye5T6cR-vb9y7Fz_wkvUum_4Zm__GEBy5ycgYVYTIVGsufNfU1btmgcZbTl_eoU9XbClpx2cpiNR3A2xYi2pMyy-QUzxEq1DvNwOJqogG-2lf1PfxdSzMn5CLIYm8L9YaO7Ef8CAAD__9Z9qhw].\r\n 3. Get the sub-account registered with A2P if sending to US numbers. You can refer to the changelog here\r\n    [https://email.eastemails.amarawbar.com/c/eJxskU2P3CwQhH-NudnCDf46cHhX-04OyeaQj_MIQ3tMggFB25vJr488yiEr7a3U3ap6VG2uzqr",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-116-7",
+        "type": "email",
+        "date": "2026-01-28",
+        "summary": "Non-compliant Messaging Activity for your sub-account on Wed Jan 28 2026 17:31:12 GMT+0000 (Coordinated Universal Time): Ama Raw Bar -- EAST - Temporary Restriction",
+        "subject": "Non-compliant Messaging Activity for your sub-account on Wed Jan 28 2026 17:31:12 GMT+0000 (Coordinated Universal Time): Ama Raw Bar -- EAST - Temporary Restriction",
+        "details": "Hi Derby Digital Team,\r\n\r\nThese are no-reply emails, this information is for your consumption to make sure the sub-account is following the SMS best\r\npractices. Replying to these emails will create a ticket but it will be auto-closed with an automated response.\r\n\r\nYou are registered as an admin/owner contact on HighLevel and are receiving email notifications on all updates as requested.\r\n\r\nWe have temporarily restricted SMS sending capabilities for the below sub-account(location) due to continued non-compliant\r\nmessaging activity :\r\n\r\nLocation Name: Ama Raw Bar -- EAST\r\n\r\nLocationID: iRSLyv1lGe7349zmD1Mx\r\n\r\nLocation Email: amarawbar@gmail.com\r\n\r\nOpt-Out Rate: 4.4%\r\n\r\nError Rate: 0%\r\n\r\nA High Opt-Out Rate indicates that contacts receiving messages have objected, generated complaints or marked your SMS as spam. A\r\ngood opt-out rate is typically in the range of 0\u20142.0%.\r\n\r\nA High Delivery Error Rate indicates that SMS sent to contacts are no longer in service, are unreachable, or use a non-SMS capable\r\ndevice such as a landline. This may also mean that external carrier filters are refusing to deliver your SMS due to bad sending\r\nbehaviour in the past. A good error rate is typically in the range of 0\u20146.0%.\r\n\r\nWhat should you do now?\r\n\r\nTo avoid future restrictions on the SMS capabilities, make sure to review recent campaigns, workflows and/or bulk messages sent\r\nfrom the sub-account mentioned and make relevant changes ASAP:\r\n\r\n 1. Ensure all upcoming SMS to new contacts have the Opt-out language and sender information. You can enable the same using the\r\n    changelog here [https://email.eastemails.amarawbar.com/c/eJxskc-OnDAMh5-G3EAkECCHHLraTg_t9tA_55EnNuA2JCgEttOnrxb1sCvtzbKlnz9_dldG-2h-jn7_8fur1h8fnjQ_0Gcj0DrT1rdekJV9ZzolTacFLcD-mu8r2QTPgsLBKYaFQrZriri7zDGI2UqtWkQcqGu0023XkAbEsSNqzDgMWrBVtepqqQbZN0bpSg7SUQ9amttAOHZFWxNs-Vy4VbBAgucbpMrFRXg757xuRfOhUJdCXWaeZk8H-cpBCPeKY6EuboYwkY_TSx2X1TMER-VGASkxlhCwjGsu455LD2HaYaJyXxEyCR9PMfzt-5f7If0n6pvW_F0e5dMfsVCeI1pYWYSYeWQHL0dft7gnRxY5kctvR6ev1x2xpngwUrKeAF0MgVyOSST7C2YIRVsjpdsdeeIMvto38T_9TUi2J-d7kNm6uFzffexh1b8AAAD__9hJrY0].\r\n 2. Enable the number validation feature to avoid future SMS being sent to a non-SMS-capable device such as a landline. You can\r\n    enable the same using the changelog here [https://email.eastemails.amarawbar.com/c/eJxskbuO3DAMRb_G6mxYGj9GhYosNpMi2RR51ANaom0mkmjIsjfO1wcwUuwC05Lg5cG59k7OPOufo99-_P7ath-fXlp6ws9aOGN1Uw-9QCP7TndK6q4VGID8PR8LmgSvAuNOiWPAmM2S2G02E0cxG9mMemw626Oqr_riNMhmHGQr22aQvZKCjKpVV0t1lf1Fq7aSV2mxh1bq4Ypu7IqmRljz-XCtIECC1wFSZTkIb-acl7W4fCjUrVC3mabZ446-shDjUREX6mZniBN6ngp1yxgWTpCO0kVXDrCiKzmWcQsDpnIHTw5Ocs-nEfr2_cuxS_8J-0uj_4Zn-fJHBMwzOwMLiciZRrLnzX3lLVk0jhLa_H51ino7EUvinRwm4xGc5RjRZk4imV8wQyya2mEaDkcTZfDVtor_6e9Csjk5H0FmYzncHza6G_UvAAD__97IqiQ].\r\n 3. Get the sub-account registered with A2P if sending to US numbers. You can refer to the changelog here\r\n    [https://email.eastemails.amarawbar.com/c/eJxskT-PnDAQxT8N7kDYiwEXLnK6bIrkUuRPvRrsYXFibMseuGw-fcQqxZ203dPM6L2f3piLs_pZ_",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-116-8",
+        "type": "email",
+        "date": "2026-01-28",
+        "summary": "Non-compliant Messaging Activity for your sub-account on Wed Jan 28 2026 17:31:09 GMT+0000 (Coordinated Universal Time): Ama Raw Bar -- EAST - Warning",
+        "subject": "Non-compliant Messaging Activity for your sub-account on Wed Jan 28 2026 17:31:09 GMT+0000 (Coordinated Universal Time): Ama Raw Bar -- EAST - Warning",
+        "details": "Hi Derby Digital Team,\r\n\r\nThese are no-reply emails, this information is for your consumption to make sure the sub-account is following the SMS best\r\npractices. Replying to these emails will create a ticket but it will be auto-closed with an automated response.\r\n\r\nYou are registered as an admin/owner contact on HighLevel and are receiving email notifications on all updates as requested.\r\n\r\nWe are seeing non-compliant messaging activity for one of your sub-account(location):\r\n\r\nLocation Name: Ama Raw Bar -- EAST\r\n\r\nLocationID: iRSLyv1lGe7349zmD1Mx\r\n\r\nLocation Email: amarawbar@gmail.com\r\n\r\nOpt-Out Rate: 4.33%\r\n\r\nError Rate: 0%\r\n\r\nA High Opt-Out Rate indicates that contacts receiving messages have objected, generated complaints or marked your SMS as spam. A\r\ngood opt-out rate is typically in the range of 0\u20142.0%.\r\n\r\nA High Delivery Error Rate indicates that SMS sent to contacts are no longer in service, are unreachable, or use a non-SMS capable\r\ndevice such as a landline. This may also mean that external carrier filters are refusing to deliver your SMS due to bad sending\r\nbehaviour in the past. A good error rate is typically in the range of 0\u20146.0%.\r\n\r\nWhat should you do now?\r\n\r\nTo avoid future restrictions on the SMS capabilities, make sure to review recent campaigns, workflows and/or bulk messages sent\r\nfrom the sub-account mentioned and make relevant changes ASAP:\r\n\r\n 1. Ensure all upcoming SMS to new contacts have the Opt-out language and sender information. You can enable the same using the\r\n    changelog here [https://email.eastemails.amarawbar.com/c/eJxskT1v3DAMhn-NtdmwJX-cBg0N0uvQpkM_5gMt8my2smjIstPrry9y6JAA2QgSePnwob8wukf78xr2H7-_dt3Hh6eOH-izVei8betxUOSaobe9bmzfKlqAwyXfVnIJnhXFg5PEhWJ2axLcfWaJana61VjbptPdiN6A7RrTDuNowHSjP12vip2udV83-tQMxuq2ak7kkcYaTN-bk8GirQm2fF-4VbBAgucRUuVlUcHNOa9bYT4U-lzo88zTHOigUHmI8VaxFPrsZ4gTBZlealnWwBA9lRtFpMRYQsRS1lzKnssAcdphonJfETKpIHcx_O37l9vRhE80mNb-XR6bpz9qoTwLOlhZRcl8ZQ8vR1822ZMnh5zI57eju6_XHbUmORgpuUCAXmIknyWp5H7BDLFoa6Q03pAnzhCqfVP_09-EZHfnfA8yOy_L5d3HHk7_CwAA__9DFq0u].\r\n 2. Enable the number validation feature to avoid future SMS being sent to a non-SMS-capable device such as a landline. You can\r\n    enable the same using the changelog here [https://email.eastemails.amarawbar.com/c/eJxskT2PnDAQhn8N7kDYsAYXLnK6bIrkUuSjXo3tYZnEH8gYLuTXR0Ip7qRtZzTvPHpeeyOnn9XPyW8_fn-9XD4-vVzoCT8r5rRVfWsGhpoPUknBlewZBiB_K8eCOsMrw7hTTjFgLHrJyW22UIps1q0w3Fo-jWriYC5KjkrCyKde2F4NrWSkRStky8XIh06JvuEjWoemhU7Kbuxc1bcIazkfrg0EyPBqIDc2Beb1XMqyVt2HSlwrcZ3pPnvc0TcWYjwaSpW42hniHX26V-JaMCwpQz5qF11tYEVXp1jHLRjM9Q6eHJzkPp1G6Nv3L8fO_Sccul79Dc_85Q8LWObkNCzEYio0kT1vbmvaskXtKKMt71enqLcTtuS0k8OsPYKzKUa0JWWW9S-YIVZ96zCbw9GdCvhmW9n_9HchRZ-cjyCLtincHja6a_EvAAD__yuVqlI].\r\n 3. Get the sub-account registered with A2P if sending to US numbers. You can refer to the changelog here\r\n    [https://email.eastemails.amarawbar.com/c/eJxskc-O3CwQxJ_G3GwBxtg-cPhW-00OyeaQP-dRD_SMSTAgaHszefrIoxyy0t5K3a2qn6rt2TvzPH-_hu3bz8_D8P_Ty-Cf8OPMnLGz4peRoRGjnrUUs1YMV_DhTPeMpsArw7",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-116-9",
         "type": "email",
         "date": "2026-01-28",
         "summary": "Non-compliant Messaging Activity for your sub-account on Wed Jan 28 2026 17:31:13 GMT+0000 (Coordinated Universal Time): Ama Raw Bar -- EAST - Temporary Restriction",
@@ -1770,6 +2197,56 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       },
       {
+        "id": "email-116-10",
+        "type": "email",
+        "date": "2026-01-27",
+        "summary": "Temporary Restriction : Messaging Limit Reached on Tue Jan 27 2026 23:14:47 GMT+0000 (Coordinated Universal Time): Ama Raw Bar -- EAST",
+        "subject": "Temporary Restriction : Messaging Limit Reached on Tue Jan 27 2026 23:14:47 GMT+0000 (Coordinated Universal Time): Ama Raw Bar -- EAST",
+        "details": "Hi Derby Digital Team,\r\n\r\nThis is a no-reply email, and the information provided is for your reference. Replying to this email will create a ticket, but it\r\nwill be auto-closed with an automated response.\r\n\r\nThis email is to inform you that your sub-account has temporarily had its SMS sending capabilities restricted due to reaching the\r\nmessaging limit. Below are the details:\r\n\r\nLocation Name: Ama Raw Bar -- EAST\r\n\r\nLocationID: iRSLyv1lGe7349zmD1Mx\r\n\r\nLocation Email: amarawbar@gmail.com\r\n\r\nMessaging Limit: 100\r\n\r\nWhy This Happened\r\n\r\nThe restriction has been applied because your sub-account has reached the messaging limit for SMS messages.\r\n\r\nTo restore SMS sending capabilities, please ask your agency admin/owner to increase your messaging limit to accommodate higher\r\nmessaging volumes. SMS sending capabilities will automatically reset at Wed Jan 28 2026 23:14:46 GMT+0000 (Coordinated Universal\r\nTime).\r\n\r\nFor further details, refer to the guidelines\r\n[https://email.eastemails.amarawbar.com/c/eJxsksuO2yAYhZ_G7Bxxsx0WLDqdpotOqlEv64jAH_tvMSDAnqZPX9mqqo40uyM-dPh0hL2g04_q-80v335-7roPD-cOH-CTIk5bJel1IKDZ0Kuu6_rjQGA26C_1nkBn80IgrJhjmCFUnXJ0i60YA5l011suHeO3jlrFLR0GAcJQwfrO3WxPCWpOeU8ZH7hgUg6HQRrRq-tRUeuEkqqRFEyp-4PlYGaTzcvV5IONM_F6qjWVRrxr-Knhpwl8OoxxwnHysILfLjX8VJaUYq5bin7ZzErDTyZXtB62KI-UMs6Ekqz1tk1TDNDOUIoZMYxtih7tveHi6X3bts87Pf-jzzslPu4b4pevT_eV-Y8wCKl-z4_s_IvMUKfotElIQqx4Q2s2i0uJS7agHWaw9TXap_3_hKQcV3SQtQfjbAwBbI2ZZP3DTCY0kjrI17vDEavxh6WQv-2vSqrePd-SrNrG-fLmH1g1_xMAAP__GgO5Fg] in the\r\nlinks provided or contact us for assistance.\r\n\r\nThanks",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-116-11",
+        "type": "email",
+        "date": "2026-01-27",
+        "summary": "Temporary Restriction : Messaging Limit Reached on Tue Jan 27 2026 23:14:46 GMT+0000 (Coordinated Universal Time): Ama Raw Bar -- EAST",
+        "subject": "Temporary Restriction : Messaging Limit Reached on Tue Jan 27 2026 23:14:46 GMT+0000 (Coordinated Universal Time): Ama Raw Bar -- EAST",
+        "details": "Hi Derby Digital Team,\r\n\r\nThis is a no-reply email, and the information provided is for your reference. Replying to this email will create a ticket, but it\r\nwill be auto-closed with an automated response.\r\n\r\nThis email is to inform you that your sub-account has temporarily had its SMS sending capabilities restricted due to reaching the\r\nmessaging limit. Below are the details:\r\n\r\nLocation Name: Ama Raw Bar -- EAST\r\n\r\nLocationID: iRSLyv1lGe7349zmD1Mx\r\n\r\nLocation Email: amarawbar@gmail.com\r\n\r\nMessaging Limit: 100\r\n\r\nWhy This Happened\r\n\r\nThe restriction has been applied because your sub-account has reached the messaging limit for SMS messages.\r\n\r\nTo restore SMS sending capabilities, please ask your agency admin/owner to increase your messaging limit to accommodate higher\r\nmessaging volumes. SMS sending capabilities will automatically reset at Wed Jan 28 2026 23:14:46 GMT+0000 (Coordinated Universal\r\nTime).\r\n\r\nFor further details, refer to the guidelines\r\n[https://email.eastemails.amarawbar.com/c/eJxsks-OnSAchZ9GdhpBEFmw6HR6u-jcZtI_6xuEn0qLQACd3j59o2maTjK7Ez5y-HKCvlkjH8X3yW3ffn5m7MPDldkH-CSQkVrQduQIJOa9YIz1A0ewKutu5R5BJvWCwO82Bb-CLzKmYDZdbPBokWPPYdI9GwY9tYyLAQbFBcWMjLTrzYSsJC3pW0w46TClvBmJNoYbPYoWMy66iragcjkfzI1aVVIvo0qNDitycikl5qp7V5FLRS4LuNjMYbHz4mAHd1yqyCVvMYZUjhTcdpjlilxUKlY7OCId2hYT3AmKa6fruAQP9Qo5q9n6uY7BWX2vSPf0vq7r55Ne_9HnkyIXzg3tl69P9x27j8A7Kn6vj_j6C61QlmCkihb5UOxktTosbjlsSYM0NoEur9E57f8nKKawWwNJOlBGB-9Bl5BQkj_UonxFWwNpvBs726Jcs2X0t_1VSZGn51uSReqw3t78A7skfwIAAP__jJi59A] in the\r\nlinks provided or contact us for assistance.\r\n\r\nThanks",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-116-12",
+        "type": "email",
+        "date": "2026-01-27",
+        "summary": "A2P Campaign Registration Status Update - Big Daddy's Crab Shack Vodka and Oyster Bar",
+        "subject": "A2P Campaign Registration Status Update - Big Daddy's Crab Shack Vodka and Oyster Bar",
+        "details": "Hello,\r\n\r\nThis is a no-reply email. If you have any questions, please reach out to our support team.\r\n\r\nYour A2P Campaign Registration Status for the below location has a new update.\r\n\r\nLocation Name: Big Daddy's Crab Shack Vodka and Oyster Bar\r\n\r\nLocationID: UcUwxa64T9jt2VFHDpRE\r\n\r\nYour A2P Campaign has been submitted for review.",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-116-13",
+        "type": "email",
+        "date": "2026-01-27",
+        "summary": "A2P Brand Registration Status Update - Big Daddy's Crab Shack Vodka and Oyster Bar",
+        "subject": "A2P Brand Registration Status Update - Big Daddy's Crab Shack Vodka and Oyster Bar",
+        "details": "Hello,\r\n\r\nThis is a no-reply email. If you have any questions, please reach out to our support team.\r\n\r\nYour A2P Brand Registration Status for the below location has a new update.\r\n\r\nLocation Name: Big Daddy's Crab Shack Vodka and Oyster Bar\r\n\r\nLocationID: UcUwxa64T9jt2VFHDpRE\r\n\r\nYour Brand registration has been approved.",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-116-14",
+        "type": "email",
+        "date": "2026-01-05",
+        "summary": "Menus",
+        "subject": "Menus",
+        "details": "",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
         "id": "email-184-12",
         "type": "email",
         "date": "2025-11-29",
@@ -1790,6 +2267,26 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       },
       {
+        "id": "email-116-15",
+        "type": "email",
+        "date": "2025-11-29",
+        "summary": "A2P Campaign Registration Status Update - Juke Bar -- BUSHWICK",
+        "subject": "A2P Campaign Registration Status Update - Juke Bar -- BUSHWICK",
+        "details": "Hello,\r\n\r\nThis is a no-reply email. If you have any questions, please reach out to our support team.\r\n\r\nYour A2P Campaign Registration Status for the below location has a new update.\r\n\r\nLocation Name: Juke Bar -- BUSHWICK\r\n\r\nLocationID: yJlAhqZYqWa6v8rzI6bZ\r\n\r\nYour A2P Campaign has been submitted for review.",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-116-16",
+        "type": "email",
+        "date": "2025-11-29",
+        "summary": "A2P Campaign Registration Status Update - Juke Bar -- EAST VILLAGE",
+        "subject": "A2P Campaign Registration Status Update - Juke Bar -- EAST VILLAGE",
+        "details": "Hello,\r\n\r\nThis is a no-reply email. If you have any questions, please reach out to our support team.\r\n\r\nYour A2P Campaign Registration Status for the below location has a new update.\r\n\r\nLocation Name: Juke Bar -- EAST VILLAGE\r\n\r\nLocationID: 5u4evLKOu5IFg42TBx9i\r\n\r\nYour A2P Campaign is approved.",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
         "id": "email-184-14",
         "type": "email",
         "date": "2025-11-28",
@@ -1800,7 +2297,37 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       },
       {
+        "id": "email-116-17",
+        "type": "email",
+        "date": "2025-11-28",
+        "summary": "A2P Campaign Registration Status Update - Juke Bar -- EAST VILLAGE",
+        "subject": "A2P Campaign Registration Status Update - Juke Bar -- EAST VILLAGE",
+        "details": "Hello,\r\n\r\nThis is a no-reply email. If you have any questions, please reach out to our support team.\r\n\r\nYour A2P Campaign Registration Status for the below location has a new update.\r\n\r\nLocation Name: Juke Bar -- EAST VILLAGE\r\n\r\nLocationID: 5u4evLKOu5IFg42TBx9i\r\n\r\nYour A2P Campaign has been submitted for review.",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-116-18",
+        "type": "email",
+        "date": "2025-11-26",
+        "summary": "Updated Menus",
+        "subject": "Updated Menus",
+        "details": "Hi Jahan!\r\n\r\nCan you please upload these respectively to the website? I have our Downing\r\n(west village) and east village menus here that have our new hours.\r\n\r\nThank you!\r\nCarly",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
         "id": "email-184-15",
+        "type": "email",
+        "date": "2025-11-13",
+        "summary": "A2P Campaign Registration Status Update - Juke Bar -- EAST VILLAGE",
+        "subject": "A2P Campaign Registration Status Update - Juke Bar -- EAST VILLAGE",
+        "details": "Hello,\r\n\r\nThis is a no-reply email. If you have any questions, please reach out to our support team.\r\n\r\nYour A2P Campaign Registration Status for the below location has a new update.\r\n\r\nLocation Name: Juke Bar -- EAST VILLAGE\r\n\r\nLocationID: 5u4evLKOu5IFg42TBx9i\r\n\r\nYour A2P Campaign verification has failed. Please log in to your account and visit the Trust Center page for this location to\r\ncheck the failure reason",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-116-19",
         "type": "email",
         "date": "2025-11-13",
         "summary": "A2P Campaign Registration Status Update - Juke Bar -- EAST VILLAGE",
@@ -1831,6 +2358,36 @@ export const SEED_CONTACTS: RolodexContact[] = [
       },
       {
         "id": "email-184-18",
+        "type": "email",
+        "date": "2025-11-12",
+        "summary": "A2P Campaign Registration Status Update - Juke Bar -- EAST VILLAGE",
+        "subject": "A2P Campaign Registration Status Update - Juke Bar -- EAST VILLAGE",
+        "details": "Hello,\r\n\r\nThis is a no-reply email. If you have any questions, please reach out to our support team.\r\n\r\nYour A2P Campaign Registration Status for the below location has a new update.\r\n\r\nLocation Name: Juke Bar -- EAST VILLAGE\r\n\r\nLocationID: 5u4evLKOu5IFg42TBx9i\r\n\r\nYour A2P Campaign verification has failed. Please log in to your account and visit the Trust Center page for this location to\r\ncheck the failure reason",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-116-20",
+        "type": "email",
+        "date": "2025-11-12",
+        "summary": "Temporary Restriction : Messaging Limit Reached on Wed Nov 12 2025 20:50:26 GMT+0000 (Coordinated Universal Time): Wu Zhao",
+        "subject": "Temporary Restriction : Messaging Limit Reached on Wed Nov 12 2025 20:50:26 GMT+0000 (Coordinated Universal Time): Wu Zhao",
+        "details": "Hi Derby Digital Team,\r\n\r\nThis is a no-reply email, and the information provided is for your reference. Replying to this email will create a ticket, but it\r\nwill be auto-closed with an automated response.\r\n\r\nThis email is to inform you that your sub-account has temporarily had its SMS sending capabilities restricted due to reaching the\r\nmessaging limit. Below are the details:\r\n\r\nLocation Name: Wu Zhao\r\n\r\nLocationID: 2m24a7VBKH1GIHBjMv7a\r\n\r\nLocation Email: zhaobentonville@gmail.com\r\n\r\nMessaging Limit: 100\r\n\r\nWhy This Happened\r\n\r\nThe restriction has been applied because your sub-account has reached the messaging limit for SMS messages.\r\n\r\nTo restore SMS sending capabilities, please ask your agency admin/owner to increase your messaging limit to accommodate higher\r\nmessaging volumes. SMS sending capabilities will automatically reset at Thu Nov 13 2025 20:50:26 GMT+0000 (Coordinated Universal\r\nTime).\r\n\r\nFor further details, refer to the guidelines\r\n[https://email.mg.msgsndr.biz/c/eJxskU-P0zAQxT9NfEtkT-P8OfhAgbJoKdoDcK1ce5LM4tiW4wSVT49SIcRKvT3NT3r66Y25kFUf-u-DW7_9_Crlx-NZ0hGfe2ZV02o5WIZKtA30HW-gYzhrcpd8i6iS_sXQb5SCn9FnFVOwq8kUPJvUdRBdN1ghuUAu26HlsufNIAGxH64gGSngIIUQAFxy6CrTQGMGYTvTYVvztqj5PFbzMi7epupKv5lTU85xKQ7vCjgVcJrQxWoME42Tww1dZcJcwGlZYwwp7ym4dfdZCjjplMk43GPdcS5AHPpalM6UcQoeyxmXRY_kxzIGR-ZWwOHL-7IsX-70_I--3Clz4b4czFDr9sfx-Ul8-vx0fD1vrWYz5ilYpSMxHzINZPRucVnCmgwqSwlNfovug_5_YTGFjSwm5VBbE7xHk0NiSb3qSfui5hbT9WZppKxdtS7sb_ubkqx2z4eSWZkwXx5-flPwJwAA___iFrR0] in the\r\nlinks provided or contact us for assistance.\r\n\r\nThanks",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-116-21",
+        "type": "email",
+        "date": "2025-11-12",
+        "summary": "Temporary Restriction : Messaging Limit Reached on Wed Nov 12 2025 20:50:27 GMT+0000 (Coordinated Universal Time): Wu Zhao",
+        "subject": "Temporary Restriction : Messaging Limit Reached on Wed Nov 12 2025 20:50:27 GMT+0000 (Coordinated Universal Time): Wu Zhao",
+        "details": "Hi Derby Digital Team,\r\n\r\nThis is a no-reply email, and the information provided is for your reference. Replying to this email will create a ticket, but it\r\nwill be auto-closed with an automated response.\r\n\r\nThis email is to inform you that your sub-account has temporarily had its SMS sending capabilities restricted due to reaching the\r\nmessaging limit. Below are the details:\r\n\r\nLocation Name: Wu Zhao\r\n\r\nLocationID: 2m24a7VBKH1GIHBjMv7a\r\n\r\nLocation Email: zhaobentonville@gmail.com\r\n\r\nMessaging Limit: 100\r\n\r\nWhy This Happened\r\n\r\nThe restriction has been applied because your sub-account has reached the messaging limit for SMS messages.\r\n\r\nTo restore SMS sending capabilities, please ask your agency admin/owner to increase your messaging limit to accommodate higher\r\nmessaging volumes. SMS sending capabilities will automatically reset at Thu Nov 13 2025 20:50:26 GMT+0000 (Coordinated Universal\r\nTime).\r\n\r\nFor further details, refer to the guidelines\r\n[https://email.mg.msgsndr.biz/c/eJxskUGP0zAQhX9NfEtkO3ESH3ygQFm0FO0BuFauPU1mcWzLdoLKr0epEGKl3p7mk54-vTFntOqD_H5167efX4X4eDgJPMCzJFb1gxZXS0CxoedypD0fCSwa3bncIqikfxHwG6bgF_BFxRTsagoGT2YljO5srwWTQmphR9pLO7ZyHK7MWCFagopTLhhjnFNB-dgM1Epz6fll6Iexk7Lq6DI1S56yt6m54G_i1FxKzFX7ruLHih9ncLGZwozT7GAD15iwVPyY1xhDKnsKbt19csWPOhU0DvbYjZQyzlrZsdqZOs7BQ71AznpCP9UxODS3irdf3td1_XKnp3_05U6JC_fl-MI7Pfw4PD-xT5-fDq-nbdBkgTIHq3RE4kPBKxq9W5xzWJMBZTGBKW_RfdD_LySmsKGFpBxoa4L3YEpIJKlXPWtfddRCutwsTli0a9ZM_ra_KSlq93woWZQJy_nh5zfF_wQAAP__Keuz_Q] in the\r\nlinks provided or contact us for assistance.\r\n\r\nThanks",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-116-22",
         "type": "email",
         "date": "2025-11-12",
         "summary": "A2P Campaign Registration Status Update - Juke Bar -- EAST VILLAGE",
@@ -1876,6 +2433,46 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "summary": "A2P Campaign Registration Status Update - Juke Bar -- EAST VILLAGE",
         "subject": "A2P Campaign Registration Status Update - Juke Bar -- EAST VILLAGE",
         "details": "Hello,\r\n\r\nThis is a no-reply email. If you have any questions, please reach out to our support team.\r\n\r\nYour A2P Campaign Registration Status for the below location has a new update.\r\n\r\nLocation Name: Juke Bar -- EAST VILLAGE\r\n\r\nLocationID: 5u4evLKOu5IFg42TBx9i\r\n\r\nYour A2P Campaign has been submitted for review.",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-116-23",
+        "type": "email",
+        "date": "2025-11-11",
+        "summary": "A2P Campaign Registration Status Update - Ramsi's Cafe On The World",
+        "subject": "A2P Campaign Registration Status Update - Ramsi's Cafe On The World",
+        "details": "Hello,\r\n\r\nThis is a no-reply email. If you have any questions, please reach out to our support team.\r\n\r\nYour A2P Campaign Registration Status for the below location has a new update.\r\n\r\nLocation Name: Ramsi's Cafe On The World\r\n\r\nLocationID: QCYZnem9uyDlOWhZS2Jx\r\n\r\nYour A2P Campaign is approved.",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-116-24",
+        "type": "email",
+        "date": "2025-11-11",
+        "summary": "A2P Campaign Registration Status Update - Wu Zhao",
+        "subject": "A2P Campaign Registration Status Update - Wu Zhao",
+        "details": "Hello,\r\n\r\nThis is a no-reply email. If you have any questions, please reach out to our support team.\r\n\r\nYour A2P Campaign Registration Status for the below location has a new update.\r\n\r\nLocation Name: Wu Zhao\r\n\r\nLocationID: 2m24a7VBKH1GIHBjMv7a\r\n\r\nYour A2P Campaign is approved.",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-116-25",
+        "type": "email",
+        "date": "2025-11-11",
+        "summary": "Third Party Ordering Links",
+        "subject": "Third Party Ordering Links",
+        "details": "East Village Door Dash\r\n<https://www.doordash.com/en/store/ama-raw-bar-new-york-985548/45412348/?srsltid=AfmBOopuR4575MVcKA1x3UAyntq-8E2vbgGbDMjwqgpidtgKnaz-YlOb>\r\nEast Village Seamless/Grubhub\r\n<https://www.seamless.com/menu/ama-raw-bar-190-avenue-b-new-york/8993112>\r\nEast Village Uber Eats\r\n<https://www.ubereats.com/store/ama-raw-bars/1CjOeCi4SbyQT-2sOlhlSA>\r\n\r\n\r\nWest Village Door Dash\r\n<https://www.doordash.com/en/store/ama-raw-bar-new-york-31160695/45431946/?srsltid=AfmBOopEKDw46js15XemZNVgFzP89RgWMVaH6zkcgnjGqyumI2U75aaj>\r\nWest Village Grubhub\r\n<https://www.seamless.com/menu/ama-raw-bar--west-village-39-downing-st-new-york/8991504>\r\nWest Village Uber Eats\r\n<https://www.ubereats.com/store/ama-raw-bars/zR6KK57aXP27hNT6TCvDdQ?srsltid=AfmBOopqqtY-7TuOmrkMNncUpCYcyuZXt-rRwS35esClymdu_KVLFRYD>",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-116-26",
+        "type": "email",
+        "date": "2025-11-11",
+        "summary": "Main Dining Space Photos",
+        "subject": "Main Dining Space Photos",
+        "details": "Please organize as you see fit!\r\n\r\n*THE MAIN BAR ROOM: 45-70* Vibrant and open, our Main Bar Room offers\r\ndirect access to the bar and a dynamic atmosphere ideal for larger\r\ncocktail-style gatherings and celebrations.",
         "direction": "inbound",
         "createdAt": "2026-03-16T12:18:59"
       },
@@ -1940,8 +2537,69 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "merge-amarawbar@",
+        "content": "Merged with duplicate contact: amarawbar@gmail.com",
+        "category": "general",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "merge-rorymgalli",
+        "content": "Merged with duplicate contact: rorymgalligan@icloud.com",
+        "category": "general",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-5-2",
+        "content": "Rory Galligan appears to be the contact person for Big Daddy's Crab Shack Vodka and Oyste, a restaurant client, based on the A2P campaign updates.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-5-3",
+        "content": "Derby Digital is managing SMS marketing for this client, including A2P campaign registration and compliance.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-5-4",
+        "content": "There are multiple 'Non-compliant Messaging Activity' emails, indicating potential issues with the client's SMS practices that Derby Digital needs to address.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-5-0",
+        "category": "business",
+        "label": "Client Name",
+        "value": "Big Daddy's Crab Shack Vodka and Oyste"
+      },
+      {
+        "id": "aif-5-1",
+        "category": "business",
+        "label": "Service Provided",
+        "value": "SMS Marketing (A2P Campaign Management)"
+      },
+      {
+        "id": "aif-5-2",
+        "category": "business",
+        "label": "Recent Activity",
+        "value": "A2P Campaign Status Updates and Non-compliant Messaging Alerts"
+      },
+      {
+        "id": "aif-5-3",
+        "category": "business",
+        "label": "Contact Email",
+        "value": "amaondowning@gmail.com"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -1950,7 +2608,11 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-10-23T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "secondaryEmail": "amarawbar@gmail.com",
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "Rory Galligan is the contact for Big Daddy's Crab Shack Vodka and Oyste, a restaurant client for whom Derby Digital manages SMS marketing, including A2P campaign registration and addressing compliance issues."
   },
   {
     "id": "7",
@@ -1960,7 +2622,11 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "company": "Swasacceleratorr",
     "website": "https://email.swasacceleratorr.com",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "agency owner",
+      "GoHighLevel",
+      "digital marketing"
+    ],
     "relationshipScore": 100,
     "interactions": [
       {
@@ -2254,8 +2920,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-6-0",
+        "content": "Pavel is likely a GoHighLevel affiliate or course creator targeting agency owners like Jahan. The emails are sales-focused, promoting GHL deals, AI tools, and business growth strategies.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-6-1",
+        "content": "The emails are highly personalized with Jahan's name, indicating a targeted email list, but the content is generic for agency owners.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-6-0",
+        "category": "business",
+        "label": "Sender's Focus",
+        "value": "GoHighLevel, agency growth, AI tools, email marketing"
+      },
+      {
+        "id": "aif-6-1",
+        "category": "business",
+        "label": "Email Frequency",
+        "value": "High, especially around year-end (multiple emails in a few days)"
+      },
+      {
+        "id": "aif-6-2",
+        "category": "business",
+        "label": "Content Type",
+        "value": "Promotional offers, urgency-driven sales, business advice for agencies"
+      },
+      {
+        "id": "aif-6-3",
+        "category": "business",
+        "label": "Jahan's Role (inferred)",
+        "value": "Digital marketing agency owner (Derby Digital)"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -2264,311 +2970,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2024-11-13T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "This contact is from Pavel at Swasacceleratorr, who appears to be a vendor or affiliate promoting GoHighLevel and related tools/training to Jahan, likely as a fellow digital marketing agency owner. The emails are frequent, highly sales-oriented, and focus on helping agencies acquire clients and improve operations using GHL and AI."
   },
   {
     "id": "8",
-    "firstName": "Rory",
-    "lastName": "Galligan",
-    "email": "amarawbar@gmail.com",
-    "company": "",
-    "website": "https://email.eastemails.amarawbar.com",
-    "relationshipType": "client",
-    "tags": [],
-    "relationshipScore": 100,
-    "interactions": [
-      {
-        "id": "email-116-0",
-        "type": "email",
-        "date": "2026-03-11",
-        "summary": "A2P Campaign Registration Status Update - Big Daddy's Crab Shack Vodka and Oyster Bar",
-        "subject": "A2P Campaign Registration Status Update - Big Daddy's Crab Shack Vodka and Oyster Bar",
-        "details": "Hello,\r\n\r\nThis is a no-reply email. If you have any questions, please reach out to our support team.\r\n\r\nYour A2P Campaign Registration Status for the below location has a new update.\r\n\r\nLocation Name: Big Daddy's Crab Shack Vodka and Oyster Bar\r\n\r\nLocationID: UcUwxa64T9jt2VFHDpRE\r\n\r\nYour A2P Campaign is approved.",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-116-1",
-        "type": "email",
-        "date": "2026-03-02",
-        "summary": "A2P Campaign Registration Status Update - Big Daddy's Crab Shack Vodka and Oyster Bar",
-        "subject": "A2P Campaign Registration Status Update - Big Daddy's Crab Shack Vodka and Oyster Bar",
-        "details": "Hello,\r\n\r\nThis is a no-reply email. If you have any questions, please reach out to our support team.\r\n\r\nYour A2P Campaign Registration Status for the below location has a new update.\r\n\r\nLocation Name: Big Daddy's Crab Shack Vodka and Oyster Bar\r\n\r\nLocationID: UcUwxa64T9jt2VFHDpRE\r\n\r\nYour A2P Campaign verification has failed. Please log in to your account and visit the Trust Center page for this location to\r\ncheck the failure reason",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-116-2",
-        "type": "email",
-        "date": "2026-02-25",
-        "summary": "Non-compliant Messaging Activity for your sub-account on Wed Feb 25 2026 18:55:29 GMT+0000 (Coordinated Universal Time): Wu Zhao - Temporary Restriction",
-        "subject": "Non-compliant Messaging Activity for your sub-account on Wed Feb 25 2026 18:55:29 GMT+0000 (Coordinated Universal Time): Wu Zhao - Temporary Restriction",
-        "details": "Hi Derby Digital Team,\r\n\r\nThese are no-reply emails, this information is for your consumption to make sure the sub-account is following the SMS best\r\npractices. Replying to these emails will create a ticket but it will be auto-closed with an automated response.\r\n\r\nYou are registered as an admin/owner contact on HighLevel and are receiving email notifications on all updates as requested.\r\n\r\nWe have temporarily restricted SMS sending capabilities for the below sub-account(location) due to continued non-compliant\r\nmessaging activity :\r\n\r\nLocation Name: Wu Zhao\r\n\r\nLocationID: 2m24a7VBKH1GIHBjMv7a\r\n\r\nLocation Email: zhaobentonville@gmail.com\r\n\r\nOpt-Out Rate: 4.69%\r\n\r\nError Rate: 0%\r\n\r\nA High Opt-Out Rate indicates that contacts receiving messages have objected, generated complaints or marked your SMS as spam. A\r\ngood opt-out rate is typically in the range of 0\u20142.0%.\r\n\r\nA High Delivery Error Rate indicates that SMS sent to contacts are no longer in service, are unreachable, or use a non-SMS capable\r\ndevice such as a landline. This may also mean that external carrier filters are refusing to deliver your SMS due to bad sending\r\nbehaviour in the past. A good error rate is typically in the range of 0\u20146.0%.\r\n\r\nWhat should you do now?\r\n\r\nTo avoid future restrictions on the SMS capabilities, make sure to review recent campaigns, workflows and/or bulk messages sent\r\nfrom the sub-account mentioned and make relevant changes ASAP:\r\n\r\n 1. Ensure all upcoming SMS to new contacts have the Opt-out language and sender information. You can enable the same using the\r\n    changelog here [https://email.mg.msgsndr.biz/c/eJxskUGPnDwMhn8NuYFCIEAOOXyjr9OtVttT2-vIxAa8DQkKgWr666tZ9dCV9mbZ0qvHz-tujPZ_833yx7efX7X-dHnRfKFnI9B2PegJBdm675Vsdd9IQSuwv-X7RjbBL0Hh5BTDSiHbLUU8XOYYxGJrmlrjqBtRkhob6sbBNaCoG9zQD8YItkqqTiql60HrRlb1ZAY0EgwqZXTXFq1c52rd5z1gqkb-Lbxdct72ovmvUNdCXReeF08n-cpBCPeKY6GuboEwk4_zY47r5hmCo3KngJQYSwhYxi2X8cilhzAfMFN5bAiZhI9vOtSqWuh_XJ6f6s9fni6vL2cPYqW8RLSwsQgx88QOHq_e9ngkRxY5kcvvT2-W_t2ILcWTkZL1BOhiCORyTCLZV1ggFK1ESuMdeeYMvjp28Tf9XUi2D84PIbN1cb19WOdp1Z8AAAD__8rrp-0].\r\n 2. Enable the number validation feature to avoid future SMS being sent to a non-SMS-capable device such as a landline. You can\r\n    enable the same using the changelog here [https://email.mg.msgsndr.biz/c/eJxskU2P1DAMQH9Nc2vVus2kOeTACIZFq-UEXEdu4mm95KNK06Lh1yNGHFhpr7b89PRsr-zMR_395vdvP79K-en8IvlMz1o4c1Iob06Q6ZSCdpCqbwUFZH8t95VMxl-C4sE5xUCxmDUnt9vCKYrFaKUG6MFOWupR6wFJnciOfQfQq64bBRto4dQCyG6Usm-b7qZHp1vUDkDL01ANbZibsM1bdLmZ-LfwZill3ar-QwWXCi4Lz4ung3xjMcZ7w6mCi10wzuTTXMGlUFhTxnyvXXT1hBu5OsU67mGiXB_o2eHD16dHBwgwoPpxfn7qPn95Or--HApFoLIkZ3BlEVPhG9vHzXVLe7ZkHGey5e3qkef_iVhzOthRNp7Q2RQj2ZKyyOYVF4zV0DrK093xzAV9s2_iH_0NpJi_nu9KFmNTuL77x8PAnwAAAP__9w-j4A].\r\n 3. Get the sub-account registered with A2P if sending to US numbers. You can refer to the changelog here\r\n    [https://email.mg.msgsndr.biz/c/eJxskcuK3DAQRb_G2tnI1ZYfCy3SJJ0Jw2SVZNuopbKtiV5IZYfO1wcPWcxA7y5VcOtwSl-tkZ-nn7Pbfvz-LsSX84uwZ3yemJH9oMRsGMp2GIB3Yjhxhl5Zd",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-116-3",
-        "type": "email",
-        "date": "2026-02-25",
-        "summary": "Non-compliant Messaging Activity for your sub-account on Wed Feb 25 2026 18:55:28 GMT+0000 (Coordinated Universal Time): Wu Zhao - Warning",
-        "subject": "Non-compliant Messaging Activity for your sub-account on Wed Feb 25 2026 18:55:28 GMT+0000 (Coordinated Universal Time): Wu Zhao - Warning",
-        "details": "Hi Derby Digital Team,\r\n\r\nThese are no-reply emails, this information is for your consumption to make sure the sub-account is following the SMS best\r\npractices. Replying to these emails will create a ticket but it will be auto-closed with an automated response.\r\n\r\nYou are registered as an admin/owner contact on HighLevel and are receiving email notifications on all updates as requested.\r\n\r\nWe are seeing non-compliant messaging activity for one of your sub-account(location):\r\n\r\nLocation Name: Wu Zhao\r\n\r\nLocationID: 2m24a7VBKH1GIHBjMv7a\r\n\r\nLocation Email: zhaobentonville@gmail.com\r\n\r\nOpt-Out Rate: 4.69%\r\n\r\nError Rate: 0%\r\n\r\nA High Opt-Out Rate indicates that contacts receiving messages have objected, generated complaints or marked your SMS as spam. A\r\ngood opt-out rate is typically in the range of 0\u20142.0%.\r\n\r\nA High Delivery Error Rate indicates that SMS sent to contacts are no longer in service, are unreachable, or use a non-SMS capable\r\ndevice such as a landline. This may also mean that external carrier filters are refusing to deliver your SMS due to bad sending\r\nbehaviour in the past. A good error rate is typically in the range of 0\u20146.0%.\r\n\r\nWhat should you do now?\r\n\r\nTo avoid future restrictions on the SMS capabilities, make sure to review recent campaigns, workflows and/or bulk messages sent\r\nfrom the sub-account mentioned and make relevant changes ASAP:\r\n\r\n 1. Ensure all upcoming SMS to new contacts have the Opt-out language and sender information. You can enable the same using the\r\n    changelog here [https://email.mg.msgsndr.biz/c/eJxskcGOmzAQhp8G30DEYCAHHxq16Var7antNZp4Bpit8VjGUKVPX2XVw66U22hG-vXN97sLo_18_Dn67cfv78Z8Ob0YPtHzUaHtejAjKrKHvtd1a3o9KFqA_SXfItkEfxSFnZOEhUK2MQluLrMENdvuUIMb4doYTca1A9bQm45Mq50Z-muj2Opad7XW5jAYo4eq6ca6wYHGrmnx2GDR1stULeu0BkzVlf8qb-ec41o0nwp9LvR55mn2tJOvHIRwq1gKfXYzhIm8TPdZlugZgqNypYCUGEsIWErMpWy59BCmDSYqt4iQSXl506EX3UL_6_T8dPj67en0-rL3oBbKs6CFyCpI5pEd3F-9rLIlRxY5kcsfT2-W3m9UTLIzUrKeAJ2EQC5LUsm-wgyhaGukdL0hT5zBV9uq_qd_CMn2zvkQMlsny-VhnbvV_wIAAP__mp6n2g].\r\n 2. Enable the number validation feature to avoid future SMS being sent to a non-SMS-capable device such as a landline. You can\r\n    enable the same using the changelog here [https://email.mg.msgsndr.biz/c/eJxskU2P1DAMQH9Nc2uVpk0_DjkwgmHRajkB15Ebu62XfFRpWjT8esSIAyvt1Zafnp7tjdF8HL_P7vj286vWny4vmi_0PAo0XQ96RkGm7nslW92rQZAHdrd838gk-CUonJxi8BSy2VLEw2aOQaymQW01qGnqZilJjqOyQPM0DnXb9rOtBRslVSeV0vWgtRqqpptlgwPNXdPi2GDRSr9Ufl_2gKma-LdwZs1524vmQ6GuhbquvKyOTnKVhRDuFcdCXe0KYSEXl0JdM_ktJkj3EgOWE-yEZQxlOPxEqTzBMcLD18VHB-VVC_2Py_NT_fnL0-X15exBeMprRAMbixAzz2wfN7c9HsmSQU5k89vVI8__E7GleDJSMo4AbQyBbI5JJPMKK4SilUhpuiMvnMFVxy7-0d9Asvnr-a5kNjb627t_PI36EwAA__-Q8KWq].\r\n 3. Get the sub-account registered with A2P if sending to US numbers. You can refer to the changelog here\r\n    [https://email.mg.msgsndr.biz/c/eJxskcuOnDoQhp8G70BQYKAXXpzWSWei0WSVZNvypQBPfJNdEHWePmKURUaa3a8q6a9PX-m7NeL_y_fF7d9-fuX80_WF2ys-X5gR4yT5YhiKbpqgHfgEM0MvrbvTI6HI8hfDcNgcg8dAIuVodk02BrYJ3l40jMrITulBTWpEqZTsx0GOA-8nxay",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-116-4",
-        "type": "email",
-        "date": "2026-02-09",
-        "summary": "TEST",
-        "subject": "TEST",
-        "details": "TEST EMAIL",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-116-5",
-        "type": "email",
-        "date": "2026-02-01",
-        "summary": "Ama Raw Bar - East & West Village Specials",
-        "subject": "Ama Raw Bar - East & West Village Specials",
-        "details": "Hey Jahan!\r\n\r\nAttached here are the two specials for the East & West Village locations.\r\nI'm thinking maybe we can add it next to the menus under the \"Menu\" tab for\r\neach location.\r\n\r\nBest,\r\nCarly",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-116-6",
-        "type": "email",
-        "date": "2026-01-29",
-        "summary": "A2P Campaign Registration Status Update - Big Daddy's Crab Shack Vodka and Oyster Bar",
-        "subject": "A2P Campaign Registration Status Update - Big Daddy's Crab Shack Vodka and Oyster Bar",
-        "details": "Hello,\r\n\r\nThis is a no-reply email. If you have any questions, please reach out to our support team.\r\n\r\nYour A2P Campaign Registration Status for the below location has a new update.\r\n\r\nLocation Name: Big Daddy's Crab Shack Vodka and Oyster Bar\r\n\r\nLocationID: UcUwxa64T9jt2VFHDpRE\r\n\r\nYour A2P Campaign verification has failed. Please log in to your account and visit the Trust Center page for this location to\r\ncheck the failure reason",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-116-7",
-        "type": "email",
-        "date": "2026-01-28",
-        "summary": "Non-compliant Messaging Activity for your sub-account on Wed Jan 28 2026 17:31:12 GMT+0000 (Coordinated Universal Time): Ama Raw Bar -- EAST - Temporary Restriction",
-        "subject": "Non-compliant Messaging Activity for your sub-account on Wed Jan 28 2026 17:31:12 GMT+0000 (Coordinated Universal Time): Ama Raw Bar -- EAST - Temporary Restriction",
-        "details": "Hi Derby Digital Team,\r\n\r\nThese are no-reply emails, this information is for your consumption to make sure the sub-account is following the SMS best\r\npractices. Replying to these emails will create a ticket but it will be auto-closed with an automated response.\r\n\r\nYou are registered as an admin/owner contact on HighLevel and are receiving email notifications on all updates as requested.\r\n\r\nWe have temporarily restricted SMS sending capabilities for the below sub-account(location) due to continued non-compliant\r\nmessaging activity :\r\n\r\nLocation Name: Ama Raw Bar -- EAST\r\n\r\nLocationID: iRSLyv1lGe7349zmD1Mx\r\n\r\nLocation Email: amarawbar@gmail.com\r\n\r\nOpt-Out Rate: 4.4%\r\n\r\nError Rate: 0%\r\n\r\nA High Opt-Out Rate indicates that contacts receiving messages have objected, generated complaints or marked your SMS as spam. A\r\ngood opt-out rate is typically in the range of 0\u20142.0%.\r\n\r\nA High Delivery Error Rate indicates that SMS sent to contacts are no longer in service, are unreachable, or use a non-SMS capable\r\ndevice such as a landline. This may also mean that external carrier filters are refusing to deliver your SMS due to bad sending\r\nbehaviour in the past. A good error rate is typically in the range of 0\u20146.0%.\r\n\r\nWhat should you do now?\r\n\r\nTo avoid future restrictions on the SMS capabilities, make sure to review recent campaigns, workflows and/or bulk messages sent\r\nfrom the sub-account mentioned and make relevant changes ASAP:\r\n\r\n 1. Ensure all upcoming SMS to new contacts have the Opt-out language and sender information. You can enable the same using the\r\n    changelog here [https://email.eastemails.amarawbar.com/c/eJxskc-OnDAMh5-G3EAkECCHHLraTg_t9tA_55EnNuA2JCgEttOnrxb1sCvtzbKlnz9_dldG-2h-jn7_8fur1h8fnjQ_0Gcj0DrT1rdekJV9ZzolTacFLcD-mu8r2QTPgsLBKYaFQrZriri7zDGI2UqtWkQcqGu0023XkAbEsSNqzDgMWrBVtepqqQbZN0bpSg7SUQ9amttAOHZFWxNs-Vy4VbBAgucbpMrFRXg757xuRfOhUJdCXWaeZk8H-cpBCPeKY6EuboYwkY_TSx2X1TMER-VGASkxlhCwjGsu455LD2HaYaJyXxEyCR9PMfzt-5f7If0n6pvW_F0e5dMfsVCeI1pYWYSYeWQHL0dft7gnRxY5kctvR6ev1x2xpngwUrKeAF0MgVyOSST7C2YIRVsjpdsdeeIMvto38T_9TUi2J-d7kNm6uFzffexh1b8AAAD__9hJrY0].\r\n 2. Enable the number validation feature to avoid future SMS being sent to a non-SMS-capable device such as a landline. You can\r\n    enable the same using the changelog here [https://email.eastemails.amarawbar.com/c/eJxskbuO3DAMRb_G6mxYGj9GhYosNpMi2RR51ANaom0mkmjIsjfO1wcwUuwC05Lg5cG59k7OPOufo99-_P7ath-fXlp6ws9aOGN1Uw-9QCP7TndK6q4VGID8PR8LmgSvAuNOiWPAmM2S2G02E0cxG9mMemw626Oqr_riNMhmHGQr22aQvZKCjKpVV0t1lf1Fq7aSV2mxh1bq4Ypu7IqmRljz-XCtIECC1wFSZTkIb-acl7W4fCjUrVC3mabZ446-shDjUREX6mZniBN6ngp1yxgWTpCO0kVXDrCiKzmWcQsDpnIHTw5Ocs-nEfr2_cuxS_8J-0uj_4Zn-fJHBMwzOwMLiciZRrLnzX3lLVk0jhLa_H51ino7EUvinRwm4xGc5RjRZk4imV8wQyya2mEaDkcTZfDVtor_6e9Csjk5H0FmYzncHza6G_UvAAD__97IqiQ].\r\n 3. Get the sub-account registered with A2P if sending to US numbers. You can refer to the changelog here\r\n    [https://email.eastemails.amarawbar.com/c/eJxskT-PnDAQxT8N7kDYiwEXLnK6bIrkUuRPvRrsYXFibMseuGw-fcQqxZ203dPM6L2f3piLs_pZ_",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-116-8",
-        "type": "email",
-        "date": "2026-01-28",
-        "summary": "Non-compliant Messaging Activity for your sub-account on Wed Jan 28 2026 17:31:09 GMT+0000 (Coordinated Universal Time): Ama Raw Bar -- EAST - Warning",
-        "subject": "Non-compliant Messaging Activity for your sub-account on Wed Jan 28 2026 17:31:09 GMT+0000 (Coordinated Universal Time): Ama Raw Bar -- EAST - Warning",
-        "details": "Hi Derby Digital Team,\r\n\r\nThese are no-reply emails, this information is for your consumption to make sure the sub-account is following the SMS best\r\npractices. Replying to these emails will create a ticket but it will be auto-closed with an automated response.\r\n\r\nYou are registered as an admin/owner contact on HighLevel and are receiving email notifications on all updates as requested.\r\n\r\nWe are seeing non-compliant messaging activity for one of your sub-account(location):\r\n\r\nLocation Name: Ama Raw Bar -- EAST\r\n\r\nLocationID: iRSLyv1lGe7349zmD1Mx\r\n\r\nLocation Email: amarawbar@gmail.com\r\n\r\nOpt-Out Rate: 4.33%\r\n\r\nError Rate: 0%\r\n\r\nA High Opt-Out Rate indicates that contacts receiving messages have objected, generated complaints or marked your SMS as spam. A\r\ngood opt-out rate is typically in the range of 0\u20142.0%.\r\n\r\nA High Delivery Error Rate indicates that SMS sent to contacts are no longer in service, are unreachable, or use a non-SMS capable\r\ndevice such as a landline. This may also mean that external carrier filters are refusing to deliver your SMS due to bad sending\r\nbehaviour in the past. A good error rate is typically in the range of 0\u20146.0%.\r\n\r\nWhat should you do now?\r\n\r\nTo avoid future restrictions on the SMS capabilities, make sure to review recent campaigns, workflows and/or bulk messages sent\r\nfrom the sub-account mentioned and make relevant changes ASAP:\r\n\r\n 1. Ensure all upcoming SMS to new contacts have the Opt-out language and sender information. You can enable the same using the\r\n    changelog here [https://email.eastemails.amarawbar.com/c/eJxskT1v3DAMhn-NtdmwJX-cBg0N0uvQpkM_5gMt8my2smjIstPrry9y6JAA2QgSePnwob8wukf78xr2H7-_dt3Hh6eOH-izVei8betxUOSaobe9bmzfKlqAwyXfVnIJnhXFg5PEhWJ2axLcfWaJana61VjbptPdiN6A7RrTDuNowHSjP12vip2udV83-tQMxuq2ak7kkcYaTN-bk8GirQm2fF-4VbBAgucRUuVlUcHNOa9bYT4U-lzo88zTHOigUHmI8VaxFPrsZ4gTBZlealnWwBA9lRtFpMRYQsRS1lzKnssAcdphonJfETKpIHcx_O37l9vRhE80mNb-XR6bpz9qoTwLOlhZRcl8ZQ8vR1822ZMnh5zI57eju6_XHbUmORgpuUCAXmIknyWp5H7BDLFoa6Q03pAnzhCqfVP_09-EZHfnfA8yOy_L5d3HHk7_CwAA__9DFq0u].\r\n 2. Enable the number validation feature to avoid future SMS being sent to a non-SMS-capable device such as a landline. You can\r\n    enable the same using the changelog here [https://email.eastemails.amarawbar.com/c/eJxskT2PnDAQhn8N7kDYsAYXLnK6bIrkUuSjXo3tYZnEH8gYLuTXR0Ip7qRtZzTvPHpeeyOnn9XPyW8_fn-9XD4-vVzoCT8r5rRVfWsGhpoPUknBlewZBiB_K8eCOsMrw7hTTjFgLHrJyW22UIps1q0w3Fo-jWriYC5KjkrCyKde2F4NrWSkRStky8XIh06JvuEjWoemhU7Kbuxc1bcIazkfrg0EyPBqIDc2Beb1XMqyVt2HSlwrcZ3pPnvc0TcWYjwaSpW42hniHX26V-JaMCwpQz5qF11tYEVXp1jHLRjM9Q6eHJzkPp1G6Nv3L8fO_Sccul79Dc_85Q8LWObkNCzEYio0kT1vbmvaskXtKKMt71enqLcTtuS0k8OsPYKzKUa0JWWW9S-YIVZ96zCbw9GdCvhmW9n_9HchRZ-cjyCLtincHja6a_EvAAD__yuVqlI].\r\n 3. Get the sub-account registered with A2P if sending to US numbers. You can refer to the changelog here\r\n    [https://email.eastemails.amarawbar.com/c/eJxskc-O3CwQxJ_G3GwBxtg-cPhW-00OyeaQP-dRD_SMSTAgaHszefrIoxyy0t5K3a2qn6rt2TvzPH-_hu3bz8_D8P_Ty-Cf8OPMnLGz4peRoRGjnrUUs1YMV_DhTPeMpsArw7",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-116-9",
-        "type": "email",
-        "date": "2026-01-28",
-        "summary": "Non-compliant Messaging Activity for your sub-account on Wed Jan 28 2026 17:31:13 GMT+0000 (Coordinated Universal Time): Ama Raw Bar -- EAST - Temporary Restriction",
-        "subject": "Non-compliant Messaging Activity for your sub-account on Wed Jan 28 2026 17:31:13 GMT+0000 (Coordinated Universal Time): Ama Raw Bar -- EAST - Temporary Restriction",
-        "details": "Hi Derby Digital Team,\r\n\r\nThese are no-reply emails, this information is for your consumption to make sure the sub-account is following the SMS best\r\npractices. Replying to these emails will create a ticket but it will be auto-closed with an automated response.\r\n\r\nYou are registered as an admin/owner contact on HighLevel and are receiving email notifications on all updates as requested.\r\n\r\nWe have temporarily restricted SMS sending capabilities for the below sub-account(location) due to continued non-compliant\r\nmessaging activity :\r\n\r\nLocation Name: Ama Raw Bar -- EAST\r\n\r\nLocationID: iRSLyv1lGe7349zmD1Mx\r\n\r\nLocation Email: amarawbar@gmail.com\r\n\r\nOpt-Out Rate: 4.33%\r\n\r\nError Rate: 0%\r\n\r\nA High Opt-Out Rate indicates that contacts receiving messages have objected, generated complaints or marked your SMS as spam. A\r\ngood opt-out rate is typically in the range of 0\u20142.0%.\r\n\r\nA High Delivery Error Rate indicates that SMS sent to contacts are no longer in service, are unreachable, or use a non-SMS capable\r\ndevice such as a landline. This may also mean that external carrier filters are refusing to deliver your SMS due to bad sending\r\nbehaviour in the past. A good error rate is typically in the range of 0\u20146.0%.\r\n\r\nWhat should you do now?\r\n\r\nTo avoid future restrictions on the SMS capabilities, make sure to review recent campaigns, workflows and/or bulk messages sent\r\nfrom the sub-account mentioned and make relevant changes ASAP:\r\n\r\n 1. Ensure all upcoming SMS to new contacts have the Opt-out language and sender information. You can enable the same using the\r\n    changelog here [https://email.eastemails.amarawbar.com/c/eJxskb9u3DAMh5_G2mzYss53GjQ0SK9Dmw79Mx8okWezlUVDlp1en77IoUMCZCNI4MePH8OF0T3an9e4_fj99XD4-PB04Af6bBW6YE3rj4pcdxzsoDs7GEUzcLyU20Iuw7OitHOWNFMqbsmCWygsSU3OEmoYTHfobRv0SfsBbWe878l4bC0pdrrVQ9vpU3fsrTaN73vE03U4eR26_moq0xKs5b5wbWCGDM8echNkVtFNpSxr1X-o9LnS54nHKdJOsQmQ0q1hqfQ5TJBGijK-1DIvkSEFqldKSJmxhoS1LKWWrdQR0rjBSPW2IBRSUe5i-Nv3L7e9i5_o2Bv7d37snv6omcok6GBhlaTwlQO8HH1ZZcuBHHKmUN6O7r5ed9SSZWek7CIBBkmJQpGssvsFE6TKtEjZ35BHLhCbbVX_09-EFHfnfA-yuCDz5d3H7k7_CwAA__9ZyK06].\r\n 2. Enable the number validation feature to avoid future SMS being sent to a non-SMS-capable device such as a landline. You can\r\n    enable the same using the changelog here [https://email.eastemails.amarawbar.com/c/eJxskcuOnDAQRb8G70D4Ad1eeJHRpLNIJos81q3CLqASP5AxTMjXR0JZzEi9rVLdOjrX3smZZ_1z9NuP31-77uPTS0dP-FkzZ6xW7XBhaPil173gulcMA5C_l2NBk-GVYdwppxgwFrPk5DZbKEU2m1FwVE71XYtXq6RsHaieC4kau1ZrxciIVvQtF1d-kVqoZpDSuevYXwdhuRxVpVqEtZwP1wYCZHgdIDc2BebNXMqyVvJDJW6VuM00zR539I2FGI-GUiVudoY4oU9TJW4Fw5Iy5KN20dUDrOjqFOu4hQFzvYMnBye5T6cR-vb9y7Fz_wkvUum_4Zm__GEBy5ycgYVYTIVGsufNfU1btmgcZbTl_eoU9XbClpx2cpiNR3A2xYi2pMyy-QUzxEq1DvNwOJqogG-2lf1PfxdSzMn5CLIYm8L9YaO7Ef8CAAD__9Z9qhw].\r\n 3. Get the sub-account registered with A2P if sending to US numbers. You can refer to the changelog here\r\n    [https://email.eastemails.amarawbar.com/c/eJxskU2P3CwQhH-NudnCDf46cHhX-04OyeaQj_MIQ3tMggFB25vJr488yiEr7a3U3ap6VG2uzqr",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-116-10",
-        "type": "email",
-        "date": "2026-01-27",
-        "summary": "Temporary Restriction : Messaging Limit Reached on Tue Jan 27 2026 23:14:47 GMT+0000 (Coordinated Universal Time): Ama Raw Bar -- EAST",
-        "subject": "Temporary Restriction : Messaging Limit Reached on Tue Jan 27 2026 23:14:47 GMT+0000 (Coordinated Universal Time): Ama Raw Bar -- EAST",
-        "details": "Hi Derby Digital Team,\r\n\r\nThis is a no-reply email, and the information provided is for your reference. Replying to this email will create a ticket, but it\r\nwill be auto-closed with an automated response.\r\n\r\nThis email is to inform you that your sub-account has temporarily had its SMS sending capabilities restricted due to reaching the\r\nmessaging limit. Below are the details:\r\n\r\nLocation Name: Ama Raw Bar -- EAST\r\n\r\nLocationID: iRSLyv1lGe7349zmD1Mx\r\n\r\nLocation Email: amarawbar@gmail.com\r\n\r\nMessaging Limit: 100\r\n\r\nWhy This Happened\r\n\r\nThe restriction has been applied because your sub-account has reached the messaging limit for SMS messages.\r\n\r\nTo restore SMS sending capabilities, please ask your agency admin/owner to increase your messaging limit to accommodate higher\r\nmessaging volumes. SMS sending capabilities will automatically reset at Wed Jan 28 2026 23:14:46 GMT+0000 (Coordinated Universal\r\nTime).\r\n\r\nFor further details, refer to the guidelines\r\n[https://email.eastemails.amarawbar.com/c/eJxsksuO2yAYhZ_G7Bxxsx0WLDqdpotOqlEv64jAH_tvMSDAnqZPX9mqqo40uyM-dPh0hL2g04_q-80v335-7roPD-cOH-CTIk5bJel1IKDZ0Kuu6_rjQGA26C_1nkBn80IgrJhjmCFUnXJ0i60YA5l011suHeO3jlrFLR0GAcJQwfrO3WxPCWpOeU8ZH7hgUg6HQRrRq-tRUeuEkqqRFEyp-4PlYGaTzcvV5IONM_F6qjWVRrxr-Knhpwl8OoxxwnHysILfLjX8VJaUYq5bin7ZzErDTyZXtB62KI-UMs6Ekqz1tk1TDNDOUIoZMYxtih7tveHi6X3bts87Pf-jzzslPu4b4pevT_eV-Y8wCKl-z4_s_IvMUKfotElIQqx4Q2s2i0uJS7agHWaw9TXap_3_hKQcV3SQtQfjbAwBbI2ZZP3DTCY0kjrI17vDEavxh6WQv-2vSqrePd-SrNrG-fLmH1g1_xMAAP__GgO5Fg] in the\r\nlinks provided or contact us for assistance.\r\n\r\nThanks",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-116-11",
-        "type": "email",
-        "date": "2026-01-27",
-        "summary": "Temporary Restriction : Messaging Limit Reached on Tue Jan 27 2026 23:14:46 GMT+0000 (Coordinated Universal Time): Ama Raw Bar -- EAST",
-        "subject": "Temporary Restriction : Messaging Limit Reached on Tue Jan 27 2026 23:14:46 GMT+0000 (Coordinated Universal Time): Ama Raw Bar -- EAST",
-        "details": "Hi Derby Digital Team,\r\n\r\nThis is a no-reply email, and the information provided is for your reference. Replying to this email will create a ticket, but it\r\nwill be auto-closed with an automated response.\r\n\r\nThis email is to inform you that your sub-account has temporarily had its SMS sending capabilities restricted due to reaching the\r\nmessaging limit. Below are the details:\r\n\r\nLocation Name: Ama Raw Bar -- EAST\r\n\r\nLocationID: iRSLyv1lGe7349zmD1Mx\r\n\r\nLocation Email: amarawbar@gmail.com\r\n\r\nMessaging Limit: 100\r\n\r\nWhy This Happened\r\n\r\nThe restriction has been applied because your sub-account has reached the messaging limit for SMS messages.\r\n\r\nTo restore SMS sending capabilities, please ask your agency admin/owner to increase your messaging limit to accommodate higher\r\nmessaging volumes. SMS sending capabilities will automatically reset at Wed Jan 28 2026 23:14:46 GMT+0000 (Coordinated Universal\r\nTime).\r\n\r\nFor further details, refer to the guidelines\r\n[https://email.eastemails.amarawbar.com/c/eJxsks-OnSAchZ9GdhpBEFmw6HR6u-jcZtI_6xuEn0qLQACd3j59o2maTjK7Ez5y-HKCvlkjH8X3yW3ffn5m7MPDldkH-CSQkVrQduQIJOa9YIz1A0ewKutu5R5BJvWCwO82Bb-CLzKmYDZdbPBokWPPYdI9GwY9tYyLAQbFBcWMjLTrzYSsJC3pW0w46TClvBmJNoYbPYoWMy66iragcjkfzI1aVVIvo0qNDitycikl5qp7V5FLRS4LuNjMYbHz4mAHd1yqyCVvMYZUjhTcdpjlilxUKlY7OCId2hYT3AmKa6fruAQP9Qo5q9n6uY7BWX2vSPf0vq7r55Ne_9HnkyIXzg3tl69P9x27j8A7Kn6vj_j6C61QlmCkihb5UOxktTosbjlsSYM0NoEur9E57f8nKKawWwNJOlBGB-9Bl5BQkj_UonxFWwNpvBs726Jcs2X0t_1VSZGn51uSReqw3t78A7skfwIAAP__jJi59A] in the\r\nlinks provided or contact us for assistance.\r\n\r\nThanks",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-116-12",
-        "type": "email",
-        "date": "2026-01-27",
-        "summary": "A2P Campaign Registration Status Update - Big Daddy's Crab Shack Vodka and Oyster Bar",
-        "subject": "A2P Campaign Registration Status Update - Big Daddy's Crab Shack Vodka and Oyster Bar",
-        "details": "Hello,\r\n\r\nThis is a no-reply email. If you have any questions, please reach out to our support team.\r\n\r\nYour A2P Campaign Registration Status for the below location has a new update.\r\n\r\nLocation Name: Big Daddy's Crab Shack Vodka and Oyster Bar\r\n\r\nLocationID: UcUwxa64T9jt2VFHDpRE\r\n\r\nYour A2P Campaign has been submitted for review.",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-116-13",
-        "type": "email",
-        "date": "2026-01-27",
-        "summary": "A2P Brand Registration Status Update - Big Daddy's Crab Shack Vodka and Oyster Bar",
-        "subject": "A2P Brand Registration Status Update - Big Daddy's Crab Shack Vodka and Oyster Bar",
-        "details": "Hello,\r\n\r\nThis is a no-reply email. If you have any questions, please reach out to our support team.\r\n\r\nYour A2P Brand Registration Status for the below location has a new update.\r\n\r\nLocation Name: Big Daddy's Crab Shack Vodka and Oyster Bar\r\n\r\nLocationID: UcUwxa64T9jt2VFHDpRE\r\n\r\nYour Brand registration has been approved.",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-116-14",
-        "type": "email",
-        "date": "2026-01-05",
-        "summary": "Menus",
-        "subject": "Menus",
-        "details": "",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-116-15",
-        "type": "email",
-        "date": "2025-11-29",
-        "summary": "A2P Campaign Registration Status Update - Juke Bar -- BUSHWICK",
-        "subject": "A2P Campaign Registration Status Update - Juke Bar -- BUSHWICK",
-        "details": "Hello,\r\n\r\nThis is a no-reply email. If you have any questions, please reach out to our support team.\r\n\r\nYour A2P Campaign Registration Status for the below location has a new update.\r\n\r\nLocation Name: Juke Bar -- BUSHWICK\r\n\r\nLocationID: yJlAhqZYqWa6v8rzI6bZ\r\n\r\nYour A2P Campaign has been submitted for review.",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-116-16",
-        "type": "email",
-        "date": "2025-11-29",
-        "summary": "A2P Campaign Registration Status Update - Juke Bar -- EAST VILLAGE",
-        "subject": "A2P Campaign Registration Status Update - Juke Bar -- EAST VILLAGE",
-        "details": "Hello,\r\n\r\nThis is a no-reply email. If you have any questions, please reach out to our support team.\r\n\r\nYour A2P Campaign Registration Status for the below location has a new update.\r\n\r\nLocation Name: Juke Bar -- EAST VILLAGE\r\n\r\nLocationID: 5u4evLKOu5IFg42TBx9i\r\n\r\nYour A2P Campaign is approved.",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-116-17",
-        "type": "email",
-        "date": "2025-11-28",
-        "summary": "A2P Campaign Registration Status Update - Juke Bar -- EAST VILLAGE",
-        "subject": "A2P Campaign Registration Status Update - Juke Bar -- EAST VILLAGE",
-        "details": "Hello,\r\n\r\nThis is a no-reply email. If you have any questions, please reach out to our support team.\r\n\r\nYour A2P Campaign Registration Status for the below location has a new update.\r\n\r\nLocation Name: Juke Bar -- EAST VILLAGE\r\n\r\nLocationID: 5u4evLKOu5IFg42TBx9i\r\n\r\nYour A2P Campaign has been submitted for review.",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-116-18",
-        "type": "email",
-        "date": "2025-11-26",
-        "summary": "Updated Menus",
-        "subject": "Updated Menus",
-        "details": "Hi Jahan!\r\n\r\nCan you please upload these respectively to the website? I have our Downing\r\n(west village) and east village menus here that have our new hours.\r\n\r\nThank you!\r\nCarly",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-116-19",
-        "type": "email",
-        "date": "2025-11-13",
-        "summary": "A2P Campaign Registration Status Update - Juke Bar -- EAST VILLAGE",
-        "subject": "A2P Campaign Registration Status Update - Juke Bar -- EAST VILLAGE",
-        "details": "Hello,\r\n\r\nThis is a no-reply email. If you have any questions, please reach out to our support team.\r\n\r\nYour A2P Campaign Registration Status for the below location has a new update.\r\n\r\nLocation Name: Juke Bar -- EAST VILLAGE\r\n\r\nLocationID: 5u4evLKOu5IFg42TBx9i\r\n\r\nYour A2P Campaign verification has failed. Please log in to your account and visit the Trust Center page for this location to\r\ncheck the failure reason",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-116-20",
-        "type": "email",
-        "date": "2025-11-12",
-        "summary": "Temporary Restriction : Messaging Limit Reached on Wed Nov 12 2025 20:50:26 GMT+0000 (Coordinated Universal Time): Wu Zhao",
-        "subject": "Temporary Restriction : Messaging Limit Reached on Wed Nov 12 2025 20:50:26 GMT+0000 (Coordinated Universal Time): Wu Zhao",
-        "details": "Hi Derby Digital Team,\r\n\r\nThis is a no-reply email, and the information provided is for your reference. Replying to this email will create a ticket, but it\r\nwill be auto-closed with an automated response.\r\n\r\nThis email is to inform you that your sub-account has temporarily had its SMS sending capabilities restricted due to reaching the\r\nmessaging limit. Below are the details:\r\n\r\nLocation Name: Wu Zhao\r\n\r\nLocationID: 2m24a7VBKH1GIHBjMv7a\r\n\r\nLocation Email: zhaobentonville@gmail.com\r\n\r\nMessaging Limit: 100\r\n\r\nWhy This Happened\r\n\r\nThe restriction has been applied because your sub-account has reached the messaging limit for SMS messages.\r\n\r\nTo restore SMS sending capabilities, please ask your agency admin/owner to increase your messaging limit to accommodate higher\r\nmessaging volumes. SMS sending capabilities will automatically reset at Thu Nov 13 2025 20:50:26 GMT+0000 (Coordinated Universal\r\nTime).\r\n\r\nFor further details, refer to the guidelines\r\n[https://email.mg.msgsndr.biz/c/eJxskU-P0zAQxT9NfEtkT-P8OfhAgbJoKdoDcK1ce5LM4tiW4wSVT49SIcRKvT3NT3r66Y25kFUf-u-DW7_9_Crlx-NZ0hGfe2ZV02o5WIZKtA30HW-gYzhrcpd8i6iS_sXQb5SCn9FnFVOwq8kUPJvUdRBdN1ghuUAu26HlsufNIAGxH64gGSngIIUQAFxy6CrTQGMGYTvTYVvztqj5PFbzMi7epupKv5lTU85xKQ7vCjgVcJrQxWoME42Tww1dZcJcwGlZYwwp7ym4dfdZCjjplMk43GPdcS5AHPpalM6UcQoeyxmXRY_kxzIGR-ZWwOHL-7IsX-70_I--3Clz4b4czFDr9sfx-Ul8-vx0fD1vrWYz5ilYpSMxHzINZPRucVnCmgwqSwlNfovug_5_YTGFjSwm5VBbE7xHk0NiSb3qSfui5hbT9WZppKxdtS7sb_ubkqx2z4eSWZkwXx5-flPwJwAA___iFrR0] in the\r\nlinks provided or contact us for assistance.\r\n\r\nThanks",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-116-21",
-        "type": "email",
-        "date": "2025-11-12",
-        "summary": "Temporary Restriction : Messaging Limit Reached on Wed Nov 12 2025 20:50:27 GMT+0000 (Coordinated Universal Time): Wu Zhao",
-        "subject": "Temporary Restriction : Messaging Limit Reached on Wed Nov 12 2025 20:50:27 GMT+0000 (Coordinated Universal Time): Wu Zhao",
-        "details": "Hi Derby Digital Team,\r\n\r\nThis is a no-reply email, and the information provided is for your reference. Replying to this email will create a ticket, but it\r\nwill be auto-closed with an automated response.\r\n\r\nThis email is to inform you that your sub-account has temporarily had its SMS sending capabilities restricted due to reaching the\r\nmessaging limit. Below are the details:\r\n\r\nLocation Name: Wu Zhao\r\n\r\nLocationID: 2m24a7VBKH1GIHBjMv7a\r\n\r\nLocation Email: zhaobentonville@gmail.com\r\n\r\nMessaging Limit: 100\r\n\r\nWhy This Happened\r\n\r\nThe restriction has been applied because your sub-account has reached the messaging limit for SMS messages.\r\n\r\nTo restore SMS sending capabilities, please ask your agency admin/owner to increase your messaging limit to accommodate higher\r\nmessaging volumes. SMS sending capabilities will automatically reset at Thu Nov 13 2025 20:50:26 GMT+0000 (Coordinated Universal\r\nTime).\r\n\r\nFor further details, refer to the guidelines\r\n[https://email.mg.msgsndr.biz/c/eJxskUGP0zAQhX9NfEtkO3ESH3ygQFm0FO0BuFauPU1mcWzLdoLKr0epEGKl3p7mk54-vTFntOqD_H5167efX4X4eDgJPMCzJFb1gxZXS0CxoedypD0fCSwa3bncIqikfxHwG6bgF_BFxRTsagoGT2YljO5srwWTQmphR9pLO7ZyHK7MWCFagopTLhhjnFNB-dgM1Epz6fll6Iexk7Lq6DI1S56yt6m54G_i1FxKzFX7ruLHih9ncLGZwozT7GAD15iwVPyY1xhDKnsKbt19csWPOhU0DvbYjZQyzlrZsdqZOs7BQ71AznpCP9UxODS3irdf3td1_XKnp3_05U6JC_fl-MI7Pfw4PD-xT5-fDq-nbdBkgTIHq3RE4kPBKxq9W5xzWJMBZTGBKW_RfdD_LySmsKGFpBxoa4L3YEpIJKlXPWtfddRCutwsTli0a9ZM_ra_KSlq93woWZQJy_nh5zfF_wQAAP__Keuz_Q] in the\r\nlinks provided or contact us for assistance.\r\n\r\nThanks",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-116-22",
-        "type": "email",
-        "date": "2025-11-12",
-        "summary": "A2P Campaign Registration Status Update - Juke Bar -- EAST VILLAGE",
-        "subject": "A2P Campaign Registration Status Update - Juke Bar -- EAST VILLAGE",
-        "details": "Hello,\r\n\r\nThis is a no-reply email. If you have any questions, please reach out to our support team.\r\n\r\nYour A2P Campaign Registration Status for the below location has a new update.\r\n\r\nLocation Name: Juke Bar -- EAST VILLAGE\r\n\r\nLocationID: 5u4evLKOu5IFg42TBx9i\r\n\r\nYour A2P Campaign verification has failed. Please log in to your account and visit the Trust Center page for this location to\r\ncheck the failure reason",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-116-23",
-        "type": "email",
-        "date": "2025-11-11",
-        "summary": "A2P Campaign Registration Status Update - Ramsi's Cafe On The World",
-        "subject": "A2P Campaign Registration Status Update - Ramsi's Cafe On The World",
-        "details": "Hello,\r\n\r\nThis is a no-reply email. If you have any questions, please reach out to our support team.\r\n\r\nYour A2P Campaign Registration Status for the below location has a new update.\r\n\r\nLocation Name: Ramsi's Cafe On The World\r\n\r\nLocationID: QCYZnem9uyDlOWhZS2Jx\r\n\r\nYour A2P Campaign is approved.",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-116-24",
-        "type": "email",
-        "date": "2025-11-11",
-        "summary": "A2P Campaign Registration Status Update - Wu Zhao",
-        "subject": "A2P Campaign Registration Status Update - Wu Zhao",
-        "details": "Hello,\r\n\r\nThis is a no-reply email. If you have any questions, please reach out to our support team.\r\n\r\nYour A2P Campaign Registration Status for the below location has a new update.\r\n\r\nLocation Name: Wu Zhao\r\n\r\nLocationID: 2m24a7VBKH1GIHBjMv7a\r\n\r\nYour A2P Campaign is approved.",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-116-25",
-        "type": "email",
-        "date": "2025-11-11",
-        "summary": "Third Party Ordering Links",
-        "subject": "Third Party Ordering Links",
-        "details": "East Village Door Dash\r\n<https://www.doordash.com/en/store/ama-raw-bar-new-york-985548/45412348/?srsltid=AfmBOopuR4575MVcKA1x3UAyntq-8E2vbgGbDMjwqgpidtgKnaz-YlOb>\r\nEast Village Seamless/Grubhub\r\n<https://www.seamless.com/menu/ama-raw-bar-190-avenue-b-new-york/8993112>\r\nEast Village Uber Eats\r\n<https://www.ubereats.com/store/ama-raw-bars/1CjOeCi4SbyQT-2sOlhlSA>\r\n\r\n\r\nWest Village Door Dash\r\n<https://www.doordash.com/en/store/ama-raw-bar-new-york-31160695/45431946/?srsltid=AfmBOopEKDw46js15XemZNVgFzP89RgWMVaH6zkcgnjGqyumI2U75aaj>\r\nWest Village Grubhub\r\n<https://www.seamless.com/menu/ama-raw-bar--west-village-39-downing-st-new-york/8991504>\r\nWest Village Uber Eats\r\n<https://www.ubereats.com/store/ama-raw-bars/zR6KK57aXP27hNT6TCvDdQ?srsltid=AfmBOopqqtY-7TuOmrkMNncUpCYcyuZXt-rRwS35esClymdu_KVLFRYD>",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-116-26",
-        "type": "email",
-        "date": "2025-11-11",
-        "summary": "Main Dining Space Photos",
-        "subject": "Main Dining Space Photos",
-        "details": "Please organize as you see fit!\r\n\r\n*THE MAIN BAR ROOM: 45-70* Vibrant and open, our Main Bar Room offers\r\ndirect access to the bar and a dynamic atmosphere ideal for larger\r\ncocktail-style gatherings and celebrations.",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      }
-    ],
-    "notes": [],
-    "facts": [],
-    "opportunities": [],
-    "aiInsights": [],
-    "groups": [],
-    "connections": [],
-    "lastContactedAt": "2026-03-11",
-    "source": "gmail-import",
-    "createdAt": "2025-11-11T00:00:00",
-    "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
-  },
-  {
-    "id": "9",
-    "firstName": "Michelle",
-    "lastName": "Richardson",
+    "firstName": "DERBY",
+    "lastName": "DIGITAL BOOKING SYSTEM",
     "email": "mlr@rpoflou.com",
-    "company": "Rpoflou",
+    "company": "Richardson Properties, Inc. / David Richardson Builder, Inc.",
     "website": "https://email.send.lcmsgsndr.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "client",
+    "tags": [
+      "restaurant niche",
+      "booking system",
+      "website updates",
+      "property management"
+    ],
     "relationshipScore": 100,
     "interactions": [
       {
@@ -2842,13 +3260,59 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-7-0",
+        "content": "Michelle Richardson (mlr@rpoflou.com) appears to be a client for whom Derby Digital manages website updates and a booking system, specifically for 'Blue Surf' which seems to be a rental property or restaurant.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-7-1",
+        "content": "The emails indicate ongoing requests for website content changes, background image updates, and management of a booking system for 'Blue Surf'.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-7-2",
+        "content": "The contact 'Testing Taila' with a 502 area code (Louisville) suggests internal testing or a connection to Jahan Taila's location, possibly indicating a personal connection or internal account.",
+        "category": "internal",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "321504db9887",
         "category": "contact",
         "label": "Phone",
         "value": "(941) 539-0390"
+      },
+      {
+        "id": "aif-7-1",
+        "category": "business",
+        "label": "Client Name",
+        "value": "Michelle Richardson"
+      },
+      {
+        "id": "aif-7-2",
+        "category": "business",
+        "label": "Primary Business",
+        "value": "Property Management/Rental (Blue Surf)"
+      },
+      {
+        "id": "aif-7-3",
+        "category": "business",
+        "label": "Services Provided",
+        "value": "Website management, booking system, chat widget integration"
+      },
+      {
+        "id": "aif-7-4",
+        "category": "contact",
+        "label": "Email Domain",
+        "value": "rpoflou.com"
       }
     ],
     "opportunities": [],
@@ -2859,17 +3323,25 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-03T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "Owner/Manager (implied)",
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "Michelle Richardson is an active client of Derby Digital, utilizing their services for website updates, content management, and a booking system for 'Blue Surf', which appears to be a rental property or restaurant. The frequent inbound emails indicate an ongoing and hands-on client relationship."
   },
   {
-    "id": "10",
+    "id": "9",
     "firstName": "Paul",
     "lastName": "Volkov",
     "email": "info@roofingky.com",
     "company": "Roofingky",
     "website": "https://tel.meet",
-    "relationshipType": "industry",
-    "tags": [],
+    "relationshipType": "client",
+    "tags": [
+      "marketing client",
+      "rescheduled meeting",
+      "lead generation"
+    ],
     "relationshipScore": 100,
     "interactions": [
       {
@@ -3143,13 +3615,59 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-8-0",
+        "content": "Paul Volkov is a current client, but recently decided to end the working relationship as of November 11, 2025.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-8-1",
+        "content": "Jahan had a meeting scheduled with Paul for November 12, 2025, which Paul rescheduled due to a family commitment.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-8-2",
+        "content": "Paul's company, Roofingky, receives lead submission notifications, some of which appear to be spam or international.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "3f090a641dfc",
         "category": "contact",
         "label": "Phone",
         "value": "6321234567"
+      },
+      {
+        "id": "aif-8-1",
+        "category": "business",
+        "label": "Company Name",
+        "value": "Roofingky"
+      },
+      {
+        "id": "aif-8-2",
+        "category": "contact",
+        "label": "Phone Number",
+        "value": "(502) 528-7021"
+      },
+      {
+        "id": "aif-8-3",
+        "category": "contact",
+        "label": "Email",
+        "value": "info@roofingky.com"
+      },
+      {
+        "id": "aif-8-4",
+        "category": "business",
+        "label": "Relationship Status",
+        "value": "Ending Client Relationship"
       }
     ],
     "opportunities": [],
@@ -3160,17 +3678,26 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-07-26T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "Owner/Manager",
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "Paul Volkov of Roofingky is an existing client who recently decided to terminate their marketing services with Jahan. A scheduled meeting was rescheduled, and Paul's company receives lead notifications, some of which are irrelevant."
   },
   {
-    "id": "11",
+    "id": "10",
     "firstName": "Colin",
     "lastName": "Dingelstad",
     "email": "colin@mentorsofmentors.com",
     "company": "Mentorsofmentors",
     "website": "https://mentorsofmentors.activehosted.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "marketing",
+      "coaching",
+      "business growth",
+      "video editing"
+    ],
     "relationshipScore": 100,
     "interactions": [
       {
@@ -3444,8 +3971,55 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-9-0",
+        "content": "Colin is consistently pitching high-ticket coaching/mentorship programs, often with offers of free services or significant discounts as an entry point.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-9-1",
+        "content": "The offers range from free video editing to '10K months' coaching, suggesting Colin targets individuals looking for business growth and marketing support.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-9-2",
+        "content": "Colin uses urgency ('2 spots left') and scarcity ('once a year we open 3 coaching spots') in his outreach.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-9-0",
+        "category": "business",
+        "label": "Colin's Company",
+        "value": "Mentorsofmentors"
+      },
+      {
+        "id": "aif-9-1",
+        "category": "business",
+        "label": "Colin's Offerings",
+        "value": "Business coaching, video editing, team building strategies"
+      },
+      {
+        "id": "aif-9-2",
+        "category": "business",
+        "label": "Pricing Strategy",
+        "value": "High-ticket services ($10-25k/month) with frequent discounted or free introductory offers"
+      },
+      {
+        "id": "aif-9-3",
+        "category": "business",
+        "label": "Target Audience",
+        "value": "Individuals seeking to grow their business, achieve $10K+ months"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -3454,17 +4028,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-02-28T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Colin Dingelstad from Mentorsofmentors is a persistent prospect, consistently reaching out to Jahan with various offers for business coaching, video editing, and team building strategies. His pitches often involve high-value services presented with significant discounts or free trials, targeting individuals looking for rapid business growth."
   },
   {
-    "id": "12",
-    "firstName": "Leadscape",
+    "id": "11",
+    "firstName": "Jake",
     "lastName": "",
     "email": "jake@leadscape.au",
     "company": "Leadscape",
     "website": "https://email.jake.leadscape.au",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "vendor",
+    "tags": [
+      "agency services",
+      "cold outreach"
+    ],
     "relationshipScore": 100,
     "interactions": [
       {
@@ -3728,13 +4306,59 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-10-0",
+        "content": "Jake from Leadscape is consistently sending cold outreach emails to Jahan, offering services to help agencies scale, acquire clients, and improve sales conversions.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-10-1",
+        "content": "The emails frequently mention guarantees for client acquisition and focus on paid ad strategies, sales closers, and high-ticket clients.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-10-2",
+        "content": "The content is clearly targeted at agency owners, coaches, and consultants, not directly at Jahan's restaurant niche clients.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "2d57e7c10e8b",
         "category": "contact",
         "label": "Phone",
         "value": "780-278-3105"
+      },
+      {
+        "id": "aif-10-1",
+        "category": "business",
+        "label": "Sender's Company",
+        "value": "Leadscape"
+      },
+      {
+        "id": "aif-10-2",
+        "category": "business",
+        "label": "Sender's Service Focus",
+        "value": "Paid ads, client acquisition, sales conversion for agencies/coaches"
+      },
+      {
+        "id": "aif-10-3",
+        "category": "business",
+        "label": "Frequency of Contact",
+        "value": "Frequent, with multiple emails in March and April 2025, and one in October 2025"
+      },
+      {
+        "id": "aif-10-4",
+        "category": "business",
+        "label": "Offer Type",
+        "value": "Guaranteed client acquisition, sales closers, scaling strategies"
       }
     ],
     "opportunities": [],
@@ -3745,17 +4369,25 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2024-12-14T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Jake from Leadscape is a persistent vendor attempting to sell services to Jahan Taila, a digital marketing agency owner. His offers revolve around scaling agencies, acquiring high-ticket clients, and improving sales conversions through paid ads and sales closers, often with strong guarantees. These services are aimed at agency owners, not Jahan's restaurant clients."
   },
   {
-    "id": "13",
+    "id": "12",
     "firstName": "Michael",
     "lastName": "Shalev",
     "email": "abdul@derbydigital.us",
     "company": "Derbydigital",
     "website": "https://sprh.mn",
-    "relationshipType": "team",
-    "tags": [],
+    "relationshipType": "client",
+    "tags": [
+      "restaurant",
+      "derby-digital",
+      "menu updates",
+      "team",
+      "website updates",
+      "digital marketing"
+    ],
     "relationshipScore": 100,
     "interactions": [
       {
@@ -3805,6 +4437,16 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "summary": "loyalty palma",
         "subject": "loyalty palma",
         "details": "Jahan, please send to the loyalty text please.\r\n\r\n\r\n\r\nPalma Family: Love is in the air so we\u2019re rewarding you this weekend \ud83d\udc98\r\n*Double points* Fri\u2013Mon at Palma. Great food, great cocktails, packed house\r\n\u2014 plan ahead.\r\n\r\n-- \r\nKeith Valley\r\n*Owner and Operator*\r\n*Phone:* 407-694-6509\r\n*Website <https://palmaitalian.com/> | Facebook\r\n<https://www.facebook.com/palmaitaliankitchen> | Instagram\r\n<https://www.instagram.com/palmaitaliankitchen_cg?fbclid=IwY2xjawOmgF5leHRuA2FlbQIxMABicmlkETE2R1BlSzQ1VXlVaGNzeVVxc3J0YwZhcHBfaWQQMjIyMDM5MTc4ODIwMDg5MgABHocEYFtiD21Grhztd_TR2thCjkJOVr65420HaSacDNUK2X2E-DF_Xbg3Q6-6_aem_Oz4PKR60F1rMOJNL_Tnqmw>*\r\n*Life is better with palm trees & pizza*",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-91-0",
+        "type": "email",
+        "date": "2026-02-11",
+        "summary": "Fwd: Fwd: Re: The Addison Production Design & Remodel x 444 Studios",
+        "subject": "Fwd: Fwd: Re: The Addison Production Design & Remodel x 444 Studios",
+        "details": "Jahan, see here renderings png files u needed thanks\r\n\r\n*All the best,*\r\n*Michael Shalev *\r\n832-643-0855\r\ninfo@thedeannyc.com\r\n*Programing Director/ Event Coordinator  *\r\n[image: The Dean Nyc - Recreation - Midtown Manhattan - New York City]\r\n\r\nSent via Superhuman <https://sprh.mn/?vip=info@thedeannyc.com>\r\n\r\n\r\n---------- Forwarded message ----------\r\nFrom: Michael Shalev <mshalev10@gmail.com>\r\nDate: Wednesday, February 11 2026 at 7:27 PM EST\r\nSubject: Fwd: Re: The Addison Production Design & Remodel x 444 Studios\r\nTo: Michael Shalev <info@thedeannyc.com>\r\n\r\n*Michael Shalev *\r\n(MSU INC)\r\nEvent Management\r\n832-643-0855\r\n\r\n\r\n---------- Forwarded message ----------\r\nFrom: Pao Lopez <pao@444society.co>\r\nDate: Wednesday, February 11 2026 at 5:22 PM EST\r\nSubject: Re: The Addison Production Design & Remodel x 444 Studios\r\nTo: Michael Shalev <mshalev10@gmail.com>\r\nCc: Ian Magid <ianscottmagid@gmail.com>, 39thstreethospitality@gmail.com,\r\nJacob Perler <JAKE@444society.co>, MAX VAILLARD <max@creative-elevation.com>,\r\npalacio.designs.us@gmail.com\r\n\r\nRenders attached\r\n 2.png\r\n<https://drive.google.com/file/d/1k_XYAt-UrHCnlG2eramVxsZBvF5rkg7j/view?usp=drive_web>\r\n 16.png\r\n<https://drive.google.com/file/d/1c1YGiWmVLpuhoTVycXyzACS-wCBAlP14/view?usp=drive_web>\r\n 4.png\r\n<https://drive.google.com/file/d/1utFZlj9jSJ4tNCPBPtUC2Vm4G7N6k2mt/view?usp=drive_web>\r\n 5.png\r\n<https://drive.google.com/file/d/1MDMEXj9j3FA0RCfXchuLv8c-sxFBir8F/view?usp=drive_web>\r\n 6.png\r\n<https://drive.google.com/file/d/1fbRM67QJ0bFc4AZAypw6GR2DHj5kSpJk/view?usp=drive_web>\r\n\r\nOn Thu, Feb 5, 2026 at 6:13\u202fPM Michael Shalev <mshalev10@gmail.com> wrote:\r\n\r\nThanks\r\n\r\n*Michael Shalev *\r\n(MSU INC)\r\nEvent Management\r\n832-643-0855\r\n\r\n\r\nOn Thu, Feb 05, 2026 at 1:46 PM, Pao Lopez <pao@444society.co> wrote:\r\n\r\nHi everyone, It\u2019s been a pleasure working together!\r\n\r\nAttached please find the design layouts and dimensions for the three areas:\r\n\r\n\r\n   - Entrance shelving / wall\r\n   - Photo booth\r\n   - Bar\r\n   - Wall behind booth",
         "direction": "inbound",
         "createdAt": "2026-03-16T12:18:59"
       },
@@ -4019,13 +4661,59 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "merge-info@thede",
+        "content": "Merged with duplicate contact: info@thedeannyc.com",
+        "category": "general",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-11-1",
+        "content": "Michael Shalev (Abdul) is a key contact, likely a project manager or owner, providing content and requests for multiple restaurant clients.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-11-2",
+        "content": "Jahan Taila is actively working on website content updates, menu changes, and potentially loyalty program texts for various restaurants managed by Derby Digital.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "d8c5b74389bc",
         "category": "contact",
         "label": "Phone",
         "value": "828-372-1015"
+      },
+      {
+        "id": "aif-11-1",
+        "category": "business",
+        "label": "Email Address",
+        "value": "abdul@derbydigital.us"
+      },
+      {
+        "id": "aif-11-2",
+        "category": "business",
+        "label": "Phone Number",
+        "value": "832-643-0855"
+      },
+      {
+        "id": "aif-11-3",
+        "category": "business",
+        "label": "Associated Restaurants",
+        "value": "Guidon Brewing, Palma, Mayfly, The Dean NYC, The Addison"
+      },
+      {
+        "id": "aif-11-4",
+        "category": "business",
+        "label": "Primary Activities",
+        "value": "Website content updates, menu management, loyalty program support"
       }
     ],
     "opportunities": [],
@@ -4036,17 +4724,28 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-12-15T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "secondaryEmail": "info@thedeannyc.com",
+    "title": "Programing Director/ Event Coordinator",
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "Michael Shalev (Abdul) is a client contact from Derby Digital, frequently sending requests to Jahan Taila for digital marketing tasks related to multiple restaurant clients including website updates, menu changes, and loyalty program content. This indicates an ongoing client relationship where Jahan is actively managing various restaurant accounts under Derby Digital's umbrella."
   },
   {
-    "id": "14",
-    "firstName": "Kendell",
-    "lastName": "Sheppard",
+    "id": "13",
+    "firstName": "DERBY",
+    "lastName": "DIGITAL RESTAURANT REWARDS SYSTEM",
     "email": "kendelljsheppard@gmail.com",
-    "company": "",
+    "company": "The Service Station",
     "website": "",
     "relationshipType": "client",
-    "tags": [],
+    "tags": [
+      "restaurant",
+      "customer retention",
+      "rewards system",
+      "menu design",
+      "online ordering"
+    ],
     "relationshipScore": 100,
     "interactions": [
       {
@@ -4300,7 +4999,29 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-12-0",
+        "content": "Kendell is actively seeking digital marketing and operational support for 'The Service Station,' indicating a need for various services beyond just a rewards system.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-12-1",
+        "content": "There's a recent engagement with Owner.com for online ordering and customer retention, suggesting a potential overlap or competition in services, but also an openness to external solutions.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-12-2",
+        "content": "Frequent inbound form submissions suggest a need for lead management, customer service automation, and potentially a more robust CRM or loyalty program.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "a5346eded3e9",
@@ -4313,6 +5034,30 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "category": "contact",
         "label": "Address",
         "value": "208 E Burnett Ave, Louisville"
+      },
+      {
+        "id": "aif-12-2",
+        "category": "business",
+        "label": "Primary Contact Email",
+        "value": "kendelljsheppard@gmail.com"
+      },
+      {
+        "id": "aif-12-3",
+        "category": "business",
+        "label": "Restaurant Name",
+        "value": "The Service Station"
+      },
+      {
+        "id": "aif-12-4",
+        "category": "business",
+        "label": "Recent Marketing Partner",
+        "value": "Owner.com"
+      },
+      {
+        "id": "aif-12-5",
+        "category": "business",
+        "label": "Service Needs",
+        "value": "Menu Design, Online Ordering, Customer Retention, Rewards System"
       }
     ],
     "opportunities": [],
@@ -4323,19 +5068,57 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-10-11T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "Owner/Manager (implied)",
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "Kendell Sheppard, likely an owner or manager of 'The Service Station' restaurant in Louisville, KY, is an active client of Derby Digital. They are seeking assistance with various digital marketing and operational needs, including menu design, online ordering, and customer retention, despite recently engaging with Owner.com for some of these services. The high volume of inbound form submissions also points to a need for efficient customer interaction and loyalty programs."
   },
   {
-    "id": "15",
+    "id": "14",
     "firstName": "Manu",
     "lastName": "Anil",
     "email": "manuanil347@gmail.com",
-    "company": "",
+    "company": "Derby Digital",
     "website": "https://email.replies.acct-mgmt.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "team",
+    "tags": [
+      "internal communication",
+      "payments",
+      "project management"
+    ],
     "relationshipScore": 100,
     "interactions": [
+      {
+        "id": "email-40-0",
+        "type": "email",
+        "date": "2026-03-10",
+        "summary": "Payment",
+        "subject": "Payment",
+        "details": "James Leach\r\n\r\n   -\r\n\r\n   Paid: 5 times\r\n\r\n   -\r\n\r\n   Total collected: $995\r\n\r\n   -\r\n\r\n   My 50%: $497.50\r\n\r\n\r\nToday\u2019s Man\r\n\r\n   -\r\n\r\n   Paid: 4 times\r\n\r\n   -\r\n\r\n   Total collected: $2,800\r\n\r\n   -\r\n\r\n   My 50%: $1,400\r\n\r\n\r\nSNKRplug\r\n\r\n   -\r\n\r\n   Paid: 2 times\r\n\r\n   -\r\n\r\n   Total collected: $300\r\n\r\n   -\r\n\r\n   My 50%: $150\r\n\r\n\r\nLori\r\n\r\n   -\r\n\r\n   Paid: 1 time\r\n\r\n   -\r\n\r\n   Total collected: $500\r\n\r\n   -\r\n\r\n   My 50%: $250\r\n\r\n\r\nMoney I spent on the card: $487\r\n\r\nTotal I\u2019m owed after card spend: $1,810.50",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-40-1",
+        "type": "email",
+        "date": "2026-02-24",
+        "summary": "new shit",
+        "subject": "new shit",
+        "details": "Yo Jahan,\r\n\r\nFinished the Bluegrass doc \u2014 it mentions emergency repairs and includes the\r\nexamples you told me to add + added some new things. check it out and lmk\r\n\r\nAlso, 502 Thrift\u2019s website is gonna be live soon(he;s taking pictures of\r\nmerchandise), and 502 Snkr Plug\u2019s website too, I've been making that.\r\n\r\nTalked to Mo too \u2014 new campaign is live and it\u2019s getting more sales. He\u2019s\r\ntryna see if he can refer us to his friend in Ohio who owns a shop too.\r\n\r\nOn some real life shit though, I\u2019ve just been hella preoccupied. Matrix\r\nattacked again, my great grandma died last week, my parents are fucked up\r\nright now, my dad\u2019s going to India, my mom\u2019s been crying, and my other\r\ngrandma is still in the hospital. Shit\u2019s not looking too good for her, so\r\nI\u2019ve just been dealing with that.\r\n\r\nAlso, I got some meetings booked this week that we can attend together \u2014\r\nI\u2019ll put them in ClickUp.\r\n\r\nCall or text me when you can so we can catch up and shit too.\r\n\r\n\u2013 Manu",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-40-2",
+        "type": "email",
+        "date": "2026-02-12",
+        "summary": "Re: Derby Digital demo & examples",
+        "subject": "Re: Derby Digital demo & examples",
+        "details": "Are you sending me a link to join?\r\n\r\nOn Wed, Feb 11, 2026 at 1:12\u202fPM Manu Anil <manu@derbydigital.us> wrote:\r\n\r\n> Hi Ashley,\r\n>\r\n> I took another look at your site, and there\u2019s definitely more potential\r\n> there \u2014 especially for what restaurants are typically paying on SpotHopper.\r\n>\r\n> You\u2019ve probably noticed that a lot of SpotHopper websites look the same.\r\n> They follow a similar template structure, which makes it hard to truly\r\n> stand out. We build everything fully custom so you\u2019re differentiated from\r\n> the competition with a cleaner, more premium website that actually converts.\r\n>\r\n> Our backend system connects everything in one place \u2014 reservations, online\r\n> ordering, catering, private events, reviews, SMS/email marketing \u2014 all\r\n> streamlined into one organized dashboard so you\u2019re not juggling multiple\r\n> tools.\r\n>\r\n> I also ran a quick audit on your site, and SpotHopper isn\u2019t actively\r\n> improving your SEO or building authority over time. That means your\r\n> rankings aren\u2019t growing \u2014 you\u2019re mostly just being maintained. I\u2019d be happy\r\n> to walk you through that live.\r\n>\r\n> Here are a few restaurants that switched from SpotHopper to us (happy to\r\n> send more if helpful):\r\n>\r\n> \u2022 https://palmaitalian.com\r\n> <https://gfhiedh.r.af.d.sendibt2.com/tr/cl/m6JVVpeQgIyE311pDotxMH1aWgF1HL5lW7lmn2FLMz6XrgQOLJGt9R5JEMb9RFnQnr8aeWBoEv3QdrKNvUcIrSl0vC6TbOwbbolGt7feW6OES8omOGTItkBMO4DZdYcJgocVcYpX4wp2ocJgCu6EpHDo_2sSUsLbbGnC8_JYk-izKcAN0dxsITH8NV-XQTbZPfAQis7eCkYEG8TfhuSoydAfiGphzAgwX1hUM1IuchQ0-ufOfusPyQy-WnSbe0qof7qPLlMp_apqpwjJtLqc3g>\r\n> \u2022 https://themayflynyc.com\r\n> <https://gfhiedh.r.af.d.sendibt2.com/tr/cl/9MOTFFlJfvfVZP7ozefGuq6Sdh94UsK8ApLbYwTHdLTzDUOcSGQff55dCr-LH7gjkG2HaNWscwn_Ctr8ULkSOwDySbocrFOwv2VLc2dTgtZx4WMLyIHwf8gpKSBDay1Ayva-uxccO9_DFSLOQpBS4vvJXAgqyxAHS6jMg5JN828IuDGsK-_asgq5CQYmpBIQR8E1jGbFH0G8SP5SikS-9gNHbgJvLXrtW8j_yEK3LLyIclKhB5AHx78UoF4bw8vSpvqRA_2InGEiCyxxcbv2QQ>\r\n> \u2022 https://zhaobentonville.com\r\n> <https://gfhiedh.r.af.d.sendibt2.com/tr/cl/jRgsyD1X",
+        "direction": "outbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
       {
         "id": "email-218-0",
         "type": "email",
@@ -4567,6 +5350,16 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       },
       {
+        "id": "email-40-3",
+        "type": "email",
+        "date": "2025-12-24",
+        "summary": "Your video is here...",
+        "subject": "Your video is here...",
+        "details": "Hey! Jahan here.\u00a0\r\n\r\n\r\nYou just opted in to see my video on how we generate 30-50 monthly leads for our electrician clients using AI Funnels.\r\n\r\n\r\n\u2192 Here's the link to watch the video [https://email.send.lcmsgsndr.org/c/eJxsk09v6joQxT9NsgtyHIckCy_Kn9z2Qi5wC6WwiRzbJAY7Tm2TlH76J_qqp-qp25k5c6TfnKGlYHiW7U7yur38ieP5pIjFhC8yn2ECUFIxn2lFRIstb9lIUmVr2zIz0qb-6pR6aLmxjehKd-s4rhtZVld64c7nOEzG4xjFKEp8roiQpeLWkprfbRcHlvy57ter2ziFbyk06mX5NfW5aNDmcpJ6-Fa7y-I4hTRCKEgTWgWIRjwgKSIBjVAW8xRQGoffJdbx7q5jAFTVKQyDZBxmAaqyKMhYwgJEU8JiRhiJkc_bXhjdKt463BnNrtQJ3foNRmhMxjDLYhiFKEsAiEFGoxSAMCaUJMgXGAIYhxAiEIEoTkYZYByyMSQ0iiECyEPgB4bClrYhhrPyi-bJaFUSxgy3tjT8RKjThjPszJX7EjfOddaLHjyYezCv9YhxU92YqIUjcnS1HswH4mjjS1r-C0G0jpuWSLyDuWW_Xi6voQfzzSoPrZ6J6vfT9HfKp9l2-7CWHszfF7LeVaf-8TJsXlfvrWKv4ta0UecmV1eQt6xHx3B5jlaFnHab89GD-dqD-at6FNt-P4VKZ0NaNPsjBdEMvWyqv22Raw_mM5YUdZ-vD6xg7x-skPNnaW5bk6arOXDb5Lzs31YdaaZF1tXwbY7S5_Fu48EJev4Q60Q9zMO_Sjra5V0DTvvZwoOTpxt4Fodkqp8OHsz352KZpNtfx2GzzB4PxRoNH-vjthh2XjTzpf4Mu1KXCXHrenHe326LIT2-84uvuGs0w6QTfmd0Lxg3WHLCqG5bfj-Ab7Ai7dVD4H-8fauvhnL8yToQtg_useXGd_hu-KObw1Sr8sevc5i78r_g9xj-EwAA__8ncznt]\r\n\r\nReply here if you have questions, or if you're interested in me setting up and managing AI lead gen campaigns for your electrical\r\nbusiness.\r\n\r\n\r\nJahan\r\n\r\n\r\nps: If you're skeptical of working with me, simply Google \"Derby Digital\" and read through 40+ 5-star reviews from electricians\r\njust like you!\u00a0\r\n\r\n\r\nIf you no longer wish to receive these emails you may unsubscribe\r\n[https://email.send.lcmsgsndr.org/c/eJxslNFzojoYxf-a8EYHkyDwwMOqZdtVVt3aWn1hQvIpUUJoEqD2r79jt3fvzlxfId85k_P7TnghRTpLng91tzn_DMP7SR7KCcwTT6QsoFEpPKEVk01qoRF3NVf2aBth7rQ5fv0p9NCAsZVsC3dpIT1WdVF2_AzOg3QUjcchDSmJPFBM1oUCa9kRrrbznYh-dtvV8jKO8VuMjXpZfJ36FBq0OR9qPfz17ToWhjHmhFI_jnjpU07AZzFlPic0CSEOOA9Hf49YB-11TgRBWR5GIz8ajxKflgnxExEJn_KYiVAwwULqQdNLoxsFjUtbo0XHndSNV6WYQUyxiALCKQfOgCchDaPoQCLOCMWeTHGAwxHGNCABCaO7JBCAxRgzTkJMA4pocCNDaQtbMQOi-ErzYLQqmBAGrC0MHBh32oBInenAq9PKudYi8g3hDOHMguklB3v3ryTXCuHs8_YW4azsZC3AIJx1je1Ky40sw",
+        "direction": "outbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
         "id": "email-218-5",
         "type": "email",
         "date": "2025-12-22",
@@ -4575,15 +5368,98 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "details": "Hi Jahan,\r\n\r\nNicole here - I work with The Granville Pub. I'd love to set up a time to\r\nconnect with you guys to learn more about what you do, and what all you\r\noffer.\r\n\r\nCan you shoot me back some days and times that work for you this and\r\nnext week? If your availability it limited due to the holidays - no worries\r\nwe can also look into the following week.\r\n\r\nLook forward to hearing from you.\r\n\r\n[image: linkedin] <https://www.linkedin.com/in/nicoleemenpour/>\r\n[image: instagram] <https://www.instagram.com/ugc_withnicole/>\r\nNicole Hill\r\n\r\nOwner\r\n\r\nNicole Hill Creative\r\n[image: mobilePhone] 614-736-9052 | 614-596-8818\r\n[image: emailAddress] nicole@nicolehillcreative.com\r\n[image: website] www.nicolehillcreative.com",
         "direction": "inbound",
         "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-40-4",
+        "type": "email",
+        "date": "2025-12-03",
+        "summary": "(no subject)",
+        "subject": "",
+        "details": "Attachment available until Jan 2, 2026\r\nClick to Download\r\n <https://www.icloud.com/attachment/?u=https%3A%2F%2Fcvws.icloud-content.com%2FB%2FAfSfdqTK02cXQgdsImrvE67LLGerASJZ47Mmml0IE8lDjSn1a57bsH4P%2F%24%7Bf%7D%3Fo%3DAs9pA0SKpyqHVbySANRfWgl0km0kCq9_EFJgyb3tPQCP%26v%3D1%26x%3D3%26a%3DCAogdbod0NQwUodCAIIDj92Dn-3AAjrlW_ferZDd51DYDnoSehD3p6CVrjMY97eb6bczIgEAKgkC6AMA_0dJ0JBSBMssZ6taBNuwfg9qJyzdvXo9tQhQypt74soY9XjX_s43uzTnvOkkf25mdzNxKPFlonR8aXIn70W7H1LVSHXy4nexGnd5ZRFx_59R8zUfgxn18WV5pK132I2K0zMQ%26e%3D1767331257%26fl%3D%26r%3DCB34091C-E1A7-4DA3-9728-B7E3B65E7BA6-1%26k%3D%24%7Buk%7D%26ckc%3Dcom.apple.largeattachment%26ckz%3DDFCB1001-C733-4D35-B879-293B435D7607%26p%3D149%26s%3D-YyzQEah6lqv6feS3RmWZwyCaew&uk=TPcmn7ulo062C8oO5Pu7kg&f=Movie%20on%2011-25-25%20at%204.28%20PM.mov&sz=2623437463>Movie on 11-25-25 at 4.28 PM.mov\r\n2.62 GB",
+        "direction": "outbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-40-5",
+        "type": "email",
+        "date": "2025-09-17",
+        "summary": "[Scan] 2025-09-17 13:23",
+        "subject": "[Scan] 2025-09-17 13:23",
+        "details": "Seo audit \r\n--\r\nSent with Genius Scan for iOS.\r\nhttps://tglapp.com/e/scan",
+        "direction": "outbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-40-6",
+        "type": "email",
+        "date": "2025-09-07",
+        "summary": "Re: Bringing Do Asian Fusion Online",
+        "subject": "Re: Bringing Do Asian Fusion Online",
+        "details": "Manu,\r\n\r\nI'm so sorry for the delay in responding to you! I am interested in seeing\r\nwhat you are able to offer. We are a very small business with only one\r\nlocation, so pricing is rather important to us. Would you be available for\r\na demo sometime this week? I should be available any weekday between 11:00\r\na.m. and 4:00 p.m.\r\n\r\nThank you,\r\n\r\nKalie Ammons\r\n\r\nOn Mon, Aug 25, 2025 at 2:44\u202fPM Manu Anil <manu@6578437.brevosend.com>\r\nwrote:\r\n\r\n> Hi Kelly,\r\n>\r\n> It was great speaking with you earlier. Since Do Asian Fusion doesn\u2019t\r\n> currently have a website, I\u2019d like to show you how we can set you up with a\r\n> professional site that includes online ordering, reservations, and a\r\n> loyalty/rewards program.\r\n>\r\n>\r\n> With our software, we can handle everything\u2014websites, getting your\r\n> business ranked higher on Google so more customers can find you, email/SMS\r\n> marketing, catering, event management, and custom social media design.\r\n> We\u2019ve already worked with 40\u201350 restaurants, and in our demo we can walk\r\n> you through exactly how it all works and how it would look for Do Asian\r\n> Fusion.\r\n>\r\n>\r\n> You can take a look at our site here to learn more: derbydigital.us\r\n> <https://gfhiedh.r.bh.d.sendibt3.com/tr/cl/BRU2vFVWgv4GTzD2a69TTJCFhDpOXRzwVtaYcC5Go6FxegkoLVPAUN1o58KOJ4RISw-PzIm_FF_sQa1yNjduFmPWmxZ9bc-6kvnwNl8cOkvZBP4fxqZltvd7w4pjsiWudBJ0s_BFRxjKdk5RMu2edlAP4gJQPGcnsYkuUvMx8Ev0fheysYqGHPOVGOF5Cdlz_zG5Dp0p2-x6586T7N1zMO2dorG9W8C61fDMi-mGfhxZ__oaax7TkAIwt3iEdozFU_ycK-9MTqj1>\r\n>\r\n>\r\n> Best regards,\r\n>\r\n> Manu Anil\r\n>\r\n>\r\n\r\n-- \r\nManager\r\nDo Asian Fusion",
+        "direction": "outbound",
+        "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "merge-manu@derby",
+        "content": "Merged with duplicate contact: manu@derbydigital.us",
+        "category": "general",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-13-1",
+        "content": "Manu appears to be an internal team member at Derby Digital, handling payments, project updates, and potentially client communication.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-13-2",
+        "content": "There are multiple payment-related emails, some indicating failed payments for a 'LeadConnector System' which might be a tool used by Derby Digital.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-13-3",
+        "content": "Manu is involved in content creation (Bluegrass doc) and website development (502 Thrift's website).",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "0b695e22df4f",
         "category": "contact",
         "label": "Phone",
         "value": "614-736-9052"
+      },
+      {
+        "id": "aif-13-1",
+        "category": "business",
+        "label": "Role",
+        "value": "Internal team member (likely project manager, content creator, or operations)"
+      },
+      {
+        "id": "aif-13-2",
+        "category": "business",
+        "label": "Company Email Domain",
+        "value": "@derbydigital.us"
+      },
+      {
+        "id": "aif-13-3",
+        "category": "business",
+        "label": "Payment System",
+        "value": "LeadConnector System"
+      },
+      {
+        "id": "aif-13-4",
+        "category": "business",
+        "label": "Project Management Tool",
+        "value": "ClickUp"
       }
     ],
     "opportunities": [],
@@ -4594,17 +5470,24 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-12-22T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "secondaryEmail": "manu@derbydigital.us",
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "Manu Anil is an internal team member at Derby Digital, involved in project management, content creation, client communication, and financial operations. The emails indicate collaboration with Jahan on projects, handling payments, and managing internal tools like LeadConnector and ClickUp."
   },
   {
-    "id": "16",
+    "id": "15",
     "firstName": "Aaron",
     "lastName": "Martinez",
     "email": "aaronmartinez@closersintoleaders.com",
     "company": "Closersintoleaders",
     "website": "https://d2n5vF04.na1.hubspotlinks.com",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "commission_based_services",
+      "sales_appointment_setting"
+    ],
     "relationshipScore": 100,
     "interactions": [
       {
@@ -4838,8 +5721,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-14-0",
+        "content": "Aaron Martinez from Closersintoleaders is consistently emailing Jahan Taila about commission-based appointment setters for high-ticket businesses.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-14-1",
+        "content": "The emails are framed as forwarded messages from 'Cole' and emphasize getting more sales calls and quality leads.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-14-0",
+        "category": "business",
+        "label": "Sender",
+        "value": "Aaron Martinez (from Cole's team)"
+      },
+      {
+        "id": "aif-14-1",
+        "category": "business",
+        "label": "Company",
+        "value": "Closersintoleaders"
+      },
+      {
+        "id": "aif-14-2",
+        "category": "business",
+        "label": "Service Offered",
+        "value": "Commission-based appointment setters/lead generation"
+      },
+      {
+        "id": "aif-14-3",
+        "category": "business",
+        "label": "Target Client",
+        "value": "High-ticket businesses needing more sales calls/appointments"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -4848,17 +5771,25 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-01-23T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "This contact is a persistent vendor attempting to sell commission-based appointment setting services to Jahan Taila, likely perceiving Derby Digital as a 'high-ticket business' that needs more sales calls. Jahan is being targeted as a potential client for lead generation services."
   },
   {
-    "id": "17",
+    "id": "16",
     "firstName": "Silviana",
     "lastName": "Prioteasa",
     "email": "silviana@globalfoodsoft.com",
     "company": "Globalfoodsoft",
     "website": "https://info.restaurantlogin.com",
-    "relationshipType": "vendor",
-    "tags": [],
+    "relationshipType": "partner",
+    "tags": [
+      "POS",
+      "Online Ordering",
+      "Oracle",
+      "Restaurant Tech",
+      "Reservations",
+      "Marketing Automation"
+    ],
     "relationshipScore": 100,
     "interactions": [
       {
@@ -5072,8 +6003,55 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-15-0",
+        "content": "Silviana from Globalfoodsoft (Oracle partner) is actively pitching various restaurant technology solutions to Jahan, likely for resale or integration into Derby Digital's offerings.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-15-1",
+        "content": "The emails consistently position Jahan as someone who helps restaurants, suggesting Globalfoodsoft sees Derby Digital as a potential channel partner or reseller.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-15-2",
+        "content": "The content covers a wide range of restaurant operational and marketing tools, indicating Globalfoodsoft has a comprehensive suite of products under the Oracle Restaurants eStore platform.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-15-0",
+        "category": "business",
+        "label": "Sender Company",
+        "value": "Globalfoodsoft (partnering with Oracle)"
+      },
+      {
+        "id": "aif-15-1",
+        "category": "business",
+        "label": "Product Focus",
+        "value": "Oracle Restaurants eStore platform, POS, online ordering, reservations, marketing automation, reporting"
+      },
+      {
+        "id": "aif-15-2",
+        "category": "business",
+        "label": "Call to Action",
+        "value": "Resell/implement their solutions to Jahan's restaurant clients"
+      },
+      {
+        "id": "aif-15-3",
+        "category": "business",
+        "label": "Frequency of Contact",
+        "value": "Very high (daily/every few days)"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -5082,17 +6060,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-08-29T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Silviana Prioteasa from Globalfoodsoft is a highly active inbound contact, consistently pitching Oracle's restaurant technology solutions to Jahan Taila. The communication clearly positions Jahan as a potential partner or reseller who can integrate these tools into Derby Digital's services for their restaurant clients. The emails cover a broad spectrum of restaurant operations and marketing, from POS and online ordering to reservations and marketing automation, all under the 'Oracle Restaurants eStore platform' umbrella."
   },
   {
-    "id": "18",
+    "id": "17",
     "firstName": "Hostinger",
     "lastName": "",
     "email": "team@user.hostinger.com",
     "company": "User",
     "website": "https://clicks.hostinger.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "restaurant niche",
+      "web hosting",
+      "website issues"
+    ],
     "relationshipScore": 100,
     "interactions": [
       {
@@ -5296,8 +6279,55 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-16-0",
+        "content": "This contact is receiving critical hosting alerts (outgrown plan, PHPmail suspended) indicating potential website performance and deliverability issues.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-16-1",
+        "content": "Multiple restaurant-related domains (conallspublichouse.com, dipncrepe.com) were recently connected, suggesting this 'User' manages websites for restaurants.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-16-2",
+        "content": "The 'User' company name is generic, implying this is likely an agency or freelancer managing multiple client websites, aligning with Jahan's services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-16-0",
+        "category": "business",
+        "label": "Hosting Provider",
+        "value": "Hostinger"
+      },
+      {
+        "id": "aif-16-1",
+        "category": "business",
+        "label": "Recent Hosting Issues",
+        "value": "Outgrown plan, PHPmail suspended"
+      },
+      {
+        "id": "aif-16-2",
+        "category": "business",
+        "label": "Associated Domains (Restaurant Niche)",
+        "value": "conallspublichouse.com, dipncrepe.com"
+      },
+      {
+        "id": "aif-16-3",
+        "category": "business",
+        "label": "Likely Role",
+        "value": "Website manager/agency for multiple clients"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -5306,17 +6336,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-10-03T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "This contact, 'User', appears to be an agency or individual managing multiple websites, including several in the restaurant niche. They are experiencing critical web hosting issues with Hostinger, such as outgrowing their plan and suspended PHPmail, which could impact their clients' online presence. This presents a strong opportunity for Jahan Taila at Derby Digital to offer website optimization, management, or potentially migration services, especially given their focus on the restaurant niche."
   },
   {
-    "id": "19",
+    "id": "18",
     "firstName": "Jess",
     "lastName": "Valley",
     "email": "jess@valleynorthhospitality.com",
     "company": "Valleynorthhospitality",
     "website": "https://email.ec1.msgsndr.org",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "reservations",
+      "hiring",
+      "hospitality",
+      "restaurant"
+    ],
     "relationshipScore": 90,
     "interactions": [
       {
@@ -5500,13 +6536,52 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-17-0",
+        "content": "Jess Valley receives high volume of reservation and job requests for Palma Italian Kitchen, indicating active operations and potential need for digital marketing to manage/optimize these processes.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-17-1",
+        "content": "The emails are automated form submissions, suggesting they have a website and potentially a CRM or booking system in place.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "f0d98f7fca12",
         "category": "contact",
         "label": "Phone",
         "value": "1407928664"
+      },
+      {
+        "id": "aif-17-1",
+        "category": "business",
+        "label": "Primary Business",
+        "value": "Hospitality/Restaurant (Palma Italian Kitchen)"
+      },
+      {
+        "id": "aif-17-2",
+        "category": "business",
+        "label": "Email Volume",
+        "value": "18 emails (recent sample shows daily activity)"
+      },
+      {
+        "id": "aif-17-3",
+        "category": "business",
+        "label": "Key Activities",
+        "value": "Reservations, Job Applications"
+      },
+      {
+        "id": "aif-17-4",
+        "category": "business",
+        "label": "Specific Restaurant",
+        "value": "Palma Italian Kitchen"
       }
     ],
     "opportunities": [],
@@ -5517,17 +6592,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-06-14T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Jess Valley at Valleynorthhospitality appears to be involved with Palma Italian Kitchen, a restaurant actively managing online reservations and job applications. This indicates a potential need for digital marketing services to enhance their online presence, streamline booking processes, or optimize recruitment efforts."
   },
   {
-    "id": "20",
+    "id": "19",
     "firstName": "Bella",
     "lastName": "Napoli Pizzeria",
     "email": "info@bellanapolipizzeria.com",
-    "company": "Bellanapolipizzeria",
+    "company": "Bella Napoli Pizzeria",
     "website": "https://email.emails.bellanapolipizzeria.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "local business",
+      "pizzeria",
+      "form submissions",
+      "restaurant"
+    ],
     "relationshipScore": 85,
     "interactions": [
       {
@@ -5701,13 +6782,59 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-18-0",
+        "content": "Bella Napoli Pizzeria is actively receiving various form submissions, including contact requests, private party inquiries, and job applications.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-18-1",
+        "content": "The consistent inbound activity suggests a need for efficient lead management and potentially improved website functionality or marketing efforts.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-18-2",
+        "content": "The presence of private party requests indicates a potential for catering or event-based marketing strategies.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "a1c0c632609e",
         "category": "contact",
         "label": "Phone",
         "value": "9286531793"
+      },
+      {
+        "id": "aif-18-1",
+        "category": "business",
+        "label": "Total Emails",
+        "value": "17"
+      },
+      {
+        "id": "aif-18-2",
+        "category": "business",
+        "label": "Recent Inbound Activity",
+        "value": "Multiple form submissions (contact, private parties, job requests) between July 18-26, 2025"
+      },
+      {
+        "id": "aif-18-3",
+        "category": "business",
+        "label": "Key Contact Email",
+        "value": "info@bellanapolipizzeria.com"
+      },
+      {
+        "id": "aif-18-4",
+        "category": "business",
+        "label": "Niche Alignment",
+        "value": "Restaurant (Pizzeria)"
       }
     ],
     "opportunities": [],
@@ -5718,18 +6845,26 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-07-10T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "Bella Napoli Pizzeria is a restaurant prospect in Louisville, KY, actively receiving various inbound form submissions. This indicates a potential need for digital marketing services to manage leads, optimize their website, and potentially expand their private party or catering business."
   },
   {
-    "id": "21",
+    "id": "20",
     "firstName": "Charlie",
     "lastName": "Morgan",
     "email": "charlie@imperiumlabsltd.com",
     "company": "Imperiumlabsltd",
     "website": "https://skool.com",
     "relationshipType": "other",
-    "tags": [],
-    "relationshipScore": 75,
+    "tags": [
+      "live training",
+      "email marketing",
+      "client acquisition",
+      "business growth"
+    ],
+    "relationshipScore": 100,
     "interactions": [
       {
         "id": "email-2-0",
@@ -5852,12 +6987,72 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       },
       {
+        "id": "email-72-0",
+        "type": "email",
+        "date": "2026-03-03",
+        "summary": "Launch went nuts. But are you inside?\n\n\n\n\n\n",
+        "subject": "Launch went nuts. But are you inside?\n\n\n\n\n\n",
+        "details": "<!DOCTYPE html><html>\n<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><meta name=\"viewport\" content=\"width=device-width, minimal-ui, initial-scale=1.0, maximum-scale=1.0, user-scalable=0;\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"><meta name=\"format-detection\" content=\"telephone=no, date=no, email=no, address=no\"><meta name=\"x-apple-disable-message-reformatting\">\n <!--[if (mso 16)]><style type=\"text/css\"> a { text-decoration: none; } </style><![endif]--><!--[if gte mso 9]><style> sup { font-size: 100% !important; } </style><![endif]--><!--[if gte mso 9]><noscript>\n         <xml>\n           <o:OfficeDocumentSettings>\n           <o:AllowPNG></o:AllowPNG>\n           <o:PixelsPerInch>96</o:PixelsPerInch>\n           </o:OfficeDocumentSettings>\n         </xml>\n      </noscript><![endif]--><!--[if gte mso 9]><style>sup { font-size: 100% !important; }</style><![endif]--><!--[if mso]><xml>\n    <w:WordDocument xmlns:w=\"urn:schemas-microsoft-com:office:word\">\n      <w:DontUseAdvancedTypographyReadingMail/>\n    </w:WordDocument>\n    </xml>\n<![endif]--><!--[if !mso]><!-- --><link href=\"https://fonts.googleapis.com/css?family=Roboto:400,400i,700,700i\" rel=\"stylesheet\"><!--<![endif]--><style type=\"text/css\">#outlook a { padding:0;}.es-button { mso-style-priority:100!important; text-decoration:none!important;}a[x-apple-data-detectors] { color:inherit!important; text-decoration:none!important; font-size:inherit!important; font-family:inherit!important; font-weight:inherit!important; line-height:inherit!important;}.es-desk-hidden { display:none; float:left; overflow:hidden; width:0; max-height:0; line-height:0; mso-hide:all;}@media only screen and (max-width:600px) {p, ul li, ol li, a { line-height:150%!important } h1, h2, h3, h1 a, h2 a, h3 a { line-height:120% } h1 { font-size:30px!important; text-align:center } h2 { font-size:26px!important; text-align:center } h3 { font-size:20px!important; text-align:center }\n .es-header-body h1 a, .es-content",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-72-1",
+        "type": "email",
+        "date": "2026-03-02",
+        "summary": "The Future 6-Figure Jahan is Inside This Email\n\n\n\n\n",
+        "subject": "The Future 6-Figure Jahan is Inside This Email\n\n\n\n\n",
+        "details": "<!DOCTYPE html><html>\n<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><meta name=\"viewport\" content=\"width=device-width, minimal-ui, initial-scale=1.0, maximum-scale=1.0, user-scalable=0;\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"><meta name=\"format-detection\" content=\"telephone=no, date=no, email=no, address=no\"><meta name=\"x-apple-disable-message-reformatting\">\n <!--[if (mso 16)]><style type=\"text/css\"> a { text-decoration: none; } </style><![endif]--><!--[if gte mso 9]><style> sup { font-size: 100% !important; } </style><![endif]--><!--[if gte mso 9]><noscript>\n         <xml>\n           <o:OfficeDocumentSettings>\n           <o:AllowPNG></o:AllowPNG>\n           <o:PixelsPerInch>96</o:PixelsPerInch>\n           </o:OfficeDocumentSettings>\n         </xml>\n      </noscript><![endif]--><!--[if gte mso 9]><style>sup { font-size: 100% !important; }</style><![endif]--><!--[if mso]><xml>\n    <w:WordDocument xmlns:w=\"urn:schemas-microsoft-com:office:word\">\n      <w:DontUseAdvancedTypographyReadingMail/>\n    </w:WordDocument>\n    </xml>\n<![endif]--><!--[if !mso]><!-- --><link href=\"https://fonts.googleapis.com/css?family=Roboto:400,400i,700,700i\" rel=\"stylesheet\"><!--<![endif]--><style type=\"text/css\">#outlook a { padding:0;}.es-button { mso-style-priority:100!important; text-decoration:none!important;}a[x-apple-data-detectors] { color:inherit!important; text-decoration:none!important; font-size:inherit!important; font-family:inherit!important; font-weight:inherit!important; line-height:inherit!important;}.es-desk-hidden { display:none; float:left; overflow:hidden; width:0; max-height:0; line-height:0; mso-hide:all;}@media only screen and (max-width:600px) {p, ul li, ol li, a { line-height:150%!important } h1, h2, h3, h1 a, h2 a, h3 a { line-height:120% } h1 { font-size:30px!important; text-align:center } h2 { font-size:26px!important; text-align:center } h3 { font-size:20px!important; text-align:center }\n .es-header-body h1 a, .es-content",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-72-2",
+        "type": "email",
+        "date": "2026-03-01",
+        "summary": "Imperium\u2122 Premium // Imperium\u2122 VIP   \n\n\n\n\n",
+        "subject": "Imperium\u2122 Premium // Imperium\u2122 VIP   \n\n\n\n\n",
+        "details": "<!DOCTYPE html><html>\n<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><meta name=\"viewport\" content=\"width=device-width, minimal-ui, initial-scale=1.0, maximum-scale=1.0, user-scalable=0;\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"><meta name=\"format-detection\" content=\"telephone=no, date=no, email=no, address=no\"><meta name=\"x-apple-disable-message-reformatting\">\n <!--[if (mso 16)]><style type=\"text/css\"> a { text-decoration: none; } \n</style><![endif]--><!--[if gte mso 9]><style> sup { font-size: 100% !important; } </style><![endif]--><!--[if gte mso 9]><noscript>\n         <xml>\n           <o:OfficeDocumentSettings>\n           <o:AllowPNG></o:AllowPNG>\n           <o:PixelsPerInch>96</o:PixelsPerInch>\n           </o:OfficeDocumentSettings>\n         </xml>\n      </noscript><![endif]--><!--[if gte mso 9]><style>sup { font-size: 100% !important; }</style><![endif]--><!--[if mso]><xml>\n    <w:WordDocument xmlns:w=\"urn:schemas-microsoft-com:office:word\">\n      <w:DontUseAdvancedTypographyReadingMail/>\n    </w:WordDocument>\n    </xml><![endif]--><!--[if !mso]><!-- --><link href=\"https://fonts.googleapis.com/css?family=Roboto:400,400i,700,700i\" rel=\"stylesheet\"><!--<![endif]--><style type=\"text/css\">#outlook a {\tpadding:0;}.es-button {\tmso-style-priority:100!important;\ttext-decoration:none!important;}a[x-apple-data-detectors] {\tcolor:inherit!important;\ttext-decoration:none!important;\tfont-size:inherit!important;\tfont-family:inherit!important;\tfont-weight:inherit!important;\tline-height:inherit!important;}.es-desk-hidden {\tdisplay:none;\tfloat:left;\toverflow:hidden;\twidth:0;\tmax-height:0;\tline-height:0;\tmso-hide:all;}@media only screen and (max-width:600px) {p, ul li, ol li, a { line-height:150%!important } h1, h2, h3, h1 a, h2 a, h3 a { line-height:120% } h1 { font-size:30px!important; text-align:center } h2 { font-size:26px!important; text-align:center } h3 { font-size:20px!important; text-align:center } .es-header-body h1 a, .es-content-",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-72-3",
+        "type": "email",
+        "date": "2026-02-28",
+        "summary": "I'm investing in (& guaranteeing) your success Jahan. Details Inside.\n\n\n\n\n",
+        "subject": "I'm investing in (& guaranteeing) your success Jahan. Details Inside.\n\n\n\n\n",
+        "details": "<!DOCTYPE html><html>\n<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><meta name=\"viewport\" content=\"width=device-width, minimal-ui, initial-scale=1.0, maximum-scale=1.0, user-scalable=0;\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"><meta name=\"format-detection\" content=\"telephone=no, date=no, email=no, address=no\"><meta name=\"x-apple-disable-message-reformatting\">\n <!--[if (mso 16)]><style type=\"text/css\"> a { text-decoration: none; } \n</style><![endif]--><!--[if gte mso 9]><style> sup { font-size: 100% !important; } </style><![endif]--><!--[if gte mso 9]><noscript>\n         <xml>\n           <o:OfficeDocumentSettings>\n           <o:AllowPNG></o:AllowPNG>\n           <o:PixelsPerInch>96</o:PixelsPerInch>\n           </o:OfficeDocumentSettings>\n         </xml>\n      </noscript><![endif]--><!--[if gte mso 9]><style>sup { font-size: 100% !important; }</style><![endif]--><!--[if mso]><xml>\n    <w:WordDocument xmlns:w=\"urn:schemas-microsoft-com:office:word\">\n      <w:DontUseAdvancedTypographyReadingMail/>\n    </w:WordDocument>\n    </xml><![endif]--><!--[if !mso]><!-- --><link href=\"https://fonts.googleapis.com/css?family=Roboto:400,400i,700,700i\" rel=\"stylesheet\"><!--<![endif]--><style type=\"text/css\">#outlook a {\tpadding:0;}.es-button {\tmso-style-priority:100!important;\ttext-decoration:none!important;}a[x-apple-data-detectors] {\tcolor:inherit!important;\ttext-decoration:none!important;\tfont-size:inherit!important;\tfont-family:inherit!important;\tfont-weight:inherit!important;\tline-height:inherit!important;}.es-desk-hidden {\tdisplay:none;\tfloat:left;\toverflow:hidden;\twidth:0;\tmax-height:0;\tline-height:0;\tmso-hide:all;}@media only screen and (max-width:600px) {p, ul li, ol li, a { line-height:150%!important } h1, h2, h3, h1 a, h2 a, h3 a { line-height:120% } h1 { font-size:30px!important; text-align:center } h2 { font-size:26px!important; text-align:center } h3 { font-size:20px!important; text-align:center } .es-header-body h1 a, .es-content-",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-72-4",
+        "type": "email",
+        "date": "2026-02-27",
+        "summary": "Something i.n.s.a.n.e is live at Imperium\u2122. Academy exclusive.\n\n\n\n",
+        "subject": "Something i.n.s.a.n.e is live at Imperium\u2122. Academy exclusive.\n\n\n\n",
+        "details": "<!DOCTYPE html><html>\n<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><meta name=\"viewport\" content=\"width=device-width, minimal-ui, initial-scale=1.0, maximum-scale=1.0, user-scalable=0;\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"><meta name=\"format-detection\" content=\"telephone=no, date=no, email=no, address=no\"><meta name=\"x-apple-disable-message-reformatting\">\n <!--[if (mso 16)]><style type=\"text/css\"> a { text-decoration: none; } \n</style><![endif]--><!--[if gte mso 9]><style> sup { font-size: 100% !important; } </style><![endif]--><!--[if gte mso 9]><noscript>\n         <xml>\n           <o:OfficeDocumentSettings>\n           <o:AllowPNG></o:AllowPNG>\n           <o:PixelsPerInch>96</o:PixelsPerInch>\n           </o:OfficeDocumentSettings>\n         </xml>\n      </noscript><![endif]--><!--[if gte mso 9]><style>sup { font-size: 100% !important; }</style><![endif]--><!--[if mso]><xml>\n    <w:WordDocument xmlns:w=\"urn:schemas-microsoft-com:office:word\">\n      <w:DontUseAdvancedTypographyReadingMail/>\n    </w:WordDocument>\n    </xml><![endif]--><!--[if !mso]><!-- --><link href=\"https://fonts.googleapis.com/css?family=Roboto:400,400i,700,700i\" rel=\"stylesheet\"><!--<![endif]--><style type=\"text/css\">#outlook a {\tpadding:0;}.es-button {\tmso-style-priority:100!important;\ttext-decoration:none!important;}a[x-apple-data-detectors] {\tcolor:inherit!important;\ttext-decoration:none!important;\tfont-size:inherit!important;\tfont-family:inherit!important;\tfont-weight:inherit!important;\tline-height:inherit!important;}.es-desk-hidden {\tdisplay:none;\tfloat:left;\toverflow:hidden;\twidth:0;\tmax-height:0;\tline-height:0;\tmso-hide:all;}@media only screen and (max-width:600px) {p, ul li, ol li, a { line-height:150%!important } h1, h2, h3, h1 a, h2 a, h3 a { line-height:120% } h1 { font-size:30px!important; text-align:center } h2 { font-size:26px!important; text-align:center } h3 { font-size:20px!important; text-align:center } .es-header-body h1 a, .es-content-",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
         "id": "email-2-12",
         "type": "email",
         "date": "2026-02-26",
         "summary": "The Imperium Agency\u2122 Closes Tonight. Last Chance to See More.",
         "subject": "The Imperium Agency\u2122 Closes Tonight. Last Chance to See More.",
         "details": "Jahan, we\u2019ve had \r\n\r\n**eight** commits.\u00a0\r\n\r\nWe\u2019ve onboarded five of those businesses, because we waste \r\n\r\n**zero** time.\u00a0\r\n\r\nI believe by the end of Q2, we\u2019ll see \r\n\r\n**ridiculous** transformations within the paid media operations, but also \r\n\r\n**sales** operations, and frankly the \r\n\r\n**retention** operations for these founders.\u00a0\r\n\r\nWhile the Imperium Agency\u2122 aims to drastically improve your paid media efforts, the spillover effects are\u2026\u00a0\r\n\r\n**Impossible** to ignore.\u00a0\r\n\r\nYour client volume \r\n\r\n**evidently** increases.\u00a0\r\n\r\nYour sales conversion rates \r\n\r\n**evidently** increase because the leads and applications are better, and the pre-sales call framing is stronger.\u00a0\r\n\r\nAs a natural byproduct, your retention increases.\u00a0\r\n\r\nI\u2019ll drum on this again, \r\n\r\n**and** I\u2019ll die on this hill.\u00a0\r\n\r\nIncreases in sales conversion, client volume, and retention of said clients in ANY way whatsoever\u2026 \r\n\r\n**compound** just like an investment account.\u00a0\r\n\r\nMake little shifts across each area of your business, and it doesn\u2019t just grow linearly. It stacks.\u00a0\r\n\r\nA 25 per-cent apiece increase to each area will \r\n\r\n**double** your revenues.\u00a0\r\n\r\nA 38 per-cent apiece increase will \r\n\r\n**2.5x** your revenues.\r\n\r\nA 45 per-cent apiece increase will \r\n\r\n**3x** your revenues.\u00a0\r\n\r\nImagine someone telling you that they\u2019ll just help you increase your sales conversions by 45 per-cent\u2026 and as a natural default, it positively affects your client volume, and client retention down the line\u2026 to the extent it basically doubles or even triples revenues.\u00a0\r\n\r\nThat\u2019s one single, little change\u2026 and on the front-end\u2026 it\u2019s increased your business by 3x.\u00a0\r\n\r\nThat\u2019s the power of \r\n\r\n**proper, paid media**.\u00a0\r\n\r\nAnd access to it is about to close down.\u00a0\r\n\r\nSo this is the last chance to see inside the Imperium Agency\u2122 and join.\u00a0\r\n\r\nYou can book in below to either join, see inside, see how it works, or compare our strategies.\u00a0\r\n\r\nYou \r\n\r\n**can** also book in for later if the calendar allows it.\u00a0\r\n\r\nBut just a reminder, w",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-72-5",
+        "type": "email",
+        "date": "2026-02-26",
+        "summary": "Pain is Your Profit Compass\n\n\n",
+        "subject": "Pain is Your Profit Compass\n\n\n",
+        "details": "<!DOCTYPE html><html>\n<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><meta name=\"viewport\" content=\"width=device-width, minimal-ui, initial-scale=1.0, maximum-scale=1.0, user-scalable=0;\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"><meta name=\"format-detection\" content=\"telephone=no, date=no, email=no, address=no\"><meta name=\"x-apple-disable-message-reformatting\">\n <!--[if (mso 16)]><style type=\"text/css\"> a { text-decoration: none; } \n</style><![endif]--><!--[if gte mso 9]><style> sup { font-size: 100% !important; } </style><![endif]--><!--[if gte mso 9]><noscript>\n         <xml>\n           <o:OfficeDocumentSettings>\n           <o:AllowPNG></o:AllowPNG>\n           <o:PixelsPerInch>96</o:PixelsPerInch>\n           </o:OfficeDocumentSettings>\n         </xml>\n      </noscript><![endif]--><!--[if gte mso 9]><style>sup { font-size: 100% !important; }</style><![endif]--><!--[if mso]><xml>\n    <w:WordDocument xmlns:w=\"urn:schemas-microsoft-com:office:word\">\n      <w:DontUseAdvancedTypographyReadingMail/>\n    </w:WordDocument>\n    </xml><![endif]--><!--[if !mso]><!-- --><link href=\"https://fonts.googleapis.com/css?family=Roboto:400,400i,700,700i\" rel=\"stylesheet\"><!--<![endif]--><style type=\"text/css\">#outlook a {\tpadding:0;}.es-button {\tmso-style-priority:100!important;\ttext-decoration:none!important;}a[x-apple-data-detectors] {\tcolor:inherit!important;\ttext-decoration:none!important;\tfont-size:inherit!important;\tfont-family:inherit!important;\tfont-weight:inherit!important;\tline-height:inherit!important;}.es-desk-hidden {\tdisplay:none;\tfloat:left;\toverflow:hidden;\twidth:0;\tmax-height:0;\tline-height:0;\tmso-hide:all;}@media only screen and (max-width:600px) {p, ul li, ol li, a { line-height:150%!important } h1, h2, h3, h1 a, h2 a, h3 a { line-height:120% } h1 { font-size:30px!important; text-align:center } h2 { font-size:26px!important; text-align:center } h3 { font-size:20px!important; text-align:center } .es-header-body h1 a, .es-content-",
         "direction": "inbound",
         "createdAt": "2026-03-16T12:18:59"
       },
@@ -5872,6 +7067,16 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       },
       {
+        "id": "email-72-6",
+        "type": "email",
+        "date": "2026-02-25",
+        "summary": "The Information Overload Strategy That Creates Experts\n\n",
+        "subject": "The Information Overload Strategy That Creates Experts\n\n",
+        "details": "Jahan,\r\n\r\nI want to share something that separates real experts from wannabes.\r\n\r\nIt's not talent. It's not connections. It's not luck.\r\n\r\nIt's what I call \"Critical Information Overload.\"\r\n\r\n**Here's how it works:**\r\n\r\nMost people dabble. They read a few articles, watch a couple YouTube videos, maybe buy a course.\r\n\r\nThen they think they're ready to help clients.\r\n\r\nThey're not.\r\n\r\nReal experts do something different. They become obsessed.\r\n\r\n**The Overload Strategy:**\r\n\r\nFor 2-3 days, you drown yourself in information about your client's problem. Not your solution. Their problem.\r\n\r\n**You consume everything:**\r\n\u2192 YouTube videos, podcasts, books\r\n\u2192 Reddit forums, social media posts\r\n\u2192 Interviews with experts\r\n\u2192 ChatGPT research sessions\r\n\u2192 Industry reports and studies\r\n\r\nThe goal isn't to be selective. It's to be comprehensive.\r\n\r\nYou're not looking for \"good\" information vs \"bad\" information yet. You're looking for ALL information.\r\n\r\nThink of it like training an AI bot - you need massive\r\namounts of data before you can create intelligence.\r\n\r\n**Why this works:**\r\n\r\nWhen you truly understand a problem at this depth, you can spot solutions others miss.\r\n\r\nYou can connect dots that competitors can't see.\r\n\r\nYou become the person clients trust because you clearly know more than anyone else they've talked to.\r\n\r\nThe 3 types of information you'll find:\r\n\r\n* Standard Information - Somewhat relevant context\r\n\r\n* Critical Information - Directly solves the problem\r\n\r\n* Faulty Information - Sounds good but is wrong\r\n\r\nDon't filter yet. Just collect everything.\r\n\r\nAction Items:\r\n\r\n* Pick your client's biggest problem\r\n\r\n* Block out 2-3 days for total information immersion\r\n\r\n* Create a \"To-Consume\" list of every piece of media on this problem\r\n\r\n* Become obsessively, unhealthily focused on learning everything\r\n\r\nWarning\r\n\r\n**:** Don't spend more than a few days here. Information overload can become an excuse to avoid the real work.\r\n\r\nBut done right, this strategy will make ",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
         "id": "email-2-14",
         "type": "email",
         "date": "2026-02-24",
@@ -5880,10 +7085,74 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "details": "Jahan, we\u2019re open.\u00a0\r\n\r\nWelcome to the\u2026\r\n\r\nImperium Agency\u2122\u00a0\r\n\r\nThe first, and last invite-only access to the \r\n\r\n**Agency** at a low investment rate as we build out your entire paid marketing operations\u2026\r\n\r\nWith arguably the best executors, managers, and strategists in the game behind your business.\u00a0\r\n\r\nWant in? Want to see how it works? Want to see the funnels, VSLs, ads, and structure? Book in below:\r\n\r\nScale: Imperium Agency\u2122 Spot https://app.iclosed.io/e/imperium/advisory-call-imperium-agency-o\r\n\r\nHere\u2019s some extra details:\r\n\r\n**Results Expectation for Jahan**:\r\n\r\n* Lead costs that drop by 20 - 40 per-cent.\r\n\r\n* MQL (marketing qualified leads) (or appointments) drop by 20 - 40 per-cent.\r\n\r\n* Sales call CPAs (cost per application) drop by 20 - 40 per-cent.\r\n\r\n**Phases / Rollout for Jahan**:\r\n\r\nPhase 1: Foundation & Offer Engineering (Days 1\u201330):\r\n\r\n* Offer positioning refinement and messaging alignment\r\n\r\n* VSL strategy, scripting, and initial edit\r\n\r\n* Funnel architecture and build (landing, booking, confirmation)\r\n\r\n* Application build and qualification logic\r\n\r\n* CRM, email, and SMS infrastructure setup\r\n\r\n* Pixel + CAPI installation and verification\r\n\r\n* Initial MQL definition and grading framework\r\n\r\n* Setter triage recommendations and lead handling logic\r\n\r\nPhase 2: Validation & Optimization (Days 31\u201360)\r\n\r\n* Paid ad strategy launch\r\n\r\n* Ad copy and creative rollout (talking head, static, carousel, b-roll)\r\n\r\n* Ad editing and format testing\r\n\r\n* Post-opt-in email and SMS nurture sequences live\r\n\r\n* Application grading and MQL tracking activated\r\n\r\n* Funnel copy and UX refinements based on behavior\r\n\r\n* Early A/B testing on headlines, hooks, and CTAs\r\n\r\nPhase 3: Scale & Systemization (Days 61\u201390)\r\n\r\n* Scaling winning ad creatives and angles\r\n\r\n* Expanded creative production based on validated hooks\r\n\r\n* Advanced A/B testing across ads and funnel\r\n\r\n* Funnel optimization for conversion rate and lead quality\r\n\r\n* Refined MQL grading based on close data\r\n\r\n* On",
         "direction": "inbound",
         "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-72-7",
+        "type": "email",
+        "date": "2026-02-24",
+        "summary": "Community Spotlight: How Safwan Hit $31K Last Month\n",
+        "subject": "Community Spotlight: How Safwan Hit $31K Last Month\n",
+        "details": "<!DOCTYPE html><html>\n<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><meta name=\"viewport\" content=\"width=device-width, minimal-ui, initial-scale=1.0, maximum-scale=1.0, user-scalable=0;\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"><meta name=\"format-detection\" content=\"telephone=no, date=no, email=no, address=no\"><meta name=\"x-apple-disable-message-reformatting\">\n <!--[if (mso 16)]><style type=\"text/css\"> a { text-decoration: none; } \n</style><![endif]--><!--[if gte mso 9]><style> sup { font-size: 100% !important; } </style><![endif]--><!--[if gte mso 9]><noscript>\n         <xml>\n           <o:OfficeDocumentSettings>\n           <o:AllowPNG></o:AllowPNG>\n           <o:PixelsPerInch>96</o:PixelsPerInch>\n           </o:OfficeDocumentSettings>\n         </xml>\n      </noscript><![endif]--><!--[if gte mso 9]><style>sup { font-size: 100% !important; }</style><![endif]--><!--[if mso]><xml>\n    <w:WordDocument xmlns:w=\"urn:schemas-microsoft-com:office:word\">\n      <w:DontUseAdvancedTypographyReadingMail/>\n    </w:WordDocument>\n    </xml><![endif]--><!--[if !mso]><!-- --><link href=\"https://fonts.googleapis.com/css?family=Roboto:400,400i,700,700i\" rel=\"stylesheet\"><!--<![endif]--><style type=\"text/css\">#outlook a {\tpadding:0;}.es-button {\tmso-style-priority:100!important;\ttext-decoration:none!important;}a[x-apple-data-detectors] {\tcolor:inherit!important;\ttext-decoration:none!important;\tfont-size:inherit!important;\tfont-family:inherit!important;\tfont-weight:inherit!important;\tline-height:inherit!important;}.es-desk-hidden {\tdisplay:none;\tfloat:left;\toverflow:hidden;\twidth:0;\tmax-height:0;\tline-height:0;\tmso-hide:all;}@media only screen and (max-width:600px) {p, ul li, ol li, a { line-height:150%!important } h1, h2, h3, h1 a, h2 a, h3 a { line-height:120% } h1 { font-size:30px!important; text-align:center } h2 { font-size:26px!important; text-align:center } h3 { font-size:20px!important; text-align:center } .es-header-body h1 a, .es-content-",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "merge-charliemor",
+        "content": "Merged with duplicate contact: charliemorgan@imperiumlabsltd.com",
+        "category": "general",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-19-1",
+        "content": "Charlie Morgan is sending Jahan Taila a high volume of inbound emails, primarily focused on client acquisition strategies and business growth for agencies.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-19-2",
+        "content": "The emails are promotional, inviting Jahan to a free live training session on client acquisition, suggesting Charlie is a coach or consultant in this area.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-19-3",
+        "content": "The content of the emails is relevant to Jahan's role at Derby Digital, a digital marketing agency, indicating a potential vendor or mentor relationship.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-19-0",
+        "category": "business",
+        "label": "Sender's Focus",
+        "value": "Client acquisition and business growth for agencies"
+      },
+      {
+        "id": "aif-19-1",
+        "category": "business",
+        "label": "Primary Call to Action",
+        "value": "Attend a free live training on client acquisition"
+      },
+      {
+        "id": "aif-19-2",
+        "category": "business",
+        "label": "Email Frequency",
+        "value": "High (multiple emails per day leading up to the event)"
+      },
+      {
+        "id": "aif-19-3",
+        "category": "business",
+        "label": "Sender's Role",
+        "value": "Likely a business coach or consultant"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -5892,17 +7161,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-24T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "secondaryEmail": "charliemorgan@imperiumlabsltd.com",
+    "aiSummary": "Charlie Morgan from Imperiumlabsltd is actively marketing client acquisition training and strategies to Jahan Taila, suggesting a potential vendor or mentor relationship where Charlie offers services relevant to Jahan's agency, Derby Digital."
   },
   {
-    "id": "22",
+    "id": "21",
     "firstName": "Sweat",
     "lastName": "Society",
     "email": "hello@sweatsocietylou.com",
-    "company": "Sweatsocietylou",
+    "company": "Sweat Society",
     "website": "https://docs.marianatek.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "website",
+      "fitness",
+      "Mariana Tek"
+    ],
     "relationshipScore": 60,
     "interactions": [
       {
@@ -6026,13 +7301,52 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-20-0",
+        "content": "Sweat Society is actively working on their website, likely integrating Mariana Tek for scheduling/booking.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-20-1",
+        "content": "They have provided various content for their website, including bios, photos, and reviews, indicating a need for content organization and potentially SEO optimization.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "8f57d177b0da",
         "category": "contact",
         "label": "Phone",
         "value": "1053167936"
+      },
+      {
+        "id": "aif-20-1",
+        "category": "business",
+        "label": "Industry",
+        "value": "Fitness/Wellness"
+      },
+      {
+        "id": "aif-20-2",
+        "category": "business",
+        "label": "Location",
+        "value": "Louisville, KY"
+      },
+      {
+        "id": "aif-20-3",
+        "category": "business",
+        "label": "Website Integration",
+        "value": "Mariana Tek"
+      },
+      {
+        "id": "aif-20-4",
+        "category": "business",
+        "label": "Content Provided",
+        "value": "Bios, photos, reviews"
       }
     ],
     "opportunities": [],
@@ -6043,17 +7357,25 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-10-20T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "Sweat Society is a Louisville-based fitness business actively developing their website, integrating Mariana Tek, and has provided various content. This indicates a strong potential for digital marketing services, particularly around website development, SEO, and content strategy."
   },
   {
-    "id": "23",
+    "id": "22",
     "firstName": "DERBY",
     "lastName": "DIGITAL RESERVATION SYSTEM",
     "email": "shane@bsbrewers.com",
     "company": "Bsbrewers",
     "website": "https://email.ec1.msgsndr.org",
     "relationshipType": "client",
-    "tags": [],
+    "tags": [
+      "event management",
+      "online sales",
+      "restaurant",
+      "brewery"
+    ],
     "relationshipScore": 55,
     "interactions": [
       {
@@ -6167,7 +7489,29 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-21-0",
+        "content": "Shane is a highly engaged client, frequently requesting updates and new functionalities for their website and online systems.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-21-1",
+        "content": "The client utilizes Derby Digital for menu updates, online ticket sales, form submissions (party/catering requests), and compliance inquiries (FCC registration).",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-21-2",
+        "content": "There's a clear need for ongoing digital marketing and web development support, indicating potential for upselling additional services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "bc87fe3b1df2",
@@ -6180,6 +7524,30 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "category": "contact",
         "label": "Address",
         "value": "1010 S Main St. \r"
+      },
+      {
+        "id": "aif-21-2",
+        "category": "business",
+        "label": "Client Contact",
+        "value": "shane@bsbrewers.com"
+      },
+      {
+        "id": "aif-21-3",
+        "category": "business",
+        "label": "Company Name",
+        "value": "Bsbrewers"
+      },
+      {
+        "id": "aif-21-4",
+        "category": "business",
+        "label": "Company Type",
+        "value": "C Corp, registered in Tennessee"
+      },
+      {
+        "id": "aif-21-5",
+        "category": "business",
+        "label": "Services Provided",
+        "value": "Menu management, online ticket sales, form submissions, compliance assistance"
       }
     ],
     "opportunities": [],
@@ -6190,17 +7558,25 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-06-04T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "Owner/Manager",
+    "city": "Springfield",
+    "state": "TN",
+    "aiSummary": "Shane from Bsbrewers is an active client of Derby Digital, consistently requesting digital marketing and web development services for their restaurant/brewery, including menu updates, event ticket sales, and form management. This indicates a strong, ongoing business relationship with opportunities for further service expansion."
   },
   {
-    "id": "24",
+    "id": "23",
     "firstName": "JEFFREY",
     "lastName": "ALLGOOD",
     "email": "allgoodmarketing4u@gmail.com",
-    "company": "",
+    "company": "Allgood Marketing & Apparel",
     "website": "https://email.send.lcmsgsndr.org",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "client",
+    "tags": [
+      "restaurant niche",
+      "digital marketing",
+      "apparel"
+    ],
     "relationshipScore": 55,
     "interactions": [
       {
@@ -6314,13 +7690,59 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-22-0",
+        "content": "Jeffrey Allgood appears to be a client of Jahan Taila's Derby Digital, evidenced by signed documents for 'Derby Digital x Derby City Pizza' and requests for website updates.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-22-1",
+        "content": "Allgood Marketing & Apparel seems to be a separate entity, potentially a client of Jahan's for apparel purchases, or a business owned by Jeffrey Allgood.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-22-2",
+        "content": "Jeffrey also forwards emails related to high school sports (basketball rosters, brackets) to Jahan, suggesting Jahan might be managing a website or digital presence for these sports programs.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "1421cd397940",
         "category": "contact",
         "label": "Phone",
         "value": "502-485-8202"
+      },
+      {
+        "id": "aif-22-1",
+        "category": "business",
+        "label": "Client of Derby Digital",
+        "value": "Yes (for Derby City Pizza and potentially other web management)"
+      },
+      {
+        "id": "aif-22-2",
+        "category": "business",
+        "label": "Company Name",
+        "value": "Allgood Marketing & Apparel (also uses allgoodmarketing4u@gmail.com)"
+      },
+      {
+        "id": "aif-22-3",
+        "category": "business",
+        "label": "Recent Project",
+        "value": "Derby Digital x Derby City Pizza (signed Feb 2026)"
+      },
+      {
+        "id": "aif-22-4",
+        "category": "business",
+        "label": "Other Activities",
+        "value": "Manages high school sports information (Atherton Boys Basketball, LIT Bracket, Butler Team Info)"
       }
     ],
     "opportunities": [],
@@ -6331,17 +7753,25 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-07-30T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "Jeffrey Allgood is a client of Jahan Taila's Derby Digital, recently signing a deal for Derby City Pizza. He also appears to run Allgood Marketing & Apparel and uses Jahan for website updates related to high school sports."
   },
   {
-    "id": "25",
+    "id": "24",
     "firstName": "Elang",
     "lastName": "Smdra",
     "email": "elangsamudra1504@gmail.com",
-    "company": "",
+    "company": "Maryam Business",
     "website": "",
-    "relationshipType": "team",
-    "tags": [],
+    "relationshipType": "client",
+    "tags": [
+      "printing",
+      "design",
+      "team",
+      "restaurant"
+    ],
     "relationshipScore": 45,
     "interactions": [
       {
@@ -6435,8 +7865,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-23-0",
+        "content": "Elang appears to be a contact from a restaurant client, Maryam Business, for whom Jahan has done design work (menu, card, banner, stickers).",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-23-1",
+        "content": "Recent emails suggest ongoing print-related tasks and updates, indicating an active working relationship.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-23-0",
+        "category": "business",
+        "label": "Last Active Date",
+        "value": "2026-01-23"
+      },
+      {
+        "id": "aif-23-1",
+        "category": "business",
+        "label": "Email Count",
+        "value": "9"
+      },
+      {
+        "id": "aif-23-2",
+        "category": "business",
+        "label": "Services Provided",
+        "value": "Menu design, card design, banner design, sticker design"
+      },
+      {
+        "id": "aif-23-3",
+        "category": "business",
+        "label": "Client Feedback",
+        "value": "Positive on new menu layout, requested legibility improvements and corrections"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -6445,121 +7915,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-07-14T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Elang Smdra is a contact from Maryam Business, a restaurant client, for whom Jahan Taila has provided design services including menus, cards, banners, and stickers. The relationship is active with recent emails indicating ongoing print-related tasks and positive feedback on design work."
   },
   {
-    "id": "26",
-    "firstName": "Charlie",
-    "lastName": "Morgan",
-    "email": "charliemorgan@imperiumlabsltd.com",
-    "company": "Imperiumlabsltd",
-    "website": "https://fonts.googleapis.com",
-    "relationshipType": "client",
-    "tags": [],
-    "relationshipScore": 40,
-    "interactions": [
-      {
-        "id": "email-72-0",
-        "type": "email",
-        "date": "2026-03-03",
-        "summary": "Launch went nuts. But are you inside?\n\n\n\n\n\n",
-        "subject": "Launch went nuts. But are you inside?\n\n\n\n\n\n",
-        "details": "<!DOCTYPE html><html>\n<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><meta name=\"viewport\" content=\"width=device-width, minimal-ui, initial-scale=1.0, maximum-scale=1.0, user-scalable=0;\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"><meta name=\"format-detection\" content=\"telephone=no, date=no, email=no, address=no\"><meta name=\"x-apple-disable-message-reformatting\">\n <!--[if (mso 16)]><style type=\"text/css\"> a { text-decoration: none; } </style><![endif]--><!--[if gte mso 9]><style> sup { font-size: 100% !important; } </style><![endif]--><!--[if gte mso 9]><noscript>\n         <xml>\n           <o:OfficeDocumentSettings>\n           <o:AllowPNG></o:AllowPNG>\n           <o:PixelsPerInch>96</o:PixelsPerInch>\n           </o:OfficeDocumentSettings>\n         </xml>\n      </noscript><![endif]--><!--[if gte mso 9]><style>sup { font-size: 100% !important; }</style><![endif]--><!--[if mso]><xml>\n    <w:WordDocument xmlns:w=\"urn:schemas-microsoft-com:office:word\">\n      <w:DontUseAdvancedTypographyReadingMail/>\n    </w:WordDocument>\n    </xml>\n<![endif]--><!--[if !mso]><!-- --><link href=\"https://fonts.googleapis.com/css?family=Roboto:400,400i,700,700i\" rel=\"stylesheet\"><!--<![endif]--><style type=\"text/css\">#outlook a { padding:0;}.es-button { mso-style-priority:100!important; text-decoration:none!important;}a[x-apple-data-detectors] { color:inherit!important; text-decoration:none!important; font-size:inherit!important; font-family:inherit!important; font-weight:inherit!important; line-height:inherit!important;}.es-desk-hidden { display:none; float:left; overflow:hidden; width:0; max-height:0; line-height:0; mso-hide:all;}@media only screen and (max-width:600px) {p, ul li, ol li, a { line-height:150%!important } h1, h2, h3, h1 a, h2 a, h3 a { line-height:120% } h1 { font-size:30px!important; text-align:center } h2 { font-size:26px!important; text-align:center } h3 { font-size:20px!important; text-align:center }\n .es-header-body h1 a, .es-content",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-72-1",
-        "type": "email",
-        "date": "2026-03-02",
-        "summary": "The Future 6-Figure Jahan is Inside This Email\n\n\n\n\n",
-        "subject": "The Future 6-Figure Jahan is Inside This Email\n\n\n\n\n",
-        "details": "<!DOCTYPE html><html>\n<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><meta name=\"viewport\" content=\"width=device-width, minimal-ui, initial-scale=1.0, maximum-scale=1.0, user-scalable=0;\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"><meta name=\"format-detection\" content=\"telephone=no, date=no, email=no, address=no\"><meta name=\"x-apple-disable-message-reformatting\">\n <!--[if (mso 16)]><style type=\"text/css\"> a { text-decoration: none; } </style><![endif]--><!--[if gte mso 9]><style> sup { font-size: 100% !important; } </style><![endif]--><!--[if gte mso 9]><noscript>\n         <xml>\n           <o:OfficeDocumentSettings>\n           <o:AllowPNG></o:AllowPNG>\n           <o:PixelsPerInch>96</o:PixelsPerInch>\n           </o:OfficeDocumentSettings>\n         </xml>\n      </noscript><![endif]--><!--[if gte mso 9]><style>sup { font-size: 100% !important; }</style><![endif]--><!--[if mso]><xml>\n    <w:WordDocument xmlns:w=\"urn:schemas-microsoft-com:office:word\">\n      <w:DontUseAdvancedTypographyReadingMail/>\n    </w:WordDocument>\n    </xml>\n<![endif]--><!--[if !mso]><!-- --><link href=\"https://fonts.googleapis.com/css?family=Roboto:400,400i,700,700i\" rel=\"stylesheet\"><!--<![endif]--><style type=\"text/css\">#outlook a { padding:0;}.es-button { mso-style-priority:100!important; text-decoration:none!important;}a[x-apple-data-detectors] { color:inherit!important; text-decoration:none!important; font-size:inherit!important; font-family:inherit!important; font-weight:inherit!important; line-height:inherit!important;}.es-desk-hidden { display:none; float:left; overflow:hidden; width:0; max-height:0; line-height:0; mso-hide:all;}@media only screen and (max-width:600px) {p, ul li, ol li, a { line-height:150%!important } h1, h2, h3, h1 a, h2 a, h3 a { line-height:120% } h1 { font-size:30px!important; text-align:center } h2 { font-size:26px!important; text-align:center } h3 { font-size:20px!important; text-align:center }\n .es-header-body h1 a, .es-content",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-72-2",
-        "type": "email",
-        "date": "2026-03-01",
-        "summary": "Imperium\u2122 Premium // Imperium\u2122 VIP   \n\n\n\n\n",
-        "subject": "Imperium\u2122 Premium // Imperium\u2122 VIP   \n\n\n\n\n",
-        "details": "<!DOCTYPE html><html>\n<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><meta name=\"viewport\" content=\"width=device-width, minimal-ui, initial-scale=1.0, maximum-scale=1.0, user-scalable=0;\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"><meta name=\"format-detection\" content=\"telephone=no, date=no, email=no, address=no\"><meta name=\"x-apple-disable-message-reformatting\">\n <!--[if (mso 16)]><style type=\"text/css\"> a { text-decoration: none; } \n</style><![endif]--><!--[if gte mso 9]><style> sup { font-size: 100% !important; } </style><![endif]--><!--[if gte mso 9]><noscript>\n         <xml>\n           <o:OfficeDocumentSettings>\n           <o:AllowPNG></o:AllowPNG>\n           <o:PixelsPerInch>96</o:PixelsPerInch>\n           </o:OfficeDocumentSettings>\n         </xml>\n      </noscript><![endif]--><!--[if gte mso 9]><style>sup { font-size: 100% !important; }</style><![endif]--><!--[if mso]><xml>\n    <w:WordDocument xmlns:w=\"urn:schemas-microsoft-com:office:word\">\n      <w:DontUseAdvancedTypographyReadingMail/>\n    </w:WordDocument>\n    </xml><![endif]--><!--[if !mso]><!-- --><link href=\"https://fonts.googleapis.com/css?family=Roboto:400,400i,700,700i\" rel=\"stylesheet\"><!--<![endif]--><style type=\"text/css\">#outlook a {\tpadding:0;}.es-button {\tmso-style-priority:100!important;\ttext-decoration:none!important;}a[x-apple-data-detectors] {\tcolor:inherit!important;\ttext-decoration:none!important;\tfont-size:inherit!important;\tfont-family:inherit!important;\tfont-weight:inherit!important;\tline-height:inherit!important;}.es-desk-hidden {\tdisplay:none;\tfloat:left;\toverflow:hidden;\twidth:0;\tmax-height:0;\tline-height:0;\tmso-hide:all;}@media only screen and (max-width:600px) {p, ul li, ol li, a { line-height:150%!important } h1, h2, h3, h1 a, h2 a, h3 a { line-height:120% } h1 { font-size:30px!important; text-align:center } h2 { font-size:26px!important; text-align:center } h3 { font-size:20px!important; text-align:center } .es-header-body h1 a, .es-content-",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-72-3",
-        "type": "email",
-        "date": "2026-02-28",
-        "summary": "I'm investing in (& guaranteeing) your success Jahan. Details Inside.\n\n\n\n\n",
-        "subject": "I'm investing in (& guaranteeing) your success Jahan. Details Inside.\n\n\n\n\n",
-        "details": "<!DOCTYPE html><html>\n<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><meta name=\"viewport\" content=\"width=device-width, minimal-ui, initial-scale=1.0, maximum-scale=1.0, user-scalable=0;\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"><meta name=\"format-detection\" content=\"telephone=no, date=no, email=no, address=no\"><meta name=\"x-apple-disable-message-reformatting\">\n <!--[if (mso 16)]><style type=\"text/css\"> a { text-decoration: none; } \n</style><![endif]--><!--[if gte mso 9]><style> sup { font-size: 100% !important; } </style><![endif]--><!--[if gte mso 9]><noscript>\n         <xml>\n           <o:OfficeDocumentSettings>\n           <o:AllowPNG></o:AllowPNG>\n           <o:PixelsPerInch>96</o:PixelsPerInch>\n           </o:OfficeDocumentSettings>\n         </xml>\n      </noscript><![endif]--><!--[if gte mso 9]><style>sup { font-size: 100% !important; }</style><![endif]--><!--[if mso]><xml>\n    <w:WordDocument xmlns:w=\"urn:schemas-microsoft-com:office:word\">\n      <w:DontUseAdvancedTypographyReadingMail/>\n    </w:WordDocument>\n    </xml><![endif]--><!--[if !mso]><!-- --><link href=\"https://fonts.googleapis.com/css?family=Roboto:400,400i,700,700i\" rel=\"stylesheet\"><!--<![endif]--><style type=\"text/css\">#outlook a {\tpadding:0;}.es-button {\tmso-style-priority:100!important;\ttext-decoration:none!important;}a[x-apple-data-detectors] {\tcolor:inherit!important;\ttext-decoration:none!important;\tfont-size:inherit!important;\tfont-family:inherit!important;\tfont-weight:inherit!important;\tline-height:inherit!important;}.es-desk-hidden {\tdisplay:none;\tfloat:left;\toverflow:hidden;\twidth:0;\tmax-height:0;\tline-height:0;\tmso-hide:all;}@media only screen and (max-width:600px) {p, ul li, ol li, a { line-height:150%!important } h1, h2, h3, h1 a, h2 a, h3 a { line-height:120% } h1 { font-size:30px!important; text-align:center } h2 { font-size:26px!important; text-align:center } h3 { font-size:20px!important; text-align:center } .es-header-body h1 a, .es-content-",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-72-4",
-        "type": "email",
-        "date": "2026-02-27",
-        "summary": "Something i.n.s.a.n.e is live at Imperium\u2122. Academy exclusive.\n\n\n\n",
-        "subject": "Something i.n.s.a.n.e is live at Imperium\u2122. Academy exclusive.\n\n\n\n",
-        "details": "<!DOCTYPE html><html>\n<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><meta name=\"viewport\" content=\"width=device-width, minimal-ui, initial-scale=1.0, maximum-scale=1.0, user-scalable=0;\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"><meta name=\"format-detection\" content=\"telephone=no, date=no, email=no, address=no\"><meta name=\"x-apple-disable-message-reformatting\">\n <!--[if (mso 16)]><style type=\"text/css\"> a { text-decoration: none; } \n</style><![endif]--><!--[if gte mso 9]><style> sup { font-size: 100% !important; } </style><![endif]--><!--[if gte mso 9]><noscript>\n         <xml>\n           <o:OfficeDocumentSettings>\n           <o:AllowPNG></o:AllowPNG>\n           <o:PixelsPerInch>96</o:PixelsPerInch>\n           </o:OfficeDocumentSettings>\n         </xml>\n      </noscript><![endif]--><!--[if gte mso 9]><style>sup { font-size: 100% !important; }</style><![endif]--><!--[if mso]><xml>\n    <w:WordDocument xmlns:w=\"urn:schemas-microsoft-com:office:word\">\n      <w:DontUseAdvancedTypographyReadingMail/>\n    </w:WordDocument>\n    </xml><![endif]--><!--[if !mso]><!-- --><link href=\"https://fonts.googleapis.com/css?family=Roboto:400,400i,700,700i\" rel=\"stylesheet\"><!--<![endif]--><style type=\"text/css\">#outlook a {\tpadding:0;}.es-button {\tmso-style-priority:100!important;\ttext-decoration:none!important;}a[x-apple-data-detectors] {\tcolor:inherit!important;\ttext-decoration:none!important;\tfont-size:inherit!important;\tfont-family:inherit!important;\tfont-weight:inherit!important;\tline-height:inherit!important;}.es-desk-hidden {\tdisplay:none;\tfloat:left;\toverflow:hidden;\twidth:0;\tmax-height:0;\tline-height:0;\tmso-hide:all;}@media only screen and (max-width:600px) {p, ul li, ol li, a { line-height:150%!important } h1, h2, h3, h1 a, h2 a, h3 a { line-height:120% } h1 { font-size:30px!important; text-align:center } h2 { font-size:26px!important; text-align:center } h3 { font-size:20px!important; text-align:center } .es-header-body h1 a, .es-content-",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-72-5",
-        "type": "email",
-        "date": "2026-02-26",
-        "summary": "Pain is Your Profit Compass\n\n\n",
-        "subject": "Pain is Your Profit Compass\n\n\n",
-        "details": "<!DOCTYPE html><html>\n<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><meta name=\"viewport\" content=\"width=device-width, minimal-ui, initial-scale=1.0, maximum-scale=1.0, user-scalable=0;\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"><meta name=\"format-detection\" content=\"telephone=no, date=no, email=no, address=no\"><meta name=\"x-apple-disable-message-reformatting\">\n <!--[if (mso 16)]><style type=\"text/css\"> a { text-decoration: none; } \n</style><![endif]--><!--[if gte mso 9]><style> sup { font-size: 100% !important; } </style><![endif]--><!--[if gte mso 9]><noscript>\n         <xml>\n           <o:OfficeDocumentSettings>\n           <o:AllowPNG></o:AllowPNG>\n           <o:PixelsPerInch>96</o:PixelsPerInch>\n           </o:OfficeDocumentSettings>\n         </xml>\n      </noscript><![endif]--><!--[if gte mso 9]><style>sup { font-size: 100% !important; }</style><![endif]--><!--[if mso]><xml>\n    <w:WordDocument xmlns:w=\"urn:schemas-microsoft-com:office:word\">\n      <w:DontUseAdvancedTypographyReadingMail/>\n    </w:WordDocument>\n    </xml><![endif]--><!--[if !mso]><!-- --><link href=\"https://fonts.googleapis.com/css?family=Roboto:400,400i,700,700i\" rel=\"stylesheet\"><!--<![endif]--><style type=\"text/css\">#outlook a {\tpadding:0;}.es-button {\tmso-style-priority:100!important;\ttext-decoration:none!important;}a[x-apple-data-detectors] {\tcolor:inherit!important;\ttext-decoration:none!important;\tfont-size:inherit!important;\tfont-family:inherit!important;\tfont-weight:inherit!important;\tline-height:inherit!important;}.es-desk-hidden {\tdisplay:none;\tfloat:left;\toverflow:hidden;\twidth:0;\tmax-height:0;\tline-height:0;\tmso-hide:all;}@media only screen and (max-width:600px) {p, ul li, ol li, a { line-height:150%!important } h1, h2, h3, h1 a, h2 a, h3 a { line-height:120% } h1 { font-size:30px!important; text-align:center } h2 { font-size:26px!important; text-align:center } h3 { font-size:20px!important; text-align:center } .es-header-body h1 a, .es-content-",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-72-6",
-        "type": "email",
-        "date": "2026-02-25",
-        "summary": "The Information Overload Strategy That Creates Experts\n\n",
-        "subject": "The Information Overload Strategy That Creates Experts\n\n",
-        "details": "Jahan,\r\n\r\nI want to share something that separates real experts from wannabes.\r\n\r\nIt's not talent. It's not connections. It's not luck.\r\n\r\nIt's what I call \"Critical Information Overload.\"\r\n\r\n**Here's how it works:**\r\n\r\nMost people dabble. They read a few articles, watch a couple YouTube videos, maybe buy a course.\r\n\r\nThen they think they're ready to help clients.\r\n\r\nThey're not.\r\n\r\nReal experts do something different. They become obsessed.\r\n\r\n**The Overload Strategy:**\r\n\r\nFor 2-3 days, you drown yourself in information about your client's problem. Not your solution. Their problem.\r\n\r\n**You consume everything:**\r\n\u2192 YouTube videos, podcasts, books\r\n\u2192 Reddit forums, social media posts\r\n\u2192 Interviews with experts\r\n\u2192 ChatGPT research sessions\r\n\u2192 Industry reports and studies\r\n\r\nThe goal isn't to be selective. It's to be comprehensive.\r\n\r\nYou're not looking for \"good\" information vs \"bad\" information yet. You're looking for ALL information.\r\n\r\nThink of it like training an AI bot - you need massive\r\namounts of data before you can create intelligence.\r\n\r\n**Why this works:**\r\n\r\nWhen you truly understand a problem at this depth, you can spot solutions others miss.\r\n\r\nYou can connect dots that competitors can't see.\r\n\r\nYou become the person clients trust because you clearly know more than anyone else they've talked to.\r\n\r\nThe 3 types of information you'll find:\r\n\r\n* Standard Information - Somewhat relevant context\r\n\r\n* Critical Information - Directly solves the problem\r\n\r\n* Faulty Information - Sounds good but is wrong\r\n\r\nDon't filter yet. Just collect everything.\r\n\r\nAction Items:\r\n\r\n* Pick your client's biggest problem\r\n\r\n* Block out 2-3 days for total information immersion\r\n\r\n* Create a \"To-Consume\" list of every piece of media on this problem\r\n\r\n* Become obsessively, unhealthily focused on learning everything\r\n\r\nWarning\r\n\r\n**:** Don't spend more than a few days here. Information overload can become an excuse to avoid the real work.\r\n\r\nBut done right, this strategy will make ",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-72-7",
-        "type": "email",
-        "date": "2026-02-24",
-        "summary": "Community Spotlight: How Safwan Hit $31K Last Month\n",
-        "subject": "Community Spotlight: How Safwan Hit $31K Last Month\n",
-        "details": "<!DOCTYPE html><html>\n<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><meta name=\"viewport\" content=\"width=device-width, minimal-ui, initial-scale=1.0, maximum-scale=1.0, user-scalable=0;\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"><meta name=\"format-detection\" content=\"telephone=no, date=no, email=no, address=no\"><meta name=\"x-apple-disable-message-reformatting\">\n <!--[if (mso 16)]><style type=\"text/css\"> a { text-decoration: none; } \n</style><![endif]--><!--[if gte mso 9]><style> sup { font-size: 100% !important; } </style><![endif]--><!--[if gte mso 9]><noscript>\n         <xml>\n           <o:OfficeDocumentSettings>\n           <o:AllowPNG></o:AllowPNG>\n           <o:PixelsPerInch>96</o:PixelsPerInch>\n           </o:OfficeDocumentSettings>\n         </xml>\n      </noscript><![endif]--><!--[if gte mso 9]><style>sup { font-size: 100% !important; }</style><![endif]--><!--[if mso]><xml>\n    <w:WordDocument xmlns:w=\"urn:schemas-microsoft-com:office:word\">\n      <w:DontUseAdvancedTypographyReadingMail/>\n    </w:WordDocument>\n    </xml><![endif]--><!--[if !mso]><!-- --><link href=\"https://fonts.googleapis.com/css?family=Roboto:400,400i,700,700i\" rel=\"stylesheet\"><!--<![endif]--><style type=\"text/css\">#outlook a {\tpadding:0;}.es-button {\tmso-style-priority:100!important;\ttext-decoration:none!important;}a[x-apple-data-detectors] {\tcolor:inherit!important;\ttext-decoration:none!important;\tfont-size:inherit!important;\tfont-family:inherit!important;\tfont-weight:inherit!important;\tline-height:inherit!important;}.es-desk-hidden {\tdisplay:none;\tfloat:left;\toverflow:hidden;\twidth:0;\tmax-height:0;\tline-height:0;\tmso-hide:all;}@media only screen and (max-width:600px) {p, ul li, ol li, a { line-height:150%!important } h1, h2, h3, h1 a, h2 a, h3 a { line-height:120% } h1 { font-size:30px!important; text-align:center } h2 { font-size:26px!important; text-align:center } h3 { font-size:20px!important; text-align:center } .es-header-body h1 a, .es-content-",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      }
-    ],
-    "notes": [],
-    "facts": [],
-    "opportunities": [],
-    "aiInsights": [],
-    "groups": [],
-    "connections": [],
-    "lastContactedAt": "2026-03-03",
-    "source": "gmail-import",
-    "createdAt": "2026-02-24T00:00:00",
-    "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
-  },
-  {
-    "id": "27",
+    "id": "25",
     "firstName": "Ali",
     "lastName": "Eldridge",
     "email": "alieldridge04@gmail.com",
-    "company": "",
+    "company": "Wu Zhao",
     "website": "",
     "relationshipType": "client",
-    "tags": [],
+    "tags": [
+      "website management",
+      "content updates",
+      "restaurant",
+      "DoorDash integration"
+    ],
     "relationshipScore": 40,
     "interactions": [
       {
@@ -6643,8 +8015,55 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-24-0",
+        "content": "Ali is actively involved in managing Wu Zhao's digital presence, specifically website content, imagery, and DoorDash integration.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-24-1",
+        "content": "Frequent inbound communication indicates ongoing website development or maintenance needs, suggesting a current or recent project.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-24-2",
+        "content": "The emails detail specific requests for image resizing, menu updates, and website previews, highlighting a need for responsive web design and accurate content.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-24-0",
+        "category": "business",
+        "label": "Restaurant Name",
+        "value": "Wu Zhao"
+      },
+      {
+        "id": "aif-24-1",
+        "category": "business",
+        "label": "Restaurant Type",
+        "value": "Modern Asian (dim sum, sushi, Chinese-inspired)"
+      },
+      {
+        "id": "aif-24-2",
+        "category": "business",
+        "label": "Location",
+        "value": "Bentonville"
+      },
+      {
+        "id": "aif-24-3",
+        "category": "business",
+        "label": "Role",
+        "value": "Social Media Manager"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -6653,17 +8072,25 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-10-29T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "Social Media Manager",
+    "city": "Bentonville",
+    "state": "AR",
+    "aiSummary": "Ali Eldridge from Wu Zhao, a modern Asian restaurant in Bentonville, is a client actively engaging Derby Digital for website content updates, image management, and DoorDash integration, indicating ongoing digital marketing and web development needs."
   },
   {
-    "id": "28",
+    "id": "26",
     "firstName": "Palma",
     "lastName": "Assistant",
     "email": "palmaitaliankitchen@gmail.com",
-    "company": "",
+    "company": "Palma Italian Kitchen",
     "website": "https://palmaitalian.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "client",
+    "tags": [
+      "email marketing",
+      "loyalty program",
+      "restaurant"
+    ],
     "relationshipScore": 40,
     "interactions": [
       {
@@ -6747,13 +8174,52 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-25-0",
+        "content": "Jahan is actively managing Palma Italian Kitchen's loyalty program, including scheduling messages and updating member lists.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-25-1",
+        "content": "The communication indicates a regular, ongoing service provided by Derby Digital related to email/SMS loyalty campaigns.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "35ddf4e8cb70",
         "category": "contact",
         "label": "Phone",
         "value": "407-694-6509"
+      },
+      {
+        "id": "aif-25-1",
+        "category": "business",
+        "label": "Service Provided",
+        "value": "Loyalty Program Management (email/SMS scheduling, list updates)"
+      },
+      {
+        "id": "aif-25-2",
+        "category": "business",
+        "label": "Communication Frequency",
+        "value": "Weekly/Bi-weekly for loyalty program updates"
+      },
+      {
+        "id": "aif-25-3",
+        "category": "business",
+        "label": "Key Contact Role",
+        "value": "Palma Assistant (likely handles operational coordination)"
+      },
+      {
+        "id": "aif-25-4",
+        "category": "business",
+        "label": "Client Niche",
+        "value": "Restaurant (Italian Cuisine)"
       }
     ],
     "opportunities": [],
@@ -6764,17 +8230,25 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-12-15T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "Assistant",
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "This contact is a client, Palma Italian Kitchen, for whom Jahan (Derby Digital) manages their loyalty program, including scheduling promotional messages and maintaining member lists. The communication is regular and operational, indicating an ongoing service."
   },
   {
-    "id": "29",
+    "id": "27",
     "firstName": "Robert",
     "lastName": "Kagan",
     "email": "robert_kagan@yahoo.com",
-    "company": "",
+    "company": "Daisy Dukes/Daisy Maes",
     "website": "https://daisiesprivateevents.com",
     "relationshipType": "client",
-    "tags": [],
+    "tags": [
+      "website management",
+      "private events",
+      "restaurant"
+    ],
     "relationshipScore": 40,
     "interactions": [
       {
@@ -6858,13 +8332,59 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-26-0",
+        "content": "Robert is actively involved in managing the website content and functionality for Daisy Dukes/Daisy Maes, including menu updates, package details, and reservation changes.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-26-1",
+        "content": "There's an indication of a payment failure related to 'daisiesprivateevents.com', suggesting potential issues with their current SaaS provider or billing.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-26-2",
+        "content": "Robert is the primary contact for website updates and changes, indicating he's the decision-maker or key influencer for digital marketing services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "3e0d05cca69d",
         "category": "contact",
         "label": "Address",
         "value": "121 CHARTRES ST |\r"
+      },
+      {
+        "id": "aif-26-1",
+        "category": "business",
+        "label": "Business Name",
+        "value": "Daisy Dukes/Daisy Maes"
+      },
+      {
+        "id": "aif-26-2",
+        "category": "business",
+        "label": "Website Management Needs",
+        "value": "Frequent updates to menus, packages, and reservations"
+      },
+      {
+        "id": "aif-26-3",
+        "category": "business",
+        "label": "Private Events Domain",
+        "value": "daisiesprivateevents.com"
+      },
+      {
+        "id": "aif-26-4",
+        "category": "business",
+        "label": "Potential Issue",
+        "value": "Payment failure for SaaS related to private events"
       }
     ],
     "opportunities": [],
@@ -6875,10 +8395,13 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-09-20T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "Robert Kagan is a client from Daisy Dukes/Daisy Maes, a restaurant in Louisville, KY. He frequently requests website updates for menus, packages, and reservations, and recently registered 'daisiesprivateevents.com'. There's a recent inbound email about a payment failure for their private events SaaS, indicating a potential need for review of their current digital services."
   },
   {
-    "id": "30",
+    "id": "28",
     "firstName": "Nima",
     "lastName": "Asgari (via Google Docs)",
     "email": "nathan.seb.anil@gmail.com",
@@ -6969,7 +8492,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-27-0",
+        "content": "This contact appears to be related to personal matters for Jahan Taila, specifically concerning an apartment transfer and an emergency situation involving his father.",
+        "category": "personal",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-27-1",
+        "content": "The emails include documents related to a lease, an after-school curriculum, and logos, suggesting a mix of personal and possibly educational/organizational connections.",
+        "category": "personal",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "9bbef0809963",
@@ -6982,6 +8520,30 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "category": "contact",
         "label": "Address",
         "value": "1501 Bellamy Pl, Louisville"
+      },
+      {
+        "id": "aif-27-2",
+        "category": "personal",
+        "label": "Email Sender",
+        "value": "Nima Asgari (via Google Docs)"
+      },
+      {
+        "id": "aif-27-3",
+        "category": "personal",
+        "label": "Email Address",
+        "value": "nathan.seb.anil@gmail.com"
+      },
+      {
+        "id": "aif-27-4",
+        "category": "personal",
+        "label": "Key Topics",
+        "value": "Apartment transfer, lease, emergency, after-school curriculum"
+      },
+      {
+        "id": "aif-27-5",
+        "category": "personal",
+        "label": "Associated Name",
+        "value": "Jahan Taila's father (Jonathan)"
       }
     ],
     "opportunities": [],
@@ -6992,17 +8554,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-05-07T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "This contact, Nima Asgari, appears to be involved in personal matters related to Jahan Taila, including an apartment transfer, lease documents, and an emergency situation involving Jahan's father. The content is not relevant to Derby Digital's business in digital marketing for restaurants."
   },
   {
-    "id": "31",
+    "id": "29",
     "firstName": "Corey",
     "lastName": "Haines",
     "email": "corey@swipefiles.com",
     "company": "Swipefiles",
     "website": "https://36cf0b0f.click.convertkit-mail4.com",
-    "relationshipType": "vendor",
-    "tags": [],
+    "relationshipType": "industry",
+    "tags": [
+      "AI marketing",
+      "SaaS growth",
+      "conversion optimization",
+      "marketing insights"
+    ],
     "relationshipScore": 35,
     "interactions": [
       {
@@ -7076,7 +8644,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-28-0",
+        "content": "Corey Haines is a prominent figure in marketing, particularly for SaaS and startups, offering insights on growth, conversions, and AI.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-28-1",
+        "content": "Jahan Taila, operating in the restaurant niche, could potentially adapt some of Corey's broader marketing principles, especially around conversion and AI, but direct applicability is limited.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "4293efd20d8b",
@@ -7089,6 +8672,30 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "category": "contact",
         "label": "Address",
         "value": "8067 Hudson Dr, San"
+      },
+      {
+        "id": "aif-28-2",
+        "category": "business",
+        "label": "Focus",
+        "value": "SaaS growth, marketing, conversion optimization, AI in marketing"
+      },
+      {
+        "id": "aif-28-3",
+        "category": "business",
+        "label": "Content Type",
+        "value": "Newsletters, GitHub repos, growth roadmaps"
+      },
+      {
+        "id": "aif-28-4",
+        "category": "business",
+        "label": "Engagement",
+        "value": "Jahan is subscribed to Corey's newsletter, indicating interest in marketing best practices."
+      },
+      {
+        "id": "aif-28-5",
+        "category": "business",
+        "label": "Recent Topics",
+        "value": "AI for marketing, website conversions, SaaS growth roadmap"
       }
     ],
     "opportunities": [],
@@ -7099,118 +8706,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-04T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "Founder",
+    "aiSummary": "Corey Haines is a marketing expert (Swipefiles) whose content focuses on SaaS growth, conversions, and AI. Jahan Taila is subscribed to his newsletter, suggesting an interest in general marketing strategies, though Corey's direct niche (SaaS) differs from Jahan's (restaurants)."
   },
   {
-    "id": "32",
-    "firstName": "Manu",
-    "lastName": "Anil",
-    "email": "manu@derbydigital.us",
-    "company": "Derbydigital",
-    "website": "https://palmaitalian.com",
-    "relationshipType": "team",
-    "tags": [],
-    "relationshipScore": 35,
-    "interactions": [
-      {
-        "id": "email-40-0",
-        "type": "email",
-        "date": "2026-03-10",
-        "summary": "Payment",
-        "subject": "Payment",
-        "details": "James Leach\r\n\r\n   -\r\n\r\n   Paid: 5 times\r\n\r\n   -\r\n\r\n   Total collected: $995\r\n\r\n   -\r\n\r\n   My 50%: $497.50\r\n\r\n\r\nToday\u2019s Man\r\n\r\n   -\r\n\r\n   Paid: 4 times\r\n\r\n   -\r\n\r\n   Total collected: $2,800\r\n\r\n   -\r\n\r\n   My 50%: $1,400\r\n\r\n\r\nSNKRplug\r\n\r\n   -\r\n\r\n   Paid: 2 times\r\n\r\n   -\r\n\r\n   Total collected: $300\r\n\r\n   -\r\n\r\n   My 50%: $150\r\n\r\n\r\nLori\r\n\r\n   -\r\n\r\n   Paid: 1 time\r\n\r\n   -\r\n\r\n   Total collected: $500\r\n\r\n   -\r\n\r\n   My 50%: $250\r\n\r\n\r\nMoney I spent on the card: $487\r\n\r\nTotal I\u2019m owed after card spend: $1,810.50",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-40-1",
-        "type": "email",
-        "date": "2026-02-24",
-        "summary": "new shit",
-        "subject": "new shit",
-        "details": "Yo Jahan,\r\n\r\nFinished the Bluegrass doc \u2014 it mentions emergency repairs and includes the\r\nexamples you told me to add + added some new things. check it out and lmk\r\n\r\nAlso, 502 Thrift\u2019s website is gonna be live soon(he;s taking pictures of\r\nmerchandise), and 502 Snkr Plug\u2019s website too, I've been making that.\r\n\r\nTalked to Mo too \u2014 new campaign is live and it\u2019s getting more sales. He\u2019s\r\ntryna see if he can refer us to his friend in Ohio who owns a shop too.\r\n\r\nOn some real life shit though, I\u2019ve just been hella preoccupied. Matrix\r\nattacked again, my great grandma died last week, my parents are fucked up\r\nright now, my dad\u2019s going to India, my mom\u2019s been crying, and my other\r\ngrandma is still in the hospital. Shit\u2019s not looking too good for her, so\r\nI\u2019ve just been dealing with that.\r\n\r\nAlso, I got some meetings booked this week that we can attend together \u2014\r\nI\u2019ll put them in ClickUp.\r\n\r\nCall or text me when you can so we can catch up and shit too.\r\n\r\n\u2013 Manu",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-40-2",
-        "type": "email",
-        "date": "2026-02-12",
-        "summary": "Re: Derby Digital demo & examples",
-        "subject": "Re: Derby Digital demo & examples",
-        "details": "Are you sending me a link to join?\r\n\r\nOn Wed, Feb 11, 2026 at 1:12\u202fPM Manu Anil <manu@derbydigital.us> wrote:\r\n\r\n> Hi Ashley,\r\n>\r\n> I took another look at your site, and there\u2019s definitely more potential\r\n> there \u2014 especially for what restaurants are typically paying on SpotHopper.\r\n>\r\n> You\u2019ve probably noticed that a lot of SpotHopper websites look the same.\r\n> They follow a similar template structure, which makes it hard to truly\r\n> stand out. We build everything fully custom so you\u2019re differentiated from\r\n> the competition with a cleaner, more premium website that actually converts.\r\n>\r\n> Our backend system connects everything in one place \u2014 reservations, online\r\n> ordering, catering, private events, reviews, SMS/email marketing \u2014 all\r\n> streamlined into one organized dashboard so you\u2019re not juggling multiple\r\n> tools.\r\n>\r\n> I also ran a quick audit on your site, and SpotHopper isn\u2019t actively\r\n> improving your SEO or building authority over time. That means your\r\n> rankings aren\u2019t growing \u2014 you\u2019re mostly just being maintained. I\u2019d be happy\r\n> to walk you through that live.\r\n>\r\n> Here are a few restaurants that switched from SpotHopper to us (happy to\r\n> send more if helpful):\r\n>\r\n> \u2022 https://palmaitalian.com\r\n> <https://gfhiedh.r.af.d.sendibt2.com/tr/cl/m6JVVpeQgIyE311pDotxMH1aWgF1HL5lW7lmn2FLMz6XrgQOLJGt9R5JEMb9RFnQnr8aeWBoEv3QdrKNvUcIrSl0vC6TbOwbbolGt7feW6OES8omOGTItkBMO4DZdYcJgocVcYpX4wp2ocJgCu6EpHDo_2sSUsLbbGnC8_JYk-izKcAN0dxsITH8NV-XQTbZPfAQis7eCkYEG8TfhuSoydAfiGphzAgwX1hUM1IuchQ0-ufOfusPyQy-WnSbe0qof7qPLlMp_apqpwjJtLqc3g>\r\n> \u2022 https://themayflynyc.com\r\n> <https://gfhiedh.r.af.d.sendibt2.com/tr/cl/9MOTFFlJfvfVZP7ozefGuq6Sdh94UsK8ApLbYwTHdLTzDUOcSGQff55dCr-LH7gjkG2HaNWscwn_Ctr8ULkSOwDySbocrFOwv2VLc2dTgtZx4WMLyIHwf8gpKSBDay1Ayva-uxccO9_DFSLOQpBS4vvJXAgqyxAHS6jMg5JN828IuDGsK-_asgq5CQYmpBIQR8E1jGbFH0G8SP5SikS-9gNHbgJvLXrtW8j_yEK3LLyIclKhB5AHx78UoF4bw8vSpvqRA_2InGEiCyxxcbv2QQ>\r\n> \u2022 https://zhaobentonville.com\r\n> <https://gfhiedh.r.af.d.sendibt2.com/tr/cl/jRgsyD1X",
-        "direction": "outbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-40-3",
-        "type": "email",
-        "date": "2025-12-24",
-        "summary": "Your video is here...",
-        "subject": "Your video is here...",
-        "details": "Hey! Jahan here.\u00a0\r\n\r\n\r\nYou just opted in to see my video on how we generate 30-50 monthly leads for our electrician clients using AI Funnels.\r\n\r\n\r\n\u2192 Here's the link to watch the video [https://email.send.lcmsgsndr.org/c/eJxsk09v6joQxT9NsgtyHIckCy_Kn9z2Qi5wC6WwiRzbJAY7Tm2TlH76J_qqp-qp25k5c6TfnKGlYHiW7U7yur38ieP5pIjFhC8yn2ECUFIxn2lFRIstb9lIUmVr2zIz0qb-6pR6aLmxjehKd-s4rhtZVld64c7nOEzG4xjFKEp8roiQpeLWkprfbRcHlvy57ter2ziFbyk06mX5NfW5aNDmcpJ6-Fa7y-I4hTRCKEgTWgWIRjwgKSIBjVAW8xRQGoffJdbx7q5jAFTVKQyDZBxmAaqyKMhYwgJEU8JiRhiJkc_bXhjdKt463BnNrtQJ3foNRmhMxjDLYhiFKEsAiEFGoxSAMCaUJMgXGAIYhxAiEIEoTkYZYByyMSQ0iiECyEPgB4bClrYhhrPyi-bJaFUSxgy3tjT8RKjThjPszJX7EjfOddaLHjyYezCv9YhxU92YqIUjcnS1HswH4mjjS1r-C0G0jpuWSLyDuWW_Xi6voQfzzSoPrZ6J6vfT9HfKp9l2-7CWHszfF7LeVaf-8TJsXlfvrWKv4ta0UecmV1eQt6xHx3B5jlaFnHab89GD-dqD-at6FNt-P4VKZ0NaNPsjBdEMvWyqv22Raw_mM5YUdZ-vD6xg7x-skPNnaW5bk6arOXDb5Lzs31YdaaZF1tXwbY7S5_Fu48EJev4Q60Q9zMO_Sjra5V0DTvvZwoOTpxt4Fodkqp8OHsz352KZpNtfx2GzzB4PxRoNH-vjthh2XjTzpf4Mu1KXCXHrenHe326LIT2-84uvuGs0w6QTfmd0Lxg3WHLCqG5bfj-Ab7Ai7dVD4H-8fauvhnL8yToQtg_useXGd_hu-KObw1Sr8sevc5i78r_g9xj-EwAA__8ncznt]\r\n\r\nReply here if you have questions, or if you're interested in me setting up and managing AI lead gen campaigns for your electrical\r\nbusiness.\r\n\r\n\r\nJahan\r\n\r\n\r\nps: If you're skeptical of working with me, simply Google \"Derby Digital\" and read through 40+ 5-star reviews from electricians\r\njust like you!\u00a0\r\n\r\n\r\nIf you no longer wish to receive these emails you may unsubscribe\r\n[https://email.send.lcmsgsndr.org/c/eJxslNFzojoYxf-a8EYHkyDwwMOqZdtVVt3aWn1hQvIpUUJoEqD2r79jt3fvzlxfId85k_P7TnghRTpLng91tzn_DMP7SR7KCcwTT6QsoFEpPKEVk01qoRF3NVf2aBth7rQ5fv0p9NCAsZVsC3dpIT1WdVF2_AzOg3QUjcchDSmJPFBM1oUCa9kRrrbznYh-dtvV8jKO8VuMjXpZfJ36FBq0OR9qPfz17ToWhjHmhFI_jnjpU07AZzFlPic0CSEOOA9Hf49YB-11TgRBWR5GIz8ajxKflgnxExEJn_KYiVAwwULqQdNLoxsFjUtbo0XHndSNV6WYQUyxiALCKQfOgCchDaPoQCLOCMWeTHGAwxHGNCABCaO7JBCAxRgzTkJMA4pocCNDaQtbMQOi-ErzYLQqmBAGrC0MHBh32oBInenAq9PKudYi8g3hDOHMguklB3v3ryTXCuHs8_YW4azsZC3AIJx1je1Ky40sw",
-        "direction": "outbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-40-4",
-        "type": "email",
-        "date": "2025-12-03",
-        "summary": "(no subject)",
-        "subject": "",
-        "details": "Attachment available until Jan 2, 2026\r\nClick to Download\r\n <https://www.icloud.com/attachment/?u=https%3A%2F%2Fcvws.icloud-content.com%2FB%2FAfSfdqTK02cXQgdsImrvE67LLGerASJZ47Mmml0IE8lDjSn1a57bsH4P%2F%24%7Bf%7D%3Fo%3DAs9pA0SKpyqHVbySANRfWgl0km0kCq9_EFJgyb3tPQCP%26v%3D1%26x%3D3%26a%3DCAogdbod0NQwUodCAIIDj92Dn-3AAjrlW_ferZDd51DYDnoSehD3p6CVrjMY97eb6bczIgEAKgkC6AMA_0dJ0JBSBMssZ6taBNuwfg9qJyzdvXo9tQhQypt74soY9XjX_s43uzTnvOkkf25mdzNxKPFlonR8aXIn70W7H1LVSHXy4nexGnd5ZRFx_59R8zUfgxn18WV5pK132I2K0zMQ%26e%3D1767331257%26fl%3D%26r%3DCB34091C-E1A7-4DA3-9728-B7E3B65E7BA6-1%26k%3D%24%7Buk%7D%26ckc%3Dcom.apple.largeattachment%26ckz%3DDFCB1001-C733-4D35-B879-293B435D7607%26p%3D149%26s%3D-YyzQEah6lqv6feS3RmWZwyCaew&uk=TPcmn7ulo062C8oO5Pu7kg&f=Movie%20on%2011-25-25%20at%204.28%20PM.mov&sz=2623437463>Movie on 11-25-25 at 4.28 PM.mov\r\n2.62 GB",
-        "direction": "outbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-40-5",
-        "type": "email",
-        "date": "2025-09-17",
-        "summary": "[Scan] 2025-09-17 13:23",
-        "subject": "[Scan] 2025-09-17 13:23",
-        "details": "Seo audit \r\n--\r\nSent with Genius Scan for iOS.\r\nhttps://tglapp.com/e/scan",
-        "direction": "outbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-40-6",
-        "type": "email",
-        "date": "2025-09-07",
-        "summary": "Re: Bringing Do Asian Fusion Online",
-        "subject": "Re: Bringing Do Asian Fusion Online",
-        "details": "Manu,\r\n\r\nI'm so sorry for the delay in responding to you! I am interested in seeing\r\nwhat you are able to offer. We are a very small business with only one\r\nlocation, so pricing is rather important to us. Would you be available for\r\na demo sometime this week? I should be available any weekday between 11:00\r\na.m. and 4:00 p.m.\r\n\r\nThank you,\r\n\r\nKalie Ammons\r\n\r\nOn Mon, Aug 25, 2025 at 2:44\u202fPM Manu Anil <manu@6578437.brevosend.com>\r\nwrote:\r\n\r\n> Hi Kelly,\r\n>\r\n> It was great speaking with you earlier. Since Do Asian Fusion doesn\u2019t\r\n> currently have a website, I\u2019d like to show you how we can set you up with a\r\n> professional site that includes online ordering, reservations, and a\r\n> loyalty/rewards program.\r\n>\r\n>\r\n> With our software, we can handle everything\u2014websites, getting your\r\n> business ranked higher on Google so more customers can find you, email/SMS\r\n> marketing, catering, event management, and custom social media design.\r\n> We\u2019ve already worked with 40\u201350 restaurants, and in our demo we can walk\r\n> you through exactly how it all works and how it would look for Do Asian\r\n> Fusion.\r\n>\r\n>\r\n> You can take a look at our site here to learn more: derbydigital.us\r\n> <https://gfhiedh.r.bh.d.sendibt3.com/tr/cl/BRU2vFVWgv4GTzD2a69TTJCFhDpOXRzwVtaYcC5Go6FxegkoLVPAUN1o58KOJ4RISw-PzIm_FF_sQa1yNjduFmPWmxZ9bc-6kvnwNl8cOkvZBP4fxqZltvd7w4pjsiWudBJ0s_BFRxjKdk5RMu2edlAP4gJQPGcnsYkuUvMx8Ev0fheysYqGHPOVGOF5Cdlz_zG5Dp0p2-x6586T7N1zMO2dorG9W8C61fDMi-mGfhxZ__oaax7TkAIwt3iEdozFU_ycK-9MTqj1>\r\n>\r\n>\r\n> Best regards,\r\n>\r\n> Manu Anil\r\n>\r\n>\r\n\r\n-- \r\nManager\r\nDo Asian Fusion",
-        "direction": "outbound",
-        "createdAt": "2026-03-16T12:18:59"
-      }
-    ],
-    "notes": [],
-    "facts": [
-      {
-        "id": "cadae768b460",
-        "category": "contact",
-        "label": "Phone",
-        "value": "1767331257"
-      }
-    ],
-    "opportunities": [],
-    "aiInsights": [],
-    "groups": [],
-    "connections": [],
-    "lastContactedAt": "2026-03-10",
-    "source": "gmail-import",
-    "createdAt": "2025-09-07T00:00:00",
-    "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
-  },
-  {
-    "id": "33",
+    "id": "30",
     "firstName": "Gamma",
     "lastName": "",
     "email": "hello@gamma.app",
     "company": "Gamma",
     "website": "https://track.pstmrk.it",
-    "relationshipType": "vendor",
-    "tags": [],
+    "relationshipType": "other",
+    "tags": [
+      "software",
+      "AI websites",
+      "AI presentations"
+    ],
     "relationshipScore": 35,
     "interactions": [
       {
@@ -7284,8 +8796,42 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-29-0",
+        "content": "Jahan is receiving daily inbound marketing emails from Gamma, a company focused on AI-powered presentations and website building.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-29-1",
+        "content": "The emails suggest Jahan may have signed up for a trial or newsletter, indicating potential interest in AI tools for content creation.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-29-0",
+        "category": "business",
+        "label": "Email Frequency",
+        "value": "Daily inbound emails from March 1st to March 7th, 2026."
+      },
+      {
+        "id": "aif-29-1",
+        "category": "business",
+        "label": "Core Offering",
+        "value": "AI-powered presentations and website building."
+      },
+      {
+        "id": "aif-29-2",
+        "category": "business",
+        "label": "Sender",
+        "value": "Gamma Tech, Inc."
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -7294,17 +8840,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-01T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Jahan Taila is receiving daily marketing emails from Gamma, a company specializing in AI-powered presentations and website creation. This suggests Jahan might be exploring AI tools for content generation, which could be relevant for Derby Digital's digital marketing services, especially in the restaurant niche for creating engaging visuals or simple websites."
   },
   {
-    "id": "34",
+    "id": "31",
     "firstName": "Partner",
     "lastName": "Intelliworx",
     "email": "joy@outsourceaccelerator.com",
     "company": "Outsourceaccelerator",
     "website": "https://d5cXbX04.na1.hs-sales-engage.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "partner",
+    "tags": [
+      "outsourcing",
+      "meeting",
+      "virtual assistant"
+    ],
     "relationshipScore": 35,
     "interactions": [
       {
@@ -7378,13 +8929,52 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-30-0",
+        "content": "Jahan is actively exploring outsourcing solutions, specifically for virtual assistants, and has multiple meetings scheduled with different outsourcing providers facilitated by Outsourceaccelerator.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-30-1",
+        "content": "Outsourceaccelerator appears to be a broker or facilitator connecting Jahan with various outsourcing companies (Intelliworx PH, Pentwater Connect, PANDR Outsourcing).",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "089f2f32d101",
         "category": "contact",
         "label": "Phone",
         "value": "754-216-5970"
+      },
+      {
+        "id": "aif-30-1",
+        "category": "business",
+        "label": "Outsourcing Interest",
+        "value": "Virtual Assistant"
+      },
+      {
+        "id": "aif-30-2",
+        "category": "business",
+        "label": "Meeting Arranger",
+        "value": "Outsource Accelerator (Alelie)"
+      },
+      {
+        "id": "aif-30-3",
+        "category": "business",
+        "label": "Number of Meetings Scheduled",
+        "value": "3+"
+      },
+      {
+        "id": "aif-30-4",
+        "category": "business",
+        "label": "Recent Incentive",
+        "value": "$100 Gift Card for next meeting"
       }
     ],
     "opportunities": [],
@@ -7395,17 +8985,25 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-09-23T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "Partner",
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "Jahan Taila is actively engaging with Outsourceaccelerator to find virtual assistant outsourcing solutions, having multiple meetings scheduled with various providers. Outsourceaccelerator acts as an intermediary, and Jahan recently received an incentive for future meetings."
   },
   {
-    "id": "35",
+    "id": "32",
     "firstName": "David",
     "lastName": "",
     "email": "david@editvideo.io",
     "company": "Editvideo",
     "website": "https://editvideo.io",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "vendor",
+    "tags": [
+      "inbound",
+      "free trial",
+      "video editing"
+    ],
     "relationshipScore": 35,
     "interactions": [
       {
@@ -7479,8 +9077,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-31-0",
+        "content": "Jahan appears to have signed up for a free test video service from Editvideo, indicating a potential need for video editing.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-31-1",
+        "content": "The emails are a series of follow-ups and countdowns for a free video offer, suggesting a sales funnel for Editvideo's services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-31-0",
+        "category": "business",
+        "label": "Service Offered",
+        "value": "Video editing (free test video)"
+      },
+      {
+        "id": "aif-31-1",
+        "category": "business",
+        "label": "Engagement Level",
+        "value": "Signed up for a free offer, but hasn't completed the request."
+      },
+      {
+        "id": "aif-31-2",
+        "category": "business",
+        "label": "Email Frequency",
+        "value": "Daily for 7 days"
+      },
+      {
+        "id": "aif-31-3",
+        "category": "business",
+        "label": "Call to Action",
+        "value": "Submit video request form for free test video"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -7489,19 +9127,33 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-02-18T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Jahan Taila is being actively pursued by Editvideo, a video editing service, after signing up for a free test video. The emails are a time-sensitive campaign to encourage Jahan to utilize the free offer before it expires, indicating a potential need for video content creation or editing within Derby Digital or for their restaurant clients."
   },
   {
-    "id": "36",
+    "id": "33",
     "firstName": "Webild",
     "lastName": "",
     "email": "admin@webild.io",
     "company": "Webild",
     "website": "https://manage.kmail",
-    "relationshipType": "vendor",
-    "tags": [],
-    "relationshipScore": 30,
+    "relationshipType": "other",
+    "tags": [
+      "domain registration",
+      "website builder"
+    ],
+    "relationshipScore": 40,
     "interactions": [
+      {
+        "id": "email-51-0",
+        "type": "email",
+        "date": "2026-03-08",
+        "summary": "Payment Confirmation - Invoice VVKSXPOI-0002",
+        "subject": "Payment Confirmation - Invoice VVKSXPOI-0002",
+        "details": "<!doctype html>\r\n<html lang=\"en\">\r\n<head>\r\n  <meta charset=\"utf-8\" />\r\n  <meta name=\"viewport\" content=\"width=device-width,initial-scale=1\" />\r\n  <title>Payment Confirmation</title>\r\n  <style>\r\n    :root { color-scheme: light dark; supported-color-schemes: light dark; }\r\n    @media (prefers-color-scheme: dark) {\r\n      .bg    { background:#0f1320 !important; }\r\n      .card  { background:#151a2b !important; box-shadow:none !important; }\r\n      .heading { color:#fff !important; }\r\n      .muted   { color:#a9aec3 !important; }\r\n    }\r\n    @media screen and (max-width:640px){\r\n      .container{ width:100% !important; }\r\n      .px { padding-left:20px !important; padding-right:20px !important; }\r\n    }\r\n  </style>\r\n</head>\r\n<body style=\"margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px;color:#111;\">\r\n  <center role=\"article\" aria-roledescription=\"email\" lang=\"en\" class=\"bg\" style=\"width:100%;background:#f6f7fc;\">\r\n    <table role=\"presentation\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\" width=\"100%\">\r\n      <tr>\r\n        <td align=\"center\" style=\"padding:24px 12px;\">\r\n          <table role=\"presentation\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\" class=\"container\" style=\"width:550px;max-width:550px;\">\r\n            <tr><td style=\"height:24px;line-height:24px;font-size:0;\">&nbsp;</td></tr>\r\n            \r\n            <tr>\r\n              <td align=\"center\" class=\"px\" style=\"padding:0 24px;\">\r\n                <table role=\"presentation\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\" width=\"100%\" class=\"card\"\r\n                       style=\"border-radius:24px;overflow:hidden;background:#ffffff;box-shadow:0 0 24px rgba(0,0,0,0.10);\">\r\n                  <tr>\r\n                    <td style=\"padding:32px 24px 24px 24px;\">\r\n                      <h1 class=\"h1 heading\" style=\"margin:0 0 16px 0;font-weight:800;font-size:28px;line-height:1.2;color:#14151a;\">\r\n                        Pay",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
       {
         "id": "email-60-0",
         "type": "email",
@@ -7553,6 +9205,16 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       },
       {
+        "id": "email-78-0",
+        "type": "email",
+        "date": "2026-03-02",
+        "summary": "Pssst... Webild Just Launched",
+        "subject": "Pssst... Webild Just Launched",
+        "details": "https://www.webild.io/\r\n\r\nhttps://www.webild.io/\r\n\r\nhttps://www.webild.io/\r\n\r\n[twitter](https://x.com/webild)\r\n[instagram](https://www.instagram.com/webild/)\r\n\r\nNo longer want to receive these emails? [Unsubscribe](https://manage.kmail-=\r\nlists.com/subscriptions/unsubscribe?a=3DUAvGAB&c=3D01KJH5FMDG1162SPRSW52F72=\r\n55&k=3De594ccefbde8499c5add3f70351c5fa7&g=3DXJR7uk&m=3D01KJKE8P99AEJJPRSV3D=\r\n5G81N2&r=3D01KJR0X0G18KDABNC8RHM7404B).",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
         "id": "email-60-5",
         "type": "email",
         "date": "2026-02-28",
@@ -7563,13 +9225,66 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "merge-dmytro@web",
+        "content": "Merged with duplicate contact: dmytro@webild.io",
+        "category": "general",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "merge-idan@hello",
+        "content": "Merged with duplicate contact: idan@hello.webild.io",
+        "category": "general",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-32-2",
+        "content": "This contact is receiving marketing emails from Webild, a website builder and domain registration service.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-32-3",
+        "content": "The emails indicate recent activity with Webild, including a payment confirmation and multiple promotional messages.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "1f41b8bcd32c",
         "category": "contact",
         "label": "Address",
         "value": "5565 HARDY AVE San Diego, California"
+      },
+      {
+        "id": "aif-32-1",
+        "category": "business",
+        "label": "Company Type",
+        "value": "Website builder / Domain registrar"
+      },
+      {
+        "id": "aif-32-2",
+        "category": "business",
+        "label": "Recent Activity",
+        "value": "Payment confirmation, promotional emails"
+      },
+      {
+        "id": "aif-32-3",
+        "category": "business",
+        "label": "Email Frequency",
+        "value": "High (8 emails in 10 days)"
+      },
+      {
+        "id": "aif-32-4",
+        "category": "business",
+        "label": "Unsubscribe Links Present",
+        "value": "Yes"
       }
     ],
     "opportunities": [],
@@ -7580,17 +9295,25 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-28T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "secondaryEmail": "dmytro@webild.io",
+    "title": "Admin",
+    "aiSummary": "This contact is an admin at Webild and is actively receiving marketing and transactional emails from Webild, a website builder and domain registration service. The high frequency of emails suggests recent engagement with their services."
   },
   {
-    "id": "37",
+    "id": "34",
     "firstName": "Julian",
     "lastName": "Goldie",
     "email": "me@juliangoldie.com",
     "company": "Juliangoldie",
     "website": "https://email.crm.juliangoldie.com",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "AI",
+      "digital marketing",
+      "productivity",
+      "SEO"
+    ],
     "relationshipScore": 30,
     "interactions": [
       {
@@ -7654,8 +9377,55 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-33-0",
+        "content": "Julian Goldie appears to be a marketer selling AI and productivity-related courses/systems, as evidenced by the email content.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-33-1",
+        "content": "The emails are highly sales-driven with urgent calls to action and bonus offers, indicating a direct sales funnel.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-33-2",
+        "content": "Jahan Taila has received multiple inbound emails from Julian Goldie, suggesting Jahan is on Julian's mailing list.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-33-0",
+        "category": "business",
+        "label": "Sender's Focus",
+        "value": "AI, SEO, productivity systems"
+      },
+      {
+        "id": "aif-33-1",
+        "category": "business",
+        "label": "Email Frequency",
+        "value": "6 emails in 2 days (very high)"
+      },
+      {
+        "id": "aif-33-2",
+        "category": "business",
+        "label": "Email Tone",
+        "value": "Urgent, sales-focused, scarcity-driven"
+      },
+      {
+        "id": "aif-33-3",
+        "category": "business",
+        "label": "Product/Service Offered",
+        "value": "AI Profit Boardroom, 40-Hour Freedom System, Tuesday Turnaround bonuses, AI SEO Success Lab courses"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -7664,17 +9434,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-24T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "This contact is from Julian Goldie, a marketer sending frequent, urgent, sales-focused emails about AI, SEO, and productivity courses/systems. Jahan Taila is on Julian's mailing list, receiving these inbound communications."
   },
   {
-    "id": "38",
+    "id": "35",
     "firstName": "Merchynt",
     "lastName": "",
     "email": "justin@merchynt.com",
     "company": "Merchynt",
     "website": "https://scribe.merchynt.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "vendor",
+    "tags": [
+      "white-label SEO",
+      "Google Business Profile optimization"
+    ],
     "relationshipScore": 30,
     "interactions": [
       {
@@ -7738,7 +9512,29 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-34-0",
+        "content": "Merchynt is a white-label Google Business Profile optimization service provider, potentially useful for Derby Digital to offer to their restaurant clients.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-34-1",
+        "content": "Jahan requested agency pricing, indicating an initial interest in partnering or utilizing their services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-34-2",
+        "content": "The communication from Merchynt is focused on explaining their agency program and addressing potential hesitations.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "749fdf513e2d",
@@ -7751,6 +9547,30 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "category": "contact",
         "label": "Address",
         "value": "3101 Ocean Park Blvd Ste 100 PMB 285 Santa Monica, CA"
+      },
+      {
+        "id": "aif-34-2",
+        "category": "business",
+        "label": "Service Offered",
+        "value": "White-label Google Business Profile optimization"
+      },
+      {
+        "id": "aif-34-3",
+        "category": "business",
+        "label": "Contact Initiator",
+        "value": "Jahan Taila (requested pricing)"
+      },
+      {
+        "id": "aif-34-4",
+        "category": "business",
+        "label": "Recent Interaction Date",
+        "value": "2026-02-19"
+      },
+      {
+        "id": "aif-34-5",
+        "category": "business",
+        "label": "Merchynt's Goal",
+        "value": "Convert Jahan into an agency partner"
       }
     ],
     "opportunities": [],
@@ -7761,17 +9581,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-06T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Jahan Taila of Derby Digital is a prospect for Merchynt's white-label Google Business Profile optimization services. Jahan initiated contact by requesting agency pricing, and Merchynt has been actively following up to explain their program and address potential concerns, with the latest interaction on February 19, 2026."
   },
   {
-    "id": "39",
+    "id": "36",
     "firstName": "Daejuan",
     "lastName": "Dove",
     "email": "daejuan.d@uk.velta-agency.com",
-    "company": "Uk",
+    "company": "Velta Agency",
     "website": "https://email.uk.velta-agency.com",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "cancelled",
+      "appointment"
+    ],
     "relationshipScore": 30,
     "interactions": [
       {
@@ -7835,8 +9659,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-35-0",
+        "content": "This contact appears to be from a marketing agency (Velta Agency) that Jahan Taila had an appointment with, likely for a 'Pay Per Appointment demo'.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-35-1",
+        "content": "The appointment was confirmed and then cancelled on the same day, suggesting a potential lead or vendor interaction that did not proceed.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-35-0",
+        "category": "business",
+        "label": "Contact Name",
+        "value": "Daejuan Dove"
+      },
+      {
+        "id": "aif-35-1",
+        "category": "business",
+        "label": "Contact Email",
+        "value": "daejuan.d@uk.velta-agency.com"
+      },
+      {
+        "id": "aif-35-2",
+        "category": "business",
+        "label": "Company",
+        "value": "Velta Agency"
+      },
+      {
+        "id": "aif-35-3",
+        "category": "business",
+        "label": "Interaction Type",
+        "value": "Scheduled and cancelled demo"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -7845,17 +9709,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-01-04T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Jahan Taila had a confirmed 'Pay Per Appointment demo' with Daejuan Dove from Velta Agency that was subsequently cancelled on the same day. This suggests a potential past vendor or lead interaction."
   },
   {
-    "id": "40",
+    "id": "37",
     "firstName": "Jordan",
     "lastName": "Ross",
     "email": "jordan@8figureagency.co",
     "company": "8Figureagency",
     "website": "https://media.beehiiv.com",
-    "relationshipType": "client",
-    "tags": [],
+    "relationshipType": "industry",
+    "tags": [
+      "agency owner",
+      "AI",
+      "digital marketing",
+      "lead generation"
+    ],
     "relationshipScore": 25,
     "interactions": [
       {
@@ -7909,13 +9779,52 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-36-0",
+        "content": "Jordan Ross from 8Figureagency is sending emails focused on agency scaling, AI, and lead generation, indicating they are likely a B2B service provider targeting other agencies.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-36-1",
+        "content": "The content suggests 8Figureagency offers solutions for agency growth, potentially through AI tools or lead generation strategies.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "0a5d0d44bc12",
         "category": "contact",
         "label": "Phone",
         "value": "1758498716"
+      },
+      {
+        "id": "aif-36-1",
+        "category": "business",
+        "label": "Email Sender",
+        "value": "Jordan Ross"
+      },
+      {
+        "id": "aif-36-2",
+        "category": "business",
+        "label": "Sender Company",
+        "value": "8Figureagency"
+      },
+      {
+        "id": "aif-36-3",
+        "category": "business",
+        "label": "Email Content Focus",
+        "value": "Agency scaling, AI, lead generation, employee retention"
+      },
+      {
+        "id": "aif-36-4",
+        "category": "business",
+        "label": "Recent Engagement",
+        "value": "5 inbound emails between March 10-14, 2026"
       }
     ],
     "opportunities": [],
@@ -7926,17 +9835,24 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-10T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Jordan Ross from 8Figureagency is an industry contact sending inbound emails focused on agency scaling, AI, and lead generation. Their content suggests they offer B2B services to help agencies grow."
   },
   {
-    "id": "41",
+    "id": "38",
     "firstName": "kai",
     "lastName": "",
     "email": "kai@stonescaling.com",
     "company": "Stonescaling",
     "website": "https://email.lc.stonescaling.com",
-    "relationshipType": "client",
-    "tags": [],
+    "relationshipType": "other",
+    "tags": [
+      "sales",
+      "AI",
+      "SAAS",
+      "cold calling",
+      "business model"
+    ],
     "relationshipScore": 25,
     "interactions": [
       {
@@ -7990,8 +9906,55 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-37-0",
+        "content": "Kai from Stonescaling is sending inbound emails to Jahan, promoting a business model focused on generating meetings, closing clients, and leveraging AI/SAAS.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-37-1",
+        "content": "The content suggests Kai is trying to sell a course or service related to sales, cold calling, and business growth, potentially using AI tools.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-37-2",
+        "content": "Jahan is receiving content about sales scripts, live client closes, and SAAS course access, indicating a potential interest in these areas or a past interaction.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-37-0",
+        "category": "business",
+        "label": "Sender",
+        "value": "Kai from Stonescaling"
+      },
+      {
+        "id": "aif-37-1",
+        "category": "business",
+        "label": "Email Frequency",
+        "value": "5 emails in 2 weeks (March 2026)"
+      },
+      {
+        "id": "aif-37-2",
+        "category": "business",
+        "label": "Key Topics",
+        "value": "Cold calling, sales, AI, SAAS, business growth"
+      },
+      {
+        "id": "aif-37-3",
+        "category": "business",
+        "label": "Call to Action",
+        "value": "Watch videos, check out testimonials, access courses/bonuses"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -8000,17 +9963,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-27T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Kai from Stonescaling is actively sending promotional emails to Jahan Taila, focusing on a business model that promises to generate meetings, close clients, and leverage AI/SAAS. The content includes sales scripts, live client closing demonstrations, and access to courses/bonuses, suggesting Kai is trying to sell a related service or product."
   },
   {
-    "id": "42",
+    "id": "39",
     "firstName": "Mark",
     "lastName": "Manson",
     "email": "mark@markmanson.net",
     "company": "Markmanson",
     "website": "https://fc541894.click.convertkit-mail4.com",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "personal development",
+      "newsletter subscriber"
+    ],
     "relationshipScore": 25,
     "interactions": [
       {
@@ -8064,8 +10031,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-38-0",
+        "content": "Jahan is receiving Mark Manson's personal development newsletter, which focuses on self-improvement and philosophical topics.",
+        "category": "personal",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-38-1",
+        "content": "This contact is not directly relevant to Derby Digital's services for restaurants in Louisville, KY.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-38-0",
+        "category": "personal",
+        "label": "Email Sender",
+        "value": "Mark Manson (Author/Blogger)"
+      },
+      {
+        "id": "aif-38-1",
+        "category": "personal",
+        "label": "Content Focus",
+        "value": "Personal development, self-help, philosophy"
+      },
+      {
+        "id": "aif-38-2",
+        "category": "business",
+        "label": "Relevance to Derby Digital",
+        "value": "Low/None"
+      },
+      {
+        "id": "aif-38-3",
+        "category": "personal",
+        "label": "Engagement Type",
+        "value": "Newsletter subscription (inbound)"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -8074,17 +10081,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-26T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "Author/Blogger",
+    "aiSummary": "Jahan Taila is subscribed to Mark Manson's personal development newsletter. This contact is not a prospect or relevant business connection for Derby Digital's digital marketing services in the restaurant niche."
   },
   {
-    "id": "43",
+    "id": "40",
     "firstName": "Instantly",
     "lastName": "",
     "email": "growth@instantly.ai",
     "company": "Instantly",
     "website": "https://instantly.ai",
-    "relationshipType": "client",
-    "tags": [],
+    "relationshipType": "vendor",
+    "tags": [
+      "email marketing",
+      "outbound sales",
+      "AI tools"
+    ],
     "relationshipScore": 25,
     "interactions": [
       {
@@ -8138,13 +10151,46 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-39-0",
+        "content": "Instantly is an email outreach platform, offering features like API rate limit increases, automation upgrades, and AI reply agents. They also offer a VIP service for their team to run outbound campaigns.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-39-1",
+        "content": "This contact is likely a vendor providing services or tools that Jahan Taila's agency, Derby Digital, might use for their own marketing or for client campaigns.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "524cffb75071",
         "category": "contact",
         "label": "Phone",
         "value": "1790857026"
+      },
+      {
+        "id": "aif-39-1",
+        "category": "business",
+        "label": "Product/Service",
+        "value": "Email outreach platform with automation and AI features"
+      },
+      {
+        "id": "aif-39-2",
+        "category": "business",
+        "label": "Recent Updates",
+        "value": "10x API rate limits, new developer docs, automation upgrades, AI Reply Agent features, Time Triggers + Conditional Branching"
+      },
+      {
+        "id": "aif-39-3",
+        "category": "business",
+        "label": "Service Offering",
+        "value": "Team-led outbound campaign management (VIP offer)"
       }
     ],
     "opportunities": [],
@@ -8155,91 +10201,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-25T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Instantly is a vendor providing an email outreach platform with advanced automation and AI features, potentially useful for Derby Digital's operations or client services. They also offer a managed outbound service."
   },
   {
-    "id": "44",
-    "firstName": "Credit",
-    "lastName": "Karma",
-    "email": "notifications@mail.creditkarma.com",
-    "company": "Mail",
-    "website": "https://creditkarma.com",
-    "relationshipType": "other",
-    "tags": [],
-    "relationshipScore": 25,
-    "interactions": [
-      {
-        "id": "email-38-0",
-        "type": "email",
-        "date": "2026-03-10",
-        "summary": "See your updated credit score inside.",
-        "subject": "See your updated credit score inside.",
-        "details": "Hey Jahan,\r\n\r\nJust wanted to let you know that your current score of 734 was last updated on 03/05/2026.*\r\n\r\nCheck in to see your individual credit factors and how they affect your score.\r\n\r\nCheck in: https://www.creditkarma.com/u/overview/credit/transunion\r\n\r\n*Based on your credit report information from TransUnion as reported on 03/05/2026.\r\nThis is a promotional email.\r\nTo manage your email preferences, please go to notification preferences: https://www.creditkarma.com/notification-events/redirect/mailing?ctPayload=H4sIAAAAAAAAA2WQT2vkMAzFv8qgw55SiP%2FFife2Q0svhR56K0tQbLk149jBcYaW0u9e0ilLd%2Fcigd57SPo9vkFwYMDJXnSc9QNvuRi4lT052uukSXnBoYG6gmFaC6Zb1nYNLIXOv2K2JzBpi7EB3OpzLmCg0rxErHQ1Y8InKtCAw4q3uD6DAeGUVhxJsG7qfMekRNlPfvAdemKT%2BnKDeQObU6VUx6%2F%2B8LoQGKAZQ4TmjxpDOj3QSwUDxzzPWwoWa8jp8APn5efhLqdQcwnp6XBfyFOhZGn9ll9tIUo7hFxmTHVc4raO09mPdivl4siFvifI7gvAwE3O9fNBH%2BllXGu5CRRdy8DAfcluu%2Fj%2BkUULBryfWsROa4eO2cGi74XkkxwsYxNz2Enqlex71SvyWg3acie500wqx1rRQgPr61ppHulMqR6z29lc72yOMdjTf%2Frn6WDU3%2FMLU%2F7%2B%2FvsDHqmtFQsCAAA%3D&content_link=https%3A%2F%2Fwww.creditkarma.com%2Fmyprofile%2Fpreferences&trackingId=58d520c042d20cea2be65ec4cc3ba285e198faece05481dcb0c954cf905c0dc70684&categories=Engagement,US,SubscriptionRequired,Bulk&notificationId=ffb0aa677dad1c9caf8342b49c11b1da64e85488585ef7597c2d42d7145d1030&notificationAuthFactorId=0c37dec1-8c73-4bfe-b925-100cfd7470de&notificationType=dormant_plus_bvf_current_score\r\n\r\n\r\nUnsubscribe from all: https://www.creditkarma.com/notification-events/redirect/mailing?forwardCtPayload=true&ctPayload=H4sIAAAAAAAAA2WQwWrcMBCGX2WZswuSZVmyjimE3hJCcgrFjKRRYyJLRpKXhJB3L7sbQtKeBub%2Ffpj5Ht9g8WAgCHJhsqi1lqRYEIJ7GnvneXDCKwsdtAqGKyW4YpyNHWyFjlcxu2cwaY%2BxA9zbUy5goNG6RWz0Y8WEf6hABx4b%2FsL6BAbEhNyK0GvZu0HwKYSJoQwkJudHb9kHDeYNXE6NUps%2F5v3rRmCAVlwidJ9pXNLzPb00MPCQ6m6rK4ulQyh5PWCMhzNfvxSqK0QJDPhcVkxt3uJeZ3sMs9tLuRC50NcGubbkU%2BU653b%2BKER6mWsr1wtFzzgYuC3Z7xfun1iwk%2BJgGeKolEfP3eQwaDH0dpgc55Z7HAfSctBaaklByUm53g%2B9V3yQnjNx8lJfa6N1piOl9jP7k4w7qlSO5Oebrd3s7",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-38-1",
-        "type": "email",
-        "date": "2026-03-08",
-        "summary": "Jahan, your new score is here.",
-        "subject": "Jahan, your new score is here.",
-        "details": "Jahan, your updated credit score is ready for you.*\r\n\r\nCome check in and see where you stand.\r\n\r\nSee your new score: https://www.creditkarma.com/u/dashboard\r\n\r\n*Based on your credit report information from TransUnion as reported between 03/05/2026 and 03/07/2026.\r\nThis is a promotional email.\r\nTo manage your email preferences, please go to notification preferences: https://www.creditkarma.com/notification-events/redirect/mailing?ctPayload=H4sIAAAAAAAAA2WQy2ocMRBFf2WoRVYd0KNbr%2BwyxGQT8MK7EBo9SjNi1FKj1gw2xv8e2jbBSVYFdW9V3To%2FnyEFMBCklFJLRzmnXFPvKGOCa5Sj9WxECgP0DQyVkmml2EQGWBvevubqL2DKNecB7LWfawMDHZc1246fF1vsCRsMEGy33%2B123k9ZpF6NyhErRh5dnCbHHJXSxxi0du9uMM%2Fga%2BlY%2BvxeH55WBAO42JRh%2BKPmVC4P%2BNjBwLEuy7Ukb3uq5fDJLuuXw49aUq8tldPhvmHEhsXj9mF%2B8w2xgAHre7rhvLa04Lz52tCfbTnhRy%2F6fTUYuKu1v74WMz7OW293CXMgFAzctxqub75%2FZE7AABGMSCZoHN2IjhASmeZCWKsc6snzkbNRoRJTEMqLaCMlqDQSrcfoRdjjbE9bx2XGG5Z%2BrGGn8m2ncszJX%2F7TX6ODmf7uv9FkLy%2B%2FfgOCyCq7BQIAAA%3D%3D&content_link=https%3A%2F%2Fwww.creditkarma.com%2Fmyprofile%2Fpreferences&trackingId=58d520c042d20cea2be65ec4cc3ba285e198faece05481dcb0c954cf905c0dc70684&categories=SubscriptionRequired,Bulk&notificationId=06207261f4b4eb000f29366aa8be95c343248e865d68c6faf10e89e0994fc6de&notificationAuthFactorId=4fbbe6c1-bab3-4f00-8536-e083508cdc0d&notificationType=active_prime_scorechange\r\n\r\n\r\nUnsubscribe from all: https://www.creditkarma.com/notification-events/redirect/mailing?forwardCtPayload=true&ctPayload=H4sIAAAAAAAAA2WQwWrkMBBEf2Xosxck2ZIlHXch7C0hZE9LMG2plTGRJSPJQ0LIv4eZhJDsngq6XkNV%2FX2BxYOFXvKAxOZx1ih5j5IQlWJciNFxEQx00CpYPo7CaC0k62ArdPoZs3sEm%2FYYO8C9HXMBC43WLWKjHysmfKACHXhs%2BBvrESwMQgjf4xi4lHrsB2WYcNoE5QcxovYfNNgXcDk1Sm360LvnjcACrbhE6D7duKTHO3pqYOFPqvtcXVlmOoSS1wPGeLjw9ctDdYUogQV0bTnRtJVlpam6XMgdMT3QV5ZcW%2FIZvsq5XbqESE9TbeVqoegZBws3Jfv9nfvH7hlYYEqwUSgehnmgmTEWhOmVQtQzGen6oReDJq2kV9qpgIEz0oaYMUNwyp%2Fj1OfaaJ3oRKn9yv48wy1VKify0%2FXWrvf2H3TJD1Z%2Bv79vKF5f798AXVSon%2FsBAAA%3D&trackingId=58d520c042d20cea2be65ec4cc3ba285e198faece05481dcb0",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-38-2",
-        "type": "email",
-        "date": "2026-03-06",
-        "summary": "Good news: Your score has changed, Jahan.",
-        "subject": "Good news: Your score has changed, Jahan.",
-        "details": "Great news, Jahan.\r\n\r\nYour credit score is on the rise.* \r\n\r\nTap below for more details, and keep up the great work!\r\n\r\nCheck your score: https://www.creditkarma.com/u/overview/credit/transunion\r\n\r\n*Based on your credit report information from TransUnion as reported on 03/02/26.\r\n\r\nThis is a promotional email.\r\nTo manage your email preferences, please go to notification preferences: https://www.creditkarma.com/notification-events/redirect/mailing?ctPayload=H4sIAAAAAAAAA2WQS0slMRCF%2F8qlFrNqIY%2FurnTceVFmM%2BDC3TA0eVRruOmkSdKiiP99uCqDOquCOl8V55zfLxA8aEB0fFDKT05M0llv2DhNDDnjwvbMSeigVdAcUSiGSqkOtkKPVzG7E%2Bi0x9iB2dtDLqCh0bpF0%2BhiNcncU4EOvGnmp6kPoKFXw8R6J5iREmXPba884qJQyLEXo%2FygQb%2BAy6lRavPHvHveCDTQakKE7p8aQzrd0VMDDce8rnsKzrSQ0%2BGHWbfLw6%2BcQsslpPvDbaGFCiVH9dN9dYUonX3vF9XlQnNIrpCpNHO2tS8oufNn0HCTc3tLtkR6mmsrN4GiZxw03Jbs93fumywZaGBMoiWpLHkl1WSsEsicsygRrRyHkRlc1ND7YWSeceNHa%2BziEMXC5eQ9dFCfa6N1pkdK7Zj9uZTrcynHGNzpP%2F3NOujh6%2F69TPH6%2Bucvj9hJqwQCAAA%3D&content_link=https%3A%2F%2Fwww.creditkarma.com%2Fmyprofile%2Fpreferences&trackingId=58d520c042d20cea2be65ec4cc3ba285e198faece05481dcb0c954cf905c0dc70684&categories=Bulk,US,SendLimitsAlwaysApply,Engagement,SubscriptionRequired,TouchPointException&notificationId=0037be38bed8389ab8270ccb7377b36560a7f854d560d01ad6babfc772f139dd&notificationAuthFactorId=0c010ff1-ef6d-4457-8b7c-50dd220abf0e&notificationType=tu-score_increase_10pts\r\n\r\n\r\nUnsubscribe from all: https://www.creditkarma.com/notification-events/redirect/mailing?forwardCtPayload=true&ctPayload=H4sIAAAAAAAAA2WQS2vDMBCE%2F0rYswOyZFuyji2E3lJKeirF6LFuTGTJSHJICPnvJQ9K054Gdr6Fmfk4wWBBgmZ1SZXlvBaoKk1oT9vKlK1ujW2RUiggJ5Al51QQLoQoYIq4f3LB7ED62bkC1Jy3IYKEjOPkVMblqLz6wggFWJXVi0pbkGDKquopbWklCG1qLlhlBWmQ9LxpWkbvNMgTmOAz%2BtzddXOcECTgqAYHxY%2FrBr%2Fb4CGDhHefZp1MHDQu%2BhjGhXJuceXTr4dkIqK%2FBJ2XyYSI3eBNRJWwK8mUH1A0eQgXdhVCvlbpHR66lONqQGdJCRJeY7DzjftjMwISCGFcIxMarWCiVVpQTozRnHGuWVM3RPFe1JWtG2JJqWyjle4N57QvWWstFJCOKePY4R59fg72ssIbJox7tN16yus5%2F4Ou%2BUHWj%2FfbhPR8%2FvwGB4ybnvoBAAA%3",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-38-3",
-        "type": "email",
-        "date": "2026-03-03",
-        "summary": "Jahan: You're on a hot streak",
-        "subject": "Jahan: You're on a hot streak",
-        "details": "Hey Jahan,\r\n\r\nPayment streak unlocked! \r\n\r\nYou've made 3 on-time payments* on your DISCOVERCARD credit card, which could help boost your credit scores. Nice work!\r\n\r\nCheck in to see where you stand and learn more ways to make your hard work pay off.\r\n\r\nSee your progress: https://www.creditkarma.com/u/cards/details/transunion/d01c2627-ca83-478c-84bb-e370b0062d06_be6e90cf1c6e1acdd574ffc02278b68b_a9b7ba70783b617e9998dc4dd82eb3c5\r\n\r\n*Based on your credit report information from TransUnion as reported on 2026-02-20\r\n\r\nThis is a promotional email.\r\nTo manage your email preferences, please go to notification preferences: https://www.creditkarma.com/notification-events/redirect/mailing?ctPayload=H4sIAAAAAAAAA2WQQWvcMBCF%2F8oyh55ckLWWLKm3Lg29FHLILRQzlkaJWFkykhyyhPz34CSUJD0NzHuPmffdPkFwYECQ0oO2SpFiwvZKzG60nPeKO9JS9NBBq2D6ceRCcMn7DtZCDz9jtmcwaYuxA9zafS5goNGyRmz0fcGEd1SgA4cNf2O9BwOcxtF54XEgh4OUimuvHeeITMphnt%2FdYJ7A5tQotel93lxWAgO0YIjQ%2FVNjSOcbemxg4JSXZUvBYgs5Hb7hsv44%2FMkptFxCujtcF%2FJUKFmqH%2FLVFqIEBhasdUJr27StDhtNK15qK4TnyYdS2%2FFjiOx%2BAwxc5dxeO%2FpIj1Nt5SpQdKwHA9clu%2B3N90U%2Bsp2EksiYQzUjG%2FSRHbklzdishWSj12pANhBpJ4mcsN4r4XZIimYvZ8EFdFAvtdEy0QOldspux%2FNrx3OKwZ7%2F019fByM%2B79%2Bw8ufnvy9vjef%2FDgIAAA%3D%3D&content_link=https%3A%2F%2Fwww.creditkarma.com%2Fmyprofile%2Fpreferences&trackingId=58d520c042d20cea2be65ec4cc3ba285e198faece05481dcb0c954cf905c0dc70684&categories=Bulk,US,SendLimitsAlwaysApply,Engagement,SubscriptionRequired&notificationId=286a00da8ba0493032ce900b95607f984a04ee9d6eed5cff85daa068ebf6b525&notificationAuthFactorId=7b9a4125-ced7-45bc-b68e-30f7e61ddf19&notificationType=mass_acct_update_paystreak_first3\r\n\r\n\r\nUnsubscribe from all: https://www.creditkarma.com/notification-events/redirect/mailing?forwardCtPayload=true&ctPayload=H4sIAAAAAAAAA2WQTWvkMAyG%2F8qgcxZsJ3ZiH7tQ9tZS2lNZghLJ2zDOB7YydCj970unpbS7J4He5wHpfXyBiSBAN3jUDUc0mkyMbUNklLJ%2BaLS32imoQAoE3bbGWuOMrmDLfLpK63iEsOwpVYC7PK0ZAgjPW0LhHzMu%2BIczVEAo%2BAvLEwTQzg%2FK6lohUd22RGQ666nRtbUOTfygIbzAuC7Ci%2FQf8%2F6",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-38-4",
-        "type": "email",
-        "date": "2026-03-02",
-        "summary": "Jahan: Update to your credit usage.",
-        "subject": "Jahan: Update to your credit usage.",
-        "details": "Your credit usage made moves.\r\n\r\nSee your credit usage: https://www.creditkarma.com/u/credit-health/factors/transunion/ccu\r\n\r\nJahan, one of your credit factors - credit usage - has changed since your last credit report on 2026-02-20. It's now considered to be \"excellent\".\r\n\r\nCome see an overview of your credit usage, how it's calculated and more things to avoid. Small improvements add up! Check in while it's top of mind. \r\n\r\nHot tip:\r\nHaving one maxed-out card can hurt your score, even if your overall credit card usage is low. Spreading out your current debts or future spending could help.\r\n\r\nSee your credit usage: https://www.creditkarma.com/u/credit-health/factors/transunion/ccu\r\n\r\nThis is a promotional email.\r\nTo manage your email preferences, please go to notification preferences: https://www.creditkarma.com/notification-events/redirect/mailing?ctPayload=H4sIAAAAAAAAA2WQT0skMRDFv8pQhz21kKST7kz2toPiRfDgTZYmXanMhMmfJp0WRfzuMiqLu3sqqN97vKr3%2BArBgQGlncTZj6MUPZsVR0kchVPS7hE9l9BBW8HwcRRSa7UXHSyVnn7FgmcweYuxA7u1U6lgoFFaom10lWy2R6rQgbPN3tr1dIny3pHwTlhL5Jn3bMB5j3xmHqVVw5cazCtgyY1ym77mw8tCYICSDRG6PzSGfH6g5wYGDiWlLQe0LZS8%2B2HT8nN3V3JopYZ83N1X8lQpI63f%2FCtWogwGfHITFounkI%2BTt9hKxZPNR5oQt4nStOTvNsJLChi4KaV9fOkjPU9rqzeBomMcDNzX4rZP3T%2B4Z2CAKc0kOuFoYEIi83oQmvXzwJXUotd97yQyR57xXgmahRZeyX7kTqBm6KGD9WVtlCZ6otwOxV0Kur4UdIgBz%2F%2Fxj9PBqL%2F3n8WKt7ff7%2Fyyq64QAgAA&content_link=https%3A%2F%2Fwww.creditkarma.com%2Fmyprofile%2Fpreferences&trackingId=58d520c042d20cea2be65ec4cc3ba285e198faece05481dcb0c954cf905c0dc70684&categories=SubscriptionRequired,Bulk,US,Engagement&notificationId=05804cd2de6024c0f862803b6154823833d4c0def01352eb282f54371d2c80cf&notificationAuthFactorId=23329c4a-4d0d-45c0-a634-2116b1d3ab86&notificationType=fmd_coaching_factorchange_ccu_em_pn\r\n\r\n\r\nUnsubscribe from all: https://www.creditkarma.com/notification-events/redirect/mailing?forwardCtPayload=true&ctPayload=H4sIAAAAAAAAA2WQTWvcMBCG%2F8oyZxdkfVvHFkJvCSE9lWK0o9GuiSwZSV4SQv57ySaUtD0NzPs8MPP%2BfIElgAOcJNMkyI6eRiW",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      }
-    ],
-    "notes": [],
-    "facts": [],
-    "opportunities": [],
-    "aiInsights": [],
-    "groups": [],
-    "connections": [],
-    "lastContactedAt": "2026-03-10",
-    "source": "gmail-import",
-    "createdAt": "2026-03-02T00:00:00",
-    "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
-  },
-  {
-    "id": "45",
+    "id": "41",
     "firstName": "Jay",
     "lastName": "Feldman",
     "email": "jay@leadgenjay.com",
     "company": "Leadgenjay",
     "website": "https://youtu.be",
-    "relationshipType": "client",
-    "tags": [],
+    "relationshipType": "industry",
+    "tags": [
+      "automation",
+      "content creation",
+      "AI",
+      "digital marketing"
+    ],
     "relationshipScore": 25,
     "interactions": [
       {
@@ -8293,8 +10271,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-40-0",
+        "content": "Jay Feldman focuses on AI and automation for digital marketing, specifically for content creation (thumbnails, promos, social media) and workflow optimization.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-40-1",
+        "content": "His content often involves comparisons or discussions around specific AI tools like Claude Code and n8n.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-40-0",
+        "category": "business",
+        "label": "Focus",
+        "value": "AI & Automation for Digital Marketing"
+      },
+      {
+        "id": "aif-40-1",
+        "category": "business",
+        "label": "Recent Topics",
+        "value": "Viral thumbnails, holiday promos, AI memory, n8n vs Claude Code, IG growth engine"
+      },
+      {
+        "id": "aif-40-2",
+        "category": "business",
+        "label": "Tools Mentioned",
+        "value": "Claude Code, n8n"
+      },
+      {
+        "id": "aif-40-3",
+        "category": "business",
+        "label": "Value Proposition",
+        "value": "Automating tasks to save time/money and improve results"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -8303,17 +10321,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-27T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Jay Feldman from Leadgenjay is an industry contact focused on leveraging AI and automation for various digital marketing tasks, including content creation and social media growth, often discussing specific tools and workflows."
   },
   {
-    "id": "46",
+    "id": "42",
     "firstName": "Carlos",
     "lastName": "Villagran Arias",
     "email": "saboracuva@gmail.com",
-    "company": "",
+    "company": "Sabor a Cuba",
     "website": "",
     "relationshipType": "client",
-    "tags": [],
+    "tags": [
+      "website",
+      "frustrated",
+      "restaurant"
+    ],
     "relationshipScore": 25,
     "interactions": [
       {
@@ -8367,8 +10390,55 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-41-0",
+        "content": "Carlos is a client who seems to be experiencing frustration with receiving emails months after signing up, possibly related to a service like SpotHopper.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-41-1",
+        "content": "Carlos introduced his web developer, also named Carlos, for the 'Chao Vietnamese street food website,' indicating he might own or be involved with multiple restaurant businesses.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-41-2",
+        "content": "The repeated 'Sonrie que nada te cuesta. :-)' suggests a friendly or personal touch, despite the recent frustration.",
+        "category": "personal",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-41-0",
+        "category": "business",
+        "label": "Email Frequency Issue",
+        "value": "Carlos is frustrated by receiving emails months after signing up."
+      },
+      {
+        "id": "aif-41-1",
+        "category": "business",
+        "label": "Website Developer Introduced",
+        "value": "Carlos introduced his web developer for the 'Chao Vietnamese street food website'."
+      },
+      {
+        "id": "aif-41-2",
+        "category": "business",
+        "label": "Potential Multiple Businesses",
+        "value": "References 'Chao Vietnamese street food website' in addition to 'Sabor a Cuba'."
+      },
+      {
+        "id": "aif-41-3",
+        "category": "personal",
+        "label": "Signature Phrase",
+        "value": "Uses 'Sonrie que nada te cuesta. :-)'"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -8377,17 +10447,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-11-30T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Carlos Villagran Arias is a client, likely in the restaurant niche (Sabor a Cuba, Chao Vietnamese street food). He is currently frustrated with receiving unsolicited emails months after signing up for a service, possibly SpotHopper. He also introduced his web developer for the Chao website. Jahan needs to address the email issue promptly to retain this client."
   },
   {
-    "id": "47",
+    "id": "43",
     "firstName": "Eulogio",
     "lastName": "Gutierrez",
     "email": "gutierrezllc.2011@hotmail.com",
-    "company": "",
+    "company": "Gutierrez LLC",
     "website": "https://aka.ms",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "digital marketing",
+      "Louisville KY",
+      "restaurant"
+    ],
     "relationshipScore": 25,
     "interactions": [
       {
@@ -8441,8 +10516,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-42-0",
+        "content": "Eulogio Gutierrez appears to be interested in 'Al Forno' and 'Pi\u00f1a Fiesta' which are likely restaurant-related, indicating a potential fit for Derby Digital's restaurant niche.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-42-1",
+        "content": "The repeated 'Get Outlook for iOS' suggests these are likely forwarded or shared emails, possibly from a personal account or a business account using a personal email service.",
+        "category": "technical",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-42-0",
+        "category": "business",
+        "label": "Email Domain",
+        "value": "hotmail.com"
+      },
+      {
+        "id": "aif-42-1",
+        "category": "business",
+        "label": "Potential Restaurant Interest",
+        "value": "Al Forno, Pi\u00f1a Fiesta"
+      },
+      {
+        "id": "aif-42-2",
+        "category": "communication",
+        "label": "Email Client",
+        "value": "Outlook for iOS"
+      },
+      {
+        "id": "aif-42-3",
+        "category": "communication",
+        "label": "Email Frequency",
+        "value": "5 emails in 2 days"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -8451,17 +10566,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-12T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Eulogio Gutierrez, using a Hotmail account, shows recent interest in restaurant-related topics ('Al Forno', 'Pi\u00f1a Fiesta'). This contact is a strong prospect for Jahan Taila at Derby Digital, given their focus on digital marketing for restaurants in Louisville, KY. The high frequency of recent emails suggests active engagement with these topics."
   },
   {
-    "id": "48",
+    "id": "44",
     "firstName": "Strategic",
     "lastName": "Telemarketing",
     "email": "strategicmktgph@gmail.com",
-    "company": "",
+    "company": "Strategic Telemarketing",
     "website": "https://discord.gg",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "unsolicited",
+      "spam",
+      "payment request",
+      "SEO services"
+    ],
     "relationshipScore": 25,
     "interactions": [
       {
@@ -8515,13 +10636,59 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-43-0",
+        "content": "This contact appears to be an unsolicited vendor attempting to sell SEO services and requesting payment via Remitly/Maya.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-43-1",
+        "content": "The communication includes requests to join Discord and ClickUp, which seems like an attempt to gain access or further engage.",
+        "category": "technical",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-43-2",
+        "content": "The 'URGENT GET YOUR GUARANTEED SEO CONTRACT CLIENTS IMMEDIATELY' email is a strong indicator of a cold outreach/spam attempt.",
+        "category": "marketing",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "4aa57ff1b22b",
         "category": "contact",
         "label": "Phone",
         "value": "0962749794"
+      },
+      {
+        "id": "aif-43-1",
+        "category": "business",
+        "label": "Service Offered",
+        "value": "Guaranteed SEO contract clients"
+      },
+      {
+        "id": "aif-43-2",
+        "category": "contact",
+        "label": "Email Address",
+        "value": "strategicmktgph@gmail.com"
+      },
+      {
+        "id": "aif-43-3",
+        "category": "contact",
+        "label": "Phone Number (US)",
+        "value": "+1 (323) 306-3938"
+      },
+      {
+        "id": "aif-43-4",
+        "category": "contact",
+        "label": "WhatsApp Number (Philippines)",
+        "value": "+63 (962) 749-7943"
       }
     ],
     "opportunities": [],
@@ -8532,17 +10699,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-07-16T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "This contact is an unsolicited vendor from 'Strategic Telemarketing' attempting to sell SEO services to Jahan Taila. The communication includes requests for payment via Remitly/Maya, invitations to Discord and ClickUp, and appears to be a spam or cold outreach attempt rather than a legitimate business inquiry or existing relationship."
   },
   {
-    "id": "49",
+    "id": "45",
     "firstName": "Deshawn",
     "lastName": "Marcus",
     "email": "deshawnmarcus84@gmail.com",
     "company": "",
     "website": "",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "marketing",
+      "restaurant",
+      "competitor analysis"
+    ],
     "relationshipScore": 25,
     "interactions": [
       {
@@ -8596,13 +10768,59 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-44-0",
+        "content": "Deshawn is actively receiving emails about restaurant marketing and alternatives to platforms like SpotHopper and Owner, indicating a potential need for digital marketing services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-44-1",
+        "content": "The emails suggest Deshawn is either a restaurant owner/manager or someone involved in restaurant operations, making them a relevant target for Jahan Taila's niche.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-44-2",
+        "content": "The repeated 'Fwd' emails about SpotHopper alternatives suggest Deshawn might be evaluating or dissatisfied with current restaurant technology solutions.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "8e04f72d22ee",
         "category": "contact",
         "label": "Phone",
         "value": "214-709-0158"
+      },
+      {
+        "id": "aif-44-1",
+        "category": "business",
+        "label": "Email Activity",
+        "value": "5 inbound emails between Dec 2025 and Jan 2026."
+      },
+      {
+        "id": "aif-44-2",
+        "category": "business",
+        "label": "Key Topics",
+        "value": "SpotHopper alternatives, Owner alternatives, boosting restaurant revenue."
+      },
+      {
+        "id": "aif-44-3",
+        "category": "business",
+        "label": "Implied Role",
+        "value": "Restaurant owner/manager or decision-maker."
+      },
+      {
+        "id": "aif-44-4",
+        "category": "business",
+        "label": "Potential Need",
+        "value": "Digital marketing, restaurant tech solutions, revenue growth strategies."
       }
     ],
     "opportunities": [],
@@ -8613,17 +10831,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-12-17T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Deshawn Marcus is a strong prospect for Jahan Taila, showing active engagement with emails related to restaurant marketing, revenue growth, and alternatives to existing restaurant technology platforms like SpotHopper and Owner. This indicates a potential need for digital marketing services and a willingness to explore new solutions for their restaurant business."
   },
   {
-    "id": "50",
+    "id": "46",
     "firstName": "Maurice",
     "lastName": "Davis",
     "email": "brad@lbrdesign.com",
     "company": "Lbrdesign",
     "website": "https://send.vis.ee",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "partner",
+    "tags": [
+      "web design",
+      "website transition"
+    ],
     "relationshipScore": 25,
     "interactions": [
       {
@@ -8677,13 +10899,52 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-45-0",
+        "content": "Maurice Davis from Lbrdesign is collaborating with Jahan Taila on the Derby City Pizza website transition, indicating a potential partnership or vendor relationship.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-45-1",
+        "content": "The communication revolves around handing off web architecture documents and login information for Derby City Pizza, suggesting Lbrdesign might be the previous web developer or a collaborating agency.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "dd92286a9fbc",
         "category": "contact",
         "label": "Phone",
         "value": "(502) 702-6268"
+      },
+      {
+        "id": "aif-45-1",
+        "category": "business",
+        "label": "Project",
+        "value": "Derby City Pizza Web Transition"
+      },
+      {
+        "id": "aif-45-2",
+        "category": "business",
+        "label": "Role",
+        "value": "Collaborator/Vendor for website transition"
+      },
+      {
+        "id": "aif-45-3",
+        "category": "contact",
+        "label": "Email",
+        "value": "brad@lbrdesign.com"
+      },
+      {
+        "id": "aif-45-4",
+        "category": "business",
+        "label": "Company",
+        "value": "Lbrdesign"
       }
     ],
     "opportunities": [],
@@ -8694,17 +10955,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-12T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Maurice Davis from Lbrdesign is actively involved in the website transition for Derby City Pizza, collaborating with Jahan Taila. Lbrdesign appears to be a partner or vendor providing web development or transition services."
   },
   {
-    "id": "51",
+    "id": "47",
     "firstName": "Elizabeth",
     "lastName": "M",
     "email": "em@automateclients.io",
     "company": "Automateclients",
     "website": "https://email.automateclients.co",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "vendor",
+    "tags": [
+      "demo booked",
+      "marketing automation"
+    ],
     "relationshipScore": 25,
     "interactions": [
       {
@@ -8758,13 +11023,52 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-46-0",
+        "content": "Jahan booked a demo session with Automateclients, likely for a marketing automation or client acquisition solution.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-46-1",
+        "content": "The emails indicate a scheduled demo for January 5, 2026, with multiple reminders and a strict no-show policy.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "2395bbcb0ce5",
         "category": "contact",
         "label": "Phone",
         "value": "7726017247"
+      },
+      {
+        "id": "aif-46-1",
+        "category": "business",
+        "label": "Demo Date",
+        "value": "January 5, 2026"
+      },
+      {
+        "id": "aif-46-2",
+        "category": "business",
+        "label": "Demo Time",
+        "value": "10:40 AM Eastern Time"
+      },
+      {
+        "id": "aif-46-3",
+        "category": "business",
+        "label": "Vendor Service",
+        "value": "Marketing Automation/Client Acquisition"
+      },
+      {
+        "id": "aif-46-4",
+        "category": "business",
+        "label": "Contact Person",
+        "value": "Elizabeth M"
       }
     ],
     "opportunities": [],
@@ -8775,17 +11079,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-01-05T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Jahan Taila has booked and received multiple reminders for a demo session with Automateclients on January 5, 2026, at 10:40 AM ET. Automateclients appears to be a vendor offering marketing automation or client acquisition services."
   },
   {
-    "id": "52",
+    "id": "48",
     "firstName": "Sphere",
     "lastName": "Rocket Virtual Assistants",
     "email": "justin@sphererocket.com",
-    "company": "Sphererocket",
+    "company": "Sphere Rocket Virtual Assistants",
     "website": "https://sphererocketva.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "vendor",
+    "tags": [
+      "delegation",
+      "productivity",
+      "virtual assistant"
+    ],
     "relationshipScore": 25,
     "interactions": [
       {
@@ -8839,13 +11148,52 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-47-0",
+        "content": "Sphere Rocket offers virtual assistant services, focusing on helping entrepreneurs with administrative tasks, email management, and scheduling to free up time for growth.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-47-1",
+        "content": "Their marketing emphasizes the cost of not having an assistant and the negative impact of 'busywork' on business growth.",
+        "category": "marketing",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "63cff8bae9cb",
         "category": "contact",
         "label": "Phone",
         "value": "212-2981254"
+      },
+      {
+        "id": "aif-47-1",
+        "category": "business",
+        "label": "Service",
+        "value": "Virtual Assistant Services"
+      },
+      {
+        "id": "aif-47-2",
+        "category": "business",
+        "label": "Target Audience",
+        "value": "Entrepreneurs, Business Owners"
+      },
+      {
+        "id": "aif-47-3",
+        "category": "business",
+        "label": "Value Proposition",
+        "value": "Free up time, reduce admin, enable growth"
+      },
+      {
+        "id": "aif-47-4",
+        "category": "business",
+        "label": "Client Base Claim",
+        "value": "3,000+ business owners"
       }
     ],
     "opportunities": [],
@@ -8856,17 +11204,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-10-20T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "This contact is a vendor offering virtual assistant services, actively marketing to business owners to help them delegate administrative tasks and focus on growth. Jahan Taila, as a digital marketing agency owner, might be a target for their services to streamline internal operations or delegate client-related admin."
   },
   {
-    "id": "53",
+    "id": "49",
     "firstName": "Deyna",
     "lastName": "Reyes",
     "email": "deyna.reyes@angi.com",
     "company": "Angi",
     "website": "https://b2b.angi.com",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "settlement offers",
+      "collections"
+    ],
     "relationshipScore": 25,
     "interactions": [
       {
@@ -8920,13 +11272,52 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-48-0",
+        "content": "This contact appears to be an automated sender from Angi, specifically related to settlement offers for a construction company, not a restaurant.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-48-1",
+        "content": "The emails are all inbound and consistently about the same settlement offer for 'Rodriguez Construction'.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "4be534464a37",
         "category": "contact",
         "label": "Phone",
         "value": "2674381964"
+      },
+      {
+        "id": "aif-48-1",
+        "category": "business",
+        "label": "Sender Email",
+        "value": "deyna.reyes@angi.com"
+      },
+      {
+        "id": "aif-48-2",
+        "category": "business",
+        "label": "Email Content",
+        "value": "Angi Settlement offer \u2013 avoid 3rd party collections: Spid 11409673 Rodriguez Con | Settlement Offer for Rodriguez Construction."
+      },
+      {
+        "id": "aif-48-3",
+        "category": "business",
+        "label": "Frequency",
+        "value": "Approximately bi-weekly"
+      },
+      {
+        "id": "aif-48-4",
+        "category": "business",
+        "label": "Recipient (implied)",
+        "value": "Rodriguez Construction (or someone managing their Angi account/debt)"
       }
     ],
     "opportunities": [],
@@ -8937,17 +11328,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-04-16T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "This contact is an automated sender from Angi, sending settlement offers for a construction company. It is highly unlikely to be a relevant contact for Jahan Taila's digital marketing agency in the restaurant niche."
   },
   {
-    "id": "54",
+    "id": "50",
     "firstName": "Zach",
     "lastName": "Babiarz",
     "email": "hello@effortlessaiautomation.com",
     "company": "Effortlessaiautomation",
     "website": "https://email.mail.effortlessaiautomation.com",
-    "relationshipType": "client",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "automation",
+      "app development",
+      "AI",
+      "lead generation"
+    ],
     "relationshipScore": 20,
     "interactions": [
       {
@@ -8991,8 +11388,42 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-49-0",
+        "content": "Zach is sending marketing emails about AI tools for lead generation and app development, likely trying to sell his 'Open Claw AI agent' or similar products.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-49-1",
+        "content": "Jahan likely signed up for a 'free Agent Command Kit' from Zach, indicating initial interest in AI or automation tools.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-49-0",
+        "category": "business",
+        "label": "Sender's Business",
+        "value": "AI automation and lead generation tools"
+      },
+      {
+        "id": "aif-49-1",
+        "category": "business",
+        "label": "Jahan's Interaction",
+        "value": "Grabbed a 'free Agent Command Kit'"
+      },
+      {
+        "id": "aif-49-2",
+        "category": "business",
+        "label": "Recent Email Topics",
+        "value": "Free leads (HVAC example), app building with AI"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -9001,17 +11432,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-02T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Zach Babiarz from Effortlessaiautomation is a prospect sending marketing emails to Jahan Taila, likely trying to sell AI automation tools for lead generation and app development. Jahan previously engaged by getting a 'free Agent Command Kit'."
   },
   {
-    "id": "55",
+    "id": "51",
     "firstName": "Sabri",
     "lastName": "Suby",
     "email": "sabri@kingkong.com.au",
     "company": "Kingkong",
     "website": "https://w3.org",
-    "relationshipType": "client",
-    "tags": [],
+    "relationshipType": "industry",
+    "tags": [
+      "agency owner",
+      "digital marketing",
+      "thought leader"
+    ],
     "relationshipScore": 20,
     "interactions": [
       {
@@ -9055,8 +11491,42 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-50-0",
+        "content": "Sabri Suby is a well-known figure in the digital marketing space, particularly for his aggressive growth strategies and content marketing.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-50-1",
+        "content": "His emails focus on high-impact business results, marketing tactics, and psychological hacks for client acquisition.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-50-0",
+        "category": "business",
+        "label": "Company Focus",
+        "value": "Digital Marketing Agency"
+      },
+      {
+        "id": "aif-50-1",
+        "category": "business",
+        "label": "Email Content Theme",
+        "value": "Growth, client acquisition, marketing strategies"
+      },
+      {
+        "id": "aif-50-2",
+        "category": "business",
+        "label": "Recent Email Topics",
+        "value": "$108M in 11 months, video strategy, AI ads, psychological hacks"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -9065,17 +11535,24 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-27T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "Founder/CEO",
+    "city": "Melbourne",
+    "state": "VIC",
+    "aiSummary": "Sabri Suby is a prominent digital marketing agency owner and thought leader. His inbound emails provide insights into high-growth marketing strategies and client acquisition tactics, which could be valuable for Jahan Taila's agency, Derby Digital, in the restaurant niche."
   },
   {
-    "id": "56",
+    "id": "52",
     "firstName": "Flavio",
     "lastName": "Amiel (",
     "email": "flavio@theaudienz.com",
     "company": "Theaudienz",
     "website": "https://theaudienz.com",
-    "relationshipType": "client",
-    "tags": [],
+    "relationshipType": "other",
+    "tags": [
+      "SEO",
+      "content marketing"
+    ],
     "relationshipScore": 20,
     "interactions": [
       {
@@ -9119,8 +11596,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-51-0",
+        "content": "Flavio appears to be an SEO consultant or agency owner, focused on content strategy and topical maps for increasing organic traffic.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-51-1",
+        "content": "His emails suggest a strong emphasis on systems, content structure, and achieving significant ROI through SEO.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-51-0",
+        "category": "business",
+        "label": "Email Sender",
+        "value": "Flavio Amiel"
+      },
+      {
+        "id": "aif-51-1",
+        "category": "business",
+        "label": "Company",
+        "value": "Theaudienz"
+      },
+      {
+        "id": "aif-51-2",
+        "category": "business",
+        "label": "Primary Focus",
+        "value": "SEO, Topical Maps, Content Strategy"
+      },
+      {
+        "id": "aif-51-3",
+        "category": "business",
+        "label": "Experience Claim",
+        "value": "Started ranking websites in 2009, first $100K year in SEO, teaching since 2008"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -9129,17 +11646,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-05T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Flavio Amiel from Theaudienz is an SEO expert with a focus on topical maps and content structure to drive organic traffic and revenue. His emails highlight his experience since 2008-2009 and the success of his methods."
   },
   {
-    "id": "57",
+    "id": "53",
     "firstName": "Envato",
     "lastName": "",
     "email": "news@m.elements.envato.com",
-    "company": "M",
+    "company": "Envato",
     "website": "https://elements.envato.com",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "marketing trends",
+      "AI video",
+      "creative resources",
+      "design assets"
+    ],
     "relationshipScore": 20,
     "interactions": [
       {
@@ -9183,8 +11706,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-52-0",
+        "content": "Jahan is receiving marketing emails from Envato, a platform for creative assets and tools.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-52-1",
+        "content": "The content of these emails suggests Jahan is interested in design, video, and creative trends, which aligns with digital marketing.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-52-0",
+        "category": "business",
+        "label": "Email Sender",
+        "value": "Envato"
+      },
+      {
+        "id": "aif-52-1",
+        "category": "business",
+        "label": "Email Frequency",
+        "value": "Weekly to bi-weekly"
+      },
+      {
+        "id": "aif-52-2",
+        "category": "business",
+        "label": "Content Focus",
+        "value": "Creative assets, design trends, AI video, product updates"
+      },
+      {
+        "id": "aif-52-3",
+        "category": "business",
+        "label": "Recipient Name",
+        "value": "Jahan"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -9193,17 +11756,24 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-26T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Jahan is subscribed to Envato's marketing emails, indicating an interest in creative resources, design, and digital tools relevant to the digital marketing industry. This suggests Jahan is actively seeking or consuming content related to enhancing creative projects and staying updated on industry trends."
   },
   {
-    "id": "58",
+    "id": "54",
     "firstName": "Paige",
     "lastName": "",
     "email": "paige@paige.merchynt.com",
     "company": "Paige",
     "website": "https://merchynt.com",
-    "relationshipType": "client",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "GMB",
+      "local SEO",
+      "restaurant niche",
+      "SEO",
+      "digital marketing"
+    ],
     "relationshipScore": 20,
     "interactions": [
       {
@@ -9247,13 +11817,59 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-53-0",
+        "content": "Paige is receiving inbound marketing emails from Merchynt.com, indicating an interest in digital marketing, specifically local SEO and GMB rankings.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-53-1",
+        "content": "The email content suggests Paige is likely a business owner or marketing decision-maker looking for ways to improve online visibility.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-53-2",
+        "content": "Jahan Taila's agency, Derby Digital, specializes in the restaurant niche, which aligns well with local SEO and GMB needs.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "749fdf513e2d",
         "category": "contact",
         "label": "Phone",
         "value": "(323) 212-5327"
+      },
+      {
+        "id": "aif-53-1",
+        "category": "business",
+        "label": "Email Domain",
+        "value": "paige.merchynt.com"
+      },
+      {
+        "id": "aif-53-2",
+        "category": "business",
+        "label": "Email Frequency",
+        "value": "4 emails in 16 days"
+      },
+      {
+        "id": "aif-53-3",
+        "category": "business",
+        "label": "Key Interest Areas",
+        "value": "Local SEO, GMB rankings, marketing automation"
+      },
+      {
+        "id": "aif-53-4",
+        "category": "business",
+        "label": "Last Inbound Email",
+        "value": "2026-03-12"
       }
     ],
     "opportunities": [],
@@ -9264,17 +11880,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-25T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Paige is an active prospect receiving digital marketing content focused on local SEO and GMB. Their engagement with Merchynt.com suggests a need for improved online presence, which aligns with Derby Digital's restaurant niche expertise."
   },
   {
-    "id": "59",
+    "id": "55",
     "firstName": "John",
     "lastName": "Jonas",
     "email": "john@onlinejobs.ph",
     "company": "Onlinejobs",
     "website": "https://youtu.be",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "virtual assistants",
+      "Philippines",
+      "outsourcing"
+    ],
     "relationshipScore": 20,
     "interactions": [
       {
@@ -9318,8 +11939,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-54-0",
+        "content": "John Jonas is the sender of emails related to hiring and managing Virtual Assistants (VAs) from the Philippines, specifically through Onlinejobs.ph.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-54-1",
+        "content": "The content of the emails focuses on improving VA work quality, language proficiency, client interaction, and compensation for VAs.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-54-0",
+        "category": "business",
+        "label": "Email Sender",
+        "value": "John Jonas"
+      },
+      {
+        "id": "aif-54-1",
+        "category": "business",
+        "label": "Company",
+        "value": "Onlinejobs"
+      },
+      {
+        "id": "aif-54-2",
+        "category": "business",
+        "label": "Topic Focus",
+        "value": "Virtual Assistants (VAs) from the Philippines"
+      },
+      {
+        "id": "aif-54-3",
+        "category": "business",
+        "label": "Recent Inbound Topics",
+        "value": "Improving VA work quality, VA English proficiency, VAs meeting clients, VA benefits"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -9328,17 +11989,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-25T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "This contact is from John Jonas of Onlinejobs.ph, an individual or company focused on providing information and resources for hiring and managing Virtual Assistants (VAs) from the Philippines. The recent emails indicate an interest in optimizing VA performance and integration into business operations."
   },
   {
-    "id": "60",
+    "id": "56",
     "firstName": "Credit",
     "lastName": "Karma + TurboTax",
     "email": "turbotax@em1.turbotax.intuit.com",
-    "company": "Em1",
+    "company": "Intuit (TurboTax, Credit Karma)",
     "website": "https://ablink.em1.turbotax.intuit.com",
-    "relationshipType": "client",
-    "tags": [],
+    "relationshipType": "other",
+    "tags": [
+      "tax software",
+      "email marketing",
+      "financial services"
+    ],
     "relationshipScore": 20,
     "interactions": [
       {
@@ -9382,8 +12048,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-55-0",
+        "content": "This contact represents a large financial software company with a strong email marketing presence, likely for user engagement and retention.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-55-1",
+        "content": "The emails focus on tax-related updates, potential savings, and account management, indicating a transactional and informational communication strategy.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-55-0",
+        "category": "business",
+        "label": "Email Sender",
+        "value": "TurboTax (Intuit)"
+      },
+      {
+        "id": "aif-55-1",
+        "category": "business",
+        "label": "Email Frequency (sample)",
+        "value": "4 emails in 4 days"
+      },
+      {
+        "id": "aif-55-2",
+        "category": "business",
+        "label": "Email Content Themes",
+        "value": "Tax savings, account updates, self-employment advice"
+      },
+      {
+        "id": "aif-55-3",
+        "category": "business",
+        "label": "Call to Action",
+        "value": "Sign in, update info, get advice"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -9392,17 +12098,25 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-09T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "N/A",
+    "city": "N/A",
+    "state": "N/A",
+    "aiSummary": "This contact is an example of email marketing from a major financial software company (Intuit, via TurboTax and Credit Karma) with frequent, targeted communications around tax season, focusing on user engagement, account management, and potential savings."
   },
   {
-    "id": "61",
+    "id": "57",
     "firstName": "Jeff",
     "lastName": "Allgood",
     "email": "allgoodmarketing@hotmail.com",
-    "company": "",
+    "company": "Allgood Marketing",
     "website": "https://icloud.com",
-    "relationshipType": "client",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "local business",
+      "marketing agency",
+      "Google My Business"
+    ],
     "relationshipScore": 20,
     "interactions": [
       {
@@ -9446,7 +12160,29 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-56-0",
+        "content": "Jeff Allgood seems to be a marketing professional, possibly running his own agency, given the email address and content.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-56-1",
+        "content": "His recent inbound emails suggest a focus on Google Profile/Google My Business management for clients (PRIME PICTURES, AMA).",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-56-2",
+        "content": "The 'Fw: Three distilleries beat bourbon slump' email indicates an interest in the local restaurant/hospitality industry, which aligns with Jahan's niche.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "362f146bb257",
@@ -9459,6 +12195,30 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "category": "contact",
         "label": "Address",
         "value": "4500 Camp Ground Rd, Louisville"
+      },
+      {
+        "id": "aif-56-2",
+        "category": "business",
+        "label": "Email Domain",
+        "value": "hotmail.com (personal/small business)"
+      },
+      {
+        "id": "aif-56-3",
+        "category": "business",
+        "label": "Recent Activity Focus",
+        "value": "Google My Business/Google Profile"
+      },
+      {
+        "id": "aif-56-4",
+        "category": "business",
+        "label": "Industry Interest",
+        "value": "Restaurants/Distilleries (Louisville area)"
+      },
+      {
+        "id": "aif-56-5",
+        "category": "business",
+        "label": "Company Name",
+        "value": "Allgood Marketing"
       }
     ],
     "opportunities": [],
@@ -9469,17 +12229,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-01T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Jeff Allgood, likely running 'Allgood Marketing,' is a prospect interested in Google My Business management for clients, with a clear interest in the Louisville restaurant/hospitality sector, making him a strong potential partner or client for Jahan Taila."
   },
   {
-    "id": "62",
-    "firstName": "Asgari",
-    "lastName": "Home Services",
+    "id": "58",
+    "firstName": "Asgarihomeservices",
+    "lastName": "",
     "email": "asgarihomeservices@gmail.com",
-    "company": "",
+    "company": "Asgari Home Services",
     "website": "https://email.send.lcmsgsndr.com",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "contractor leads",
+      "home services"
+    ],
     "relationshipScore": 20,
     "interactions": [
       {
@@ -9523,13 +12287,52 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-57-0",
+        "content": "This contact appears to be a lead generation service or platform that Asgari Home Services uses, not Asgari Home Services itself. The emails are notifications of form submissions for various home services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-57-1",
+        "content": "The leads are for services like fencing, roofing, and general contracting, indicating a focus on home improvement.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "24dcdeb86163",
         "category": "contact",
         "label": "Phone",
         "value": "1502472530"
+      },
+      {
+        "id": "aif-57-1",
+        "category": "business",
+        "label": "Email Sender",
+        "value": "Asgarihomeservices"
+      },
+      {
+        "id": "aif-57-2",
+        "category": "business",
+        "label": "Email Content",
+        "value": "Lead notifications for home services"
+      },
+      {
+        "id": "aif-57-3",
+        "category": "business",
+        "label": "Lead Locations (partial)",
+        "value": "Louisville KY (Rachel Sandrella, Heather Simpson-Lamb)"
+      },
+      {
+        "id": "aif-57-4",
+        "category": "business",
+        "label": "Services Mentioned",
+        "value": "Fencing, Roofing, General Contracting"
       }
     ],
     "opportunities": [],
@@ -9540,17 +12343,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-06-02T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "This contact is a lead generation service for home improvement contractors, sending form submissions to clients like Asgari Home Services. While some leads are in Louisville, KY, this is not a direct restaurant contact for Jahan Taila."
   },
   {
-    "id": "63",
+    "id": "59",
     "firstName": "Henry",
     "lastName": "",
     "email": "hl@scalbl.io",
     "company": "Scalbl",
     "website": "https://email.hl.scalbl.io",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "meeting confirmed",
+      "zoom call"
+    ],
     "relationshipScore": 20,
     "interactions": [
       {
@@ -9594,8 +12401,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-58-0",
+        "content": "Scalbl initiated a meeting with Jahan Taila for Jan 27, 2025, sending multiple reminders and zoom links.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-58-1",
+        "content": "There appears to be a discrepancy in the confirmed meeting time (11:30 AM vs 8:30 AM) and sender name (Jay vs Irakli) for the confirmation emails.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-58-0",
+        "category": "business",
+        "label": "Meeting Date",
+        "value": "January 27, 2025"
+      },
+      {
+        "id": "aif-58-1",
+        "category": "business",
+        "label": "Meeting Time (Conflicting)",
+        "value": "8:30 AM / 11:30 AM"
+      },
+      {
+        "id": "aif-58-2",
+        "category": "business",
+        "label": "Sender Names (Conflicting)",
+        "value": "Jay / Irakli"
+      },
+      {
+        "id": "aif-58-3",
+        "category": "business",
+        "label": "Email Count",
+        "value": "4"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -9604,17 +12451,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-01-27T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Scalbl is a prospect that scheduled a meeting with Jahan Taila on January 27, 2025. Multiple emails were sent to confirm and provide zoom links, but there are inconsistencies in the meeting time and sender names in the confirmation emails."
   },
   {
-    "id": "64",
+    "id": "60",
     "firstName": "Maricela",
     "lastName": "Fuentes",
     "email": "maricelafuentes53@yahoo.com",
-    "company": "",
+    "company": "Tuscany Italian Restaurant - Outer Loop",
     "website": "",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "email marketing",
+      "spothopper",
+      "restaurant",
+      "italian"
+    ],
     "relationshipScore": 20,
     "interactions": [
       {
@@ -9658,13 +12511,59 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-59-0",
+        "content": "Maricela is forwarding emails related to 'Tuscany Italian Restaurant - Outer Loop' and email marketing, possibly indicating a decision-making or influential role.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-59-1",
+        "content": "The emails mention SpotHopper, suggesting they might be using or evaluating their services for email marketing, which could be a point of competition or integration.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-59-2",
+        "content": "The 'Fw: Fwd: tuscany' subject line suggests an internal discussion or review process regarding the restaurant's marketing efforts.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "9e4756619d8f",
         "category": "contact",
         "label": "Phone",
         "value": "0783733673"
+      },
+      {
+        "id": "aif-59-1",
+        "category": "business",
+        "label": "Restaurant Name",
+        "value": "Tuscany Italian Restaurant - Outer Loop"
+      },
+      {
+        "id": "aif-59-2",
+        "category": "business",
+        "label": "Current Email Marketing Platform (potential)",
+        "value": "SpotHopper"
+      },
+      {
+        "id": "aif-59-3",
+        "category": "contact",
+        "label": "Email Provider",
+        "value": "Yahoo Mail for iPhone"
+      },
+      {
+        "id": "aif-59-4",
+        "category": "business",
+        "label": "Referral/Internal Contact",
+        "value": "Cindy Esparza (fivecservices502@gmail.com)"
       }
     ],
     "opportunities": [],
@@ -9675,17 +12574,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-07-22T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "Maricela Fuentes appears to be a prospect associated with Tuscany Italian Restaurant - Outer Loop in Louisville, KY. She is involved in reviewing or discussing email marketing efforts, potentially using or evaluating SpotHopper. This contact presents an opportunity for Derby Digital to offer digital marketing services, especially in email marketing, to a local restaurant."
   },
   {
-    "id": "65",
+    "id": "61",
     "firstName": "Vikas",
     "lastName": "Thakur",
     "email": "vikas.thakur1@imarkinfotech.com",
     "company": "Imarkinfotech",
     "website": "https://imarkinfotech.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "vendor",
+    "tags": [
+      "payment",
+      "white-label"
+    ],
     "relationshipScore": 20,
     "interactions": [
       {
@@ -9729,13 +12634,46 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-60-0",
+        "content": "Vikas is following up on a potential white-labeled partnership between Derby Digital and iMark Infotech.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-60-1",
+        "content": "There's an ongoing discussion about payment, suggesting a service might have been rendered or is about to be.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "fe47b690ae75",
         "category": "contact",
         "label": "Phone",
         "value": "(626) 525-7161"
+      },
+      {
+        "id": "aif-60-1",
+        "category": "business",
+        "label": "Partnership Type",
+        "value": "White-labeled"
+      },
+      {
+        "id": "aif-60-2",
+        "category": "business",
+        "label": "Last Contact Date",
+        "value": "2025-08-14"
+      },
+      {
+        "id": "aif-60-3",
+        "category": "business",
+        "label": "Initial Contact Date",
+        "value": "2025-07-21"
       }
     ],
     "opportunities": [],
@@ -9746,17 +12684,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-07-21T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Vikas Thakur from Imarkinfotech is a vendor pursuing a white-labeled partnership with Derby Digital, with recent communications focused on onboarding and payment status."
   },
   {
-    "id": "66",
+    "id": "62",
     "firstName": "kishan",
     "lastName": "patel",
     "email": "kishanpatel1299@gmail.com",
     "company": "",
     "website": "https://u7445749.ct.sendgrid.net",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "social media",
+      "digital marketing",
+      "SEO",
+      "accounting"
+    ],
     "relationshipScore": 20,
     "interactions": [
       {
@@ -9800,8 +12744,55 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-61-0",
+        "content": "Kishan is forwarding financial reports and digital marketing reports, suggesting he is either an owner, manager, or consultant for a business.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-61-1",
+        "content": "He is receiving reports from 'brandiodigital.com' for SEO and social media, indicating he is actively involved in or overseeing digital marketing efforts.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-61-2",
+        "content": "The mention of 'R4paws' and 'SHPR' could be names of businesses he is involved with, potentially in the restaurant or pet industry given the 'paws' reference.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-61-0",
+        "category": "business",
+        "label": "Involved in Digital Marketing",
+        "value": "Receiving SEO and social media reports from Brandio Digital."
+      },
+      {
+        "id": "aif-61-1",
+        "category": "business",
+        "label": "Financial Oversight",
+        "value": "Forwarding Profit and Loss reports."
+      },
+      {
+        "id": "aif-61-2",
+        "category": "business",
+        "label": "Access to Ad Platforms",
+        "value": "Has access to Google Ads and Facebook Ads Manager."
+      },
+      {
+        "id": "aif-61-3",
+        "category": "business",
+        "label": "Potential Business Names",
+        "value": "R4paws, SHPR"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -9810,17 +12801,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-05-22T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Kishan Patel appears to be a business owner or manager actively involved in overseeing digital marketing and financial performance, potentially for a restaurant or pet-related business. He is receiving digital marketing reports from an agency and forwarding financial reports, indicating a need for digital marketing services and financial management."
   },
   {
-    "id": "67",
+    "id": "63",
     "firstName": "Rechelle",
     "lastName": "",
     "email": "rechelle@getwingapp.com",
     "company": "Getwingapp",
     "website": "https://calendly.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "virtual assistant",
+      "sales outreach"
+    ],
     "relationshipScore": 20,
     "interactions": [
       {
@@ -9864,13 +12859,52 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-62-0",
+        "content": "Rechelle from Wing Assistant is actively trying to sell virtual assistant services to Jahan.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-62-1",
+        "content": "The emails suggest Jahan may have initially shown interest or inquired about their services, but has not engaged further.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "490777f3b08e",
         "category": "contact",
         "label": "Phone",
         "value": "(323) 815-7780"
+      },
+      {
+        "id": "aif-62-1",
+        "category": "business",
+        "label": "Sender Name",
+        "value": "Rechelle"
+      },
+      {
+        "id": "aif-62-2",
+        "category": "business",
+        "label": "Sender Company",
+        "value": "Getwingapp (Wing Assistant)"
+      },
+      {
+        "id": "aif-62-3",
+        "category": "business",
+        "label": "Service Offered",
+        "value": "Virtual Assistant"
+      },
+      {
+        "id": "aif-62-4",
+        "category": "business",
+        "label": "Engagement Status",
+        "value": "Unresponsive"
       }
     ],
     "opportunities": [],
@@ -9881,17 +12915,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-01-14T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Rechelle from Wing Assistant is a prospect who has been actively emailing Jahan, attempting to sell virtual assistant services. Jahan appears to be unresponsive to their outreach, despite potential initial interest."
   },
   {
-    "id": "68",
+    "id": "64",
     "firstName": "Shanique",
     "lastName": "Wright",
     "email": "shanique@merchynt.com",
     "company": "Merchynt",
     "website": "https://cVBsR04.na1.hs-sales-engage.com",
-    "relationshipType": "industry",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "agency",
+      "Paige by Merchynt"
+    ],
     "relationshipScore": 20,
     "interactions": [
       {
@@ -9935,13 +12973,46 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-63-0",
+        "content": "Jahan (Derby Digital) is interested in Merchynt's 'Paige' product, designed to help agencies scale.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-63-1",
+        "content": "A meeting occurred on Feb 6, 2026, where Shanique provided pricing details for Paige.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "e1d86d3d37ea",
         "category": "contact",
         "label": "Phone",
         "value": "218-481-1529"
+      },
+      {
+        "id": "aif-63-1",
+        "category": "business",
+        "label": "Product of Interest",
+        "value": "Paige by Merchynt"
+      },
+      {
+        "id": "aif-63-2",
+        "category": "business",
+        "label": "Meeting Date",
+        "value": "2026-02-06"
+      },
+      {
+        "id": "aif-63-3",
+        "category": "business",
+        "label": "Merchynt's Offering",
+        "value": "Helps agencies save time, scale faster, deliver more."
       }
     ],
     "opportunities": [],
@@ -9952,17 +13023,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-06T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Jahan Taila from Derby Digital is a prospect for Merchynt's 'Paige' product, having expressed interest and met with Shanique Wright to discuss pricing and how Paige can help agencies scale."
   },
   {
-    "id": "69",
+    "id": "65",
     "firstName": "Abhishek",
     "lastName": "Das Global Indian",
     "email": "abhishek.das@globalindian.com",
     "company": "Globalindian",
     "website": "https://w3.org",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "storytelling",
+      "immigration"
+    ],
     "relationshipScore": 20,
     "interactions": [
       {
@@ -10006,13 +13081,52 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-64-0",
+        "content": "Jahan received an email from Global Indian Storytelling, suggesting a past inquiry or interest in their services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-64-1",
+        "content": "Recent emails from Y-Axis indicate Abhishek Das is involved in immigration-related payments and quotations, possibly for personal reasons or related to Globalindian's services.",
+        "category": "personal",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "811d4e760924",
         "category": "contact",
         "label": "Phone",
         "value": "9193985859"
+      },
+      {
+        "id": "aif-64-1",
+        "category": "business",
+        "label": "Company Website",
+        "value": "globalindian.com"
+      },
+      {
+        "id": "aif-64-2",
+        "category": "business",
+        "label": "Contact Person",
+        "value": "Abhishek Das"
+      },
+      {
+        "id": "aif-64-3",
+        "category": "business",
+        "label": "Email Domain",
+        "value": "globalindian.com"
+      },
+      {
+        "id": "aif-64-4",
+        "category": "personal",
+        "label": "Immigration Service Provider",
+        "value": "Y-Axis"
       }
     ],
     "opportunities": [],
@@ -10023,17 +13137,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-11-10T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "This contact, Abhishek Das from Globalindian, appears to be involved with a 'Global Indian Storytelling' service that Jahan previously engaged with. Recent emails also show Abhishek is using Y-Axis for immigration-related services, which might be personal or business-related. Given Jahan's restaurant niche, this contact doesn't immediately align as a prospect or client for Derby Digital's services."
   },
   {
-    "id": "70",
+    "id": "66",
     "firstName": "Payton",
     "lastName": "Keathley",
     "email": "ambassador@olympusgaminglounge.com",
     "company": "Olympusgaminglounge",
     "website": "https://app.base44.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "restaurant niche",
+      "ambassador program",
+      "digital marketing",
+      "gaming lounge"
+    ],
     "relationshipScore": 20,
     "interactions": [
       {
@@ -10077,8 +13197,55 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-65-0",
+        "content": "Olympusgaminglounge is actively managing an ambassador program, indicating a focus on community engagement and potentially influencer marketing.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-65-1",
+        "content": "They are using 'Base44' as their ambassador platform, suggesting a need for integration or optimization of their digital tools.",
+        "category": "technical",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-65-2",
+        "content": "The contact is providing lists of ambassadors and their codes, which could be leveraged for targeted marketing strategies.",
+        "category": "marketing",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-65-0",
+        "category": "business",
+        "label": "Company Name",
+        "value": "Olympusgaminglounge"
+      },
+      {
+        "id": "aif-65-1",
+        "category": "business",
+        "label": "Contact Email",
+        "value": "ambassador@olympusgaminglounge.com"
+      },
+      {
+        "id": "aif-65-2",
+        "category": "business",
+        "label": "Ambassador Platform",
+        "value": "Base44"
+      },
+      {
+        "id": "aif-65-3",
+        "category": "business",
+        "label": "Recent Activity",
+        "value": "Managing ambassador program, setting up domain for platform"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -10087,17 +13254,24 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-10-27T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "Ambassador",
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "Payton Keathley from Olympusgaminglounge is managing an ambassador program using the Base44 platform. This indicates a potential need for digital marketing services, especially given Jahan Taila's focus on the restaurant niche (which gaming lounges often overlap with for food/drink sales)."
   },
   {
-    "id": "71",
+    "id": "67",
     "firstName": "Gary",
     "lastName": "Yin",
     "email": "gary@usemotion.app",
     "company": "Usemotion",
     "website": "https://cal.com",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "inbound marketing",
+      "project management software"
+    ],
     "relationshipScore": 20,
     "interactions": [
       {
@@ -10141,8 +13315,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-66-0",
+        "content": "Gary Yin is sending inbound marketing emails for Motion, a project management software, targeting teams.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-66-1",
+        "content": "The emails focus on features like task reshuffling, project coordination, and onboarding, with a recent offer to waive onboarding fees.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-66-0",
+        "category": "business",
+        "label": "Company",
+        "value": "Usemotion"
+      },
+      {
+        "id": "aif-66-1",
+        "category": "business",
+        "label": "Product",
+        "value": "Motion (project management software)"
+      },
+      {
+        "id": "aif-66-2",
+        "category": "business",
+        "label": "Target Audience",
+        "value": "Teams (especially >15 members)"
+      },
+      {
+        "id": "aif-66-3",
+        "category": "business",
+        "label": "Recent Offer",
+        "value": "$5,500 waived onboarding fee"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -10151,17 +13365,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-10-29T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "This contact is an inbound marketing lead from Gary Yin at Usemotion, promoting their project management software 'Motion' for teams. The emails highlight features like task management, project coordination, and a recent offer to waive onboarding fees."
   },
   {
-    "id": "72",
-    "firstName": "jbray",
-    "lastName": "brayelectric.net",
+    "id": "68",
+    "firstName": "DERBY",
+    "lastName": "DIGITAL LEAD SYSTEM",
     "email": "jbray@brayelectric.net",
     "company": "Brayelectric",
     "website": "https://email.mg.msgsndr.net",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "client",
+    "tags": [
+      "invoice",
+      "vending"
+    ],
     "relationshipScore": 20,
     "interactions": [
       {
@@ -10205,13 +13423,53 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-67-0",
+        "content": "Joshua Bray has submitted multiple vending machine service requests, indicating a need for vending solutions.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-67-1",
+        "content": "Brayelectric has an outstanding invoice with Derby Digital LLC for $1,050.00 due on September 28, 2025.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-67-2",
+        "content": "The contact is actively engaging with vending services, which is outside Derby Digital's restaurant niche.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "4b2079d2e012",
         "category": "contact",
         "label": "Phone",
         "value": "1502541902"
+      },
+      {
+        "id": "aif-67-1",
+        "category": "business",
+        "label": "Last Invoice Amount",
+        "value": "$1,050.00"
+      },
+      {
+        "id": "aif-67-2",
+        "category": "business",
+        "label": "Last Invoice Due Date",
+        "value": "2025-09-28"
+      },
+      {
+        "id": "aif-67-3",
+        "category": "business",
+        "label": "Primary Activity",
+        "value": "Vending Machine Services"
       }
     ],
     "opportunities": [],
@@ -10222,17 +13480,24 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-09-28T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "Joshua Bray of Brayelectric is a current client of Derby Digital LLC, primarily for vending machine services, with an outstanding invoice. His recent inquiries are all related to vending, not digital marketing for restaurants."
   },
   {
-    "id": "73",
+    "id": "69",
     "firstName": "Shayan",
-    "lastName": "Gaieb",
+    "lastName": "",
     "email": "shayan@iclosed.io",
     "company": "Iclosed",
     "website": "https://app.iclosed.io",
-    "relationshipType": "industry",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "onboarding",
+      "cancelled demo",
+      "free trial"
+    ],
     "relationshipScore": 20,
     "interactions": [
       {
@@ -10276,13 +13541,52 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-68-0",
+        "content": "Jahan Taila initiated a free trial and scheduled a demo with Shayan Gaieb, but the demo was cancelled.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-68-1",
+        "content": "Shayan is following up on the incomplete free trial and offering onboarding assistance.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "946c74da3939",
         "category": "contact",
         "label": "Phone",
         "value": "9630109169"
+      },
+      {
+        "id": "aif-68-1",
+        "category": "business",
+        "label": "Latest Interaction",
+        "value": "2025-10-21"
+      },
+      {
+        "id": "aif-68-2",
+        "category": "business",
+        "label": "Demo Status",
+        "value": "Cancelled"
+      },
+      {
+        "id": "aif-68-3",
+        "category": "business",
+        "label": "Product Interest",
+        "value": "iClosed (sales team/onboarding)"
+      },
+      {
+        "id": "aif-68-4",
+        "category": "business",
+        "label": "Role",
+        "value": "Account Executive"
       }
     ],
     "opportunities": [],
@@ -10293,17 +13597,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-10-19T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "Account Executive",
+    "aiSummary": "Jahan Taila is a prospect for iClosed, having started a free trial and scheduled a demo that was later cancelled. Shayan Gaieb, an Account Executive at iClosed, is actively following up to encourage completion of the trial and offer onboarding support."
   },
   {
-    "id": "74",
+    "id": "70",
     "firstName": "Cindy",
     "lastName": "Lawrence",
     "email": "clawrence@driveoxmoor.com",
     "company": "Driveoxmoor",
     "website": "https://driveoxmoor.com",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "unsolicited",
+      "vehicle sales"
+    ],
     "relationshipScore": 20,
     "interactions": [
       {
@@ -10347,8 +13656,35 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-69-0",
+        "content": "This contact is from a car dealership, not related to digital marketing or the restaurant niche. It appears to be an unsolicited follow-up regarding a past vehicle inquiry.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-69-0",
+        "category": "business",
+        "label": "Company Type",
+        "value": "Car Dealership"
+      },
+      {
+        "id": "aif-69-1",
+        "category": "business",
+        "label": "Contact Purpose",
+        "value": "Vehicle Sales Follow-up"
+      },
+      {
+        "id": "aif-69-2",
+        "category": "business",
+        "label": "Relevance to Jahan's Business",
+        "value": "None"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -10357,19 +13693,57 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-06-27T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "Sales Assistant",
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "Cindy Lawrence from Driveoxmoor (Oxmoor Ford) is a sales assistant following up on Jahan's past inquiry about a vehicle. This contact is unrelated to Jahan's digital marketing agency or his target restaurant niche."
   },
   {
-    "id": "75",
+    "id": "71",
     "firstName": "James",
     "lastName": "Shields",
     "email": "james@scalesifylabs.com",
     "company": "Scalesifylabs",
     "website": "https://calendly.com",
-    "relationshipType": "vendor",
-    "tags": [],
-    "relationshipScore": 20,
+    "relationshipType": "prospect",
+    "tags": [
+      "cold email",
+      "marketing agency",
+      "lead generation"
+    ],
+    "relationshipScore": 35,
     "interactions": [
+      {
+        "id": "email-59-0",
+        "type": "email",
+        "date": "2026-03-06",
+        "summary": "hey again Jahan",
+        "subject": "hey again Jahan",
+        "details": "Jahan, it's James here, we spoke a while back on 30/04/2025.\n\nReason I'm reaching out is because we just launched our new pay per booked call model.\n\nWe run cold email A-Z, and you only pay for qualified calls we book.\n\nCan I share how it works?\n\nSpeak soon,\nJames Shields\n\nPS - one of our most recent clients just closed 4 high ticket deals in 60 days, you can be next",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-228-0",
+        "type": "email",
+        "date": "2025-10-14",
+        "summary": "for you Jahan",
+        "subject": "for you Jahan",
+        "details": "Jahan, it's James here from Frostmailer.\u00a0\r\n\r\nWe spoke a while ago about cold email and lead gen.\r\n\r\nI'm reaching out because we launched a new offer where we build your cold email system for completely free.\r\n\r\nLet's jump on a short call to go over it, no pressure, but only doing limited buildouts for free.\r\n\r\nThanks,\r\nJames\r\nFounder of Frostmailer\r\n\r\nPS - one of our recent clients closed 4 high ticket deals in 38 days, you can be next",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-254-0",
+        "type": "email",
+        "date": "2025-08-07",
+        "summary": "this you on twitter?",
+        "subject": "this you on twitter?",
+        "details": "hi Jahan - saw you followed @scaling_shields on Twitter, thought it would be relevant to reach out here.\r\n\r\nShort question, if we could build you a free cold email setup that books 15-30 meetingseach month, would you be open to hearing more? (we'll build it for zero service/performance cost)\r\n\r\nJust reply with \"yes\" and i'll send more details\r\n\r\nBest,\r\nJames Shields\r\n\r\nps - my twitter is @scaling_shields",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
       {
         "id": "email-283-0",
         "type": "email",
@@ -10411,13 +13785,80 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "merge-s.james@ge",
+        "content": "Merged with duplicate contact: s.james@getshieldsoutbound.com",
+        "category": "general",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "merge-james.s@fr",
+        "content": "Merged with duplicate contact: james.s@frostmailerreport.info",
+        "category": "general",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "merge-james@gosc",
+        "content": "Merged with duplicate contact: james@goscaler.info",
+        "category": "general",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-70-3",
+        "content": "James Shields from Scalesifylabs (formerly Frostmailer) has been consistently trying to sell cold email and lead generation services to Jahan since at least April 2025.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-70-4",
+        "content": "Jahan previously booked a 'strategy session' with James on April 30, 2025, but the content of the follow-up emails suggests it was likely a sales call for a 'free cold email system'.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-70-5",
+        "content": "James has evolved his offer from building a 'free cold email system' to a 'pay per booked call model', indicating a persistent sales effort and adaptation of his service offering.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "4095de4714cd",
         "category": "contact",
         "label": "Phone",
         "value": "1267866178"
+      },
+      {
+        "id": "aif-70-1",
+        "category": "business",
+        "label": "Company Name (Current)",
+        "value": "Scalesifylabs"
+      },
+      {
+        "id": "aif-70-2",
+        "category": "business",
+        "label": "Company Name (Previous)",
+        "value": "Frostmailer"
+      },
+      {
+        "id": "aif-70-3",
+        "category": "business",
+        "label": "Service Offered",
+        "value": "Cold email & lead generation (pay per booked call model)"
+      },
+      {
+        "id": "aif-70-4",
+        "category": "business",
+        "label": "Last Contact Date",
+        "value": "2026-03-06"
       }
     ],
     "opportunities": [],
@@ -10428,17 +13869,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-04-29T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "secondaryEmail": "s.james@getshieldsoutbound.com",
+    "aiSummary": "James Shields from Scalesifylabs (formerly Frostmailer) is a persistent vendor attempting to sell cold email and lead generation services to Jahan Taila. Jahan previously engaged by booking a strategy session, but has not converted into a client, indicating a long-term sales pursuit from James."
   },
   {
-    "id": "76",
+    "id": "72",
     "firstName": "Chris",
     "lastName": "Sloane",
     "email": "chris@digitalagencygrowthacademy.com",
     "company": "Digitalagencygrowthacademy",
     "website": "https://email.mail.revenuecommander.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "vendor",
+    "tags": [
+      "agency growth",
+      "niche strategy"
+    ],
     "relationshipScore": 20,
     "interactions": [
       {
@@ -10482,8 +13928,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-71-0",
+        "content": "Chris Sloane is a vendor offering resources and guidance for growing digital agencies, specifically focusing on niching strategies.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-71-1",
+        "content": "Jahan has engaged with Digital Agency Growth Academy by downloading a guide, indicating interest in agency growth and potentially niching.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-71-0",
+        "category": "business",
+        "label": "Vendor Service",
+        "value": "Digital agency growth and niching strategies"
+      },
+      {
+        "id": "aif-71-1",
+        "category": "business",
+        "label": "Jahan's Engagement",
+        "value": "Downloaded '9 Proven Steps' guide"
+      },
+      {
+        "id": "aif-71-2",
+        "category": "business",
+        "label": "Recent Email Topic",
+        "value": "Alternative perspectives on niching"
+      },
+      {
+        "id": "aif-71-3",
+        "category": "business",
+        "label": "Vendor Goal",
+        "value": "Help agencies achieve consistent revenue growth"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -10492,17 +13978,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-02-17T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Chris Sloane from Digitalagencygrowthacademy is a vendor providing resources and advice on growing digital agencies, with a focus on niching. Jahan has shown interest by downloading their guide, suggesting a current focus on agency growth and strategy."
   },
   {
-    "id": "77",
+    "id": "73",
     "firstName": "Esteban",
     "lastName": "",
     "email": "esteban@remotelatinos.com",
     "company": "Remotelatinos",
     "website": "https://email.reply.remotelatinos.com",
-    "relationshipType": "client",
-    "tags": [],
+    "relationshipType": "other",
+    "tags": [
+      "remote talent",
+      "recruiting"
+    ],
     "relationshipScore": 15,
     "interactions": [
       {
@@ -10536,8 +14026,42 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-72-0",
+        "content": "Esteban is receiving inbound emails from Remotelatinos, a remote talent hiring platform. This suggests he is either a user of their service or on their marketing list.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-72-1",
+        "content": "The emails are focused on hiring top talent and finding elite employees faster, indicating Remotelatinos' core business is recruitment.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-72-0",
+        "category": "business",
+        "label": "Company Website",
+        "value": "remotelatinos.com"
+      },
+      {
+        "id": "aif-72-1",
+        "category": "business",
+        "label": "Email Frequency",
+        "value": "3 emails in ~2 weeks (March 2026)"
+      },
+      {
+        "id": "aif-72-2",
+        "category": "business",
+        "label": "Email Content Theme",
+        "value": "Hiring remote talent"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -10546,17 +14070,24 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-28T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Esteban is associated with Remotelatinos, a company focused on remote talent acquisition, and receives their marketing emails. This contact is not directly relevant to Jahan Taila's digital marketing services for restaurants in Louisville, KY."
   },
   {
-    "id": "78",
+    "id": "74",
     "firstName": "Neil",
     "lastName": "Patel",
     "email": "neil@advanced.npdigital.com",
     "company": "Advanced",
     "website": "https://d4GYxT04.na1.hubspotlinks.com",
-    "relationshipType": "client",
-    "tags": [],
+    "relationshipType": "industry",
+    "tags": [
+      "social media marketing",
+      "digital marketing",
+      "SEO",
+      "content marketing",
+      "webinar"
+    ],
     "relationshipScore": 15,
     "interactions": [
       {
@@ -10590,8 +14121,55 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-73-0",
+        "content": "Neil Patel is a well-known figure in digital marketing, often providing industry insights and advice.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-73-1",
+        "content": "The emails focus on evolving digital marketing trends, such as pre-website buying decisions, multi-platform search, and new performance metrics.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-73-2",
+        "content": "These insights could be valuable for Jahan Taila to stay updated on industry best practices and potentially apply them to the restaurant niche.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-73-0",
+        "category": "business",
+        "label": "Sender",
+        "value": "Neil Patel"
+      },
+      {
+        "id": "aif-73-1",
+        "category": "business",
+        "label": "Email Frequency",
+        "value": "Weekly (approx.)"
+      },
+      {
+        "id": "aif-73-2",
+        "category": "business",
+        "label": "Key Topics",
+        "value": "Buyer journey, multi-platform search, new marketing metrics"
+      },
+      {
+        "id": "aif-73-3",
+        "category": "business",
+        "label": "Call to Action",
+        "value": "Webinar (March 3rd mentioned)"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -10600,17 +14178,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-27T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "This contact is an industry thought leader providing regular updates on digital marketing trends and strategies. The content is relevant for a digital marketing agency owner like Jahan Taila to stay informed and potentially adapt strategies for clients in the restaurant niche."
   },
   {
-    "id": "79",
+    "id": "75",
     "firstName": "Keith",
     "lastName": "Valley",
     "email": "keith@valleynorthhospitality.com",
     "company": "Valleynorthhospitality",
     "website": "https://palmaitalian.com",
-    "relationshipType": "client",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "website development",
+      "restaurant",
+      "catering"
+    ],
     "relationshipScore": 15,
     "interactions": [
       {
@@ -10644,13 +14227,59 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-74-0",
+        "content": "Keith is looking to expand revenue streams and needs a new website built from scratch to showcase 5 total sources.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-74-1",
+        "content": "He also needs updates to an existing website for catering capabilities, specifically adding 'Palma Catering' and a logo from a PDF.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-74-2",
+        "content": "The outbound email from 2025 suggests Jahan may have previously submitted a reservation request for 'Palma Italian Kitchen', indicating prior interaction or interest in their services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "35ddf4e8cb70",
         "category": "contact",
         "label": "Phone",
         "value": "407-694-6509"
+      },
+      {
+        "id": "aif-74-1",
+        "category": "business",
+        "label": "Website Need",
+        "value": "New website from scratch for 5 revenue streams"
+      },
+      {
+        "id": "aif-74-2",
+        "category": "business",
+        "label": "Website Update",
+        "value": "Add 'Palma Catering' and logo to catering tab"
+      },
+      {
+        "id": "aif-74-3",
+        "category": "business",
+        "label": "Recent Activity",
+        "value": "Two inbound emails in March 2026"
+      },
+      {
+        "id": "aif-74-4",
+        "category": "business",
+        "label": "Previous Interaction",
+        "value": "Jahan submitted a reservation request for Palma Italian Kitchen in July 2025"
       }
     ],
     "opportunities": [],
@@ -10661,17 +14290,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-07-08T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Keith Valley of Valleynorthhospitality is a strong prospect in the restaurant niche, actively seeking a new website to expand revenue streams and updates to an existing site for catering. There's a prior interaction where Jahan submitted a reservation request, indicating familiarity with their brand."
   },
   {
-    "id": "80",
+    "id": "76",
     "firstName": "Rob",
     "lastName": "Williams",
     "email": "robert@folyo.me",
     "company": "Folyo",
     "website": "https://w3.org",
-    "relationshipType": "vendor",
-    "tags": [],
+    "relationshipType": "other",
+    "tags": [
+      "email marketing",
+      "case studies",
+      "web design"
+    ],
     "relationshipScore": 15,
     "interactions": [
       {
@@ -10705,8 +14339,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-75-0",
+        "content": "Rob Williams from Folyo appears to be sending marketing emails showcasing their web design and development case studies.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-75-1",
+        "content": "The emails highlight significant project values ($70K-$80K) and well-known clients (Sesame Street, USA Archery, U.S. mayors network).",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-75-0",
+        "category": "business",
+        "label": "Sender",
+        "value": "Rob Williams (Folyo)"
+      },
+      {
+        "id": "aif-75-1",
+        "category": "business",
+        "label": "Email Content",
+        "value": "Web design/rebuild case studies"
+      },
+      {
+        "id": "aif-75-2",
+        "category": "business",
+        "label": "Project Values",
+        "value": "$70K - $80K"
+      },
+      {
+        "id": "aif-75-3",
+        "category": "business",
+        "label": "Frequency",
+        "value": "3 emails in 8 days"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -10715,17 +14389,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-04T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Rob Williams from Folyo is sending marketing emails detailing their web design and development case studies, featuring high-value projects for notable clients. This contact is likely a marketing outreach from Folyo to Jahan Taila, not a direct lead for Derby Digital's restaurant niche."
   },
   {
-    "id": "81",
+    "id": "77",
     "firstName": "Onepage",
     "lastName": "",
     "email": "news@onepage.io",
     "company": "Onepage",
     "website": "https://mailchi.mp",
-    "relationshipType": "vendor",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "AI",
+      "email marketing",
+      "website optimization",
+      "lead generation"
+    ],
     "relationshipScore": 15,
     "interactions": [
       {
@@ -10759,8 +14439,55 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-76-0",
+        "content": "Onepage is actively sending email marketing content focused on website optimization and lead generation, which aligns with Derby Digital's services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-76-1",
+        "content": "The emails suggest Onepage might be a competitor or a potential partner for website-related services, or a tool Jahan might be using.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-76-2",
+        "content": "The content about 'Your Form is Costing You Leads' and 'Why Your Website Isn't Generating Leads' directly addresses pain points Derby Digital aims to solve for restaurants.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-76-0",
+        "category": "business",
+        "label": "Email Sender",
+        "value": "Onepage (news@onepage.io)"
+      },
+      {
+        "id": "aif-76-1",
+        "category": "business",
+        "label": "Email Frequency",
+        "value": "3 emails in 2 weeks (recent)"
+      },
+      {
+        "id": "aif-76-2",
+        "category": "business",
+        "label": "Email Topics",
+        "value": "Website leads, forms, AI features"
+      },
+      {
+        "id": "aif-76-3",
+        "category": "business",
+        "label": "Last Contact Date",
+        "value": "2026-03-12"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -10769,17 +14496,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-27T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Jahan is receiving marketing emails from Onepage, a company focused on website optimization, lead generation, and AI features. The content directly addresses pain points that Derby Digital aims to solve for its restaurant clients, suggesting Onepage could be a competitor, a potential partner, or a tool Jahan is evaluating."
   },
   {
-    "id": "82",
+    "id": "78",
     "firstName": "Hamza",
     "lastName": "Automates",
     "email": "hamza@hexonasystems.com",
     "company": "Hexonasystems",
     "website": "https://email.mail.hexonasystems.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "marketing",
+      "sales",
+      "AI",
+      "YouTube"
+    ],
     "relationshipScore": 15,
     "interactions": [
       {
@@ -10813,8 +14546,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-77-0",
+        "content": "Hamza is attempting to engage Jahan with content related to AI, trust, and sales/marketing strategies, possibly for a collaboration or to sell a service.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-77-1",
+        "content": "The emails are somewhat generic and focused on Hamza's insights, not directly addressing Derby Digital's services or the restaurant niche.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-77-0",
+        "category": "business",
+        "label": "Sender",
+        "value": "Hamza Automates"
+      },
+      {
+        "id": "aif-77-1",
+        "category": "business",
+        "label": "Sender Company",
+        "value": "Hexonasystems"
+      },
+      {
+        "id": "aif-77-2",
+        "category": "business",
+        "label": "Email Frequency",
+        "value": "3 emails in 2 weeks"
+      },
+      {
+        "id": "aif-77-3",
+        "category": "business",
+        "label": "Key Themes",
+        "value": "AI, trust, sales, YouTube, collaboration"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -10823,17 +14596,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-26T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Hamza Automates from Hexonasystems is an active prospect, sending frequent emails to Jahan Taila. The content revolves around AI, sales, and marketing insights, with a potential aim for collaboration or service offering. The messages are not directly tailored to Derby Digital's restaurant niche."
   },
   {
-    "id": "83",
+    "id": "79",
     "firstName": "Sujay",
     "lastName": "from Astra",
     "email": "hello@news.bsf.io",
-    "company": "News",
+    "company": "Astra",
     "website": "https://news.bsf.io",
-    "relationshipType": "vendor",
-    "tags": [],
+    "relationshipType": "other",
+    "tags": [
+      "web hosting",
+      "WordPress",
+      "AI website builder"
+    ],
     "relationshipScore": 15,
     "interactions": [
       {
@@ -10867,13 +14645,59 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-78-0",
+        "content": "Sujay from Astra appears to be a vendor of web hosting and WordPress-related services, specifically an AI website builder.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-78-1",
+        "content": "The emails are generic marketing templates, not personalized to Jahan Taila or Derby Digital.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-78-2",
+        "content": "The content focuses on website building, hosting, and WordPress tools, which could be relevant to Derby Digital's services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "cc4f2858a68f",
         "category": "contact",
         "label": "Address",
         "value": "2093 Philadelphia Pike #3090, Claymont"
+      },
+      {
+        "id": "aif-78-1",
+        "category": "business",
+        "label": "Sender Company",
+        "value": "Astra"
+      },
+      {
+        "id": "aif-78-2",
+        "category": "business",
+        "label": "Email Focus",
+        "value": "Web hosting, AI website builder, WordPress tools"
+      },
+      {
+        "id": "aif-78-3",
+        "category": "business",
+        "label": "Email Frequency",
+        "value": "3 emails in ~2 weeks"
+      },
+      {
+        "id": "aif-78-4",
+        "category": "business",
+        "label": "Recent Offer",
+        "value": "51% off AI website builder + free domain"
       }
     ],
     "opportunities": [],
@@ -10884,17 +14708,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-26T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "This contact is a vendor (Astra) sending generic marketing emails about web hosting, AI website builders, and WordPress tools. While not personalized, the content might be relevant to Derby Digital's operations as a digital marketing agency."
   },
   {
-    "id": "84",
+    "id": "80",
     "firstName": "OpenTable",
     "lastName": "",
     "email": "opentable@mgs.opentable.com",
-    "company": "Mgs",
+    "company": "OpenTable",
     "website": "https://w3.org",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "industry",
+    "tags": [
+      "email marketing",
+      "restaurant tech",
+      "local marketing"
+    ],
     "relationshipScore": 15,
     "interactions": [
       {
@@ -10928,8 +14757,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-79-0",
+        "content": "OpenTable sends localized restaurant recommendations, which could be a source of competitive intelligence or partnership opportunities for Derby Digital's restaurant clients.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-79-1",
+        "content": "The emails contain HTML/CSS, indicating a sophisticated email marketing strategy that Derby Digital could analyze for best practices or identify areas for improvement for their own clients.",
+        "category": "technical",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-79-0",
+        "category": "business",
+        "label": "Email Sender",
+        "value": "OpenTable"
+      },
+      {
+        "id": "aif-79-1",
+        "category": "business",
+        "label": "Email Content Focus",
+        "value": "Restaurant recommendations and top lists"
+      },
+      {
+        "id": "aif-79-2",
+        "category": "business",
+        "label": "Geographic Focus of Emails",
+        "value": "Louisville (Westport Rd - Lyndon) and Central Kentucky"
+      },
+      {
+        "id": "aif-79-3",
+        "category": "technical",
+        "label": "Email Format",
+        "value": "HTML"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -10938,17 +14807,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-25T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "This contact is from OpenTable, a major player in the restaurant technology space, sending localized restaurant recommendations. It's relevant for Jahan Taila's restaurant niche at Derby Digital for competitive analysis, partnership ideas, and understanding industry email marketing trends."
   },
   {
-    "id": "85",
+    "id": "81",
     "firstName": "Taylor",
     "lastName": "S",
     "email": "taylor@erase.com",
     "company": "Erase",
     "website": "https://erase.com",
-    "relationshipType": "client",
-    "tags": [],
+    "relationshipType": "vendor",
+    "tags": [
+      "review removal",
+      "reputation management"
+    ],
     "relationshipScore": 15,
     "interactions": [
       {
@@ -10982,13 +14855,59 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-80-0",
+        "content": "Jahan initiated contact with Erase.com regarding a negative Google Business Profile review.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-80-1",
+        "content": "Erase.com is a reputation management service specializing in review removal.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-80-2",
+        "content": "This interaction indicates a potential need for reputation management services for Derby Digital's restaurant clients.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "0354b939c891",
         "category": "contact",
         "label": "Phone",
         "value": "866-523-5551"
+      },
+      {
+        "id": "aif-80-1",
+        "category": "business",
+        "label": "Vendor Service",
+        "value": "Online Reputation Management / Review Removal"
+      },
+      {
+        "id": "aif-80-2",
+        "category": "business",
+        "label": "Jahan's Inquiry",
+        "value": "Bad 1-star GBP review removal"
+      },
+      {
+        "id": "aif-80-3",
+        "category": "business",
+        "label": "Vendor Contact",
+        "value": "Taylor S"
+      },
+      {
+        "id": "aif-80-4",
+        "category": "business",
+        "label": "Vendor Longevity",
+        "value": "In business since 2009"
       }
     ],
     "opportunities": [],
@@ -10999,17 +14918,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-02T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Jahan Taila contacted Erase.com, a reputation management vendor, to inquire about removing a negative 1-star Google Business Profile review. This suggests a potential need for reputation management services for Derby Digital's restaurant niche clients."
   },
   {
-    "id": "86",
+    "id": "82",
     "firstName": "Cloudways",
     "lastName": "Insider",
     "email": "success@cloudways.com",
     "company": "Cloudways",
     "website": "https://cloudways.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "vendor",
+    "tags": [
+      "server hosting",
+      "alerts"
+    ],
     "relationshipScore": 15,
     "interactions": [
       {
@@ -11043,8 +14966,42 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-81-0",
+        "content": "Jahan receives automated server status alerts from Cloudways, indicating they are a hosting provider.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-81-1",
+        "content": "Cloudways also sends promotional/newsletter emails, suggesting a standard vendor-customer communication pattern.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-81-0",
+        "category": "business",
+        "label": "Service Provided",
+        "value": "Server Hosting"
+      },
+      {
+        "id": "aif-81-1",
+        "category": "business",
+        "label": "Communication Type",
+        "value": "Automated Alerts & Newsletters"
+      },
+      {
+        "id": "aif-81-2",
+        "category": "business",
+        "label": "Server Status",
+        "value": "Fluctuating (down then up on Feb 27)"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -11053,18 +15010,24 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-26T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Jahan Taila is a customer of Cloudways, receiving server hosting services. Communication includes automated server status alerts and monthly newsletters, indicating a typical vendor-client relationship."
   },
   {
-    "id": "87",
+    "id": "83",
     "firstName": "Noe",
     "lastName": "Munoz",
     "email": "elmananerollc@gmail.com",
-    "company": "",
+    "company": "El Ma\u00f1anero",
     "website": "",
     "relationshipType": "client",
-    "tags": [],
-    "relationshipScore": 15,
+    "tags": [
+      "graphic design",
+      "advertising",
+      "menu updates",
+      "restaurant"
+    ],
+    "relationshipScore": 20,
     "interactions": [
       {
         "id": "email-125-0",
@@ -11073,6 +15036,16 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "summary": "New Updated Mananero menu",
         "subject": "New Updated Mananero menu",
         "details": "Hey buddy could you update the menu on the website please",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-235-0",
+        "type": "email",
+        "date": "2025-10-24",
+        "summary": "El Ma\u00f1anero Advertising",
+        "subject": "El Ma\u00f1anero Advertising",
+        "details": "El mananero publicidad 2.11.pdf\r\n<https://drive.google.com/file/d/1oRlXWmfZ2KRw-I8yEvpAp6aFIn4NNxSq/view?usp=drive_web>",
         "direction": "inbound",
         "createdAt": "2026-03-16T12:18:59"
       },
@@ -11097,13 +15070,59 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "merge-nmainvestm",
+        "content": "Merged with duplicate contact: nmainvestmentsllc90@gmail.com",
+        "category": "general",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-82-1",
+        "content": "Noe frequently requests website updates and shares marketing materials, indicating an ongoing service relationship.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-82-2",
+        "content": "The emails suggest Jahan is handling website maintenance, menu updates, and potentially graphic design for El Ma\u00f1anero and a related business, Helado Feliz.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "ecebff9d3798",
         "category": "contact",
         "label": "Phone",
         "value": "1000028781"
+      },
+      {
+        "id": "aif-82-1",
+        "category": "business",
+        "label": "Last Service Request",
+        "value": "2025-10-31 (menu update)"
+      },
+      {
+        "id": "aif-82-2",
+        "category": "business",
+        "label": "Services Provided",
+        "value": "Website updates, menu design, advertising material handling"
+      },
+      {
+        "id": "aif-82-3",
+        "category": "business",
+        "label": "Associated Business",
+        "value": "Helado Feliz"
+      },
+      {
+        "id": "aif-82-4",
+        "category": "business",
+        "label": "Contact Frequency",
+        "value": "Regular (multiple requests in 2025)"
       }
     ],
     "opportunities": [],
@@ -11114,71 +15133,24 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-07-15T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "secondaryEmail": "nmainvestmentsllc90@gmail.com",
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "Noe Munoz from El Ma\u00f1anero is an active client, regularly contacting Jahan for website menu updates, advertising material management, and graphic design for both El Ma\u00f1anero and Helado Feliz."
   },
   {
-    "id": "88",
-    "firstName": "Rory",
-    "lastName": "Galligan",
-    "email": "rorymgalligan@icloud.com",
-    "company": "",
-    "website": "",
-    "relationshipType": "other",
-    "tags": [],
-    "relationshipScore": 15,
-    "interactions": [
-      {
-        "id": "email-129-0",
-        "type": "email",
-        "date": "2026-02-06",
-        "summary": "Mayfly Menu Winter 25/26",
-        "subject": "Mayfly Menu Winter 25/26",
-        "details": "",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-129-1",
-        "type": "email",
-        "date": "2026-02-04",
-        "summary": "Mayfly Brunch Menu Winter 25/26",
-        "subject": "Mayfly Brunch Menu Winter 25/26",
-        "details": "",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-129-2",
-        "type": "email",
-        "date": "2026-02-04",
-        "summary": "Mayfly Menu Winter 26/26",
-        "subject": "Mayfly Menu Winter 26/26",
-        "details": "",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      }
-    ],
-    "notes": [],
-    "facts": [],
-    "opportunities": [],
-    "aiInsights": [],
-    "groups": [],
-    "connections": [],
-    "lastContactedAt": "2026-02-06",
-    "source": "gmail-import",
-    "createdAt": "2026-02-04T00:00:00",
-    "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
-  },
-  {
-    "id": "89",
-    "firstName": "Dawn",
-    "lastName": "Kenney",
+    "id": "84",
+    "firstName": "info",
+    "lastName": "",
     "email": "info@playerslockerroom.com",
     "company": "Playerslockerroom",
     "website": "https://tel.meet",
-    "relationshipType": "industry",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "rescheduled meeting",
+      "restaurant"
+    ],
     "relationshipScore": 15,
     "interactions": [
       {
@@ -11212,13 +15184,59 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-83-0",
+        "content": "Dawn Kenney/Beau Ward are the primary contacts, indicating a potential partnership or ownership structure.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-83-1",
+        "content": "They are responsive and engaged, actively rescheduling a meeting due to a holiday.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-83-2",
+        "content": "The initial meeting was accepted, showing interest in Derby Digital's services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "fff429ee11d3",
         "category": "contact",
         "label": "Phone",
         "value": "413-346-5268"
+      },
+      {
+        "id": "aif-83-1",
+        "category": "business",
+        "label": "Contact Name(s)",
+        "value": "Dawn Kenney/Beau Ward"
+      },
+      {
+        "id": "aif-83-2",
+        "category": "business",
+        "label": "Meeting Status",
+        "value": "Rescheduled to Wednesday mid-morning (11 AM)"
+      },
+      {
+        "id": "aif-83-3",
+        "category": "business",
+        "label": "Initial Meeting Date",
+        "value": "2025-09-01"
+      },
+      {
+        "id": "aif-83-4",
+        "category": "business",
+        "label": "Niche",
+        "value": "Restaurant"
       }
     ],
     "opportunities": [],
@@ -11229,17 +15247,24 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-08-29T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "Owner/Manager (implied)",
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "Playerslockerroom, represented by Dawn Kenney/Beau Ward, is an engaged prospect in the restaurant niche. They initially accepted a meeting with Derby Digital but rescheduled due to a holiday, indicating continued interest in exploring digital marketing services."
   },
   {
-    "id": "90",
+    "id": "85",
     "firstName": "Typeform",
     "lastName": "Notifications",
     "email": "notifications@followups.typeform.io",
-    "company": "Followups",
+    "company": "Typeform",
     "website": "https://admin.typeform.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "vendor",
+    "tags": [
+      "form builder",
+      "notifications"
+    ],
     "relationshipScore": 15,
     "interactions": [
       {
@@ -11273,8 +15298,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-84-0",
+        "content": "This contact is a notification service from Typeform, indicating Jahan is receiving responses from a form.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-84-1",
+        "content": "The frequency of emails (3 in 4 days) suggests active use of a Typeform form, likely for lead generation or client intake.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-84-0",
+        "category": "business",
+        "label": "Service Used",
+        "value": "Typeform"
+      },
+      {
+        "id": "aif-84-1",
+        "category": "business",
+        "label": "Email Type",
+        "value": "Automated notifications"
+      },
+      {
+        "id": "aif-84-2",
+        "category": "business",
+        "label": "Form ID",
+        "value": "cj08dxt7"
+      },
+      {
+        "id": "aif-84-3",
+        "category": "business",
+        "label": "Recent Activity",
+        "value": "3 responses in 4 days"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -11283,17 +15348,20 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-06-23T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "This contact represents automated notifications from Typeform, indicating Jahan Taila is actively using a Typeform form (ID #cj08dxt7) and receiving frequent responses. This suggests Typeform is a vendor providing a critical service for Derby Digital's operations, likely for lead capture or client engagement."
   },
   {
-    "id": "91",
+    "id": "86",
     "firstName": "Jay",
     "lastName": "Potter",
     "email": "jayspotter2@gmail.com",
     "company": "",
     "website": "https://email.hl.scalbl.io",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "restaurant niche"
+    ],
     "relationshipScore": 15,
     "interactions": [
       {
@@ -11327,13 +15395,52 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-85-0",
+        "content": "Jay Potter is actively engaged, requesting a call back, indicating interest in Jahan's services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-85-1",
+        "content": "There might have been technical issues with a previous call or meeting link, as indicated by 'not letting you join'.",
+        "category": "technical",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "c04bc4e81a4d",
         "category": "contact",
         "label": "Phone",
         "value": "6695329435"
+      },
+      {
+        "id": "aif-85-1",
+        "category": "communication",
+        "label": "Last Contact Date",
+        "value": "2025-01-28"
+      },
+      {
+        "id": "aif-85-2",
+        "category": "communication",
+        "label": "Contact Method",
+        "value": "Email"
+      },
+      {
+        "id": "aif-85-3",
+        "category": "communication",
+        "label": "Engagement Level",
+        "value": "High (responsive, requesting call)"
+      },
+      {
+        "id": "aif-85-4",
+        "category": "business",
+        "label": "Niche",
+        "value": "Restaurant"
       }
     ],
     "opportunities": [],
@@ -11344,17 +15451,24 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-01-27T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "Jay Potter is a highly engaged prospect in the restaurant niche, actively communicating via email and requesting a call back. There may have been prior technical difficulties preventing a connection."
   },
   {
-    "id": "92",
+    "id": "87",
     "firstName": "Anna",
     "lastName": "Harvey",
     "email": "anna@magnateview.com",
     "company": "Magnateview",
     "website": "https://aka.ms",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "cover story",
+      "publication",
+      "magazine"
+    ],
     "relationshipScore": 15,
     "interactions": [
       {
@@ -11388,8 +15502,55 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-86-0",
+        "content": "Anna Harvey from Magnateview is attempting to sell Jahan Taila a cover story opportunity for $200 USD in a special edition magazine.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-86-1",
+        "content": "The emails are inbound, indicating Magnateview initiated contact, likely as a cold outreach or a response to a previous interaction not shown.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-86-2",
+        "content": "The communication suggests Magnateview is a publication or media company, not directly related to digital marketing services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-86-0",
+        "category": "business",
+        "label": "Contact Name",
+        "value": "Anna Harvey"
+      },
+      {
+        "id": "aif-86-1",
+        "category": "business",
+        "label": "Company",
+        "value": "Magnateview"
+      },
+      {
+        "id": "aif-86-2",
+        "category": "business",
+        "label": "Offer",
+        "value": "Cover page of a special edition magazine"
+      },
+      {
+        "id": "aif-86-3",
+        "category": "business",
+        "label": "Price",
+        "value": "$200 USD"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -11398,17 +15559,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-01-07T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Anna Harvey from Magnateview is a vendor attempting to sell Jahan Taila a $200 cover story opportunity in their special edition magazine. This appears to be a cold outreach or a follow-up to an unrecorded initial contact, with no clear indication of a direct business relationship relevant to Derby Digital's core services."
   },
   {
-    "id": "93",
+    "id": "88",
     "firstName": "Team",
     "lastName": "Calendars",
     "email": "mayank.jain+gohighlevel.com@mailbox.gohighlevel.com",
     "company": "Mailbox",
     "website": "https://email.mailbox.gohighlevel.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "industry",
+    "tags": [
+      "GoHighLevel",
+      "Rentals Beta"
+    ],
     "relationshipScore": 15,
     "interactions": [
       {
@@ -11442,8 +15607,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-87-0",
+        "content": "Jahan is receiving updates and invitations for GoHighLevel's 'Rentals' feature, indicating he's an early adopter or interested user of the platform.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-87-1",
+        "content": "The emails are from GoHighLevel, not directly from 'Mailbox', which seems to be a generic sender name for GHL system notifications.",
+        "category": "technical",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-87-0",
+        "category": "business",
+        "label": "Platform Interest",
+        "value": "GoHighLevel Rentals"
+      },
+      {
+        "id": "aif-87-1",
+        "category": "business",
+        "label": "Engagement Level",
+        "value": "Early Access/Beta User"
+      },
+      {
+        "id": "aif-87-2",
+        "category": "business",
+        "label": "Source",
+        "value": "GoHighLevel System"
+      },
+      {
+        "id": "aif-87-3",
+        "category": "business",
+        "label": "Recent Activity",
+        "value": "Received new workflow trigger update (Feb 2026)"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -11452,17 +15657,20 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-12-12T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Jahan Taila is an early access or beta user of GoHighLevel's 'Rentals' feature, receiving system updates and invitations directly from GoHighLevel. This indicates his active engagement with the GHL platform, which is relevant for a digital marketing agency like Derby Digital."
   },
   {
-    "id": "94",
+    "id": "89",
     "firstName": "Tavious",
     "lastName": "Washington",
     "email": "tavious@sphererocket.com",
     "company": "Sphererocket",
     "website": "https://us02web.zoom.us",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "digital marketing agency"
+    ],
     "relationshipScore": 15,
     "interactions": [
       {
@@ -11496,13 +15704,52 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-88-0",
+        "content": "Tavious reached out to Jahan for testimonials and pricing, indicating interest in Derby Digital's services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-88-1",
+        "content": "A call was scheduled and likely occurred on Dec 10, 2025, suggesting active engagement.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "8dc26a36ca15",
         "category": "contact",
         "label": "Phone",
         "value": "8480540758"
+      },
+      {
+        "id": "aif-88-1",
+        "category": "business",
+        "label": "Last Contact Date",
+        "value": "2025-12-11"
+      },
+      {
+        "id": "aif-88-2",
+        "category": "business",
+        "label": "Contact Method",
+        "value": "Email"
+      },
+      {
+        "id": "aif-88-3",
+        "category": "business",
+        "label": "Meeting Scheduled",
+        "value": "Yes"
+      },
+      {
+        "id": "aif-88-4",
+        "category": "business",
+        "label": "Inbound Inquiry",
+        "value": "Yes"
       }
     ],
     "opportunities": [],
@@ -11513,18 +15760,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-12-09T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Tavious Washington from Sphererocket is an inbound prospect who inquired about Derby Digital's testimonials and pricing, leading to a scheduled call. This indicates a strong interest in potentially using Derby Digital's services."
   },
   {
-    "id": "95",
+    "id": "90",
     "firstName": "Fred",
     "lastName": "from Fireflies.ai",
     "email": "akash.kumar@webskitters.com",
     "company": "Webskitters",
     "website": "https://fonts.googleapis.com",
     "relationshipType": "other",
-    "tags": [],
-    "relationshipScore": 15,
+    "tags": [
+      "interview",
+      "recruitment"
+    ],
+    "relationshipScore": 25,
     "interactions": [
       {
         "id": "email-227-0",
@@ -11555,10 +15806,77 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "details": "________________________________________________________________________________\r\nMicrosoft Teams Need help?<https://aka.ms/JoinTeamsMeeting?omkt=en-IN>\r\nJoin the meeting now<https://teams.microsoft.com/l/meetup-join/19%3ameeting_MDdmNjhhYjAtMDFmYy00NWJiLWI5NjctNmEwNzY5YTAwZDdj%40thread.v2/0?context=%7b%22Tid%22%3a%22bc49e064-ce9b-41a6-87be-62b19ecacdba%22%2c%22Oid%22%3a%22e120b423-1324-45d7-9c52-9e159fbeae7a%22%7d>\r\nMeeting ID: 429 959 641 746 1\r\nPasscode: 5Mz7Zr7H\r\n________________________________\r\nFor organizers: Meeting options<https://teams.microsoft.com/meetingOptions/?organizerId=e120b423-1324-45d7-9c52-9e159fbeae7a&tenantId=bc49e064-ce9b-41a6-87be-62b19ecacdba&threadId=19_meeting_MDdmNjhhYjAtMDFmYy00NWJiLWI5NjctNmEwNzY5YTAwZDdj@thread.v2&messageId=0&language=en-IN>\r\n________________________________________________________________________________",
         "direction": "inbound",
         "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-233-0",
+        "type": "email",
+        "date": "2025-10-30",
+        "summary": "Your meeting recap - Derby Digital Interview With Donna",
+        "subject": "Your meeting recap - Derby Digital Interview With Donna",
+        "details": "<!DOCTYPE html>\r\n<html lang=\"en\">\r\n  <head>\r\n    <meta charset=\"UTF-8\" />\r\n    <link\r\n      href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500;600;700&display=swap\"\r\n      rel=\"stylesheet\"\r\n    />\r\n    <link\r\n      href=\"https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap\"\r\n      rel=\"stylesheet\"\r\n    />\r\n    <link\r\n      href=\"https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap\"\r\n      rel=\"stylesheet\"\r\n    />\r\n    <style>\r\n      .font-roboto {\r\n        font-family: 'Roboto', 'Verdana', 'Helvetica', 'Arial', sans-serif;\r\n      }\r\n      .font-poppins {\r\n        font-family: 'Poppins', 'Roboto', 'Verdana', 'Helvetica', 'Arial', sans-serif;\r\n      }\r\n      .font-dm-sans {\r\n        font-family: 'DM Sans', 'Roboto', 'Verdana', 'Helvetica', 'Arial', sans-serif;\r\n      }\r\n      .font-inter {\r\n        font-family: 'Inter', 'Roboto', 'Verdana', 'Helvetica', 'Arial', sans-serif;\r\n      }\r\n      .ff-link {\r\n        font: inherit;\r\n        color: #6E75FF!important;\r\n        text-decoration: underline;\r\n      }\r\n      .ff-paragraph {\r\n        font-weight: 400;\r\n        font-size: 16px;\r\n        line-height: 24px;\r\n        letter-spacing: -0.02em;\r\n        color: #484f56;\r\n        padding-top: 21px;\r\n      }\r\n    </style>\r\n  </head>\r\n  <body\r\n    class=\"font-roboto\"\r\n    style=\"\r\n      background: #F2F4F7;\r\n      margin: 0;\r\n      padding: 24px 0px 40px 0px;\r\n    \"\r\n  >\r\n    \r\n    \r\n    \r\n    <table align=\"center\" cellspacing=\"0\" cellpadding=\"0\" style=\"width: 100%; \r\n      background: #ffffff;\r\n      max-width: 640px; padding: 0 24px 0;\">\r\n      <tr>\r\n        <td align=\"center\">\r\n          <table align=\"center\" style=\"max-width: 520px; width: 100%;\" cellspacing=\"0\" cellpadding=\"0\">\r\n            <tr>\r\n              <td ><table width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" style=\"border-spacing: 0px\">\r\n      <tr><td style=\"padding-top: 72px;\"></td></tr>  <tr>\r\n        <td align=\"center\" valign=\"middle\">\r\n          <a\r\n            href=\"https://app.fireflies.ai/view/Derby-Digital-Interview-With-Donna::01K8SCWGKNW6RXZD51CBHJ3CE2?ref&#x3D;recap&amp;track&#x3D;01K8SCWGKNW6RXZD51CBHJ3CE2&amp;sg&#x3D;nb&amp;utm_content&#x3D;header_image&amp;utm_campaign&#x3D;meeting-recap-v2&amp;utm_medium&#x3D;email&amp;utm_source&#x3D;meeting_recap\"\r\n            target=\"_blank\"\r\n          >\r\n            <img\r\n              style=\"max-width: 100%\"\r\n              alt=\"\"\r\n              width=\"241\"\r\n              height=\"auto\"\r\n              src=\"https://files.fireflies.ai/email-templates/meeting-recap/fred_header.png\"\r\n            />\r\n          </a>\r\n        </td>\r\n      </tr>\r\n      <tr>\r\n        <td \r\n          style=\"\r\n            text-align: center;\r\n            padding-top: 24px;\r\n            padding-bottom: 0px;\r\n          \"\r\n        >\r\n          <p style=\"\r\n            font-size: 24px;\r\n            letter-spacing: -0.02em;\r\n            color: #6E75FF;\r\n            text-tra",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-233-1",
+        "type": "email",
+        "date": "2025-10-30",
+        "summary": "Salary expectations",
+        "subject": "Salary expectations",
+        "details": "My desired salary is $600 per month",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "merge-donnasibay",
+        "content": "Merged with duplicate contact: donnasibayan1441@gmail.com",
+        "category": "general",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-89-1",
+        "content": "This contact appears to be related to a past job interview for Jahan Taila, likely for a role at Webskitters, not a potential client for Derby Digital.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-89-2",
+        "content": "The emails are meeting invites and recaps, along with a salary expectation, all pointing to a recruitment process.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-89-0",
+        "category": "business",
+        "label": "Contact Name",
+        "value": "Fred from Fireflies.ai (via Akash Kumar)"
+      },
+      {
+        "id": "aif-89-1",
+        "category": "business",
+        "label": "Company",
+        "value": "Webskitters"
+      },
+      {
+        "id": "aif-89-2",
+        "category": "business",
+        "label": "Purpose of Contact",
+        "value": "Job interview for Jahan Taila"
+      },
+      {
+        "id": "aif-89-3",
+        "category": "business",
+        "label": "Salary Expectation",
+        "value": "$600 per month"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -11567,10 +15885,12 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-11-08T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "secondaryEmail": "donnasibayan1441@gmail.com",
+    "aiSummary": "This contact is related to Jahan Taila's past job interview process with Webskitters, not a lead for Derby Digital's digital marketing services in the restaurant niche."
   },
   {
-    "id": "96",
+    "id": "91",
     "firstName": "Nima",
     "lastName": "Asgari",
     "email": "asgarienterprise@gmail.com",
@@ -11611,8 +15931,42 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-90-0",
+        "content": "Nima Asgari is involved in discussions about 'Execution Plan' and 'Competition' related to peptide synthesizers, which is outside Jahan Taila's restaurant niche.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-90-1",
+        "content": "The emails suggest Nima Asgari is involved in a technical or scientific field, not directly related to digital marketing for restaurants.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-90-0",
+        "category": "business",
+        "label": "Email Content Keywords",
+        "value": "Execution Plan, Competition, peptide synthesizers"
+      },
+      {
+        "id": "aif-90-1",
+        "category": "business",
+        "label": "Email Sender",
+        "value": "mohammad boroomand"
+      },
+      {
+        "id": "aif-90-2",
+        "category": "business",
+        "label": "Referenced Website",
+        "value": "https://www.gyrosproteintechnologies.com/peptides/products/peptide-synthesizers"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -11621,17 +15975,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-07-04T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "This contact appears to be unrelated to Jahan Taila's digital marketing services for the restaurant niche. The email content indicates Nima Asgari is involved in a technical or scientific field concerning peptide synthesizers and execution plans, suggesting a mismatch with Derby Digital's target market."
   },
   {
-    "id": "97",
+    "id": "92",
     "firstName": "Lucy",
     "lastName": "Thompson",
     "email": "lucy.thompson@bark.com",
     "company": "Bark",
     "website": "https://bark.com",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "roofing",
+      "lead generation",
+      "painting"
+    ],
     "relationshipScore": 15,
     "interactions": [
       {
@@ -11665,13 +16024,52 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-91-0",
+        "content": "Lucy Thompson from Bark is sending lead generation emails for various home services (roofing, painting) in the Louisville, KY area.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-91-1",
+        "content": "These leads are not relevant to Jahan Taila's digital marketing agency specializing in the restaurant niche.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "3890e82040df",
         "category": "contact",
         "label": "Phone",
         "value": "1015151530"
+      },
+      {
+        "id": "aif-91-1",
+        "category": "business",
+        "label": "Email Sender",
+        "value": "Lucy Thompson"
+      },
+      {
+        "id": "aif-91-2",
+        "category": "business",
+        "label": "Company",
+        "value": "Bark"
+      },
+      {
+        "id": "aif-91-3",
+        "category": "business",
+        "label": "Service Offered by Bark",
+        "value": "Lead Generation (Home Services)"
+      },
+      {
+        "id": "aif-91-4",
+        "category": "business",
+        "label": "Location of Leads",
+        "value": "Louisville, KY and Shepherdsville, KY"
       }
     ],
     "opportunities": [],
@@ -11682,17 +16080,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-01-06T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "Lucy Thompson from Bark is sending irrelevant home service lead generation emails for the Louisville, KY area. This contact is not a fit for Jahan Taila's restaurant niche digital marketing services."
   },
   {
-    "id": "98",
+    "id": "93",
     "firstName": "Adobe",
     "lastName": "Creative Cloud",
     "email": "mail@e.adobe.com",
-    "company": "E",
+    "company": "Adobe",
     "website": "https://data.e.adobe.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "vendor",
+    "tags": [
+      "software",
+      "design tools"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -11716,8 +16120,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-92-0",
+        "content": "Jahan is receiving promotional emails from Adobe Creative Cloud, indicating they likely use or have recently signed up for Adobe products.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-92-1",
+        "content": "Derby Digital, as a digital marketing agency, would heavily rely on design software like Photoshop for creating marketing assets for their restaurant clients.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-92-0",
+        "category": "business",
+        "label": "Sender",
+        "value": "Adobe Creative Cloud"
+      },
+      {
+        "id": "aif-92-1",
+        "category": "business",
+        "label": "Email Type",
+        "value": "Promotional/Welcome"
+      },
+      {
+        "id": "aif-92-2",
+        "category": "business",
+        "label": "Recent Activity",
+        "value": "Received 'Meet the most powerful Photoshop yet' email on 2026-03-15"
+      },
+      {
+        "id": "aif-92-3",
+        "category": "business",
+        "label": "Product Focus",
+        "value": "Photoshop, Creative Cloud suite"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -11726,17 +16170,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-13T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Jahan Taila is a recipient of Adobe Creative Cloud promotional emails, suggesting they are a user or potential user of Adobe products, which is highly relevant for a digital marketing agency like Derby Digital."
   },
   {
-    "id": "99",
+    "id": "94",
     "firstName": "Birkenstock",
     "lastName": "News",
     "email": "news@emailus.birkenstock.com",
     "company": "Emailus",
     "website": "https://birkenstock.com",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "marketing",
+      "birkenstock",
+      "e-commerce"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -11760,8 +16209,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-93-0",
+        "content": "This contact appears to be an automated email service or platform used by Birkenstock for transactional and feedback emails.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-93-1",
+        "content": "The emails are from 'Birkenstock News' and relate to online purchases and customer feedback, indicating a direct-to-consumer e-commerce focus.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-93-0",
+        "category": "business",
+        "label": "Sender Name",
+        "value": "Birkenstock News"
+      },
+      {
+        "id": "aif-93-1",
+        "category": "business",
+        "label": "Sender Email",
+        "value": "news@emailus.birkenstock.com"
+      },
+      {
+        "id": "aif-93-2",
+        "category": "business",
+        "label": "Email Content Type",
+        "value": "Transactional/Feedback"
+      },
+      {
+        "id": "aif-93-3",
+        "category": "business",
+        "label": "Associated Brand",
+        "value": "Birkenstock"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -11770,17 +16259,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-10T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "This contact is an automated email address associated with Birkenstock's e-commerce operations, sending transactional and feedback emails. It's unlikely to be a direct human contact for Jahan Taila's restaurant niche."
   },
   {
-    "id": "100",
+    "id": "95",
     "firstName": "Jovin",
     "lastName": "from Mobbin",
     "email": "jovin@mobbin.com",
     "company": "Mobbin",
     "website": "https://mobbin.com",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "product benchmarking",
+      "UI/UX reference"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -11804,8 +16297,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-94-0",
+        "content": "Jovin from Mobbin is sending automated product onboarding emails for their UI/UX reference library.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-94-1",
+        "content": "This contact is likely a marketing automation or newsletter subscription, not a direct personal outreach.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-94-0",
+        "category": "business",
+        "label": "Sender Name",
+        "value": "Jovin from Mobbin"
+      },
+      {
+        "id": "aif-94-1",
+        "category": "business",
+        "label": "Sender Email",
+        "value": "jovin@mobbin.com"
+      },
+      {
+        "id": "aif-94-2",
+        "category": "business",
+        "label": "Product",
+        "value": "UI and UX reference library (Mobbin)"
+      },
+      {
+        "id": "aif-94-3",
+        "category": "business",
+        "label": "Email Type",
+        "value": "Automated onboarding/product tips"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -11814,61 +16347,24 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-13T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "This contact is an automated onboarding sequence from Mobbin, a UI/UX reference library, likely triggered by Jahan Taila's subscription or sign-up. It's not a direct sales lead for Derby Digital."
   },
   {
-    "id": "101",
-    "firstName": "Credit",
-    "lastName": "Karma",
-    "email": "mail@mail.creditkarma.com",
-    "company": "Mail",
-    "website": "https://creditkarma.com",
-    "relationshipType": "other",
-    "tags": [],
-    "relationshipScore": 10,
-    "interactions": [
-      {
-        "id": "email-11-0",
-        "type": "email",
-        "date": "2026-03-13",
-        "summary": "Jahan's score change",
-        "subject": "Jahan's score change",
-        "details": "Jahan's Karma Monthly\r\n\r\nLet's take a trip down memory lane, Jahan, and see how your finances have done this past month. Remember, working towards better finances starts here. Check in on your progress now.\r\n\r\nSee your progress: https://www.creditkarma.com/s/month-in-review\r\n\r\nThis is a promotional email.\r\nTo manage your email preferences, please go to notification preferences: https://www.creditkarma.com/notification-events/redirect/mailing?ctPayload=H4sIAAAAAAAAA2WQT2vcMBDFv8oyh55csGRbstRbl4RcCjnkVooZj0ZZsfqzyNqQJeS7l01CSdvTwLzfDO%2B9ny8QHFgQDnH0WvlpRjZq6I3zOBphhJJinRA6aBtYofUwSjlL2cGp8tP3WOgINp9j7ADP7VAqWGicThEbf02Y8ZErdOCw4R1uB7CAovdGSDZO0joNTLOeVk%2FEo1%2BR3PBBg30BKrlxbsvHfLicGCxwwhCh%2B6PGkI8P%2FNzAwr6kdM6BsIWSd18wnb7tfpQcWqkhP%2B7uK3uunIm3T%2FcbVeYMFo5YEy6p5HaIl0V8RpiuH8HCbSntLZGP%2FLxsrd4Gjq4XYOG%2BFnd%2B5%2F6Rh%2F5qW3vtVyXIrax7VL1CaYhlPwqUnpRDoeWA62oUKfa9nlGMalDGCzUjSehgu2yN08JPnNu%2BuGsZN9cy9jHQ8T%2F9zTrY6e%2F9e4ny9fXXb7VkoOD8AQAA&content_link=https%3A%2F%2Fwww.creditkarma.com%2Fmyprofile%2Fpreferences&trackingId=58d520c042d20cea2be65ec4cc3ba285e198faece05481dcb0c954cf905c0dc70684&categories=Bulk,US,SendLimitsAlwaysApply,Engagement,SubscriptionRequired,TouchPointException&notificationId=e7f7fb61cdbe70a606a29ce2041a2fc6da1723abb96c6ef078a146369f168ac2&notificationAuthFactorId=2e7a4c33-6905-4bcf-b891-719fcbe3b1f8&notificationType=karma_monthly_1\r\n\r\n\r\nUnsubscribe from all: https://www.creditkarma.com/notification-events/redirect/mailing?forwardCtPayload=true&ctPayload=H4sIAAAAAAAAA2WQwWojMRBEf8X0eRYkjSXN6JiFsLeE4D0tYWhJrfVgjWQkjbEJ%2BfdgJyzZ5FRQ9Rqq%2Bs8LzB4M9NZ7FrQbtA2Wi1F7KQPzWjPHmNgG6KBVMFzrfivEIEQHx0Knu5jdAUxaY%2BwA17bPBQw0Wo4RG%2F1YMOFfKtCBx4a%2FsO7BAHoSlg2DHJlUUjg2KG6ZCmpkUjJpP2gwL%2BByapTa9KG7y5HAAC04R%2Bj%2BpXFOhx2dGxj4nepqqyuzpU0oedlgjJsbXz8dVFeIEhg4YFlwWnJq%2B3iZ%2BGeEXJvzlbnPud0mhEjnqbZyP1P0jIOBx5L9%2Bs59iXt27amDDlZx5y1phoopFKMjwbYcRXDKI9eiR2tH5RQFpgfkW9WrMXA1oBPQQb3URstEJ0rtZ%2FbX9U9UqZzITw%2FH9rC2b9CtPxj5v%2F%2F%2BOvH6%2BvwGhDzi%2FfIBAAA%3D&track",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-11-1",
-        "type": "email",
-        "date": "2026-03-07",
-        "summary": "Jahan: Your Borrowing Power has changed!",
-        "subject": "Jahan: Your Borrowing Power has changed!",
-        "details": "Curious about your Borrowing Power*, Jahan?\r\n\r\nYour Borrowing Power is actually determined by many factors. Some of them are personal to you, like your monthly income, credit scores and debt.  And some are totally outside of your control, like industry-wide shifts in interest rates. Because so many factors go in, your Borrowing Power can change quite often. That's why Credit Karma keeps you updated \u2014 whether your amount goes up or down.\r\n\r\nYou should only borrow what you need, but we think it's helpful to know how much you might be able to get. Log in now to see for free.\r\n\r\nSee updated amount > :https://www.creditkarma.com/u/personal-loans/borrowing-power\r\n\r\n*Borrowing Power is based on the highest offer amount available to you through Credit Karma where you have Outstanding Approval Odds. The offers themselves are not guaranteed and are subject to change without notice.\r\n\r\nThis is a promotional email.\r\nTo manage your email preferences, please go to notification preferences: https://www.creditkarma.com/notification-events/redirect/mailing?ctPayload=H4sIAAAAAAAAA2WQQWvkMAyF%2F8qgw55SiO3Iib23HVp6KfTQW1mC4igzJo4dHE%2FpUPrfy7Rlabsngb73kN57fAE%2FggVEyVoaom7qBuU6R5M0CnHoGmWkclBB2cCKtpWmlnWLFayZn%2F6E5Gaw8RRCBXQqx5TBQuFlDVT4aqFIB85QwUiFbmk7goVOu3YacDBd02lu0LVGmAZbRKVV7cSnGuwLuBQLx9J%2FzofzymCBF%2FIBqn80%2BDg%2F8HMBC%2Fu0LKfoHRWf4u4XLevv3V2KvqTs42F3n3nizNHx9sW%2FucwcwcIa%2BmHtlxTLMZx7d6R44D6kNFPwM391sLscAAs3KZX3gFPg534r%2BcZzGGsBFu5zGk8fuh9Y1WBBktZKuUYLrWuBRppJ6FGQkMitHDVNjnSHElmQaeVAWo%2FGTWgaU5NmhAq281Z46fmJY9mn8dLN9aWbffBu%2Fo%2B%2Fvw4Wv%2B8%2FOpWvr3%2FfAFIOLxALAgAA&content_link=https%3A%2F%2Fwww.creditkarma.com%2Fmyprofile%2Fpreferences&trackingId=58d520c042d20cea2be65ec4cc3ba285e198faece05481dcb0c954cf905c0dc70684&categories=Engagement,US,SubscriptionRequired,Bulk&notificationId=2a6633c46166015929f16d1a125e72d6afca68525e1a972ba66d9cf59490a6e5&notificationAuthFactorId=822dd846-f1fb-4eae-add3-0de94397871c&notificationType=pl_bp_monthly_change_lookalike\r\n\r\n\r\nUnsubscribe ",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      }
-    ],
-    "notes": [],
-    "facts": [],
-    "opportunities": [],
-    "aiInsights": [],
-    "groups": [],
-    "connections": [],
-    "lastContactedAt": "2026-03-13",
-    "source": "gmail-import",
-    "createdAt": "2026-03-07T00:00:00",
-    "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
-  },
-  {
-    "id": "102",
+    "id": "96",
     "firstName": "Louis",
     "lastName": "Archuleta Jr.",
     "email": "louisarchuleta@yahoo.com",
-    "company": "",
+    "company": "Grand Slam Pizza",
     "website": "https://pizzabox.ai",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "social media marketing",
+      "google ads",
+      "restaurant",
+      "pizza",
+      "nextdoor"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -11892,8 +16388,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-95-0",
+        "content": "Louis is actively looking for digital marketing services for Grand Slam Pizza, specifically social media (FB, IG), Google Ads, and Nextdoor.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-95-1",
+        "content": "He is focused on generating cash flow through these campaigns, indicating a results-driven approach.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-95-0",
+        "category": "business",
+        "label": "Company Name",
+        "value": "Grand Slam Pizza"
+      },
+      {
+        "id": "aif-95-1",
+        "category": "business",
+        "label": "Email Domain",
+        "value": "yahoo.com"
+      },
+      {
+        "id": "aif-95-2",
+        "category": "business",
+        "label": "Marketing Channels of Interest",
+        "value": "Facebook, Instagram, Google Ads, Nextdoor"
+      },
+      {
+        "id": "aif-95-3",
+        "category": "business",
+        "label": "Goal",
+        "value": "Generate cash flow"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -11902,17 +16438,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-09T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Louis Archuleta Jr. is a prospect for Jahan Taila's digital marketing agency, Derby Digital, for his restaurant, Grand Slam Pizza. He is seeking assistance with social media (FB, IG), Google Ads, and Nextdoor to generate cash flow."
   },
   {
-    "id": "103",
+    "id": "97",
     "firstName": "Contra",
     "lastName": "",
     "email": "hello@contra.com",
     "company": "Contra",
     "website": "https://url1276.contra.com",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "platform",
+      "contest"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -11936,8 +16476,41 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-96-0",
+        "content": "Contra appears to be a platform Jahan is using or subscribed to, possibly for freelance work or contests, given the 'challenge' emails.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-96-0",
+        "category": "business",
+        "label": "Email Sender",
+        "value": "Contra"
+      },
+      {
+        "id": "aif-96-1",
+        "category": "business",
+        "label": "Email Content",
+        "value": "Weekly challenge with prize money"
+      },
+      {
+        "id": "aif-96-2",
+        "category": "business",
+        "label": "Recent Prize Amount",
+        "value": "$44.5k"
+      },
+      {
+        "id": "aif-96-3",
+        "category": "business",
+        "label": "Previous Prize Amount",
+        "value": "$5k"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -11946,17 +16519,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-05T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Jahan is receiving inbound emails from Contra, a platform that hosts weekly challenges with monetary prizes. This suggests Jahan might be a user or participant on their platform."
   },
   {
-    "id": "104",
+    "id": "98",
     "firstName": "Notable",
     "lastName": "",
     "email": "store+71664107827@t.shopifyemail.com",
-    "company": "T",
+    "company": "Notable",
     "website": "https://meetnotable.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "shopify",
+      "e-commerce"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -11980,13 +16557,52 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-97-0",
+        "content": "This contact appears to be an e-commerce customer of a Shopify store, not a business looking for digital marketing services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-97-1",
+        "content": "The email address is a generic Shopify notification address, not a direct contact for a business owner or decision-maker.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "9105e88ffb3b",
         "category": "contact",
         "label": "Phone",
         "value": "7166410782"
+      },
+      {
+        "id": "aif-97-1",
+        "category": "business",
+        "label": "Email Domain",
+        "value": "shopifyemail.com"
+      },
+      {
+        "id": "aif-97-2",
+        "category": "business",
+        "label": "Email Content",
+        "value": "Order confirmations and shipment tracking"
+      },
+      {
+        "id": "aif-97-3",
+        "category": "business",
+        "label": "Company Name",
+        "value": "Notable"
+      },
+      {
+        "id": "aif-97-4",
+        "category": "business",
+        "label": "Total Emails",
+        "value": "2"
       }
     ],
     "opportunities": [],
@@ -11997,17 +16613,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-12T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "This contact is an e-commerce customer of a Shopify store named 'Notable', based on order confirmation and shipment tracking emails. It's highly unlikely to be a viable lead for digital marketing services for restaurants."
   },
   {
-    "id": "105",
+    "id": "99",
     "firstName": "Level",
     "lastName": "Up PR",
     "email": "hello@leveluppr.io",
-    "company": "Leveluppr",
+    "company": "Level Up PR",
     "website": "https://dslh2.r.ag.d.sendibm3.com",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "sales",
+      "PR",
+      "personal branding"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -12031,13 +16652,52 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-98-0",
+        "content": "Level Up PR is sending unsolicited emails to Jahan Taila, likely a cold outreach attempt.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-98-1",
+        "content": "The emails focus on personal branding and sales call strategies, which might be relevant to a digital marketing agency owner.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "cad74fe052bb",
         "category": "contact",
         "label": "Address",
         "value": "2055 Limestone Rd STE 200-C,\u00a0\r\nWilmington"
+      },
+      {
+        "id": "aif-98-1",
+        "category": "business",
+        "label": "Sender Company",
+        "value": "Level Up PR"
+      },
+      {
+        "id": "aif-98-2",
+        "category": "business",
+        "label": "Sender Email",
+        "value": "hello@leveluppr.io"
+      },
+      {
+        "id": "aif-98-3",
+        "category": "business",
+        "label": "Recent Email Topic",
+        "value": "Personal Branding"
+      },
+      {
+        "id": "aif-98-4",
+        "category": "business",
+        "label": "Previous Email Topic",
+        "value": "Sales Calls"
       }
     ],
     "opportunities": [],
@@ -12048,17 +16708,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-25T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Level Up PR is cold emailing Jahan Taila with content related to personal branding and sales, which could be relevant to a digital marketing agency owner."
   },
   {
-    "id": "106",
+    "id": "100",
     "firstName": "Michael",
     "lastName": "Golata",
     "email": "michaelgolata1@gmail.com",
-    "company": "",
+    "company": "MG Logistics/MG Entertainment",
     "website": "",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "logistics",
+      "entertainment",
+      "restaurant niche potential"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -12082,13 +16747,52 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-99-0",
+        "content": "Michael Golata is President of MG Logistics/MG Entertainment. The 'Pics' email with a Google Drive link suggests he might be sharing visual assets related to a project or business, potentially for a restaurant concept given Jahan's niche.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-99-1",
+        "content": "His companies, MG Logistics and MG Entertainment, are not directly restaurants, but he could be an investor, partner, or service provider to restaurants, or looking to launch a new venture in the restaurant space.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "c4f903f565a5",
         "category": "contact",
         "label": "Phone",
         "value": "502-298-2572"
+      },
+      {
+        "id": "aif-99-1",
+        "category": "business",
+        "label": "Company",
+        "value": "MG Logistics/MG Entertainment"
+      },
+      {
+        "id": "aif-99-2",
+        "category": "business",
+        "label": "Title",
+        "value": "President"
+      },
+      {
+        "id": "aif-99-3",
+        "category": "contact",
+        "label": "Mobile",
+        "value": "502-298-2572"
+      },
+      {
+        "id": "aif-99-4",
+        "category": "communication",
+        "label": "Recent Inbound",
+        "value": "Pics with Google Drive link (2026-03-09)"
       }
     ],
     "opportunities": [],
@@ -12099,17 +16803,24 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-09T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "President",
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "Michael Golata, President of MG Logistics/MG Entertainment in Louisville, KY, is a prospect. His recent inbound emails, including a Google Drive link with 'Pics', suggest he may have a project or business need that could align with Jahan Taila's digital marketing services for the restaurant niche, despite his current companies not being direct restaurants."
   },
   {
-    "id": "107",
+    "id": "101",
     "firstName": "Michael",
     "lastName": "Baer",
     "email": "mike@guidonbrewing.com",
-    "company": "Guidonbrewing",
+    "company": "Guidon Brewing Company",
     "website": "https://guidonbrewing.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "client",
+    "tags": [
+      "restaurant",
+      "brewery"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -12133,12 +16844,51 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-100-0",
+        "content": "Mike is providing specific website change requests, indicating an active client relationship.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-100-1",
+        "content": "Requests focus on menu updates (drinks, beer, whiskey) and font/spacing, suggesting website maintenance or content management services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "d8c5b74389bc",
         "category": "contact",
         "label": "Phone",
+        "value": "828-372-1015"
+      },
+      {
+        "id": "aif-100-1",
+        "category": "business",
+        "label": "Company Name",
+        "value": "Guidon Brewing Company"
+      },
+      {
+        "id": "aif-100-2",
+        "category": "business",
+        "label": "Contact Title",
+        "value": "Owner"
+      },
+      {
+        "id": "aif-100-3",
+        "category": "business",
+        "label": "Industry",
+        "value": "Brewery/Restaurant"
+      },
+      {
+        "id": "aif-100-4",
+        "category": "contact",
+        "label": "Phone Number",
         "value": "828-372-1015"
       }
     ],
@@ -12150,17 +16900,26 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-25T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "Owner",
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "Mike Baer, owner of Guidon Brewing Company, is an active client providing specific website update requests related to menu content and design."
   },
   {
-    "id": "108",
+    "id": "102",
     "firstName": "Animation",
     "lastName": "Addons",
     "email": "marketing@animation-addons.com",
     "company": "Animation Addons",
     "website": "https://lfdj1.r.ag.d.sendibm3.com",
     "relationshipType": "vendor",
-    "tags": [],
+    "tags": [
+      "website templates",
+      "free resources",
+      "Elementor",
+      "animation"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -12184,8 +16943,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-101-0",
+        "content": "Animation Addons provides free Elementor templates and animated website templates, which could be useful for Derby Digital's restaurant clients.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-101-1",
+        "content": "This contact is a vendor offering tools/resources that Derby Digital might use in their web development for clients.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-101-0",
+        "category": "business",
+        "label": "Product Offering",
+        "value": "Elementor website templates, animated website templates"
+      },
+      {
+        "id": "aif-101-1",
+        "category": "business",
+        "label": "Pricing Model",
+        "value": "Offers free templates (potentially freemium model)"
+      },
+      {
+        "id": "aif-101-2",
+        "category": "business",
+        "label": "Recent Activity",
+        "value": "Released 25 new free Elementor templates (March 2026)"
+      },
+      {
+        "id": "aif-101-3",
+        "category": "business",
+        "label": "Key Feature",
+        "value": "Smooth eye-catching animations"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -12194,17 +16993,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-25T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Animation Addons is a vendor providing free Elementor and animated website templates. This could be a valuable resource for Jahan Taila at Derby Digital to enhance website development for their restaurant clients, particularly those looking for modern, animated designs."
   },
   {
-    "id": "109",
+    "id": "103",
     "firstName": "Olympus",
     "lastName": "Gaming Lounge LLC",
     "email": "management@olympusgaminglounge.com",
-    "company": "Olympusgaminglounge",
+    "company": "Olympus Gaming Lounge LLC",
     "website": "https://x.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "restaurant niche",
+      "education",
+      "gaming",
+      "entertainment"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -12228,13 +17033,59 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-102-0",
+        "content": "Nima Asgari, CEO, reached out inbound, indicating interest in Derby Digital's services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-102-1",
+        "content": "Olympus Gaming Lounge is a facility serving Kentucky in gaming, education, and entertainment, aligning with Jahan Taila's restaurant niche due to potential food/beverage services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-102-2",
+        "content": "The company is experiencing positive momentum, with their best week since November, suggesting a good time for investment in marketing.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "120f8347fe3f",
         "category": "contact",
         "label": "Phone",
         "value": "502-751-4251"
+      },
+      {
+        "id": "aif-102-1",
+        "category": "business",
+        "label": "Contact Name",
+        "value": "Nima Asgari"
+      },
+      {
+        "id": "aif-102-2",
+        "category": "business",
+        "label": "Company Email",
+        "value": "management@olympusgaminglounge.com"
+      },
+      {
+        "id": "aif-102-3",
+        "category": "business",
+        "label": "Recent Performance",
+        "value": "Best week since November"
+      },
+      {
+        "id": "aif-102-4",
+        "category": "business",
+        "label": "Services Offered",
+        "value": "Gaming, education, entertainment"
       }
     ],
     "opportunities": [],
@@ -12245,61 +17096,14 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-03T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "CEO",
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "Inbound prospect, Nima Asgari (CEO of Olympus Gaming Lounge LLC), is interested in Derby Digital's services. Their business, which includes gaming, education, and entertainment, is experiencing growth and could benefit from digital marketing within the restaurant niche."
   },
   {
-    "id": "110",
-    "firstName": "DesignRush",
-    "lastName": "",
-    "email": "sponsorship@designrush.co",
-    "company": "Designrush",
-    "website": "https://news.designrush.com",
-    "relationshipType": "other",
-    "tags": [],
-    "relationshipScore": 10,
-    "interactions": [
-      {
-        "id": "email-65-0",
-        "type": "email",
-        "date": "2026-03-04",
-        "summary": "Top 12 AI Agencies to Hire in 2026",
-        "subject": "Top 12 AI Agencies to Hire in 2026",
-        "details": "[DesignRush - Best Agencies to Hire 2025](https://news.designrush.com/best-ai-agencies-to-hire-2026)\r\n\r\nDesignRush unveils its annual list of\r\nBest AI Agencies to Hire in 2026\r\n\r\nDesignRush unveils its annual list of\u00a0\r\nBest AI Agencies to Hire in 2026Ranked by Reviews & Case Studies\r\n\r\nhttps://news.designrush.com/best-ai-agencies-to-hire-2026\r\n\r\nRanked by reviews and case studies\r\nthis year\u2019s Best AI Agencies include:\r\n\r\nRanked by reviews and case studies, this year\u2019s Best AI Agencies include:\r\n\r\n\u00a0Azumo\r\n\r\n\u00a0ELEKS\r\n\r\n\u00a0Azumo\r\n\r\n\u00a0ELEKS\r\n\r\n\u00a0247 Labs\r\n\r\n\u00a0Talentica Software\u00a0\r\n\r\n\u00a0247 Labs\r\n\r\n\u00a0Talentica Software\u00a0\r\n\r\n\u00a0Diffco\r\n\r\n\u00a0Kanda Software\r\n\r\n\u00a0Diffco\r\n\r\n\u00a0Kanda Software\r\n\r\n\u00a0Fullestop\r\n\r\n\u00a0GenAI Labs\r\n\r\nFullestop\r\n\r\n\u00a0GenAI Labs\r\n\r\nGeomotive\r\n\r\nExaud\r\n\r\n\u00a0Geomotiv\r\n\r\n\u00a0Exaud\r\n\r\n\u00a0Digital Scientists\u00a0\r\n\r\n\u00a0Sketch Development Services\r\n\r\n\u00a0 \u00a0 \u00a0 \u00a0\u00a0 Digital Scientists\u00a0\r\n\r\n\u00a0Sketch Development Services\r\n\r\n\u00a0\r\n\r\n[See the full list](https://news.designrush.com/best-ai-agencies-to-hire-2026)\r\n\r\nHave any questions?\r\nEmail us at\u00a0[sponsor@designrush.com](mailto:sponsor@designrush.com)\r\n\r\n[DesignRush](https://www.designrush.com/)\r\nB2B Marketplace Connecting Brands with Agencies\r\n\r\n[YouTube](https://www.youtube.com/channel/UCHN2TBT_oI6e7IJACULe8Wg)\r\n[LinkedIn](https://www.linkedin.com/company/designrush/)\r\n[Instagram](https://www.instagram.com/designrushmag/)\r\n\r\nDesignRush \u00a9 2026\r\n18117 Biscayne Blvd Miami, Florida 33160\u00a0\r\n\r\nNo longer want to receive these emails?\r\n[Unsubscribe](https://manage.kmail-lists.com/subscriptions/unsubscribe?a=XFxk22&c=01JSQ76QJWVQ52Z6B2Y92WFFEE&k=214330f2d80d9125a809530f5ad34332&m=01KJTD3K1GVMDTB1370RSWCBVX&r=01KJWM2Q6SH0FZW6JWZ79JWR0C)",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-65-1",
-        "type": "email",
-        "date": "2026-03-02",
-        "summary": "Top 12 Software and App Development Agencies to Hire in 2026",
-        "subject": "Top 12 Software and App Development Agencies to Hire in 2026",
-        "details": "[DesignRush - Best Agencies to Hire 2025](https://news.designrush.com/top-software-app-dev-agencies-hire-2026)\r\n\r\nDesignRush unveils its annual list of\u00c2\u00a0\r\nBest Software and App Development\r\nAgencies to Hire in 2026\r\nRanked by Reviews & Case Studies\r\n\r\nDesignRush unveils its annual list of\u00c2\u00a0\r\nBest Software and App Development Agencies to Hire in 2026Ranked by Reviews & Case Studies\r\n\r\nhttps://news.designrush.com/top-software-app-dev-agencies-hire-2026\r\n\r\n[See the full list](https://news.designrush.com/top-software-app-dev-agencies-hire-2026)\r\n\r\nHave any questions?\r\nEmail us at\u00c2\u00a0[sponsor@designrush.com](mailto:sponsor@designrush.com)\r\n\r\n[DesignRush](https://www.designrush.com/)\r\nB2B Marketplace Connecting Brands with Agencies\r\n\r\n[YouTube](https://www.youtube.com/channel/UCHN2TBT_oI6e7IJACULe8Wg)\r\n[LinkedIn](https://www.linkedin.com/company/designrush/)\r\n[Instagram](https://www.instagram.com/designrushmag/)\r\n\r\nDesignRush \u00c2\u00a9 2026\r\n18117 Biscayne Blvd Miami, Florida 33160\u00c2\u00a0\r\n\r\nNo longer want to receive these emails?\r\n[Unsubscribe](https://manage.kmail-lists.com/subscriptions/unsubscribe?a=XFxk22&c=01JSQ76QJWVQ52Z6B2Y92WFFEE&k=214330f2d80d9125a809530f5ad34332&m=01KJG9BF1SKCBE9Q407NRZZ3CY&r=01KJQF92SG4D9MG9M2DWGG30A6)",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      }
-    ],
-    "notes": [],
-    "facts": [
-      {
-        "id": "fe158e222e21",
-        "category": "contact",
-        "label": "Address",
-        "value": "2026\r\n18117 Biscayne Blvd Miami, Florida"
-      }
-    ],
-    "opportunities": [],
-    "aiInsights": [],
-    "groups": [],
-    "connections": [],
-    "lastContactedAt": "2026-03-04",
-    "source": "gmail-import",
-    "createdAt": "2026-03-02T00:00:00",
-    "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
-  },
-  {
-    "id": "111",
+    "id": "104",
     "firstName": "B.Jimmy",
     "lastName": "Taila",
     "email": "bjimmytaila@gmail.com",
@@ -12330,8 +17134,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-103-0",
+        "content": "B.Jimmy Taila seems to be sharing general news articles, one about a food recall and another personal story.",
+        "category": "personal",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-103-1",
+        "content": "The food recall email could be relevant to Jahan's restaurant niche, but it's an inbound share, not an inquiry.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-103-0",
+        "category": "communication",
+        "label": "Email Content",
+        "value": "Shares news articles (food recall, personal story)."
+      },
+      {
+        "id": "aif-103-1",
+        "category": "communication",
+        "label": "Email Frequency",
+        "value": "2 emails over 8 days."
+      },
+      {
+        "id": "aif-103-2",
+        "category": "communication",
+        "label": "Email Direction",
+        "value": "Inbound (from B.Jimmy Taila to Jahan Taila)."
+      },
+      {
+        "id": "aif-103-3",
+        "category": "business",
+        "label": "Relevance to Niche",
+        "value": "Food recall email has tangential relevance to restaurant niche."
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -12340,17 +17184,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-25T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "This contact appears to be a personal connection sharing general news, with one email tangentially related to Jahan's restaurant niche due to a food recall topic. There's no indication of business interest or a professional relationship with Derby Digital."
   },
   {
-    "id": "112",
+    "id": "105",
     "firstName": "Elang",
     "lastName": "Samudra",
     "email": "elangsamudra474@gmail.com",
     "company": "",
     "website": "",
-    "relationshipType": "team",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "business card",
+      "team",
+      "inbound lead"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -12374,8 +17223,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-104-0",
+        "content": "Elang Samudra sent two emails on the same day, both related to a business card, suggesting a strong interest in connecting.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-104-1",
+        "content": "The lack of company information in the contact details means Jahan needs to follow up to understand Elang's business and needs.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-104-0",
+        "category": "business",
+        "label": "Email Domain",
+        "value": "gmail.com"
+      },
+      {
+        "id": "aif-104-1",
+        "category": "business",
+        "label": "Total Emails",
+        "value": "2"
+      },
+      {
+        "id": "aif-104-2",
+        "category": "business",
+        "label": "Recent Inbound Date",
+        "value": "2026-03-01"
+      },
+      {
+        "id": "aif-104-3",
+        "category": "business",
+        "label": "Email Subject Keywords",
+        "value": "Business Card"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -12384,17 +17273,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-01T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Elang Samudra is a new prospect who initiated contact by sending business cards. Further information is needed to qualify the lead for Derby Digital's restaurant niche."
   },
   {
-    "id": "113",
+    "id": "106",
     "firstName": "Louis",
     "lastName": "Pugliese",
     "email": "louis@onepage.io",
     "company": "Onepage",
     "website": "https://onepage.io",
-    "relationshipType": "vendor",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "no-show",
+      "reschedule"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -12418,13 +17311,52 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-105-0",
+        "content": "Louis Pugliese from Onepage was a no-show for a scheduled meeting with Jahan Taila.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-105-1",
+        "content": "Louis sent an email suggesting Jahan book another time, indicating potential continued interest in a meeting.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "a09be8d48d6a",
         "category": "contact",
         "label": "Phone",
         "value": "5027026268"
+      },
+      {
+        "id": "aif-105-1",
+        "category": "business",
+        "label": "Meeting Scheduled",
+        "value": "2026-02-27 12:20pm EST"
+      },
+      {
+        "id": "aif-105-2",
+        "category": "business",
+        "label": "Meeting Status",
+        "value": "No-show by Onepage"
+      },
+      {
+        "id": "aif-105-3",
+        "category": "business",
+        "label": "Last Contact Date",
+        "value": "2026-02-27"
+      },
+      {
+        "id": "aif-105-4",
+        "category": "business",
+        "label": "Contact Initiator",
+        "value": "Jahan Taila (booked meeting)"
       }
     ],
     "opportunities": [],
@@ -12435,62 +17367,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-26T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Louis Pugliese from Onepage was a no-show for a scheduled meeting with Jahan Taila. Louis followed up, suggesting Jahan reschedule, indicating potential interest in future discussion."
   },
   {
-    "id": "114",
-    "firstName": "Derbydigital",
-    "lastName": "Us",
-    "email": "derbydigital.us@bf01x.hubspotemail.net",
-    "company": "Bf01X",
-    "website": "https://bf01x.hubspotemail.net",
-    "relationshipType": "other",
-    "tags": [],
-    "relationshipScore": 10,
-    "interactions": [
-      {
-        "id": "email-106-0",
-        "type": "email",
-        "date": "2026-01-27",
-        "summary": "unsubscribe",
-        "subject": "unsubscribe",
-        "details": "This message was automatically generated by Gmail.",
-        "direction": "outbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-106-1",
-        "type": "email",
-        "date": "2025-11-24",
-        "summary": "unsubscribe",
-        "subject": "unsubscribe",
-        "details": "This message was automatically generated by Gmail.",
-        "direction": "outbound",
-        "createdAt": "2026-03-16T12:18:59"
-      }
-    ],
-    "notes": [],
-    "facts": [],
-    "opportunities": [],
-    "aiInsights": [],
-    "groups": [],
-    "connections": [],
-    "lastContactedAt": "2026-01-27",
-    "source": "gmail-import",
-    "createdAt": "2025-11-24T00:00:00",
-    "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
-  },
-  {
-    "id": "115",
+    "id": "107",
     "firstName": "Publishing",
     "lastName": "",
     "email": "publishing@boldjourney.com",
     "company": "Boldjourney",
     "website": "https://boldjourney.com",
     "relationshipType": "industry",
-    "tags": [],
-    "relationshipScore": 10,
+    "tags": [
+      "interview",
+      "publishing",
+      "media"
+    ],
+    "relationshipScore": 15,
     "interactions": [
       {
         "id": "email-130-0",
@@ -12511,10 +17404,61 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "details": "Hi Jahan\r\n\r\nThank you so much for sharing your story with us.  We're looking forward to\r\ngoing live with your interview soon.  Just wanted to share your responses\r\nbelow if any changes are needed, please let us know within the next 3-4\r\ndays.\r\n\r\nYou can review and submit any revisions here:\r\nhttps://www.hiddengeminterviews.com/boldjourney/preview/4917277\r\n\r\nThanks,",
         "direction": "inbound",
         "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-203-0",
+        "type": "email",
+        "date": "2025-12-22",
+        "summary": "Your CanvasRebel Interview is Now Live",
+        "subject": "Your CanvasRebel Interview is Now Live",
+        "details": "Hi Jahan\r\n\r\nJust wanted to let you know that your article is now live!\r\n\r\nHere's the link:\r\nhttps://canvasrebel.com/meet-jahan-taila/\r\n\r\nOn the site, you can find it on the homepage in an article titled:\r\nThe story behind the idea\r\n\r\nCongratulations!  It was great working together again and looking forward\r\nto many more collaborations to come.\r\n\r\nWe'd love to send you editorial-style prints of your article if you are\r\ninterested.\r\n\r\nThe cost is $17 for the first print and $5/each for additional copies - and\r\nfor the Highlighter Series the team will also include one cover page (see\r\nthe PDF below).  We also have discounted pricing if you are interested in\r\n50 or more prints.\r\n\r\nSamples are attached below, you can let me know if you are interested.\r\n\r\n CanvasRebel Print Samples.pdf\r\n<https://drive.google.com/open?id=1bIe2DA6Vn_pCULaeaGGv-KsCXanCn2Ky>\r\n\r\nThanks,\r\nMike",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "merge-publishing",
+        "content": "Merged with duplicate contact: publishing@voyagecontentpartners.com",
+        "category": "general",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-106-1",
+        "content": "Boldjourney has published an interview with Jahan Taila, indicating a past collaboration or feature.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-106-2",
+        "content": "The contact also mentions a CanvasRebel interview, suggesting Boldjourney might be part of a larger publishing network.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-106-0",
+        "category": "business",
+        "label": "Interview Published",
+        "value": "Yes"
+      },
+      {
+        "id": "aif-106-1",
+        "category": "business",
+        "label": "Last Interaction",
+        "value": "2026-02-03"
+      },
+      {
+        "id": "aif-106-2",
+        "category": "business",
+        "label": "Interview Platform",
+        "value": "Bold Journey, CanvasRebel"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -12523,17 +17467,24 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-01-29T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "secondaryEmail": "publishing@voyagecontentpartners.com",
+    "title": "Publisher",
+    "aiSummary": "This contact from Boldjourney is a publisher who has featured Jahan Taila in an interview. The interactions indicate a past media collaboration, potentially part of a network including CanvasRebel."
   },
   {
-    "id": "116",
+    "id": "108",
     "firstName": "Anthony",
     "lastName": "Rabito",
     "email": "anthonypgr1@gmail.com",
     "company": "",
     "website": "",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "event planning",
+      "wine dinner",
+      "restaurant"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -12557,8 +17508,36 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-107-0",
+        "content": "Anthony is sending emails related to restaurant events and food, suggesting he works in or with the restaurant industry.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-107-1",
+        "content": "The emails indicate a focus on high-end dining experiences (wine dinners, specific dishes like lava scallops).",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-107-0",
+        "category": "business",
+        "label": "Recent Activity",
+        "value": "Event Planning for Kelham Vineyard Wine Dinner (March 11)"
+      },
+      {
+        "id": "aif-107-1",
+        "category": "business",
+        "label": "Content Focus",
+        "value": "Restaurant events, specific dishes, wine pairings"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -12567,17 +17546,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-10-30T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Anthony Rabito appears to be a prospect in the restaurant niche, actively involved in event planning and promoting specific menu items. His communications suggest an interest in high-quality dining experiences, aligning well with Jahan Taila's focus on restaurants."
   },
   {
-    "id": "117",
+    "id": "109",
     "firstName": "Pratama",
     "lastName": "Ramadhan",
     "email": "pratamaram285@gmail.com",
     "company": "",
     "website": "",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "meta ads",
+      "conversion",
+      "lead generation"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -12601,8 +17585,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-108-0",
+        "content": "Pratama has sent examples of Meta ad campaigns, indicating they are a potential service provider or partner for ad execution.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-108-1",
+        "content": "The emails suggest a discussion has already taken place, with Jahan requesting examples of work.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-108-0",
+        "category": "business",
+        "label": "Email Count",
+        "value": "2"
+      },
+      {
+        "id": "aif-108-1",
+        "category": "business",
+        "label": "Recent Inbound Date",
+        "value": "2026-01-26"
+      },
+      {
+        "id": "aif-108-2",
+        "category": "business",
+        "label": "Service Offered",
+        "value": "Meta Ads (lead gen & conversion)"
+      },
+      {
+        "id": "aif-108-3",
+        "category": "business",
+        "label": "Engagement Stage",
+        "value": "Information Exchange"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -12611,18 +17635,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-01-25T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Pratama Ramadhan is a prospect who has shared examples of Meta ad campaigns (lead generation and conversion-focused) after a prior discussion with Jahan. This indicates they are likely a potential vendor or partner for ad execution services."
   },
   {
-    "id": "118",
+    "id": "110",
     "firstName": "James",
     "lastName": "Bennett",
     "email": "james@contentsmash.io",
     "company": "Contentsmash",
     "website": "https://youtube.com",
-    "relationshipType": "other",
-    "tags": [],
-    "relationshipScore": 10,
+    "relationshipType": "prospect",
+    "tags": [
+      "follow-up",
+      "agency collaboration",
+      "declined meeting"
+    ],
+    "relationshipScore": 15,
     "interactions": [
       {
         "id": "email-163-0",
@@ -12643,15 +17672,78 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "details": "Jahan Taila and James Bennett\r\nTuesday Dec 23, 2025 \u22c5 11am \u2013 11:45am\r\nEastern Time - New York\r\n\r\nLocation\r\nGoogle Meet (instructions in description)\t\r\nhttps://www.google.com/maps/search/Google+Meet+(instructions+in+description)?hl=en\r\n\r\nJoin with Google Meet\r\nhttps://meet.google.com/jxh-vdjh-jhs?hs=224\r\n\r\n\r\n\t\r\nJoin by phone\r\n(EE) +372 685 2156\r\nPIN: 598764476\r\n\r\nMore phone numbers\r\nhttps://tel.meet/jxh-vdjh-jhs?pin=7362273860003&hs=0\r\n\r\n\r\nEvent Name\r\nStrategy Session with James (IB)\r\n\r\nIn this session, we\u2019ll uncover how your business can unlock new revenue.\r\n\r\n\r\n\u2705 Identify what\u2019s capping your revenue today\r\n\r\n\u2705 Map out a proven system to consistently generate qualified leads\r\n\r\n\u2705 See exactly what levers to pull to grow your revenue.\r\n\r\nLocation: This is a Google Meet web conference.\r\nYou can join this meeting from your computer, tablet, or smartphone.\r\nhttps://calendly.com/events/3fc68683-34ea-47be-89f5-e89512d9ae1e/google_meet\r\n\r\nWhat is the number 1 problem you are trying to solve in your business right  \r\nnow?: more leads\r\n\r\nWhat is your current monthly revenue in USD?: $5k/mo - $20k/mo\r\n\r\nPhone Number: +1 502-702-6268\r\n\r\nNeed to make changes to this event?\r\nCancel:  \r\nhttps://calendly.com/cancellations/2fc3de27-7bb9-4eef-b5fd-c3423becb5f8\r\nReschedule:  \r\nhttps://calendly.com/reschedulings/2fc3de27-7bb9-4eef-b5fd-c3423becb5f8\r\n\r\nPowered by Calendly.com\r\n\r\n\r\nOrganizer\r\nJames Bennett\r\njames@contentsmash.io\r\n\r\nGuests\r\nJames Bennett - organizer\r\nhello@derbydigital.us\r\nView all guest info  \r\nhttps://calendar.google.com/calendar/event?action=VIEW&eid=cGR2cm9oaWRwMTd2bGtqZWg2cnQyNnBxNGsgaGVsbG9AZGVyYnlkaWdpdGFsLnVz&tok=MjEjamFtZXNAY29udGVudHNtYXNoLmlvODBlZmJmYTlmOGRjNmRjZDk1YTM5MWE4M2MzOGUyZDk4YzU0ZTY3MA&ctz=America%2FNew_York&hl=en&es=1\r\n\r\nReply for hello@derbydigital.us and view more details  \r\nhttps://calendar.google.com/calendar/event?action=VIEW&eid=cGR2cm9oaWRwMTd2bGtqZWg2cnQyNnBxNGsgaGVsbG9AZGVyYnlkaWdpdGFsLnVz&tok=MjEjamFtZXNAY29udGVudHNtYXNoLmlvODBlZmJmYTlmOGRjNmRjZDk1YTM5MWE4M2MzOGUyZDk4YzU0ZTY3MA&ctz=America%2FNew_York&hl=en&es=1\r\nYour attendance is optional.\r\n\r\n~~//~~\r\nInvitation from Google Calendar: https://calendar.google.com/calendar/\r\n\r\nYou are receiving this email because you are subscribed to calendar  \r\nnotifications. To stop receiving these emails, go to  \r\nhttps://calendar.google.com/calendar/r/settings, select this calendar, and  \r\nchange \"Other notifications\".\r\n\r\nForwarding this invitation could allow any recipient to send a response to  \r\nthe organizer, be added to the guest list, invite others regardless of  \r\ntheir own invitation status, or modify your RSVP.\r\n\r\nLearn more https://support.google.com/calendar/answer/37135#forwarding",
         "direction": "inbound",
         "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-209-0",
+        "type": "email",
+        "date": "2025-12-15",
+        "summary": "Re: regarding Jahan",
+        "subject": "Re: regarding Jahan",
+        "details": "Jahan, were you able to see the last email I sent? I'm just checking in. Just tell me if you're not interested.\u00a0\r\n\r\nps! we're actively working with over 100+ agencies and built our own to multi 6-figures through inbound\r\n\r\nThanks,\r\nJames Bennett\r\nCo-Founder\r\nContentSmash(.)io\r\n\u00a0\r\n\r\nOn Wed, December 3, 2025 6:15 PM, James Bennett <james@contentsmashhub.co>\r\n[james@contentsmashhub.co]> wrote:\r\n\r\n> Hey Jahan,\r\n> \r\n> Saw your LinkedIn profile & what you're building with DerbyDigital\r\n> \r\n> Most agency founders I speak with are trapped in client acquisition hell while their competitors build authority and attract clients automatically.\r\n> \r\n> We'd build a complete inbound engine for you that guarantees 100 qualified leads in 90 days or full refund plus we work for free until you get them.\r\n> \r\n> Want me to send over how we'd do this for DerbyDigital?\r\n> \r\n> Best,\r\n> James Bennett\r\n> Co-Founder\r\n> ContentSmash(.)io\r\n>",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "merge-james@cont",
+        "content": "Merged with duplicate contact: james@contentsmashhub.co",
+        "category": "general",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-109-1",
+        "content": "James is trying to reconnect after a declined meeting, suggesting a partnership or service offering for Derby Digital.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-109-2",
+        "content": "Contentsmash claims to work with over 100+ agencies and has built their own to multi 6-figures, indicating they offer services to agencies.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-109-3",
+        "content": "James is persistent, sending multiple follow-ups and re-invitations after initial lack of response.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "5a4e04852918",
         "category": "contact",
         "label": "Phone",
         "value": "372 685 2156"
+      },
+      {
+        "id": "aif-109-1",
+        "category": "business",
+        "label": "Company Name",
+        "value": "Contentsmash"
+      },
+      {
+        "id": "aif-109-2",
+        "category": "business",
+        "label": "Contact Name",
+        "value": "James Bennett"
+      },
+      {
+        "id": "aif-109-3",
+        "category": "business",
+        "label": "Latest Interaction Date",
+        "value": "2025-12-30"
+      },
+      {
+        "id": "aif-109-4",
+        "category": "business",
+        "label": "Meeting Status",
+        "value": "Declined"
       }
     ],
     "opportunities": [],
@@ -12662,17 +17754,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-12-18T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "secondaryEmail": "james@contentsmashhub.co",
+    "aiSummary": "James Bennett from Contentsmash is a prospect attempting to partner with or sell services to Jahan Taila's agency, Derby Digital. He has been persistent with follow-ups and meeting invitations despite a declined meeting, highlighting their experience working with other agencies."
   },
   {
-    "id": "119",
+    "id": "111",
     "firstName": "Otis",
     "lastName": "R Florence, Principal Broker at Business Brokers and Consultants",
     "email": "otisf@bbrokers.com",
     "company": "Bbrokers",
     "website": "https://bbrokers.com",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "NDA",
+      "business broker",
+      "pet resort"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -12696,7 +17794,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-110-0",
+        "content": "Jahan (Derby Digital) inquired about a pet resort business for sale, likely indicating a potential client or a research interest.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-110-1",
+        "content": "Otis is a business broker, not a direct restaurant owner, so he's unlikely a direct client for digital marketing services in the restaurant niche.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "51a87b8c9d40",
@@ -12709,6 +17822,30 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "category": "contact",
         "label": "Address",
         "value": "13121 Eastpoint Park Blvd. Suite D. Louisville, KY"
+      },
+      {
+        "id": "aif-110-2",
+        "category": "business",
+        "label": "Company Type",
+        "value": "Business Brokerage"
+      },
+      {
+        "id": "aif-110-3",
+        "category": "business",
+        "label": "Inquiry Subject",
+        "value": "Pet Resort & Grooming Business for Sale"
+      },
+      {
+        "id": "aif-110-4",
+        "category": "business",
+        "label": "Interaction Type",
+        "value": "NDA request from broker"
+      },
+      {
+        "id": "aif-110-5",
+        "category": "business",
+        "label": "Jahan's Role",
+        "value": "Inquirer/Potential Buyer"
       }
     ],
     "opportunities": [],
@@ -12719,17 +17856,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-12-26T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "Principal Broker",
+    "aiSummary": "Jahan inquired about a pet resort business listed by Otis, a business broker. This contact is not directly related to Derby Digital's restaurant niche, but Jahan might have been exploring a personal investment or a potential client lead (if the pet resort owner needed digital marketing)."
   },
   {
-    "id": "120",
+    "id": "112",
     "firstName": "Nicole",
     "lastName": "HIll",
     "email": "nicole@nicolehillcreative.com",
     "company": "Nicolehillcreative",
     "website": "https://tel.meet",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "referral",
+      "restaurant",
+      "inbound lead"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -12753,13 +17896,59 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-111-0",
+        "content": "Nicole Hill is a creative professional working with The Granville Pub, a restaurant.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-111-1",
+        "content": "She initiated contact to learn more about Derby Digital's services, indicating interest.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-111-2",
+        "content": "A connect call is scheduled for Dec 26, 2025, which is a positive next step.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "227512926ce9",
         "category": "contact",
         "label": "Phone",
         "value": "937-404-2914"
+      },
+      {
+        "id": "aif-111-1",
+        "category": "business",
+        "label": "Referral Source",
+        "value": "The Granville Pub (client of Nicolehillcreative)"
+      },
+      {
+        "id": "aif-111-2",
+        "category": "business",
+        "label": "Meeting Scheduled",
+        "value": "Yes (Dec 26, 2025)"
+      },
+      {
+        "id": "aif-111-3",
+        "category": "business",
+        "label": "Niche Alignment",
+        "value": "Restaurant (The Granville Pub)"
+      },
+      {
+        "id": "aif-111-4",
+        "category": "contact",
+        "label": "Email Count",
+        "value": "2"
       }
     ],
     "opportunities": [],
@@ -12770,17 +17959,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-12-22T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Nicole Hill, representing Nicolehillcreative and working with The Granville Pub (a restaurant), initiated contact to learn about Derby Digital's services. A connect call is scheduled for December 26, 2025, indicating a strong inbound prospect in the restaurant niche."
   },
   {
-    "id": "121",
+    "id": "113",
     "firstName": "John",
     "lastName": "Brown",
     "email": "johnbrown@hotshotelectrical.com",
     "company": "Hotshotelectrical",
     "website": "https://hotshotelectrical.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "declined",
+      "electrical_company"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -12804,8 +17997,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-112-0",
+        "content": "John initially accepted a meeting about AI funnels but later declined a follow-up/onboarding call.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-112-1",
+        "content": "This contact is from an electrical company, not a restaurant, which is Jahan Taila's niche.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-112-0",
+        "category": "business",
+        "label": "Last Interaction",
+        "value": "Declined on 2026-01-10"
+      },
+      {
+        "id": "aif-112-1",
+        "category": "business",
+        "label": "Initial Interest",
+        "value": "Accepted AI Funnels meeting on 2026-01-04"
+      },
+      {
+        "id": "aif-112-2",
+        "category": "business",
+        "label": "Company Industry",
+        "value": "Electrical"
+      },
+      {
+        "id": "aif-112-3",
+        "category": "business",
+        "label": "Email Count",
+        "value": "2"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -12814,17 +18047,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-01-04T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "John Brown from Hotshotelectrical initially showed interest in AI funnels but ultimately declined further engagement. This contact is outside Jahan Taila's target restaurant niche."
   },
   {
-    "id": "122",
-    "firstName": "Skylar",
-    "lastName": "Fallers",
+    "id": "114",
+    "firstName": "Reminder",
+    "lastName": "",
     "email": "v.skylar.fallers@reddit.com",
     "company": "Reddit",
     "website": "https://w3.org",
-    "relationshipType": "industry",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "discovery meeting",
+      "inbound lead"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -12848,13 +18085,46 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-113-0",
+        "content": "Jahan has a discovery meeting scheduled with Skylar Fallers from Reddit on Jan 5, 2026.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-113-1",
+        "content": "This appears to be an inbound lead, as indicated by the 'inbound' email labels.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "bc2afef1ddfe",
         "category": "contact",
         "label": "Phone",
         "value": "631-709-2166"
+      },
+      {
+        "id": "aif-113-1",
+        "category": "business",
+        "label": "Meeting Date",
+        "value": "2026-01-05"
+      },
+      {
+        "id": "aif-113-2",
+        "category": "business",
+        "label": "Meeting Time",
+        "value": "11am - 11:30am ET"
+      },
+      {
+        "id": "aif-113-3",
+        "category": "business",
+        "label": "Contact Email",
+        "value": "v.skylar.fallers@reddit.com"
       }
     ],
     "opportunities": [],
@@ -12865,17 +18135,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-01-03T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Jahan Taila has an upcoming discovery meeting with Skylar Fallers from Reddit, scheduled for January 5, 2026. This appears to be an inbound prospect."
   },
   {
-    "id": "123",
+    "id": "115",
     "firstName": "guidonbrewing.com",
     "lastName": "",
     "email": "sales@guidonbrewing.com",
-    "company": "Guidonbrewing",
+    "company": "Guidon Brewing Company",
     "website": "https://guidonbrewing.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "e-commerce",
+      "restaurant",
+      "brewery"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -12899,8 +18174,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-114-0",
+        "content": "Guidon Brewing is actively processing online orders, indicating an existing e-commerce setup.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-114-1",
+        "content": "The emails are automated order confirmations, suggesting a transactional relationship with their customers.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-114-0",
+        "category": "business",
+        "label": "Website",
+        "value": "guidonbrewing.com"
+      },
+      {
+        "id": "aif-114-1",
+        "category": "business",
+        "label": "Email",
+        "value": "sales@guidonbrewing.com"
+      },
+      {
+        "id": "aif-114-2",
+        "category": "business",
+        "label": "Recent Order Date",
+        "value": "2026-01-22"
+      },
+      {
+        "id": "aif-114-3",
+        "category": "business",
+        "label": "Niche",
+        "value": "Restaurant/Brewery"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -12909,17 +18224,24 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-12-30T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "Guidon Brewing Company is a Louisville-based brewery operating with an e-commerce platform for online orders. Jahan Taila, from Derby Digital, could potentially offer digital marketing services to enhance their online sales and customer engagement within the restaurant niche."
   },
   {
-    "id": "124",
+    "id": "116",
     "firstName": "JEFF",
     "lastName": "",
     "email": "allgoodsportinggoodsky@gmail.com",
-    "company": "",
+    "company": "Allgood Sporting Goods",
     "website": "",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "email signature",
+      "logo design",
+      "website design"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -12943,13 +18265,52 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-115-0",
+        "content": "Jeff is looking for logo and website design, and an email signature. This aligns with Derby Digital's services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-115-1",
+        "content": "The initial contact was in August 2025, with a follow-up in December 2025 regarding a logo sample.",
+        "category": "timeline",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "33e9583f1d71",
         "category": "contact",
         "label": "Phone",
         "value": "502-779-1296"
+      },
+      {
+        "id": "aif-115-1",
+        "category": "business",
+        "label": "Primary Contact Email",
+        "value": "allgoodsportinggoodsky@gmail.com"
+      },
+      {
+        "id": "aif-115-2",
+        "category": "business",
+        "label": "Services Requested",
+        "value": "Logo, Website, Email Signature"
+      },
+      {
+        "id": "aif-115-3",
+        "category": "business",
+        "label": "Company Name",
+        "value": "Allgood Sporting Goods"
+      },
+      {
+        "id": "aif-115-4",
+        "category": "timeline",
+        "label": "Last Contact Date",
+        "value": "2025-12-10"
       }
     ],
     "opportunities": [],
@@ -12960,17 +18321,24 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-08-27T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "Jeff from Allgood Sporting Goods is a prospect interested in logo design, website development, and email signature creation. The last interaction involved a logo sample."
   },
   {
-    "id": "125",
+    "id": "117",
     "firstName": "Marlissa",
     "lastName": "Lahi from Emerhub Limited",
     "email": "info@emerhub.com",
-    "company": "Emerhub",
+    "company": "Emerhub Limited",
     "website": "https://ccf8404.na1.hs-service-engage.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "vendor",
+    "tags": [
+      "international",
+      "hiring",
+      "virtual assistant"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -12994,13 +18362,46 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-116-0",
+        "content": "Jahan inquired about hiring a virtual assistant for marketing activities.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-116-1",
+        "content": "Emerhub can assist with hiring VAs and potentially other roles, especially if based in Indonesia.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "066837fce34a",
         "category": "contact",
         "label": "Phone",
         "value": "9715814112"
+      },
+      {
+        "id": "aif-116-1",
+        "category": "business",
+        "label": "Service Offered",
+        "value": "Virtual Assistant Hiring"
+      },
+      {
+        "id": "aif-116-2",
+        "category": "business",
+        "label": "Jahan's Need",
+        "value": "Marketing VA"
+      },
+      {
+        "id": "aif-116-3",
+        "category": "business",
+        "label": "Emerhub's Specialty",
+        "value": "International Hiring (Indonesia mentioned)"
       }
     ],
     "opportunities": [],
@@ -13011,61 +18412,20 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-11-10T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Jahan Taila contacted Emerhub Limited to inquire about hiring a virtual assistant for marketing activities, specifically mentioning a designer based in Indonesia. Emerhub responded, confirming their ability to help with VA hiring and potentially other roles, particularly in Indonesia."
   },
   {
-    "id": "126",
-    "firstName": "Fred",
-    "lastName": "from Fireflies.ai",
-    "email": "donnasibayan1441@gmail.com",
-    "company": "",
-    "website": "https://fonts.googleapis.com",
-    "relationshipType": "other",
-    "tags": [],
-    "relationshipScore": 10,
-    "interactions": [
-      {
-        "id": "email-233-0",
-        "type": "email",
-        "date": "2025-10-30",
-        "summary": "Your meeting recap - Derby Digital Interview With Donna",
-        "subject": "Your meeting recap - Derby Digital Interview With Donna",
-        "details": "<!DOCTYPE html>\r\n<html lang=\"en\">\r\n  <head>\r\n    <meta charset=\"UTF-8\" />\r\n    <link\r\n      href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500;600;700&display=swap\"\r\n      rel=\"stylesheet\"\r\n    />\r\n    <link\r\n      href=\"https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap\"\r\n      rel=\"stylesheet\"\r\n    />\r\n    <link\r\n      href=\"https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap\"\r\n      rel=\"stylesheet\"\r\n    />\r\n    <style>\r\n      .font-roboto {\r\n        font-family: 'Roboto', 'Verdana', 'Helvetica', 'Arial', sans-serif;\r\n      }\r\n      .font-poppins {\r\n        font-family: 'Poppins', 'Roboto', 'Verdana', 'Helvetica', 'Arial', sans-serif;\r\n      }\r\n      .font-dm-sans {\r\n        font-family: 'DM Sans', 'Roboto', 'Verdana', 'Helvetica', 'Arial', sans-serif;\r\n      }\r\n      .font-inter {\r\n        font-family: 'Inter', 'Roboto', 'Verdana', 'Helvetica', 'Arial', sans-serif;\r\n      }\r\n      .ff-link {\r\n        font: inherit;\r\n        color: #6E75FF!important;\r\n        text-decoration: underline;\r\n      }\r\n      .ff-paragraph {\r\n        font-weight: 400;\r\n        font-size: 16px;\r\n        line-height: 24px;\r\n        letter-spacing: -0.02em;\r\n        color: #484f56;\r\n        padding-top: 21px;\r\n      }\r\n    </style>\r\n  </head>\r\n  <body\r\n    class=\"font-roboto\"\r\n    style=\"\r\n      background: #F2F4F7;\r\n      margin: 0;\r\n      padding: 24px 0px 40px 0px;\r\n    \"\r\n  >\r\n    \r\n    \r\n    \r\n    <table align=\"center\" cellspacing=\"0\" cellpadding=\"0\" style=\"width: 100%; \r\n      background: #ffffff;\r\n      max-width: 640px; padding: 0 24px 0;\">\r\n      <tr>\r\n        <td align=\"center\">\r\n          <table align=\"center\" style=\"max-width: 520px; width: 100%;\" cellspacing=\"0\" cellpadding=\"0\">\r\n            <tr>\r\n              <td ><table width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" style=\"border-spacing: 0px\">\r\n      <tr><td style=\"padding-top: 72px;\"></td></tr>  <tr>\r\n        <td align=\"center\" valign=\"middle\">\r\n          <a\r\n            href=\"https://app.fireflies.ai/view/Derby-Digital-Interview-With-Donna::01K8SCWGKNW6RXZD51CBHJ3CE2?ref&#x3D;recap&amp;track&#x3D;01K8SCWGKNW6RXZD51CBHJ3CE2&amp;sg&#x3D;nb&amp;utm_content&#x3D;header_image&amp;utm_campaign&#x3D;meeting-recap-v2&amp;utm_medium&#x3D;email&amp;utm_source&#x3D;meeting_recap\"\r\n            target=\"_blank\"\r\n          >\r\n            <img\r\n              style=\"max-width: 100%\"\r\n              alt=\"\"\r\n              width=\"241\"\r\n              height=\"auto\"\r\n              src=\"https://files.fireflies.ai/email-templates/meeting-recap/fred_header.png\"\r\n            />\r\n          </a>\r\n        </td>\r\n      </tr>\r\n      <tr>\r\n        <td \r\n          style=\"\r\n            text-align: center;\r\n            padding-top: 24px;\r\n            padding-bottom: 0px;\r\n          \"\r\n        >\r\n          <p style=\"\r\n            font-size: 24px;\r\n            letter-spacing: -0.02em;\r\n            color: #6E75FF;\r\n            text-tra",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      },
-      {
-        "id": "email-233-1",
-        "type": "email",
-        "date": "2025-10-30",
-        "summary": "Salary expectations",
-        "subject": "Salary expectations",
-        "details": "My desired salary is $600 per month",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      }
-    ],
-    "notes": [],
-    "facts": [],
-    "opportunities": [],
-    "aiInsights": [],
-    "groups": [],
-    "connections": [],
-    "lastContactedAt": "2025-10-30",
-    "source": "gmail-import",
-    "createdAt": "2025-10-30T00:00:00",
-    "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
-  },
-  {
-    "id": "127",
-    "firstName": "Victoria",
-    "lastName": "Bigham",
+    "id": "118",
+    "firstName": "vmbigham",
+    "lastName": "",
     "email": "vmbigham@gmail.com",
     "company": "",
     "website": "",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "restaurant niche"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -13089,13 +18449,46 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-117-0",
+        "content": "Victoria Bigham initiated a Google Meet call, indicating active interest or a desire to connect. This could be a good opportunity for Jahan Taila to discuss Derby Digital's services for restaurants.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-117-1",
+        "content": "The 'Test' email from August 18th, with contact details, suggests an initial outreach or information exchange from Victoria.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "6d179218b8ab",
         "category": "contact",
         "label": "Phone",
         "value": "503-504-2876"
+      },
+      {
+        "id": "aif-117-1",
+        "category": "contact",
+        "label": "Email",
+        "value": "vmbigham@gmail.com"
+      },
+      {
+        "id": "aif-117-2",
+        "category": "communication",
+        "label": "Recent Activity",
+        "value": "Google Meet invite (2025-09-30)"
+      },
+      {
+        "id": "aif-117-3",
+        "category": "communication",
+        "label": "Previous Activity",
+        "value": "Email with contact info (2025-08-18)"
       }
     ],
     "opportunities": [],
@@ -13106,17 +18499,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-08-18T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Victoria Bigham appears to be an engaged prospect, having initiated a recent video call and previously shared contact information. This is a strong lead for Jahan Taila to explore Derby Digital's digital marketing services for restaurants."
   },
   {
-    "id": "128",
+    "id": "119",
     "firstName": "Brandon",
     "lastName": "Vish",
     "email": "louisvillebarsandrestaurants@gmail.com",
-    "company": "",
+    "company": "Louisville Bars & Restaurants",
     "website": "https://louisvillebarsandrestaurants.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "restaurant niche",
+      "local business",
+      "logo design"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -13140,8 +18538,55 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-118-0",
+        "content": "Brandon is the contact for Louisville Bars & Restaurants, a local media/directory for the restaurant industry.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-118-1",
+        "content": "Initial contact was an inquiry from Jahan, followed by Brandon asking for more information and providing his website.",
+        "category": "communication",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-118-2",
+        "content": "Brandon recently sent an email with 'Louisville Bars and Restaurants Logos' as the subject, indicating a potential need for logo design or branding services.",
+        "category": "opportunity",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-118-0",
+        "category": "business",
+        "label": "Website",
+        "value": "https://louisvillebarsandrestaurants.com/"
+      },
+      {
+        "id": "aif-118-1",
+        "category": "business",
+        "label": "Niche",
+        "value": "Bars & Restaurants (Louisville)"
+      },
+      {
+        "id": "aif-118-2",
+        "category": "communication",
+        "label": "Last Contact Date",
+        "value": "2025-05-22"
+      },
+      {
+        "id": "aif-118-3",
+        "category": "communication",
+        "label": "Total Emails",
+        "value": "2"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -13150,17 +18595,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-04-14T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "Brandon Vish from Louisville Bars & Restaurants is a prospect who initially responded to Jahan's outreach. He recently sent an email regarding 'Logos', suggesting a potential need for design or branding services for his platform which serves the local restaurant niche."
   },
   {
-    "id": "129",
+    "id": "120",
     "firstName": "Bryce",
     "lastName": "Milton",
     "email": "bryce@listkit.io",
     "company": "Listkit",
     "website": "https://us02web.zoom.us",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "lead generation",
+      "list building"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -13184,13 +18635,46 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-119-0",
+        "content": "Bryce is following up after a scheduled call in January 2025, suggesting the initial meeting either didn't happen or didn't lead to a deal.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-119-1",
+        "content": "Listkit appears to offer lead list building services, which could be a potential partnership or vendor relationship for Derby Digital.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "361d7d2303b4",
         "category": "contact",
         "label": "Phone",
         "value": "8454994577"
+      },
+      {
+        "id": "aif-119-1",
+        "category": "business",
+        "label": "Last Contact Date",
+        "value": "2025-04-01"
+      },
+      {
+        "id": "aif-119-2",
+        "category": "business",
+        "label": "Previous Meeting Scheduled",
+        "value": "2025-01-09"
+      },
+      {
+        "id": "aif-119-3",
+        "category": "business",
+        "label": "Listkit Service",
+        "value": "Leads List Building"
       }
     ],
     "opportunities": [],
@@ -13201,17 +18685,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-01-07T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Bryce Milton from Listkit is a prospect who previously scheduled a call with Jahan Taila in January 2025, and is now following up. Listkit offers lead list building services."
   },
   {
-    "id": "130",
+    "id": "121",
     "firstName": "Robert",
     "lastName": "Rodriguez",
     "email": "robert@cempify.com",
     "company": "Cempify",
     "website": "https://cempify.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "restaurant niche",
+      "SpotHopper user"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -13235,8 +18723,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-120-0",
+        "content": "Jahan is positioning Derby Digital as a cost-effective alternative to SpotHopper, offering similar or more services for $199/month.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-120-1",
+        "content": "The initial 'test' email suggests a cold outreach or an attempt to verify contact information before the main pitch.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-120-0",
+        "category": "business",
+        "label": "Current Provider",
+        "value": "SpotHopper"
+      },
+      {
+        "id": "aif-120-1",
+        "category": "business",
+        "label": "Derby Digital Offer Price",
+        "value": "$199/month"
+      },
+      {
+        "id": "aif-120-2",
+        "category": "business",
+        "label": "Niche",
+        "value": "Restaurants"
+      },
+      {
+        "id": "aif-120-3",
+        "category": "business",
+        "label": "Last Contact Date",
+        "value": "2025-03-06"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -13245,10 +18773,11 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2024-10-30T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Robert Rodriguez at Cempify is a prospect currently using SpotHopper for restaurant services. Jahan Taila from Derby Digital is actively pitching a more affordable alternative at $199/month, offering comparable or enhanced services."
   },
   {
-    "id": "131",
+    "id": "122",
     "firstName": "Gabriel",
     "lastName": "Ferraz",
     "email": "gabriel@creem.io",
@@ -13279,13 +18808,33 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-121-0",
+        "content": "Jahan Taila appears to be a user of Creem's service, receiving account-related updates.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "b89ca13dda71",
         "category": "contact",
         "label": "Phone",
         "value": "372 5393540"
+      },
+      {
+        "id": "aif-121-1",
+        "category": "business",
+        "label": "Creem Service",
+        "value": "Payout account management, onboarding"
+      },
+      {
+        "id": "aif-121-2",
+        "category": "business",
+        "label": "Interaction Type",
+        "value": "Inbound account notifications"
       }
     ],
     "opportunities": [],
@@ -13296,17 +18845,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-01-23T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "This contact indicates Jahan Taila is a user of Creem, receiving automated account updates regarding onboarding and payout methods. There is no direct indication of a business relationship for Derby Digital."
   },
   {
-    "id": "132",
+    "id": "123",
     "firstName": "Alex",
     "lastName": "Hartsuff",
     "email": "alex@enterpriseclients.com",
     "company": "Enterpriseclients",
     "website": "https://email.lc.enterpriseclients.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "newsletter subscriber",
+      "sales training"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -13320,8 +18873,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-122-0",
+        "content": "Jahan signed up for Enterpriseclients' newsletter, indicating interest in their content on acquiring enterprise clients.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-122-1",
+        "content": "The email offers a pitch script for closing enterprise clients, which could be relevant for Derby Digital's growth strategy.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-122-0",
+        "category": "business",
+        "label": "Email Sender",
+        "value": "Alex Hartsuff"
+      },
+      {
+        "id": "aif-122-1",
+        "category": "business",
+        "label": "Email Content",
+        "value": "Enterprise Client Pitch Script training"
+      },
+      {
+        "id": "aif-122-2",
+        "category": "business",
+        "label": "Email Date",
+        "value": "2026-03-15"
+      },
+      {
+        "id": "aif-122-3",
+        "category": "business",
+        "label": "Enterpriseclients Claim",
+        "value": "Closed 217 Enterprise Clients & collected over $4.2M"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -13330,17 +18923,20 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-15T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Jahan Taila is a prospect for Enterpriseclients, having signed up for their newsletter and received a pitch script for acquiring enterprise clients. This suggests Jahan is actively looking for strategies to grow Derby Digital's client base, potentially in the enterprise sector."
   },
   {
-    "id": "133",
+    "id": "124",
     "firstName": "Fernando",
     "lastName": "Claudio Bisi",
     "email": "fernando@sendr.ai",
     "company": "Sendr",
     "website": "https://tel.meet",
-    "relationshipType": "industry",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "meeting scheduled"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -13354,13 +18950,45 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-123-0",
+        "content": "Meeting scheduled for March 16, 2026, to discuss potential collaboration or services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "8dab9cc084ab",
         "category": "contact",
         "label": "Phone",
         "value": "9456212438"
+      },
+      {
+        "id": "aif-123-1",
+        "category": "business",
+        "label": "Email",
+        "value": "fernando@sendr.ai"
+      },
+      {
+        "id": "aif-123-2",
+        "category": "business",
+        "label": "Meeting Date",
+        "value": "2026-03-16"
+      },
+      {
+        "id": "aif-123-3",
+        "category": "business",
+        "label": "Meeting Time",
+        "value": "9am - 9:30am ET"
+      },
+      {
+        "id": "aif-123-4",
+        "category": "business",
+        "label": "Meeting Platform",
+        "value": "Google Meet"
       }
     ],
     "opportunities": [],
@@ -13371,17 +18999,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-14T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Fernando Bisi from Sendr has an inbound meeting scheduled with Jahan Taila for March 16, 2026, indicating a potential prospect relationship."
   },
   {
-    "id": "134",
+    "id": "125",
     "firstName": "Design",
     "lastName": "with Akbar",
     "email": "wpwithakbar@gmail.com",
-    "company": "",
+    "company": "Design with Akbar",
     "website": "https://driveuae.ae",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "vendor",
+    "tags": [
+      "wordpress",
+      "developer",
+      "web design"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -13395,8 +19028,35 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-124-0",
+        "content": "Akbar is a WordPress designer who reached out to showcase his portfolio. He could be a potential vendor for overflow design work or specialized WordPress development.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-124-0",
+        "category": "business",
+        "label": "Email",
+        "value": "wpwithakbar@gmail.com"
+      },
+      {
+        "id": "aif-124-1",
+        "category": "business",
+        "label": "Service Offered",
+        "value": "WordPress Design"
+      },
+      {
+        "id": "aif-124-2",
+        "category": "business",
+        "label": "Portfolio Links",
+        "value": "driveuae.ae, lightyellow-dog-832481.hostingersite.com, jabelalipalm.ae, cashofferoptio"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -13405,17 +19065,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-14T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "WordPress Designer",
+    "aiSummary": "Akbar is a WordPress designer who proactively reached out with a portfolio of his work. He could be a valuable contact for Jahan Taila's agency if they need to outsource WordPress design or development, especially for restaurant clients."
   },
   {
-    "id": "135",
+    "id": "126",
     "firstName": "Omer",
     "lastName": "Bloch",
     "email": "omer@remotelatinos.com",
     "company": "Remotelatinos",
     "website": "https://email.reply.remotelatinos.com",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "hiring",
+      "remote work"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -13429,8 +19094,35 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-125-0",
+        "content": "Omer Bloch is likely involved in HR or recruitment, given the email content about hiring employees. This doesn't directly align with Derby Digital's restaurant niche.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-125-0",
+        "category": "business",
+        "label": "Company Focus",
+        "value": "Remote staffing/hiring"
+      },
+      {
+        "id": "aif-125-1",
+        "category": "business",
+        "label": "Last Email Subject",
+        "value": "Hiring your first employee? Start with this simple system"
+      },
+      {
+        "id": "aif-125-2",
+        "category": "business",
+        "label": "Email Sender",
+        "value": "Remotelatinos"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -13439,17 +19131,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-13T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "This contact is from Remotelatinos, a company focused on remote staffing/hiring. The recent email is about hiring employees, which doesn't directly relate to Derby Digital's digital marketing services for restaurants. There's no clear immediate business alignment for Jahan Taila."
   },
   {
-    "id": "136",
+    "id": "127",
     "firstName": "Ted",
-    "lastName": "Kasemir",
+    "lastName": "",
     "email": "ted@lujacks.com",
     "company": "Lujacks",
     "website": "https://instantly.ai",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "restaurant",
+      "inbound lead"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -13463,13 +19159,52 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-126-0",
+        "content": "Ted from Lujacks sent a positive reply, indicating interest in Derby Digital's services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-126-1",
+        "content": "This is an inbound lead, suggesting a higher likelihood of conversion.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "e213b758dd7c",
         "category": "contact",
         "label": "Address",
         "value": "30 N Gould St. Ste R, Sheridan"
+      },
+      {
+        "id": "aif-126-1",
+        "category": "business",
+        "label": "Email",
+        "value": "ted@lujacks.com"
+      },
+      {
+        "id": "aif-126-2",
+        "category": "business",
+        "label": "Last Contact Date",
+        "value": "2026-03-13"
+      },
+      {
+        "id": "aif-126-3",
+        "category": "business",
+        "label": "Contact Type",
+        "value": "Inbound Positive Reply"
+      },
+      {
+        "id": "aif-126-4",
+        "category": "business",
+        "label": "Niche Match",
+        "value": "Restaurant"
       }
     ],
     "opportunities": [],
@@ -13480,17 +19215,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-13T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "Ted from Lujacks, a restaurant in Louisville, KY, has sent a positive reply to Jahan Taila, indicating a strong sales opportunity for Derby Digital in the restaurant niche."
   },
   {
-    "id": "137",
+    "id": "128",
     "firstName": "Jack",
     "lastName": "Perron",
     "email": "jack.p@getperronmarketingsolutions.com",
     "company": "Getperronmarketingsolutions",
     "website": "https://getperronmarketingsolutions.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "partner",
+    "tags": [
+      "referral partner",
+      "local connection"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -13504,8 +19245,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-127-0",
+        "content": "Jack is reaching out to propose a referral partnership, leveraging established websites to send traffic to Derby Digital.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-127-1",
+        "content": "He identified Jahan is in Louisville, indicating some prior research or local focus.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-127-0",
+        "category": "business",
+        "label": "Sender Company",
+        "value": "Getperronmarketingsolutions"
+      },
+      {
+        "id": "aif-127-1",
+        "category": "business",
+        "label": "Sender Email",
+        "value": "jack.p@getperronmarketingsolutions.com"
+      },
+      {
+        "id": "aif-127-2",
+        "category": "business",
+        "label": "Contact Intent",
+        "value": "Referral partnership"
+      },
+      {
+        "id": "aif-127-3",
+        "category": "business",
+        "label": "Geographic Relevance",
+        "value": "Louisville, KY"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -13514,17 +19295,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-13T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Jack Perron from Getperronmarketingsolutions is proposing a referral partnership to drive traffic to Derby Digital from established websites, noting a shared Louisville location."
   },
   {
-    "id": "138",
+    "id": "129",
     "firstName": "Devesh",
     "lastName": "Khatri",
     "email": "devesh.khatri@gohighlevel.com",
     "company": "Gohighlevel",
     "website": "https://email.mailbox.gohighlevel.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "vendor",
+    "tags": [
+      "CRM",
+      "marketing software"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -13538,8 +19323,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-128-0",
+        "content": "Devesh is likely a representative from GoHighLevel, a platform Jahan Taila's agency (Derby Digital) might use or consider using for clients.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-128-1",
+        "content": "The email is an inbound marketing message from GoHighLevel, offering a free month, suggesting Jahan is on their marketing list.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-128-0",
+        "category": "business",
+        "label": "Email Sender",
+        "value": "Devesh Khatri"
+      },
+      {
+        "id": "aif-128-1",
+        "category": "business",
+        "label": "Sender Company",
+        "value": "Gohighlevel"
+      },
+      {
+        "id": "aif-128-2",
+        "category": "business",
+        "label": "Email Type",
+        "value": "Inbound Marketing"
+      },
+      {
+        "id": "aif-128-3",
+        "category": "business",
+        "label": "Offer",
+        "value": "Free Month of HighLevel"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -13548,17 +19373,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-13T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Devesh Khatri from GoHighLevel is a vendor contact, likely sending marketing emails to Jahan Taila. Derby Digital may be a user or prospect for GoHighLevel's platform, which is relevant for digital marketing agencies serving the restaurant niche."
   },
   {
-    "id": "139",
+    "id": "130",
     "firstName": "Independence",
     "lastName": "Bank via Adobe Acrobat Sign",
     "email": "echosign@echosign.com",
-    "company": "Echosign",
+    "company": "Independence Bank",
     "website": "https://w3.org",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "banking",
+      "financial services"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -13572,8 +19401,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-129-0",
+        "content": "Jahan signed up for electronic delivery of statements and notices from Independence Bank. This is likely a personal banking relationship.",
+        "category": "personal",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-129-1",
+        "content": "The email is from Adobe Acrobat Sign (echosign.com), indicating a formal document signing process.",
+        "category": "technical",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-129-0",
+        "category": "business",
+        "label": "Bank Name",
+        "value": "Independence Bank"
+      },
+      {
+        "id": "aif-129-1",
+        "category": "business",
+        "label": "Service",
+        "value": "Electronic Delivery Enrollment for Statements and Notices"
+      },
+      {
+        "id": "aif-129-2",
+        "category": "technical",
+        "label": "Signing Platform",
+        "value": "Adobe Acrobat Sign (Echosign)"
+      },
+      {
+        "id": "aif-129-3",
+        "category": "date",
+        "label": "Date of Interaction",
+        "value": "2026-03-12"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -13582,17 +19451,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-12T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "This contact indicates Jahan Taila has a personal banking relationship with Independence Bank, having recently signed up for electronic statement delivery via Adobe Acrobat Sign. This is not a direct business lead for Derby Digital's restaurant niche."
   },
   {
-    "id": "140",
+    "id": "131",
     "firstName": "Rachel",
     "lastName": "Sullivan",
     "email": "r.s@qualifilender.com",
     "company": "Qualifilender",
     "website": "https://qualifilender.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "inbound lead",
+      "marketing expenses"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -13606,13 +19481,45 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-130-0",
+        "content": "Rachel from Qualifilender reached out regarding 'marketing expenses' and referenced DerbyDigital's mission for SMB growth. This suggests an interest in DerbyDigital's services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "a190e1f53533",
         "category": "contact",
         "label": "Address",
         "value": "1974 Sproul Rd, Suite"
+      },
+      {
+        "id": "aif-130-1",
+        "category": "business",
+        "label": "Email Date",
+        "value": "2026-01-28"
+      },
+      {
+        "id": "aif-130-2",
+        "category": "business",
+        "label": "Sender Email",
+        "value": "r.s@qualifilender.com"
+      },
+      {
+        "id": "aif-130-3",
+        "category": "business",
+        "label": "Sender Name",
+        "value": "Rachel Sullivan"
+      },
+      {
+        "id": "aif-130-4",
+        "category": "business",
+        "label": "Inbound Topic",
+        "value": "marketing expenses"
       }
     ],
     "opportunities": [],
@@ -13623,17 +19530,20 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-01-28T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Inbound lead from Rachel Sullivan at Qualifilender, referencing DerbyDigital's mission and inquiring about 'marketing expenses'. This indicates a potential interest in digital marketing services for SMB growth."
   },
   {
-    "id": "141",
+    "id": "132",
     "firstName": "Natalija",
     "lastName": "Ilic",
     "email": "ilic.natalija@startfrontbrick.com",
     "company": "Startfrontbrick",
     "website": "https://startfrontbrick.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "GTM Agency"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -13647,8 +19557,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-131-0",
+        "content": "Natalija is an Operations Manager at a GTM Agency, which could be a potential partner or competitor for Derby Digital, depending on their service overlap.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-131-1",
+        "content": "The email references 'enterprise contracts' and generating '292 opportunities' for 'Veza Agency Network,' suggesting experience in lead generation or sales for agencies.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-131-0",
+        "category": "business",
+        "label": "Email Date",
+        "value": "2026-03-12"
+      },
+      {
+        "id": "aif-131-1",
+        "category": "business",
+        "label": "Sender Company",
+        "value": "Startfrontbrick"
+      },
+      {
+        "id": "aif-131-2",
+        "category": "business",
+        "label": "Sender Title",
+        "value": "Operations Manager"
+      },
+      {
+        "id": "aif-131-3",
+        "category": "business",
+        "label": "Sender Agency Type",
+        "value": "GTM Agency"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -13657,17 +19607,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-12T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "Operations Manager",
+    "aiSummary": "Natalija Ilic from Startfrontbrick (a GTM Agency) reached out regarding 'enterprise contracts' and claims to have generated 292 opportunities for another agency. This could be a lead for partnership or a competitive intelligence point for Jahan Taila at Derby Digital, especially given Derby Digital's focus on digital marketing for restaurants."
   },
   {
-    "id": "142",
+    "id": "133",
     "firstName": "Local",
     "lastName": "Falcon",
     "email": "success@lf.read.localfalcon.com",
-    "company": "Lf",
+    "company": "Local Falcon",
     "website": "https://localfalcon.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "vendor",
+    "tags": [
+      "local SEO",
+      "SEO tools",
+      "AI tools"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -13681,8 +19637,36 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-132-0",
+        "content": "This is an update from a vendor (Local Falcon) about new features, specifically the Claude Connector and AI-related tools.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-132-1",
+        "content": "Jahan Taila, working with restaurants, could potentially leverage these AI sentiment and campaign tracking features for clients' local SEO strategies.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-132-0",
+        "category": "business",
+        "label": "Vendor Service",
+        "value": "Local SEO grid tracking and analytics"
+      },
+      {
+        "id": "aif-132-1",
+        "category": "business",
+        "label": "New Feature",
+        "value": "Claude Connector"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -13691,17 +19675,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-12T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "This contact is an inbound email from Local Falcon, a vendor, announcing new AI-driven features like the Claude Connector, AI Sentiment Analysis, and AI Campaign Tracking. These tools could be relevant for Jahan Taila's digital marketing agency, Derby Digital, especially for optimizing local SEO strategies for restaurant clients in Louisville, KY."
   },
   {
-    "id": "143",
+    "id": "134",
     "firstName": "Roshan",
     "lastName": "P",
     "email": "roshan@tairrdigital.com",
     "company": "Tairrdigital",
     "website": "https://tairrdigital.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "digital marketing",
+      "lead generation",
+      "paid ads"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -13713,31 +19702,7 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "details": "Jahan - could I give you a paid ads funnel you can run for Derby Digital to book roughly 45 qualified sales calls per month.\n\nIncluding the ad scripts, VSL, landing page copy, and funnel metrics.\n\nLmk if you're open to reviewing the funnel?\n\nP.S. The median results we\u2019re seeing across 30+ b2b agencies we\u2019re actively working with is a 2x cash collected ROAS (in month 1), and an 11x LTV ROAS.\n\nBest,\nRoshan\nCEO | Airr Digital",
         "direction": "inbound",
         "createdAt": "2026-03-16T12:18:59"
-      }
-    ],
-    "notes": [],
-    "facts": [],
-    "opportunities": [],
-    "aiInsights": [],
-    "groups": [],
-    "connections": [],
-    "lastContactedAt": "2026-03-11",
-    "source": "gmail-import",
-    "createdAt": "2026-03-11T00:00:00",
-    "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
-  },
-  {
-    "id": "144",
-    "firstName": "Roshan",
-    "lastName": "P",
-    "email": "roshan@airrdigitalmarketinggroup.com",
-    "company": "Airrdigitalmarketinggroup",
-    "website": "https://airrdigitalmarketinggroup.com",
-    "relationshipType": "other",
-    "tags": [],
-    "relationshipScore": 10,
-    "interactions": [
+      },
       {
         "id": "email-37-0",
         "type": "email",
@@ -13749,8 +19714,55 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "merge-roshan@air",
+        "content": "Merged with duplicate contact: roshan@airrdigitalmarketinggroup.com",
+        "category": "general",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-133-1",
+        "content": "Roshan is pitching paid ad services to Jahan for Derby Digital, aiming to book 40-60 qualified sales calls per month with a 2x ROAS.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-133-2",
+        "content": "The pitch includes a comprehensive funnel (ad scripts, VSL, landing page copy, funnel metrics).",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-133-0",
+        "category": "business",
+        "label": "Roshan's Company",
+        "value": "Tairrdigital"
+      },
+      {
+        "id": "aif-133-1",
+        "category": "business",
+        "label": "Service Offered",
+        "value": "Meta Ads Funnel for Lead Generation"
+      },
+      {
+        "id": "aif-133-2",
+        "category": "business",
+        "label": "Target Calls/Month",
+        "value": "40-60"
+      },
+      {
+        "id": "aif-133-3",
+        "category": "business",
+        "label": "Target ROAS",
+        "value": "2x cash collected"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -13759,17 +19771,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-11T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "secondaryEmail": "roshan@airrdigitalmarketinggroup.com",
+    "aiSummary": "Roshan from Tairrdigital is pitching Jahan Taila (Derby Digital) on a Meta ads funnel designed to generate 40-60 qualified sales calls per month with a 2x cash collected ROAS, including all necessary creative and metrics."
   },
   {
-    "id": "145",
+    "id": "135",
     "firstName": "rnelson",
     "lastName": "",
     "email": "rnelson@lateharvestkitchen.com",
-    "company": "Lateharvestkitchen",
+    "company": "Late Harvest Kitchen",
     "website": "https://lateharvestkitchen.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "event sales",
+      "restaurant"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -13783,7 +19800,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-134-0",
+        "content": "This contact is from a restaurant in Louisville, KY, which aligns with Jahan Taila's niche. The email indicates a focus on event sales, a potential area for digital marketing support.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-134-1",
+        "content": "The email is an inbound communication, suggesting Late Harvest Kitchen has engaged with a marketing effort in the past, possibly indicating openness to new digital marketing strategies.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "ad5a74b5036e",
@@ -13796,6 +19828,30 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "category": "contact",
         "label": "Address",
         "value": "8605 River Crossing Blvd\r"
+      },
+      {
+        "id": "aif-134-2",
+        "category": "business",
+        "label": "Industry",
+        "value": "Restaurant"
+      },
+      {
+        "id": "aif-134-3",
+        "category": "business",
+        "label": "Location",
+        "value": "Louisville, KY"
+      },
+      {
+        "id": "aif-134-4",
+        "category": "business",
+        "label": "Focus Area",
+        "value": "Event Sales"
+      },
+      {
+        "id": "aif-134-5",
+        "category": "business",
+        "label": "Email Type",
+        "value": "Inbound"
       }
     ],
     "opportunities": [],
@@ -13806,17 +19862,25 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-10T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "rnelson from Late Harvest Kitchen is a prospect in the restaurant niche in Louisville, KY. Their recent inbound email highlights a focus on event sales, suggesting a potential need for digital marketing services to drive event bookings. This aligns well with Jahan Taila's expertise."
   },
   {
-    "id": "146",
+    "id": "136",
     "firstName": "Courtyard",
     "lastName": "by Marriott Faro Blanco Resort",
     "email": "marketing@courtyardbymarriottmarathonfloridakeys.ccsend.com",
-    "company": "Courtyardbymarriottmarathonfloridakeys",
+    "company": "Courtyard by Marriott Faro Blanco Resort",
     "website": "https://courtyardbymarriottmarathonfloridakeys.ccsend.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "hotel",
+      "email marketing",
+      "resort",
+      "hospitality"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -13830,8 +19894,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-135-0",
+        "content": "This contact is for a resort, which aligns with the restaurant niche as resorts often have multiple dining options.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-135-1",
+        "content": "The inbound email indicates active email marketing campaigns, suggesting a potential need for digital marketing strategy and execution.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-135-0",
+        "category": "business",
+        "label": "Industry",
+        "value": "Hospitality/Resort"
+      },
+      {
+        "id": "aif-135-1",
+        "category": "business",
+        "label": "Location",
+        "value": "Marathon, Florida Keys"
+      },
+      {
+        "id": "aif-135-2",
+        "category": "business",
+        "label": "Recent Marketing Activity",
+        "value": "Email campaign offering 20% off stay and $150 resort credit."
+      },
+      {
+        "id": "aif-135-3",
+        "category": "business",
+        "label": "Email Domain",
+        "value": "ccsend.com (Constant Contact)"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -13840,17 +19944,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-10T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "Marketing Contact",
+    "city": "Marathon",
+    "state": "FL",
+    "aiSummary": "This is a prospect contact for Courtyard by Marriott Faro Blanco Resort, located in the Florida Keys. They are actively running email marketing campaigns, indicating a potential need for digital marketing services, especially given their resort nature which likely includes multiple restaurant operations. This aligns well with Jahan Taila's focus on the restaurant niche."
   },
   {
-    "id": "147",
+    "id": "137",
     "firstName": "Adam",
     "lastName": "Pisk",
     "email": "adam@bruntwork.co",
     "company": "Bruntwork",
     "website": "https://au.trustpilot.com",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "inbound marketing"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -13864,8 +19974,42 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-136-0",
+        "content": "Adam Pisk from Bruntwork sent an inbound email promoting their services and Google reviews.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-136-1",
+        "content": "This contact is likely a sales outreach from Bruntwork, not a lead for Derby Digital.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-136-0",
+        "category": "business",
+        "label": "Email Date",
+        "value": "2026-03-09"
+      },
+      {
+        "id": "aif-136-1",
+        "category": "business",
+        "label": "Email Subject",
+        "value": "Over 5,000 companies have an edge | Check out our Google Reviews"
+      },
+      {
+        "id": "aif-136-2",
+        "category": "business",
+        "label": "Sender Company",
+        "value": "Bruntwork"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -13874,17 +20018,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-09T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Adam Pisk from Bruntwork sent an unsolicited inbound email promoting their company's services and Google reviews. This appears to be a sales outreach from Bruntwork, not a prospect or relevant contact for Jahan Taila's Derby Digital."
   },
   {
-    "id": "148",
+    "id": "138",
     "firstName": "Abigail",
     "lastName": "Johnson",
     "email": "abigail@melkprpro.com",
     "company": "Melkprpro",
     "website": "https://melkprpro.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "partner",
+    "tags": [
+      "referral partner",
+      "lead generation"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -13896,31 +20044,7 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "details": "Hi Manu, I saw you helped Al Forno boost call volume by 49.43%. Impressive!\u00a0\r\n\r\nIf we could introduce you to three or four businesses a week looking for website design for marketing agencies services, without needing to run ads or post content, would you be open to a short conversation?\r\n\r\nBest,\r\nAbigail - Booked Calls Daily\r\n\r\nP.S. We only get paid if you get results",
         "direction": "inbound",
         "createdAt": "2026-03-16T12:18:59"
-      }
-    ],
-    "notes": [],
-    "facts": [],
-    "opportunities": [],
-    "aiInsights": [],
-    "groups": [],
-    "connections": [],
-    "lastContactedAt": "2026-03-09",
-    "source": "gmail-import",
-    "createdAt": "2026-03-09T00:00:00",
-    "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
-  },
-  {
-    "id": "149",
-    "firstName": "Abigail",
-    "lastName": "Johnson",
-    "email": "abby@getmelkpr.com",
-    "company": "Getmelkpr",
-    "website": "https://getmelkpr.com",
-    "relationshipType": "other",
-    "tags": [],
-    "relationshipScore": 10,
-    "interactions": [
+      },
       {
         "id": "email-48-0",
         "type": "email",
@@ -13932,8 +20056,55 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "merge-abby@getme",
+        "content": "Merged with duplicate contact: abby@getmelkpr.com",
+        "category": "general",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-137-1",
+        "content": "Abigail is offering to introduce Jahan to businesses (restaurants and construction) seeking website design for marketing agencies services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-137-2",
+        "content": "Melkprpro seems to be a lead generation or referral service, specifically targeting marketing agencies.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-137-0",
+        "category": "business",
+        "label": "Company Offering",
+        "value": "Lead generation/referrals for website design services"
+      },
+      {
+        "id": "aif-137-1",
+        "category": "business",
+        "label": "Target Niche for Referrals",
+        "value": "Restaurants and construction businesses"
+      },
+      {
+        "id": "aif-137-2",
+        "category": "business",
+        "label": "Referral Volume Offered",
+        "value": "3-4 businesses per week"
+      },
+      {
+        "id": "aif-137-3",
+        "category": "business",
+        "label": "Reference Client",
+        "value": "Al Forno (49.43% call volume increase)"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -13942,17 +20113,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-09T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "secondaryEmail": "abby@getmelkpr.com",
+    "aiSummary": "Abigail Johnson from Melkprpro is proposing a partnership to refer 3-4 restaurants and construction businesses weekly to Jahan for website design services, referencing Jahan's success with Al Forno."
   },
   {
-    "id": "150",
+    "id": "139",
     "firstName": "Fina",
     "lastName": "Tracy",
     "email": "fina@dentalbookkeepingpro.co",
     "company": "Dentalbookkeepingpro",
     "website": "https://dentalbookkeepingpro.co",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "QuickBooks",
+      "AI",
+      "bookkeeping"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -13966,8 +20143,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-138-0",
+        "content": "Fina is pitching an AI co-pilot for QuickBooks that automates bookkeeping tasks.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-138-1",
+        "content": "This could be a potential tool for Derby Digital's restaurant clients, or a service to offer them.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-138-0",
+        "category": "business",
+        "label": "Email Date",
+        "value": "2026-02-25"
+      },
+      {
+        "id": "aif-138-1",
+        "category": "business",
+        "label": "Email Subject",
+        "value": "Quickbooks AI?"
+      },
+      {
+        "id": "aif-138-2",
+        "category": "business",
+        "label": "Sender Email",
+        "value": "fina@dentalbookkeepingpro.co"
+      },
+      {
+        "id": "aif-138-3",
+        "category": "business",
+        "label": "Company Niche",
+        "value": "Bookkeeping AI"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -13976,17 +20193,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-25T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Fina Tracy from Dentalbookkeepingpro is pitching an AI co-pilot for QuickBooks to automate bookkeeping. This could be relevant for Derby Digital's restaurant clients or as an internal tool."
   },
   {
-    "id": "151",
+    "id": "140",
     "firstName": "Arcads",
     "lastName": "",
     "email": "r@email.arcads.ai",
-    "company": "Email",
+    "company": "Arcads",
     "website": "https://r.email.arcads.ai",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "AI",
+      "video translation",
+      "SaaS"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -14000,8 +20222,42 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-139-0",
+        "content": "Arcads is an AI video translation service, likely a vendor or tool Jahan could use for clients or internal content.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-139-1",
+        "content": "This is an inbound marketing email, not a direct contact from Jahan to Arcads.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-139-0",
+        "category": "business",
+        "label": "Service Offered",
+        "value": "AI Video Translation (130+ languages, voice-over, dubbing, lip sync)"
+      },
+      {
+        "id": "aif-139-1",
+        "category": "business",
+        "label": "Contact Type",
+        "value": "Inbound Marketing Email"
+      },
+      {
+        "id": "aif-139-2",
+        "category": "business",
+        "label": "Sender",
+        "value": "Arcads"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -14010,51 +20266,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-09T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Arcads is an AI video translation service that sent an inbound marketing email to Jahan Taila. This suggests Arcads sees Jahan as a potential user or client for their translation services, which could be relevant for Derby Digital's restaurant clients for multilingual marketing content."
   },
   {
-    "id": "152",
-    "firstName": "WeBild",
-    "lastName": "",
-    "email": "dmytro@webild.io",
-    "company": "Webild",
-    "website": "https://webild.io",
-    "relationshipType": "vendor",
-    "tags": [],
-    "relationshipScore": 10,
-    "interactions": [
-      {
-        "id": "email-51-0",
-        "type": "email",
-        "date": "2026-03-08",
-        "summary": "Payment Confirmation - Invoice VVKSXPOI-0002",
-        "subject": "Payment Confirmation - Invoice VVKSXPOI-0002",
-        "details": "<!doctype html>\r\n<html lang=\"en\">\r\n<head>\r\n  <meta charset=\"utf-8\" />\r\n  <meta name=\"viewport\" content=\"width=device-width,initial-scale=1\" />\r\n  <title>Payment Confirmation</title>\r\n  <style>\r\n    :root { color-scheme: light dark; supported-color-schemes: light dark; }\r\n    @media (prefers-color-scheme: dark) {\r\n      .bg    { background:#0f1320 !important; }\r\n      .card  { background:#151a2b !important; box-shadow:none !important; }\r\n      .heading { color:#fff !important; }\r\n      .muted   { color:#a9aec3 !important; }\r\n    }\r\n    @media screen and (max-width:640px){\r\n      .container{ width:100% !important; }\r\n      .px { padding-left:20px !important; padding-right:20px !important; }\r\n    }\r\n  </style>\r\n</head>\r\n<body style=\"margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px;color:#111;\">\r\n  <center role=\"article\" aria-roledescription=\"email\" lang=\"en\" class=\"bg\" style=\"width:100%;background:#f6f7fc;\">\r\n    <table role=\"presentation\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\" width=\"100%\">\r\n      <tr>\r\n        <td align=\"center\" style=\"padding:24px 12px;\">\r\n          <table role=\"presentation\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\" class=\"container\" style=\"width:550px;max-width:550px;\">\r\n            <tr><td style=\"height:24px;line-height:24px;font-size:0;\">&nbsp;</td></tr>\r\n            \r\n            <tr>\r\n              <td align=\"center\" class=\"px\" style=\"padding:0 24px;\">\r\n                <table role=\"presentation\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\" width=\"100%\" class=\"card\"\r\n                       style=\"border-radius:24px;overflow:hidden;background:#ffffff;box-shadow:0 0 24px rgba(0,0,0,0.10);\">\r\n                  <tr>\r\n                    <td style=\"padding:32px 24px 24px 24px;\">\r\n                      <h1 class=\"h1 heading\" style=\"margin:0 0 16px 0;font-weight:800;font-size:28px;line-height:1.2;color:#14151a;\">\r\n                        Pay",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      }
-    ],
-    "notes": [],
-    "facts": [],
-    "opportunities": [],
-    "aiInsights": [],
-    "groups": [],
-    "connections": [],
-    "lastContactedAt": "2026-03-08",
-    "source": "gmail-import",
-    "createdAt": "2026-03-08T00:00:00",
-    "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
-  },
-  {
-    "id": "153",
+    "id": "141",
     "firstName": "Jeff",
     "lastName": "Jackel",
     "email": "jeff.jackel.j@clientgiantcorp.com",
     "company": "Clientgiantcorp",
     "website": "https://clientgiantcorp.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "digital marketing",
+      "inbound lead"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -14068,8 +20294,41 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-140-0",
+        "content": "Jeff Jackel from Clientgiantcorp initiated contact inquiring about client acquisition strategies, specifically 'how Codera lands clients'. This indicates a potential interest in digital marketing services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-140-0",
+        "category": "business",
+        "label": "Email Subject",
+        "value": "how Codera lands clients"
+      },
+      {
+        "id": "aif-140-1",
+        "category": "business",
+        "label": "Last Contact Date",
+        "value": "2026-03-07"
+      },
+      {
+        "id": "aif-140-2",
+        "category": "business",
+        "label": "Contact Type",
+        "value": "Inbound Email"
+      },
+      {
+        "id": "aif-140-3",
+        "category": "business",
+        "label": "Email Content Snippet",
+        "value": "Hi<strong style=\"border:0px solid;margin:0px;padding:0px;font-weight:bolder;font-family:'Readex Pro', sans-serif;font-size:14px;"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -14078,17 +20337,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-07T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Jeff Jackel from Clientgiantcorp is an inbound prospect interested in client acquisition strategies, likely for digital marketing services. Jahan Taila should follow up to understand Clientgiantcorp's business and how Derby Digital can help them land clients, especially within the restaurant niche."
   },
   {
-    "id": "154",
+    "id": "142",
     "firstName": "Michael",
     "lastName": "Ray",
     "email": "michaelr@janprok.com",
     "company": "Janprok",
     "website": "https://janprok.com",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "unsolicited",
+      "cleaning services"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -14100,10 +20363,60 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "details": "Hi ,\u00a0\r\n\r\n\r\nAre you the right person to speak with about cleaning/janitorial services for DerbyDigital?\r\n\r\n\r\nWe provide recurring facility cleaning (after-hours or daytime). If you\u2019re open to it, I can send a quick overview + typical pricing ranges for your type of space.\r\n\r\n\r\nIf you\u2019re not the right contact, who should I reach out to?\r\n\r\n\r\nThanks,",
         "direction": "inbound",
         "createdAt": "2026-03-16T12:18:59"
+      },
+      {
+        "id": "email-90-0",
+        "type": "email",
+        "date": "2026-02-26",
+        "summary": "Cleaning service",
+        "subject": "Cleaning service",
+        "details": "Hi Jahan,\u00a0\n\n\nAre you the right person to speak with about cleaning/janitorial services for DerbyDigital?\n\n\nWe provide recurring facility cleaning (after-hours or daytime). If you\u2019re open to it, I can send a quick overview + typical pricing ranges for your type of space.\n\n\nIf you\u2019re not the right contact, who should I reach out to?\n\n\nThanks,",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "merge-ray@janpro",
+        "content": "Merged with duplicate contact: ray@janprokentu.com",
+        "category": "general",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-141-1",
+        "content": "This is an unsolicited sales outreach for cleaning services, not relevant to Jahan's business or niche.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-141-0",
+        "category": "business",
+        "label": "Sender Company",
+        "value": "Janprok"
+      },
+      {
+        "id": "aif-141-1",
+        "category": "business",
+        "label": "Sender Service",
+        "value": "Cleaning/Janitorial Services"
+      },
+      {
+        "id": "aif-141-2",
+        "category": "business",
+        "label": "Recipient Company",
+        "value": "Derby Digital"
+      },
+      {
+        "id": "aif-141-3",
+        "category": "business",
+        "label": "Email Frequency",
+        "value": "2 emails in 10 days"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -14112,17 +20425,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-07T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "secondaryEmail": "ray@janprokentu.com",
+    "aiSummary": "Unsolicited sales outreach from Janprok for cleaning services for Derby Digital. Not relevant to Jahan Taila's role or business focus."
   },
   {
-    "id": "155",
+    "id": "143",
     "firstName": "M",
     "lastName": "Hoffman",
     "email": "m.hoffman@reputationbench.com",
     "company": "Reputationbench",
     "website": "https://reputationbench.com",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "PR",
+      "publishing",
+      "reputation management"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -14136,42 +20455,41 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
-    "opportunities": [],
-    "aiInsights": [],
-    "groups": [],
-    "connections": [],
-    "lastContactedAt": "2026-03-06",
-    "source": "gmail-import",
-    "createdAt": "2026-03-06T00:00:00",
-    "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
-  },
-  {
-    "id": "156",
-    "firstName": "James",
-    "lastName": "Shields",
-    "email": "s.james@getshieldsoutbound.com",
-    "company": "Getshieldsoutbound",
-    "website": "https://getshieldsoutbound.com",
-    "relationshipType": "other",
-    "tags": [],
-    "relationshipScore": 10,
-    "interactions": [
+    "notes": [
       {
-        "id": "email-59-0",
-        "type": "email",
-        "date": "2026-03-06",
-        "summary": "hey again Jahan",
-        "subject": "hey again Jahan",
-        "details": "Jahan, it's James here, we spoke a while back on 30/04/2025.\n\nReason I'm reaching out is because we just launched our new pay per booked call model.\n\nWe run cold email A-Z, and you only pay for qualified calls we book.\n\nCan I share how it works?\n\nSpeak soon,\nJames Shields\n\nPS - one of our most recent clients just closed 4 high ticket deals in 60 days, you can be next",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
+        "id": "ai-142-0",
+        "content": "Mark Hoffman from Reputation Bench reached out regarding a Wikipedia page for Derby Digital.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "facts": [
+      {
+        "id": "aif-142-0",
+        "category": "business",
+        "label": "Sender Company",
+        "value": "Reputation Bench"
+      },
+      {
+        "id": "aif-142-1",
+        "category": "business",
+        "label": "Sender Role",
+        "value": "PR and publishing firm"
+      },
+      {
+        "id": "aif-142-2",
+        "category": "business",
+        "label": "Email Subject",
+        "value": "Wikipedia Page for Derby Digital"
+      },
+      {
+        "id": "aif-142-3",
+        "category": "business",
+        "label": "Date of Contact",
+        "value": "2026-03-06"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -14180,17 +20498,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-06T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Mark Hoffman from Reputation Bench, a PR and publishing firm, contacted Jahan Taila regarding a Wikipedia page for Derby Digital. This appears to be an unsolicited business development outreach."
   },
   {
-    "id": "157",
+    "id": "144",
     "firstName": "Quick",
     "lastName": "Question?",
     "email": "austin@webdesignshop.co",
     "company": "Webdesignshop",
     "website": "https://webdesignshop.co",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "partner",
+    "tags": [
+      "web design",
+      "WordPress",
+      "SEO"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -14204,8 +20527,41 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-143-0",
+        "content": "Austin is asking about Jahan's SEO services, indicating a potential referral or white-label partnership opportunity.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-143-0",
+        "category": "business",
+        "label": "Email",
+        "value": "austin@webdesignshop.co"
+      },
+      {
+        "id": "aif-143-1",
+        "category": "business",
+        "label": "Company Focus",
+        "value": "WordPress web design"
+      },
+      {
+        "id": "aif-143-2",
+        "category": "business",
+        "label": "Inquiry Date",
+        "value": "2026-03-04"
+      },
+      {
+        "id": "aif-143-3",
+        "category": "business",
+        "label": "Inquiry Type",
+        "value": "SEO services"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -14214,17 +20570,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-04T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Austin from Webdesignshop, a WordPress web design company, is inquiring about Derby Digital's SEO services and typical monthly packages, suggesting a potential partnership for SEO referrals or white-label services."
   },
   {
-    "id": "158",
+    "id": "145",
     "firstName": "Editing",
     "lastName": "",
     "email": "editing@canvasrebel.com",
     "company": "Canvasrebel",
     "website": "https://hiddengeminterviews.com",
-    "relationshipType": "client",
-    "tags": [],
+    "relationshipType": "industry",
+    "tags": [
+      "interview",
+      "content creation"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -14238,8 +20598,41 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-144-0",
+        "content": "Jahan was interviewed by Canvasrebel, indicating a connection in the digital marketing or content creation industry.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-144-0",
+        "category": "business",
+        "label": "Interaction Type",
+        "value": "Interview"
+      },
+      {
+        "id": "aif-144-1",
+        "category": "business",
+        "label": "Contact Person",
+        "value": "Editing"
+      },
+      {
+        "id": "aif-144-2",
+        "category": "business",
+        "label": "Company Website",
+        "value": "canvasrebel.com"
+      },
+      {
+        "id": "aif-144-3",
+        "category": "business",
+        "label": "Date of Interaction",
+        "value": "2026-03-03"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -14248,14 +20641,16 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-03T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "Editor",
+    "aiSummary": "Jahan Taila was interviewed by Canvasrebel, an industry contact, for content creation. This indicates a professional connection within the broader digital marketing or content creation space."
   },
   {
-    "id": "159",
+    "id": "146",
     "firstName": "Alissa",
     "lastName": "James",
     "email": "alissa@prepscholar.com",
-    "company": "Prepscholar",
+    "company": "PrepScholar",
     "website": "https://prepscholar.com",
     "relationshipType": "other",
     "tags": [],
@@ -14272,13 +20667,46 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-145-0",
+        "content": "This contact is an inbound email regarding a compromised email account, not a direct inquiry for digital marketing services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-145-1",
+        "content": "The email indicates a potential security issue that Jahan Taila's company (Derby Digital) might have been exposed to.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "a07a82dec09e",
         "category": "contact",
         "label": "Phone",
         "value": "866-811-5546"
+      },
+      {
+        "id": "aif-145-1",
+        "category": "business",
+        "label": "Email Issue",
+        "value": "Compromised email account"
+      },
+      {
+        "id": "aif-145-2",
+        "category": "business",
+        "label": "Sender Company",
+        "value": "PrepScholar"
+      },
+      {
+        "id": "aif-145-3",
+        "category": "business",
+        "label": "Email Date",
+        "value": "2026-03-03"
       }
     ],
     "opportunities": [],
@@ -14289,17 +20717,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-03T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Alissa James from PrepScholar sent an inbound email to inform Jahan Taila that her email was compromised and to disregard a previous email titled 'PrepScholar, Inc Shared a Document.' This is not a lead for digital marketing services but a security notification."
   },
   {
-    "id": "160",
+    "id": "147",
     "firstName": "Arvell",
     "lastName": "Craig",
     "email": "arvell.cc@botbuildersonline.org",
     "company": "Botbuildersonline",
     "website": "https://botbuildersonline.org",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "small business",
+      "sales pipeline",
+      "medium business",
+      "bot automation"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -14313,8 +20747,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-146-0",
+        "content": "Arvell is pitching a bot-based solution to keep sales pipelines full for small to medium businesses, aiming to help them compete with larger companies without adding overhead.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-146-1",
+        "content": "This could be a potential partnership opportunity for Derby Digital if their restaurant clients need sales automation, or a lead for Jahan to explore if Botbuildersonline needs digital marketing.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-146-0",
+        "category": "business",
+        "label": "Company Offering",
+        "value": "Bots for sales pipeline management"
+      },
+      {
+        "id": "aif-146-1",
+        "category": "business",
+        "label": "Target Market",
+        "value": "Small to medium sized companies"
+      },
+      {
+        "id": "aif-146-2",
+        "category": "contact",
+        "label": "Last Contact Date",
+        "value": "2026-03-03"
+      },
+      {
+        "id": "aif-146-3",
+        "category": "contact",
+        "label": "Contact Type",
+        "value": "Inbound email"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -14323,17 +20797,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-03T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Arvell Craig from Botbuildersonline reached out to Jahan Taila with an inbound email on 2026-03-03, pitching their bot solutions to help small to medium businesses fill their sales pipelines and compete with larger companies. This presents a potential opportunity for partnership or a lead for Derby Digital."
   },
   {
-    "id": "161",
+    "id": "148",
     "firstName": "Iqra",
     "lastName": "Jawed",
     "email": "ijawed@digitalocean.com",
-    "company": "Digitalocean",
+    "company": "DigitalOcean",
     "website": "https://calendly.com",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "Cloudways",
+      "agency partnership"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -14347,8 +20825,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-147-0",
+        "content": "Iqra Jawed from DigitalOcean is reaching out regarding a past interaction with the Cloudways Agency Partnership Program, which Jahan Taila found unconvincing.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-147-1",
+        "content": "This contact is likely a follow-up or re-engagement attempt from DigitalOcean/Cloudways, not directly related to Derby Digital's restaurant niche.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-147-0",
+        "category": "business",
+        "label": "Sender Company",
+        "value": "DigitalOcean"
+      },
+      {
+        "id": "aif-147-1",
+        "category": "business",
+        "label": "Email Topic",
+        "value": "Cloudways Agency Partnership Program"
+      },
+      {
+        "id": "aif-147-2",
+        "category": "business",
+        "label": "Jahan's Past Interaction",
+        "value": "Found Cloudways program unconvincing"
+      },
+      {
+        "id": "aif-147-3",
+        "category": "business",
+        "label": "Email Type",
+        "value": "Inbound re-engagement"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -14357,17 +20875,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-04T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Iqra Jawed from DigitalOcean is following up on Jahan Taila's previous unconvincing experience with the Cloudways Agency Partnership Program. This is an inbound re-engagement email from a vendor/partner, not a direct prospect for Derby Digital's services."
   },
   {
-    "id": "162",
+    "id": "149",
     "firstName": "Noelle",
     "lastName": "Ashford",
     "email": "noelleashford@continuumodyssey.com",
     "company": "Continuumodyssey",
     "website": "https://continuumodyssey.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "restaurant niche",
+      "performance marketing",
+      "inbound lead"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -14381,8 +20904,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-148-0",
+        "content": "Noelle is offering a performance-based lead generation service, specifically targeting ICPs for Jahan's agency.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-148-1",
+        "content": "The offer is 'pay when you close' which could be attractive for a digital marketing agency looking to scale their client acquisition.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-148-0",
+        "category": "business",
+        "label": "Sender Company",
+        "value": "Continuumodyssey"
+      },
+      {
+        "id": "aif-148-1",
+        "category": "business",
+        "label": "Offer Type",
+        "value": "Performance-based lead generation"
+      },
+      {
+        "id": "aif-148-2",
+        "category": "business",
+        "label": "Payment Model",
+        "value": "Pay when you close"
+      },
+      {
+        "id": "aif-148-3",
+        "category": "business",
+        "label": "Target Lead Volume",
+        "value": "3-5 ICPs per month"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -14391,17 +20954,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-03T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Noelle Ashford from Continuumodyssey is a prospect offering a performance-based lead generation service to Jahan Taila's agency, Derby Digital. The proposal is to deliver 3-5 ICPs monthly, with payment only upon closing the client. This is an inbound lead that could potentially help Derby Digital acquire more restaurant clients."
   },
   {
-    "id": "163",
+    "id": "150",
     "firstName": "Areeb",
     "lastName": "Farqaleet",
     "email": "afarqaleet@digitalocean.com",
-    "company": "Digitalocean",
+    "company": "DigitalOcean",
     "website": "https://calendly.com",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "inbound",
+      "Cloudways",
+      "partnership program"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -14415,8 +20983,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-149-0",
+        "content": "This is an inbound email from DigitalOcean regarding the Cloudways Agency Partnership Program, suggesting Jahan was previously introduced to it.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-149-1",
+        "content": "The sender, Areeb Farqaleet, is trying to understand why the program wasn't convincing to Jahan.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-149-0",
+        "category": "business",
+        "label": "Sender Company",
+        "value": "DigitalOcean"
+      },
+      {
+        "id": "aif-149-1",
+        "category": "business",
+        "label": "Topic",
+        "value": "Cloudways Agency Partnership Program"
+      },
+      {
+        "id": "aif-149-2",
+        "category": "business",
+        "label": "Email Type",
+        "value": "Inbound"
+      },
+      {
+        "id": "aif-149-3",
+        "category": "business",
+        "label": "Date",
+        "value": "2026-03-03"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -14425,17 +21033,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-03T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Inbound email from DigitalOcean's Areeb Farqaleet, following up on Jahan's previous interaction with the Cloudways Agency Partnership Program to understand why it wasn't convincing."
   },
   {
-    "id": "164",
+    "id": "151",
     "firstName": "Robert",
     "lastName": "Young",
     "email": "rob@acquisitionsdirect.com",
     "company": "Acquisitionsdirect",
     "website": "https://acquisitionsdirect.com",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "business broker",
+      "acquisition"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -14449,13 +21061,39 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-150-0",
+        "content": "Robert Young is a business broker specializing in internet-driven businesses. He reached out regarding an 'online education business', which is likely a misunderstanding of Jahan's agency's services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "4e338f4de935",
         "category": "contact",
         "label": "Phone",
         "value": "610-422-0051"
+      },
+      {
+        "id": "aif-150-1",
+        "category": "business",
+        "label": "Company Focus",
+        "value": "Sale of internet-driven businesses"
+      },
+      {
+        "id": "aif-150-2",
+        "category": "business",
+        "label": "Contact Role",
+        "value": "Partner at a national business brokering firm"
+      },
+      {
+        "id": "aif-150-3",
+        "category": "business",
+        "label": "Inquiry Type",
+        "value": "Interest in 'Online Education Business'"
       }
     ],
     "opportunities": [],
@@ -14466,17 +21104,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-03T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "Partner",
+    "aiSummary": "Robert Young from Acquisitionsdirect, a business brokering firm, contacted Jahan Taila expressing interest in an 'online education business'. This appears to be a misdirected inquiry, as Jahan's agency, Derby Digital, focuses on digital marketing for restaurants."
   },
   {
-    "id": "165",
+    "id": "152",
     "firstName": "Katen",
     "lastName": "Patel",
     "email": "katen1patel@gmail.com",
     "company": "",
     "website": "https://mailchi.mp",
-    "relationshipType": "client",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "restaurant niche",
+      "SBDC",
+      "Kentucky"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -14490,8 +21134,42 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-151-0",
+        "content": "Katen is forwarding SBDC emails, indicating an interest in business development and training, which aligns with Derby Digital's services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-151-1",
+        "content": "The mention of 'FL items' suggests Katen may have business interests or operations in Florida, potentially expanding their restaurant footprint.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-151-0",
+        "category": "business",
+        "label": "Email Source",
+        "value": "Kentucky SBDC"
+      },
+      {
+        "id": "aif-151-1",
+        "category": "business",
+        "label": "Activity Date",
+        "value": "2026-03-03"
+      },
+      {
+        "id": "aif-151-2",
+        "category": "business",
+        "label": "Potential Location",
+        "value": "Florida (FL items)"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -14500,17 +21178,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-03T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Katen Patel is a prospect who is actively engaged with business development resources (SBDC) and may be expanding their restaurant business, potentially into Florida. This indicates a strong potential fit for Derby Digital's digital marketing services in the restaurant niche."
   },
   {
-    "id": "166",
+    "id": "153",
     "firstName": "rahul.pathak",
     "lastName": "",
     "email": "rahul.pathak@gohighlevel.com",
     "company": "Gohighlevel",
     "website": "https://email.mailbox.gohighlevel.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "vendor",
+    "tags": [
+      "HighLevel",
+      "Account Manager"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -14524,8 +21206,41 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-152-0",
+        "content": "Rahul is Jahan's Account Manager at HighLevel, offering to help optimize their HighLevel account.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-152-0",
+        "category": "business",
+        "label": "Vendor Service",
+        "value": "HighLevel platform"
+      },
+      {
+        "id": "aif-152-1",
+        "category": "business",
+        "label": "Contact Role",
+        "value": "Account Manager"
+      },
+      {
+        "id": "aif-152-2",
+        "category": "business",
+        "label": "Email Date",
+        "value": "2026-03-03"
+      },
+      {
+        "id": "aif-152-3",
+        "category": "business",
+        "label": "Email Type",
+        "value": "Inbound"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -14534,51 +21249,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-03T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "Account Manager",
+    "aiSummary": "Rahul Pathak is Jahan Taila's Account Manager at HighLevel, reaching out to offer optimization support for their HighLevel account. This indicates Jahan is a current user/client of HighLevel."
   },
   {
-    "id": "167",
-    "firstName": "Webild",
-    "lastName": "",
-    "email": "idan@hello.webild.io",
-    "company": "Hello",
-    "website": "https://webild.io",
-    "relationshipType": "other",
-    "tags": [],
-    "relationshipScore": 10,
-    "interactions": [
-      {
-        "id": "email-78-0",
-        "type": "email",
-        "date": "2026-03-02",
-        "summary": "Pssst... Webild Just Launched",
-        "subject": "Pssst... Webild Just Launched",
-        "details": "https://www.webild.io/\r\n\r\nhttps://www.webild.io/\r\n\r\nhttps://www.webild.io/\r\n\r\n[twitter](https://x.com/webild)\r\n[instagram](https://www.instagram.com/webild/)\r\n\r\nNo longer want to receive these emails? [Unsubscribe](https://manage.kmail-=\r\nlists.com/subscriptions/unsubscribe?a=3DUAvGAB&c=3D01KJH5FMDG1162SPRSW52F72=\r\n55&k=3De594ccefbde8499c5add3f70351c5fa7&g=3DXJR7uk&m=3D01KJKE8P99AEJJPRSV3D=\r\n5G81N2&r=3D01KJR0X0G18KDABNC8RHM7404B).",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      }
-    ],
-    "notes": [],
-    "facts": [],
-    "opportunities": [],
-    "aiInsights": [],
-    "groups": [],
-    "connections": [],
-    "lastContactedAt": "2026-03-02",
-    "source": "gmail-import",
-    "createdAt": "2026-03-02T00:00:00",
-    "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
-  },
-  {
-    "id": "168",
+    "id": "154",
     "firstName": "Saoirse",
     "lastName": "Hartwick",
     "email": "saoirsehartwick@discovervigor.com",
     "company": "Discovervigor",
     "website": "https://discovervigor.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "agency",
+      "pay-per-close"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -14592,8 +21278,35 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-153-0",
+        "content": "Saoirse is pitching a 'pay per close' model, suggesting Jahan's agency might be paying retainers without guaranteed deals.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-153-0",
+        "category": "business",
+        "label": "Email Date",
+        "value": "2026-03-02"
+      },
+      {
+        "id": "aif-153-1",
+        "category": "business",
+        "label": "Email Direction",
+        "value": "inbound"
+      },
+      {
+        "id": "aif-153-2",
+        "category": "business",
+        "label": "Pitch Focus",
+        "value": "Pay per close model"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -14602,17 +21315,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-02T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Saoirse Hartwick from Discovervigor is an inbound prospect pitching a 'pay per close' model, implying Jahan's agency might benefit from a different payment structure than traditional retainers."
   },
   {
-    "id": "169",
+    "id": "155",
     "firstName": "Judy",
     "lastName": "Bailey",
     "email": "judy@promoifyhq.co",
     "company": "Promoifyhq",
     "website": "https://promoifyhq.co",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "cold outreach",
+      "AI staffing"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -14626,42 +21343,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
-    "opportunities": [],
-    "aiInsights": [],
-    "groups": [],
-    "connections": [],
-    "lastContactedAt": "2026-03-02",
-    "source": "gmail-import",
-    "createdAt": "2026-03-02T00:00:00",
-    "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
-  },
-  {
-    "id": "170",
-    "firstName": "9x",
-    "lastName": "",
-    "email": "hi@mail.go9x.com",
-    "company": "Mail",
-    "website": "https://go9x.com",
-    "relationshipType": "other",
-    "tags": [],
-    "relationshipScore": 10,
-    "interactions": [
+    "notes": [
       {
-        "id": "email-81-0",
-        "type": "email",
-        "date": "2026-03-02",
-        "summary": "Jahan, here's your free template: OpenClaw Marketing Team",
-        "subject": "Jahan, here's your free template: OpenClaw Marketing Team",
-        "details": "OpenClaw Marketing Team\r\n\r\nHi Jahan \ud83d\udc4b\r\n\r\nAs promised here's your downloadable resource, ready to implement and test for yourself:\r\n\r\nClick here to access ( https://drive.google.com/drive/folders/143_4Euzp3gzV6na5qRy8PMMkvnjpC6nK?usp=sharing&utm_campaign=YouTube+Resource+Claimed&utm_content=YouTube+Resource+Claimed&utm_medium=email&utm_source=customer.io&utm_term=RMasCAUAAZytMcQwByJfiOlO95zALw%3D%3D )\r\n\r\nPS. Keep an eye out for our next newsletter where you'll find details on our upcoming free weekly AI workshops and latest AI and automation videos from our YouTube channel.\r\n\r\nHappy automating,\r\nAlex, Jan & PYV\r\n\r\n9x Email Footer ( https://go9x.com?utm_campaign=YouTube+Resource+Claimed&utm_content=YouTube+Resource+Claimed&utm_medium=email&utm_source=customer.io&utm_term=RMasCAUAAZytMcQwByJfiOlO95zALw%3D%3D )\r\n\r\nConnect with: \u00a0Alex ( https://www.linkedin.com/in/akantjas/?utm_campaign=YouTube+Resource+Claimed&utm_content=YouTube+Resource+Claimed&utm_medium=email&utm_source=customer.io&utm_term=RMasCAUAAZytMcQwByJfiOlO95zALw%3D%3D ) \u00a0| \u00a0Jan ( https://www.linkedin.com/in/jan-meinecke/?utm_campaign=YouTube+Resource+Claimed&utm_content=YouTube+Resource+Claimed&utm_medium=email&utm_source=customer.io&utm_term=RMasCAUAAZytMcQwByJfiOlO95zALw%3D%3D )\u00a0 | \u00a0PYV ( https://www.linkedin.com/in/thisispyv/?utm_campaign=YouTube+Resource+Claimed&utm_content=YouTube+Resource+Claimed&utm_medium=email&utm_source=customer.io&utm_term=RMasCAUAAZytMcQwByJfiOlO95zALw%3D%3D )\r\n\r\n\u00a0\r\n\r\n\u00a0\r\n\r\nView in the browser ( https://track.customer.io/deliveries/RMasCAUAAZytMcQwByJfiOlO95zALw== )\r\n\r\n\u00a0\r\n\r\nnx UG - B\u00f6dikerstra\u00dfe 31 - 10245 Berlin",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
+        "id": "ai-154-0",
+        "content": "This is an unsolicited inbound email offering AI-ready remote staff from India.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-154-1",
+        "content": "The sender is likely a vendor attempting to sell staffing services, not a potential client for Derby Digital's services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "facts": [
+      {
+        "id": "aif-154-0",
+        "category": "business",
+        "label": "Email Sender",
+        "value": "Judy Bailey"
+      },
+      {
+        "id": "aif-154-1",
+        "category": "business",
+        "label": "Email Domain",
+        "value": "promoifyhq.co"
+      },
+      {
+        "id": "aif-154-2",
+        "category": "business",
+        "label": "Service Offered",
+        "value": "AI-Ready Remote Staff"
+      },
+      {
+        "id": "aif-154-3",
+        "category": "business",
+        "label": "Staff Origin",
+        "value": "India"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -14670,17 +21393,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-02T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "This contact is an unsolicited vendor offering AI staffing services, not a prospect for Derby Digital's digital marketing services in the restaurant niche."
   },
   {
-    "id": "171",
+    "id": "156",
     "firstName": "Christian",
     "lastName": "Quijoy",
     "email": "admin@venuehopper.com",
     "company": "Venuehopper",
     "website": "https://theaddisonnyc.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "client",
+    "tags": [
+      "restaurant niche",
+      "website development"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -14694,13 +21421,39 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-155-0",
+        "content": "Christian is communicating about a domain purchase for a restaurant client, 'theaddisonnyc.com', indicating Jahan's agency is likely building or managing their website.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "cb01be5ef23a",
         "category": "contact",
         "label": "Phone",
         "value": "955 133 7567"
+      },
+      {
+        "id": "aif-155-1",
+        "category": "business",
+        "label": "Client Domain",
+        "value": "theaddisonnyc.com"
+      },
+      {
+        "id": "aif-155-2",
+        "category": "business",
+        "label": "Service Provided",
+        "value": "Website Development/Management"
+      },
+      {
+        "id": "aif-155-3",
+        "category": "business",
+        "label": "Contact Role",
+        "value": "Admin"
       }
     ],
     "opportunities": [],
@@ -14711,17 +21464,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-27T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Christian Quijoy from Venuehopper is an existing client contact, likely an admin, who is coordinating domain acquisition for a restaurant client (theaddisonnyc.com) that Derby Digital is providing website services for."
   },
   {
-    "id": "172",
+    "id": "157",
     "firstName": "Wu",
     "lastName": "Zhao",
     "email": "zhaobentonville@gmail.com",
     "company": "",
     "website": "",
-    "relationshipType": "client",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "menu planning",
+      "wine dinner",
+      "restaurant"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -14735,8 +21493,42 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-156-0",
+        "content": "Wu Zhao is likely involved in restaurant operations, specifically menu and wine pairing for events.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-156-1",
+        "content": "The email content suggests a focus on high-end dining experiences and detailed menu descriptions.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-156-0",
+        "category": "business",
+        "label": "Email Content",
+        "value": "Wine Dinner Menu details (Crab Cake, Swordfish, Kelham Chardonnay/Merlot pairings)"
+      },
+      {
+        "id": "aif-156-1",
+        "category": "business",
+        "label": "Potential Role",
+        "value": "Restaurant owner/manager or event coordinator"
+      },
+      {
+        "id": "aif-156-2",
+        "category": "business",
+        "label": "Location Hint",
+        "value": "Bentonville (from email address)"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -14745,17 +21537,24 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-27T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "city": "Bentonville",
+    "state": "AR",
+    "aiSummary": "Wu Zhao appears to be a restaurant professional, possibly in Bentonville, AR, focused on curating detailed dining experiences like wine dinners. This aligns well with Jahan Taila's restaurant niche for digital marketing."
   },
   {
-    "id": "173",
+    "id": "158",
     "firstName": "Toast",
     "lastName": "",
     "email": "customermarketing@customers.mktg.toasttab.com",
-    "company": "Customers",
+    "company": "Toast",
     "website": "https://clicks.brz.toasttab.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "industry",
+    "tags": [
+      "POS",
+      "restaurant tech",
+      "payroll"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -14769,8 +21568,42 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-157-0",
+        "content": "Toast is a major POS and restaurant management platform, making them a key player in Jahan's target niche.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-157-1",
+        "content": "The email content focuses on Toast Payroll, indicating a service offering that addresses operational needs for restaurants.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-157-0",
+        "category": "business",
+        "label": "Company Type",
+        "value": "Restaurant Technology Provider"
+      },
+      {
+        "id": "aif-157-1",
+        "category": "business",
+        "label": "Product Focus (Email)",
+        "value": "Toast Payroll"
+      },
+      {
+        "id": "aif-157-2",
+        "category": "business",
+        "label": "Industry Relevance",
+        "value": "High (direct competitor/partner in restaurant space)"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -14779,17 +21612,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-27T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "This contact is from Toast, a significant restaurant technology provider, specifically highlighting their payroll services. For Jahan Taila, this represents an industry touchpoint, offering insights into the market and potential for partnership or competitive analysis within the restaurant niche."
   },
   {
-    "id": "174",
+    "id": "159",
     "firstName": "Searchlight",
     "lastName": "Pictures",
     "email": "searchlightpictures@email.searchlightpictures.com",
-    "company": "Email",
+    "company": "Searchlight Pictures",
     "website": "https://l.email.searchlightpictures.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "marketing",
+      "film industry"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -14803,8 +21640,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-158-0",
+        "content": "This is an inbound email from Searchlight Pictures, a film production and distribution company. The content is a promotional email for a new film streaming on Hulu.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-158-1",
+        "content": "While Searchlight Pictures is not directly in the restaurant niche, they engage in significant digital marketing for their films. This could indicate a need for sophisticated digital marketing strategies.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-158-0",
+        "category": "business",
+        "label": "Company Type",
+        "value": "Film Production/Distribution"
+      },
+      {
+        "id": "aif-158-1",
+        "category": "business",
+        "label": "Email Source",
+        "value": "Inbound promotional email"
+      },
+      {
+        "id": "aif-158-2",
+        "category": "business",
+        "label": "Recent Activity",
+        "value": "Promoting a film streaming on Hulu"
+      },
+      {
+        "id": "aif-158-3",
+        "category": "business",
+        "label": "Potential Need",
+        "value": "Digital marketing expertise for film promotion"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -14813,17 +21690,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-01-01T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Searchlight Pictures is a film company sending promotional emails. While not a restaurant, they are active in digital marketing, which could be a tangential opportunity for Jahan Taila's agency if they expand beyond the restaurant niche or if Searchlight has internal catering/restaurant needs for their productions."
   },
   {
-    "id": "175",
+    "id": "160",
     "firstName": "The",
     "lastName": "Service Station Restaurant",
     "email": "vip@mg.owner.com",
-    "company": "Mg",
+    "company": "The Service Station Restaurant",
     "website": "https://w3.org",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "local business",
+      "restaurant"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -14837,8 +21718,55 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-159-0",
+        "content": "The Service Station Restaurant is actively using email marketing for customer engagement and promotions.",
+        "category": "marketing",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-159-1",
+        "content": "The email content suggests a focus on customer retention and driving repeat business through discounts.",
+        "category": "marketing",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-159-2",
+        "content": "The email address 'vip@mg.owner.com' indicates a potential owner or high-level manager, making them a key decision-maker.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-159-0",
+        "category": "business",
+        "label": "Industry",
+        "value": "Restaurant"
+      },
+      {
+        "id": "aif-159-1",
+        "category": "marketing",
+        "label": "Current Marketing Activity",
+        "value": "Email promotions ($5 off)"
+      },
+      {
+        "id": "aif-159-2",
+        "category": "contact",
+        "label": "Email Domain",
+        "value": "mg.owner.com"
+      },
+      {
+        "id": "aif-159-3",
+        "category": "contact",
+        "label": "Email Recipient Type",
+        "value": "VIP/Owner"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -14847,92 +21775,24 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-27T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "Owner/Manager",
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "The Service Station Restaurant is a Louisville-based restaurant actively using email marketing for customer promotions. The contact email suggests a high-level decision-maker, making them a strong prospect for digital marketing services, particularly in areas like advanced email strategy, SEO, or social media to complement their existing efforts."
   },
   {
-    "id": "176",
-    "firstName": "Michael",
-    "lastName": "Ray",
-    "email": "ray@janprokentu.com",
-    "company": "Janprokentu",
-    "website": "https://janprokentu.com",
-    "relationshipType": "other",
-    "tags": [],
-    "relationshipScore": 10,
-    "interactions": [
-      {
-        "id": "email-90-0",
-        "type": "email",
-        "date": "2026-02-26",
-        "summary": "Cleaning service",
-        "subject": "Cleaning service",
-        "details": "Hi Jahan,\u00a0\n\n\nAre you the right person to speak with about cleaning/janitorial services for DerbyDigital?\n\n\nWe provide recurring facility cleaning (after-hours or daytime). If you\u2019re open to it, I can send a quick overview + typical pricing ranges for your type of space.\n\n\nIf you\u2019re not the right contact, who should I reach out to?\n\n\nThanks,",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      }
-    ],
-    "notes": [],
-    "facts": [],
-    "opportunities": [],
-    "aiInsights": [],
-    "groups": [],
-    "connections": [],
-    "lastContactedAt": "2026-02-26",
-    "source": "gmail-import",
-    "createdAt": "2026-02-26T00:00:00",
-    "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
-  },
-  {
-    "id": "177",
-    "firstName": "Michael",
-    "lastName": "Shalev",
-    "email": "info@thedeannyc.com",
-    "company": "Thedeannyc",
-    "website": "https://sprh.mn",
-    "relationshipType": "client",
-    "tags": [],
-    "relationshipScore": 10,
-    "interactions": [
-      {
-        "id": "email-91-0",
-        "type": "email",
-        "date": "2026-02-11",
-        "summary": "Fwd: Fwd: Re: The Addison Production Design & Remodel x 444 Studios",
-        "subject": "Fwd: Fwd: Re: The Addison Production Design & Remodel x 444 Studios",
-        "details": "Jahan, see here renderings png files u needed thanks\r\n\r\n*All the best,*\r\n*Michael Shalev *\r\n832-643-0855\r\ninfo@thedeannyc.com\r\n*Programing Director/ Event Coordinator  *\r\n[image: The Dean Nyc - Recreation - Midtown Manhattan - New York City]\r\n\r\nSent via Superhuman <https://sprh.mn/?vip=info@thedeannyc.com>\r\n\r\n\r\n---------- Forwarded message ----------\r\nFrom: Michael Shalev <mshalev10@gmail.com>\r\nDate: Wednesday, February 11 2026 at 7:27 PM EST\r\nSubject: Fwd: Re: The Addison Production Design & Remodel x 444 Studios\r\nTo: Michael Shalev <info@thedeannyc.com>\r\n\r\n*Michael Shalev *\r\n(MSU INC)\r\nEvent Management\r\n832-643-0855\r\n\r\n\r\n---------- Forwarded message ----------\r\nFrom: Pao Lopez <pao@444society.co>\r\nDate: Wednesday, February 11 2026 at 5:22 PM EST\r\nSubject: Re: The Addison Production Design & Remodel x 444 Studios\r\nTo: Michael Shalev <mshalev10@gmail.com>\r\nCc: Ian Magid <ianscottmagid@gmail.com>, 39thstreethospitality@gmail.com,\r\nJacob Perler <JAKE@444society.co>, MAX VAILLARD <max@creative-elevation.com>,\r\npalacio.designs.us@gmail.com\r\n\r\nRenders attached\r\n 2.png\r\n<https://drive.google.com/file/d/1k_XYAt-UrHCnlG2eramVxsZBvF5rkg7j/view?usp=drive_web>\r\n 16.png\r\n<https://drive.google.com/file/d/1c1YGiWmVLpuhoTVycXyzACS-wCBAlP14/view?usp=drive_web>\r\n 4.png\r\n<https://drive.google.com/file/d/1utFZlj9jSJ4tNCPBPtUC2Vm4G7N6k2mt/view?usp=drive_web>\r\n 5.png\r\n<https://drive.google.com/file/d/1MDMEXj9j3FA0RCfXchuLv8c-sxFBir8F/view?usp=drive_web>\r\n 6.png\r\n<https://drive.google.com/file/d/1fbRM67QJ0bFc4AZAypw6GR2DHj5kSpJk/view?usp=drive_web>\r\n\r\nOn Thu, Feb 5, 2026 at 6:13\u202fPM Michael Shalev <mshalev10@gmail.com> wrote:\r\n\r\nThanks\r\n\r\n*Michael Shalev *\r\n(MSU INC)\r\nEvent Management\r\n832-643-0855\r\n\r\n\r\nOn Thu, Feb 05, 2026 at 1:46 PM, Pao Lopez <pao@444society.co> wrote:\r\n\r\nHi everyone, It\u2019s been a pleasure working together!\r\n\r\nAttached please find the design layouts and dimensions for the three areas:\r\n\r\n\r\n   - Entrance shelving / wall\r\n   - Photo booth\r\n   - Bar\r\n   - Wall behind booth",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      }
-    ],
-    "notes": [],
-    "facts": [
-      {
-        "id": "df7ba840421e",
-        "category": "contact",
-        "label": "Phone",
-        "value": "832-643-0855"
-      }
-    ],
-    "opportunities": [],
-    "aiInsights": [],
-    "groups": [],
-    "connections": [],
-    "lastContactedAt": "2026-02-11",
-    "source": "gmail-import",
-    "createdAt": "2026-02-11T00:00:00",
-    "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
-  },
-  {
-    "id": "178",
+    "id": "161",
     "firstName": "Typeform",
     "lastName": "",
     "email": "news@typeform.com",
     "company": "Typeform",
     "website": "https://links2.typeform.com",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "email marketing",
+      "product updates"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -14946,13 +21806,45 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-160-0",
+        "content": "This is an inbound marketing email from Typeform, likely a newsletter or product update, not a direct contact for business development.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "511a1f4e7da3",
         "category": "contact",
         "label": "Phone",
         "value": "2903526941"
+      },
+      {
+        "id": "aif-160-1",
+        "category": "business",
+        "label": "Sender Email",
+        "value": "news@typeform.com"
+      },
+      {
+        "id": "aif-160-2",
+        "category": "business",
+        "label": "Email Subject",
+        "value": "Hey, here\u2019s what\u2019s new at Typeform | Typeform Feature drops, updates, community inspiration. It\u2019s all here"
+      },
+      {
+        "id": "aif-160-3",
+        "category": "business",
+        "label": "Date Received",
+        "value": "2026-02-26"
+      },
+      {
+        "id": "aif-160-4",
+        "category": "business",
+        "label": "Email Type",
+        "value": "Newsletter/Product Update"
       }
     ],
     "opportunities": [],
@@ -14963,17 +21855,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-26T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "This contact is an automated marketing email from Typeform, providing product updates and community inspiration. It does not represent a direct lead or business opportunity for Jahan Taila at Derby Digital."
   },
   {
-    "id": "179",
+    "id": "162",
     "firstName": "Gary",
     "lastName": "Brewer",
     "email": "gary.brewer@builtwith.com",
     "company": "Builtwith",
     "website": "https://pro.builtwith.com",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "restaurant tech",
+      "technology report"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -14987,8 +21883,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-161-0",
+        "content": "Gary Brewer from Builtwith sends technology snapshots, specifically mentioning Spothopper, a restaurant technology.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-161-1",
+        "content": "This contact provides data on restaurant technology adoption, which could be valuable for Jahan Taila's restaurant niche.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-161-0",
+        "category": "business",
+        "label": "Company",
+        "value": "Builtwith"
+      },
+      {
+        "id": "aif-161-1",
+        "category": "business",
+        "label": "Contact Name",
+        "value": "Gary Brewer"
+      },
+      {
+        "id": "aif-161-2",
+        "category": "business",
+        "label": "Email Content Focus",
+        "value": "Technology snapshot (Spothopper)"
+      },
+      {
+        "id": "aif-161-3",
+        "category": "business",
+        "label": "Spothopper Live Sites",
+        "value": "15,920"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -14997,17 +21933,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-26T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Gary Brewer from Builtwith provides technology reports, specifically tracking Spothopper, a restaurant technology. This contact could be a source of market intelligence for Jahan Taila's digital marketing agency in the restaurant niche."
   },
   {
-    "id": "180",
+    "id": "163",
     "firstName": "Tia",
     "lastName": "Lindsay",
     "email": "tia.lindsay@ramp.com",
     "company": "Ramp",
     "website": "https://linkedin.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "corporate cards",
+      "financial services",
+      "inbound lead"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -15021,7 +21962,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-162-0",
+        "content": "Tia reached out congratulating Jahan on his 1-year anniversary at Derby Digital, indicating she likely found him via LinkedIn.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-162-1",
+        "content": "She is positioning Ramp as a potential improvement for Derby Digital, likely for financial management or corporate cards.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "fea6890a8641",
@@ -15034,6 +21990,30 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "category": "contact",
         "label": "Address",
         "value": "28 W 23rd St New York, NY"
+      },
+      {
+        "id": "aif-162-2",
+        "category": "business",
+        "label": "Company",
+        "value": "Ramp"
+      },
+      {
+        "id": "aif-162-3",
+        "category": "business",
+        "label": "Contact Name",
+        "value": "Tia Lindsay"
+      },
+      {
+        "id": "aif-162-4",
+        "category": "business",
+        "label": "Contact Email",
+        "value": "tia.lindsay@ramp.com"
+      },
+      {
+        "id": "aif-162-5",
+        "category": "business",
+        "label": "Interaction Type",
+        "value": "Inbound Email"
       }
     ],
     "opportunities": [],
@@ -15044,17 +22024,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-19T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Tia Lindsay from Ramp sent an inbound email congratulating Jahan on his 1-year anniversary at Derby Digital and introduced Ramp as a potential solution for business improvements."
   },
   {
-    "id": "181",
+    "id": "164",
     "firstName": "Tyler",
     "lastName": "Giroud",
     "email": "tyler@hipresscart.com",
     "company": "Hipresscart",
     "website": "https://presscart.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "restaurant niche",
+      "inbound lead"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -15068,8 +22052,41 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-163-0",
+        "content": "Tyler from Hipresscart saw Derby Digital's work in Louisville hospitality marketing and reached out. This is a strong inbound lead.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-163-0",
+        "category": "business",
+        "label": "Email Domain",
+        "value": "hipresscart.com"
+      },
+      {
+        "id": "aif-163-1",
+        "category": "business",
+        "label": "Inbound Date",
+        "value": "2026-02-25"
+      },
+      {
+        "id": "aif-163-2",
+        "category": "business",
+        "label": "Stated Interest",
+        "value": "Louisville hospitality marketing"
+      },
+      {
+        "id": "aif-163-3",
+        "category": "business",
+        "label": "Sender Name",
+        "value": "Tyler Giroud"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -15078,17 +22095,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-25T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Tyler Giroud from Hipresscart is an inbound prospect interested in Derby Digital's hospitality marketing services in Louisville, KY."
   },
   {
-    "id": "182",
+    "id": "165",
     "firstName": "Summer",
     "lastName": "Lane",
     "email": "summerlane@glimmharmonyaim.com",
     "company": "Glimmharmonyaim",
     "website": "https://glimmharmonyaim.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "CRM",
+      "AI",
+      "agency founder"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -15102,8 +22124,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-164-0",
+        "content": "Summer is interested in Derbydigital's STALLion Success CRM and AI agents for scaling SMB growth, likely for her own agency or clients.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-164-1",
+        "content": "The email suggests Summer is an agency founder looking to upgrade outreach with AI.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-164-0",
+        "category": "business",
+        "label": "Email Domain",
+        "value": "glimmharmonyaim.com"
+      },
+      {
+        "id": "aif-164-1",
+        "category": "business",
+        "label": "Inbound Email Date",
+        "value": "2026-02-25"
+      },
+      {
+        "id": "aif-164-2",
+        "category": "business",
+        "label": "Mentioned Product",
+        "value": "STALLion Success CRM"
+      },
+      {
+        "id": "aif-164-3",
+        "category": "business",
+        "label": "Interest",
+        "value": "AI agents for scaling SMB growth"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -15112,17 +22174,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-25T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Summer Lane from Glimmharmonyaim is a prospect interested in Derbydigital's STALLion Success CRM and AI agents for agency outreach and SMB growth. She appears to be an agency founder."
   },
   {
-    "id": "183",
+    "id": "166",
     "firstName": "Jamie",
     "lastName": "Atkinson",
     "email": "help@vedetteglobal.com",
     "company": "Vedetteglobal",
     "website": "https://vedetteglobal.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "pricing strategy",
+      "digital marketing"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -15136,8 +22202,42 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-165-0",
+        "content": "Jamie is working on a 'Risk Reversal' pricing and offer for 'Media Firestorm'. This indicates they are involved in digital marketing services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-165-1",
+        "content": "The email suggests Jamie is a decision-maker or heavily involved in strategic offerings for their company.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-165-0",
+        "category": "business",
+        "label": "Company Name",
+        "value": "Vedetteglobal"
+      },
+      {
+        "id": "aif-165-1",
+        "category": "business",
+        "label": "Contact Email",
+        "value": "help@vedetteglobal.com"
+      },
+      {
+        "id": "aif-165-2",
+        "category": "business",
+        "label": "Topic of Email",
+        "value": "'Risk Reversal' pricing for 'Media Firestorm'"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -15146,17 +22246,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-24T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Jamie Atkinson from Vedetteglobal is a prospect working on pricing strategies for their digital marketing services. This could be an opportunity for Jahan Taila to offer insights or services related to effective pricing and offer development, especially if Vedetteglobal serves the restaurant niche or could be a potential partner."
   },
   {
-    "id": "184",
+    "id": "167",
     "firstName": "Nora",
     "lastName": "Russell",
     "email": "nora.russell@getplatinms.com",
     "company": "Getplatinms",
     "website": "https://getplatinms.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "collaboration",
+      "inbound lead"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -15170,8 +22274,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-166-0",
+        "content": "Nora reached out via email, indicating she found Derby Digital by searching 'Marketing agency' in Louisville.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-166-1",
+        "content": "The email subject 'collaboration question' suggests a potential partnership or service inquiry.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-166-0",
+        "category": "business",
+        "label": "Source",
+        "value": "Online search ('Marketing agency' in Louisville)"
+      },
+      {
+        "id": "aif-166-1",
+        "category": "business",
+        "label": "Contact Method",
+        "value": "Email"
+      },
+      {
+        "id": "aif-166-2",
+        "category": "business",
+        "label": "Inquiry Type",
+        "value": "Collaboration question"
+      },
+      {
+        "id": "aif-166-3",
+        "category": "business",
+        "label": "Date of Contact",
+        "value": "2026-02-24"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -15180,17 +22324,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-24T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Inbound lead from Nora Russell at Getplatinms, who found Derby Digital via an online search for 'Marketing agency' in Louisville. She is inquiring about a 'collaboration question'."
   },
   {
-    "id": "185",
+    "id": "168",
     "firstName": "Trevor",
     "lastName": "",
     "email": "trevor@bigdaddys.ca",
     "company": "Bigdaddys",
     "website": "https://bigdaddys.ca",
     "relationshipType": "client",
-    "tags": [],
+    "tags": [
+      "website maintenance",
+      "restaurant"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -15204,8 +22352,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-167-0",
+        "content": "Trevor is a contact at Big Daddy's, a restaurant client, requesting website updates.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-167-1",
+        "content": "The email indicates an ongoing website maintenance relationship with Big Daddy's.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-167-0",
+        "category": "business",
+        "label": "Contact Name",
+        "value": "Trevor Ford"
+      },
+      {
+        "id": "aif-167-1",
+        "category": "business",
+        "label": "Email",
+        "value": "trevor@bigdaddys.ca"
+      },
+      {
+        "id": "aif-167-2",
+        "category": "business",
+        "label": "Last Contact Date",
+        "value": "2026-02-24"
+      },
+      {
+        "id": "aif-167-3",
+        "category": "business",
+        "label": "Contact Type",
+        "value": "Inbound Request"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -15214,17 +22402,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-24T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "Trevor Ford from Big Daddy's, a restaurant client, sent an inbound email on 2026-02-24 requesting website fixes, indicating an active website maintenance relationship."
   },
   {
-    "id": "186",
+    "id": "169",
     "firstName": "Dean",
     "lastName": "White",
     "email": "dean@deanxwhite.com",
     "company": "Deanxwhite",
     "website": "https://deanxwhite.com",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "AIW Private Mentorship"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -15238,8 +22431,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-168-0",
+        "content": "Dean White submitted his email for verification to 'AIW Private Mentorship,' indicating potential interest in a mentorship program.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-168-1",
+        "content": "Jahan Taila received this inbound email, suggesting he might be involved with or monitoring the 'AIW Private Mentorship' program.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-168-0",
+        "category": "business",
+        "label": "Email Domain",
+        "value": "deanxwhite.com"
+      },
+      {
+        "id": "aif-168-1",
+        "category": "business",
+        "label": "Last Contact Date",
+        "value": "2026-02-24"
+      },
+      {
+        "id": "aif-168-2",
+        "category": "business",
+        "label": "Contact Type",
+        "value": "Inbound Email Verification"
+      },
+      {
+        "id": "aif-168-3",
+        "category": "business",
+        "label": "Program of Interest",
+        "value": "AIW Private Mentorship"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -15248,17 +22481,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-24T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Dean White is an individual who recently submitted his email for verification to a program called 'AIW Private Mentorship.' Jahan Taila received this inbound email, suggesting a connection to or oversight of this mentorship program. This contact doesn't directly indicate Dean White's interest in digital marketing services for the restaurant niche from Derby Digital, but rather an interest in a mentorship program."
   },
   {
-    "id": "187",
+    "id": "170",
     "firstName": "Joshua",
     "lastName": "Campos",
     "email": "hello@cal.com",
     "company": "Cal",
     "website": "https://us06web.zoom.us",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "scheduled meeting",
+      "inbound lead"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -15272,13 +22509,52 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-169-0",
+        "content": "Joshua Campos from Cal has scheduled a 1-1 Scaling Evaluation with Jahan Taila. This is an inbound lead.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-169-1",
+        "content": "The meeting is scheduled for February 24, 2026, in the America/New_York timezone.",
+        "category": "logistics",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "ee246fe61513",
         "category": "contact",
         "label": "Phone",
         "value": "1502702626"
+      },
+      {
+        "id": "aif-169-1",
+        "category": "business",
+        "label": "Meeting Type",
+        "value": "1-1 Scaling Evaluation"
+      },
+      {
+        "id": "aif-169-2",
+        "category": "business",
+        "label": "Meeting Date",
+        "value": "2026-02-24"
+      },
+      {
+        "id": "aif-169-3",
+        "category": "business",
+        "label": "Contact Email",
+        "value": "hello@cal.com"
+      },
+      {
+        "id": "aif-169-4",
+        "category": "business",
+        "label": "Lead Source",
+        "value": "Inbound"
       }
     ],
     "opportunities": [],
@@ -15289,17 +22565,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-24T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Joshua Campos from Cal has scheduled an inbound 1-1 Scaling Evaluation with Jahan Taila for February 24, 2026. This indicates a strong prospect interested in scaling their business, aligning with Derby Digital's services."
   },
   {
-    "id": "188",
+    "id": "171",
     "firstName": "Sisson,",
     "lastName": "Bridget",
     "email": "bsisson@isbdc.org",
     "company": "Isbdc",
     "website": "https://protect.checkpoint.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "client",
+    "tags": [
+      "client enrollment",
+      "appointment scheduling"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -15313,13 +22593,52 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-170-0",
+        "content": "Bridget is an Office Administrator at ISBDC, handling client enrollment and scheduling.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-170-1",
+        "content": "Jahan has completed new client enrollment information with ISBDC, indicating a potential partnership or service engagement.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "5abf9e09f85f",
         "category": "contact",
         "label": "Address",
         "value": "4201 Grant Line Rd.\r"
+      },
+      {
+        "id": "aif-170-1",
+        "category": "business",
+        "label": "Email Address",
+        "value": "bsisson@isbdc.org"
+      },
+      {
+        "id": "aif-170-2",
+        "category": "business",
+        "label": "Company",
+        "value": "Isbdc"
+      },
+      {
+        "id": "aif-170-3",
+        "category": "business",
+        "label": "Last Contact Date",
+        "value": "2026-02-24"
+      },
+      {
+        "id": "aif-170-4",
+        "category": "business",
+        "label": "Proposed Meeting Date",
+        "value": "2026-03-09"
       }
     ],
     "opportunities": [],
@@ -15330,17 +22649,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-24T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "Office Adm",
+    "aiSummary": "Bridget Sisson from ISBDC is an Office Administrator who has processed Jahan Taila's new client enrollment and is proposing an appointment for March 9th. This indicates Jahan is engaging with ISBDC as a client."
   },
   {
-    "id": "189",
-    "firstName": "Paul",
-    "lastName": "Berrier",
+    "id": "172",
+    "firstName": "DERBY",
+    "lastName": "DIGITAL",
     "email": "paul@derbycityhops.com",
     "company": "Derbycityhops",
     "website": "https://email.send.lcmsgsndr.com",
-    "relationshipType": "client",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "negative feedback",
+      "restaurant"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -15354,13 +22678,52 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-171-0",
+        "content": "Received a 2-star rating from Lacey Smith via a Google Review Automation form submission for Hop Atomica. This indicates a negative customer experience.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-171-1",
+        "content": "The contact is paul@derbycityhops.com, suggesting Paul is the primary contact for Derbycityhops, a potential client in the restaurant niche.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "5c03a7e575bd",
         "category": "contact",
         "label": "Phone",
         "value": "1559760852"
+      },
+      {
+        "id": "aif-171-1",
+        "category": "business",
+        "label": "Email",
+        "value": "paul@derbycityhops.com"
+      },
+      {
+        "id": "aif-171-2",
+        "category": "business",
+        "label": "Niche",
+        "value": "Restaurant"
+      },
+      {
+        "id": "aif-171-3",
+        "category": "business",
+        "label": "Feedback Rating",
+        "value": "2-star"
+      },
+      {
+        "id": "aif-171-4",
+        "category": "business",
+        "label": "Feedback Source",
+        "value": "Google Review Automation (Hop Atomica)"
       }
     ],
     "opportunities": [],
@@ -15371,12 +22734,15 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-01T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "Paul from Derbycityhops is a prospect in the restaurant niche. A recent Google Review Automation submission for 'Hop Atomica' received a 2-star rating from Lacey Smith, indicating a negative customer experience that Derby Digital could potentially help address."
   },
   {
-    "id": "190",
-    "firstName": "Maurice",
-    "lastName": "Davis",
+    "id": "173",
+    "firstName": "Brad",
+    "lastName": "",
     "email": "mdavis199173@yahoo.com",
     "company": "",
     "website": "",
@@ -15395,13 +22761,46 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-172-0",
+        "content": "This email is a follow-up regarding a previous request from Jahan, suggesting a potential past interaction or service inquiry.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-172-1",
+        "content": "The sender is concerned about email delivery, indicating a possible communication issue or a need for reliable contact.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "dd92286a9fbc",
         "category": "contact",
         "label": "Phone",
         "value": "(502) 702-6268"
+      },
+      {
+        "id": "aif-172-1",
+        "category": "business",
+        "label": "Email Count",
+        "value": "1"
+      },
+      {
+        "id": "aif-172-2",
+        "category": "business",
+        "label": "Last Contact Date",
+        "value": "2026-02-16"
+      },
+      {
+        "id": "aif-172-3",
+        "category": "business",
+        "label": "Sender Email",
+        "value": "mdavis199173@yahoo.com"
       }
     ],
     "opportunities": [],
@@ -15412,17 +22811,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-16T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "This contact is a follow-up from Brad to Jahan regarding a previous request, indicating a potential past interaction or inquiry. The sender is concerned about email delivery, suggesting a need for reliable communication."
   },
   {
-    "id": "191",
-    "firstName": "Craig",
-    "lastName": "Singleton",
+    "id": "174",
+    "firstName": "Craigselectricpa",
+    "lastName": "",
     "email": "craigselectricpa@gmail.com",
-    "company": "",
+    "company": "Craigselectricpa",
     "website": "https://tel.meet",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "AI Funnels",
+      "lead generation"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -15436,13 +22839,52 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-173-0",
+        "content": "Received an outbound email regarding AI funnels for lead generation, specifically targeting 15-30 monthly leads.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-173-1",
+        "content": "A meeting was scheduled for Jan 11, 2026, at 3 PM ET to discuss AI funnels.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "a62e54f67417",
         "category": "contact",
         "label": "Phone",
         "value": "470-285-0465"
+      },
+      {
+        "id": "aif-173-1",
+        "category": "business",
+        "label": "Email Subject",
+        "value": "Craig - Learn How AI Funnels Will Generate An Extra 15-30 Monthly Leads For You | reminder"
+      },
+      {
+        "id": "aif-173-2",
+        "category": "business",
+        "label": "Meeting Date",
+        "value": "2026-01-11"
+      },
+      {
+        "id": "aif-173-3",
+        "category": "business",
+        "label": "Meeting Time",
+        "value": "3pm \u2013 3:30pm Eastern Time"
+      },
+      {
+        "id": "aif-173-4",
+        "category": "business",
+        "label": "Meeting Platform",
+        "value": "meet.google."
       }
     ],
     "opportunities": [],
@@ -15453,119 +22895,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-01-11T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Craigselectricpa is a prospect who received an outbound email and has a scheduled meeting to discuss AI funnels for lead generation, aiming for 15-30 extra monthly leads."
   },
   {
-    "id": "192",
-    "firstName": "Derbydigital",
-    "lastName": "Us",
-    "email": "derbydigital.us@bf08x.hubspotemail.net",
-    "company": "Bf08X",
-    "website": "https://bf08x.hubspotemail.net",
-    "relationshipType": "other",
-    "tags": [],
-    "relationshipScore": 10,
-    "interactions": [
-      {
-        "id": "email-109-0",
-        "type": "email",
-        "date": "2025-12-04",
-        "summary": "unsubscribe",
-        "subject": "unsubscribe",
-        "details": "This message was automatically generated by Gmail.",
-        "direction": "outbound",
-        "createdAt": "2026-03-16T12:18:59"
-      }
-    ],
-    "notes": [],
-    "facts": [],
-    "opportunities": [],
-    "aiInsights": [],
-    "groups": [],
-    "connections": [],
-    "lastContactedAt": "2025-12-04",
-    "source": "gmail-import",
-    "createdAt": "2025-12-04T00:00:00",
-    "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
-  },
-  {
-    "id": "193",
-    "firstName": "Derbydigital",
-    "lastName": "Us",
-    "email": "derbydigital.us@bf04x.hubspotemail.net",
-    "company": "Bf04X",
-    "website": "https://bf04x.hubspotemail.net",
-    "relationshipType": "other",
-    "tags": [],
-    "relationshipScore": 10,
-    "interactions": [
-      {
-        "id": "email-110-0",
-        "type": "email",
-        "date": "2025-11-29",
-        "summary": "unsubscribe",
-        "subject": "unsubscribe",
-        "details": "This message was automatically generated by Gmail.",
-        "direction": "outbound",
-        "createdAt": "2026-03-16T12:18:59"
-      }
-    ],
-    "notes": [],
-    "facts": [],
-    "opportunities": [],
-    "aiInsights": [],
-    "groups": [],
-    "connections": [],
-    "lastContactedAt": "2025-11-29",
-    "source": "gmail-import",
-    "createdAt": "2025-11-29T00:00:00",
-    "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
-  },
-  {
-    "id": "194",
-    "firstName": "Derbydigital",
-    "lastName": "Us",
-    "email": "derbydigital.us@bf53x.hubspotemail.net",
-    "company": "Bf53X",
-    "website": "https://bf53x.hubspotemail.net",
-    "relationshipType": "other",
-    "tags": [],
-    "relationshipScore": 10,
-    "interactions": [
-      {
-        "id": "email-111-0",
-        "type": "email",
-        "date": "2025-11-20",
-        "summary": "unsubscribe",
-        "subject": "unsubscribe",
-        "details": "This message was automatically generated by Gmail.",
-        "direction": "outbound",
-        "createdAt": "2026-03-16T12:18:59"
-      }
-    ],
-    "notes": [],
-    "facts": [],
-    "opportunities": [],
-    "aiInsights": [],
-    "groups": [],
-    "connections": [],
-    "lastContactedAt": "2025-11-20",
-    "source": "gmail-import",
-    "createdAt": "2025-11-20T00:00:00",
-    "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
-  },
-  {
-    "id": "195",
+    "id": "175",
     "firstName": "Kendell",
     "lastName": "Sheppard",
     "email": "kcosta@yelp.com",
     "company": "Yelp",
     "website": "https://yelp.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "industry",
+    "tags": [
+      "event marketing",
+      "Yelp"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -15579,8 +22923,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-174-0",
+        "content": "Kendell Sheppard (kcosta@yelp.com) is likely Keri Costa, a Yelp employee, based on the email address and sender name.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-174-1",
+        "content": "This contact indicates Yelp is actively using its platform for community events and seeing good RSVP rates.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-174-0",
+        "category": "business",
+        "label": "Email Address",
+        "value": "kcosta@yelp.com"
+      },
+      {
+        "id": "aif-174-1",
+        "category": "business",
+        "label": "Company",
+        "value": "Yelp"
+      },
+      {
+        "id": "aif-174-2",
+        "category": "business",
+        "label": "Event RSVPs",
+        "value": "25"
+      },
+      {
+        "id": "aif-174-3",
+        "category": "business",
+        "label": "Email Date",
+        "value": "2025-08-06"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -15589,85 +22973,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-08-06T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "This contact is with Keri Costa from Yelp, who is actively using Yelp for community events and seeing good engagement. This could be an opportunity to understand Yelp's internal marketing strategies or explore partnership opportunities related to event promotion for restaurants."
   },
   {
-    "id": "196",
-    "firstName": "Derbydigital",
-    "lastName": "Us",
-    "email": "derbydigital.us@bf54x.hubspotemail.net",
-    "company": "Bf54X",
-    "website": "https://bf54x.hubspotemail.net",
-    "relationshipType": "other",
-    "tags": [],
-    "relationshipScore": 10,
-    "interactions": [
-      {
-        "id": "email-113-0",
-        "type": "email",
-        "date": "2025-05-07",
-        "summary": "unsubscribe",
-        "subject": "unsubscribe",
-        "details": "This message was automatically generated by Gmail.",
-        "direction": "outbound",
-        "createdAt": "2026-03-16T12:18:59"
-      }
-    ],
-    "notes": [],
-    "facts": [],
-    "opportunities": [],
-    "aiInsights": [],
-    "groups": [],
-    "connections": [],
-    "lastContactedAt": "2025-05-07",
-    "source": "gmail-import",
-    "createdAt": "2025-05-07T00:00:00",
-    "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
-  },
-  {
-    "id": "197",
-    "firstName": "Derbydigital",
-    "lastName": "Us",
-    "email": "derbydigital.us@26740822m.e.bitly.com",
-    "company": "26740822M",
-    "website": "https://26740822m.e.bitly.com",
-    "relationshipType": "other",
-    "tags": [],
-    "relationshipScore": 10,
-    "interactions": [
-      {
-        "id": "email-114-0",
-        "type": "email",
-        "date": "2025-03-26",
-        "summary": "unsubscribe",
-        "subject": "unsubscribe",
-        "details": "This message was automatically generated by Gmail.",
-        "direction": "outbound",
-        "createdAt": "2026-03-16T12:18:59"
-      }
-    ],
-    "notes": [],
-    "facts": [],
-    "opportunities": [],
-    "aiInsights": [],
-    "groups": [],
-    "connections": [],
-    "lastContactedAt": "2025-03-26",
-    "source": "gmail-import",
-    "createdAt": "2025-03-26T00:00:00",
-    "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
-  },
-  {
-    "id": "198",
+    "id": "176",
     "firstName": "Danielle",
     "lastName": "Cornwell",
     "email": "danielle@dairykastle.com",
     "company": "Dairykastle",
     "website": "https://dairykastle.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "website management",
+      "website design",
+      "restaurant",
+      "inbound lead"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -15681,13 +23003,52 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-175-0",
+        "content": "Inbound lead specifically requesting website creation and management services for Dairy Kastle.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-175-1",
+        "content": "Danielle is the General Manager, indicating decision-making authority or influence.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "5b6edee97d82",
         "category": "contact",
         "label": "Phone",
         "value": "(502) 509-2826"
+      },
+      {
+        "id": "aif-175-1",
+        "category": "business",
+        "label": "Contact Name",
+        "value": "Danielle Cornwell"
+      },
+      {
+        "id": "aif-175-2",
+        "category": "business",
+        "label": "Company Email",
+        "value": "danielle@dairykastle.com"
+      },
+      {
+        "id": "aif-175-3",
+        "category": "business",
+        "label": "Service Interest",
+        "value": "Website Creation & Management"
+      },
+      {
+        "id": "aif-175-4",
+        "category": "business",
+        "label": "Lead Source",
+        "value": "Inbound Email"
       }
     ],
     "opportunities": [],
@@ -15698,17 +23059,25 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-01-29T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "General Manager",
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "Danielle Cornwell, General Manager of Dairy Kastle, is an inbound prospect interested in website creation and management services for her restaurant in Louisville, KY."
   },
   {
-    "id": "199",
+    "id": "177",
     "firstName": "785",
     "lastName": "Beer Company",
     "email": "info@785beercompany.com",
-    "company": "785Beercompany",
+    "company": "785 Beer Company",
     "website": "https://palmaitalian.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "inbound lead",
+      "restaurant",
+      "brewery"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -15722,8 +23091,55 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-176-0",
+        "content": "Ashley from 785 Beer Company is responding to a demo request, indicating active engagement.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-176-1",
+        "content": "The prospect is asking for a link to join, suggesting readiness for the next step in the sales process.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-176-2",
+        "content": "Jahan Taila's agency, Derby Digital, has already reviewed their site, showing initial research and personalization.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-176-0",
+        "category": "business",
+        "label": "Contact Name",
+        "value": "Ashley"
+      },
+      {
+        "id": "aif-176-1",
+        "category": "business",
+        "label": "Contact Email",
+        "value": "info@785beercompany.com"
+      },
+      {
+        "id": "aif-176-2",
+        "category": "business",
+        "label": "Last Inbound Email Date",
+        "value": "2026-02-12"
+      },
+      {
+        "id": "aif-176-3",
+        "category": "business",
+        "label": "Derby Digital Sender",
+        "value": "Manu Anil"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -15732,17 +23148,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-12T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Ashley from 785 Beer Company is an engaged prospect, actively requesting a link for a demo after Derby Digital's initial site review. This indicates a strong potential lead for Jahan Taila in the restaurant niche."
   },
   {
-    "id": "200",
+    "id": "178",
     "firstName": "Daniel",
     "lastName": "Carter",
     "email": "daniel.carter@qaretobiz.info",
     "company": "Qaretobiz",
     "website": "https://qaretobiz.info",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "agency owner",
+      "inbound lead"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -15756,8 +23176,41 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-177-0",
+        "content": "Daniel initiated contact with an email suggesting Derby Digital might need help with lead generation/discovery calls, implying Qaretobiz offers a solution for this.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-177-0",
+        "category": "business",
+        "label": "Email Domain",
+        "value": "qaretobiz.info"
+      },
+      {
+        "id": "aif-177-1",
+        "category": "business",
+        "label": "Email Date",
+        "value": "2026-03-04"
+      },
+      {
+        "id": "aif-177-2",
+        "category": "business",
+        "label": "Email Subject",
+        "value": "your bench"
+      },
+      {
+        "id": "aif-177-3",
+        "category": "business",
+        "label": "Email Type",
+        "value": "inbound"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -15766,17 +23219,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-04T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Daniel Carter from Qaretobiz sent an inbound email to Jahan Taila, probing Derby Digital's lead generation strategy and implying Qaretobiz can help with booking discovery calls."
   },
   {
-    "id": "201",
+    "id": "179",
     "firstName": "Wayne",
     "lastName": "Young",
     "email": "wayne@scaleachievenova.org",
     "company": "Scaleachievenova",
     "website": "https://scaleachievenova.org",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "ad spend",
+      "follow-up",
+      "lead generation"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -15790,8 +23248,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-178-0",
+        "content": "Wayne Young from Scaleachievenova sent an inbound email about wasted ad spend and lost leads, indicating a potential need for lead nurturing or CRM solutions.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-178-1",
+        "content": "The email highlights the cost of slow follow-up ($1,200 per missed lead) and high ad spend ($91-$186 per lead) with a 73% cold lead rate, suggesting a pain point Jahan's agency could address.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-178-0",
+        "category": "business",
+        "label": "Email Subject",
+        "value": "Wasting Ad Spend on Lost Leads?"
+      },
+      {
+        "id": "aif-178-1",
+        "category": "business",
+        "label": "Lost Revenue per Missed Follow-up",
+        "value": "$1,200"
+      },
+      {
+        "id": "aif-178-2",
+        "category": "business",
+        "label": "Ad Spend per Lead",
+        "value": "$91\u2013$186"
+      },
+      {
+        "id": "aif-178-3",
+        "category": "business",
+        "label": "Cold Lead Rate",
+        "value": "73%"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -15800,17 +23298,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-23T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Wayne Young from Scaleachievenova is a prospect who reached out regarding issues with wasted ad spend and lost leads due to poor follow-up. This aligns with Derby Digital's services, especially for restaurants needing efficient lead management."
   },
   {
-    "id": "202",
+    "id": "180",
     "firstName": "Stan",
     "lastName": "Lusk",
     "email": "stan@limitlessagency.io",
     "company": "Limitlessagency",
     "website": "https://email.mail.limitlesscapital.net",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "vendor",
+    "tags": [
+      "onboarding",
+      "meeting"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -15824,8 +23326,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-179-0",
+        "content": "This email is a meeting reminder for a session with Limitless Agency, indicating Jahan is likely a client or prospect of Limitless Agency.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-179-1",
+        "content": "The 'Ready to roll in 30?' suggests an upcoming scheduled call or meeting.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-179-0",
+        "category": "business",
+        "label": "Email Sender",
+        "value": "Stan Lusk"
+      },
+      {
+        "id": "aif-179-1",
+        "category": "business",
+        "label": "Sender Company",
+        "value": "Limitlessagency"
+      },
+      {
+        "id": "aif-179-2",
+        "category": "business",
+        "label": "Email Type",
+        "value": "Meeting Reminder"
+      },
+      {
+        "id": "aif-179-3",
+        "category": "business",
+        "label": "Meeting Timeframe",
+        "value": "30 minutes"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -15834,17 +23376,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-23T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Stan Lusk from Limitlessagency sent a meeting reminder to Jahan Taila for an upcoming session, suggesting Limitlessagency is a vendor or service provider to Jahan."
   },
   {
-    "id": "203",
+    "id": "181",
     "firstName": "Manish",
     "lastName": "Dagur",
     "email": "manishd9062@gmail.com",
     "company": "",
     "website": "https://u.list-prefs.com",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "unsolicited",
+      "spam"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -15858,13 +23404,46 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-180-0",
+        "content": "This is an unsolicited email from a digital solutions provider, likely a vendor trying to sell services to Jahan Taila.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-180-1",
+        "content": "The sender is offering web design, development, mobile apps, SEO, PPC, and SMM, which are services Derby Digital provides.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "3b737a2488da",
         "category": "contact",
         "label": "Phone",
         "value": "0168426874"
+      },
+      {
+        "id": "aif-180-1",
+        "category": "business",
+        "label": "Sender's Service Offerings",
+        "value": "Web design, development, mobile applications, SEO, PPC, SMM"
+      },
+      {
+        "id": "aif-180-2",
+        "category": "business",
+        "label": "Email Type",
+        "value": "Inbound unsolicited"
+      },
+      {
+        "id": "aif-180-3",
+        "category": "business",
+        "label": "Sender's Email",
+        "value": "manishd9062@gmail.com"
       }
     ],
     "opportunities": [],
@@ -15875,17 +23454,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-18T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Manish Dagur sent an unsolicited email offering digital marketing services, which directly competes with Derby Digital's offerings. This contact is likely a vendor trying to sell services, not a potential client for Jahan Taila."
   },
   {
-    "id": "204",
+    "id": "182",
     "firstName": "Muhammad",
     "lastName": "Hamza",
     "email": "m.hamza12599@gmail.com",
     "company": "",
     "website": "",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "customer success",
+      "job applicant"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -15899,8 +23482,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-181-0",
+        "content": "Muhammad Hamza is applying for a Customer Success role at Derby Digital.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-181-1",
+        "content": "He sent an unsolicited 'value-add' email, likely a portfolio piece or demonstration of his skills.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-181-0",
+        "category": "business",
+        "label": "Email Date",
+        "value": "2026-02-17"
+      },
+      {
+        "id": "aif-181-1",
+        "category": "business",
+        "label": "Email Type",
+        "value": "Inbound Job Application"
+      },
+      {
+        "id": "aif-181-2",
+        "category": "business",
+        "label": "Role Interested In",
+        "value": "Customer Success"
+      },
+      {
+        "id": "aif-181-3",
+        "category": "business",
+        "label": "Email Subject",
+        "value": "Built this for Derby Digital. No pitch, just value"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -15909,17 +23532,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-17T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Muhammad Hamza is an inbound job applicant for a Customer Success position at Derby Digital, who sent an email on 2026-02-17 with a 'value-add' subject line."
   },
   {
-    "id": "205",
+    "id": "183",
     "firstName": "Madiha",
     "lastName": "Saleem",
     "email": "revolution115@gmail.com",
     "company": "",
     "website": "",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "vendor",
+    "tags": [
+      "marketing services",
+      "freelancer",
+      "virtual assistant"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -15933,13 +23561,46 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-182-0",
+        "content": "Madiha is reaching out for a remote VA position, indicating she offers marketing and administrative services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-182-1",
+        "content": "She has 10 years of experience in Facebook, Google, and WordPress, which could be relevant for agency support.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "99847bb3eb6a",
         "category": "contact",
         "label": "Phone",
         "value": "0092321762"
+      },
+      {
+        "id": "aif-182-1",
+        "category": "business",
+        "label": "Service Offered",
+        "value": "Marketing & Administrative VA"
+      },
+      {
+        "id": "aif-182-2",
+        "category": "business",
+        "label": "Experience",
+        "value": "10 years in Facebook, Google, WordPress"
+      },
+      {
+        "id": "aif-182-3",
+        "category": "contact",
+        "label": "Email",
+        "value": "revolution115@gmail.com"
       }
     ],
     "opportunities": [],
@@ -15950,17 +23611,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-09T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "Marketing & Administrative VA",
+    "aiSummary": "Madiha Saleem is a potential vendor offering marketing and administrative virtual assistant services with 10 years of experience in Facebook, Google, and WordPress. This contact is not a prospect for Derby Digital's services but a potential freelancer for internal support."
   },
   {
-    "id": "206",
+    "id": "184",
     "firstName": "Shahzeb",
     "lastName": "Hayat",
     "email": "zebhayat@gmail.com",
     "company": "",
     "website": "https://canva.com",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "job applicant"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -15974,8 +23639,29 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-183-0",
+        "content": "Shahzeb applied for a Marketing & Administrative VA position, indicating experience with GoHighLevel, Google Ads, and Meta Ads.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-183-0",
+        "category": "business",
+        "label": "Experience",
+        "value": "4+ years with GoHighLevel, Google Ads, Meta Ads"
+      },
+      {
+        "id": "aif-183-1",
+        "category": "business",
+        "label": "Role Applied For",
+        "value": "Marketing & Administrative VA"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -15984,17 +23670,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-09T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Shahzeb Hayat is a job applicant who responded to Jahan Taila's post for a Marketing & Administrative VA, highlighting 4+ years of experience with key digital marketing platforms."
   },
   {
-    "id": "207",
+    "id": "185",
     "firstName": "Mayank",
     "lastName": "Jain",
     "email": "mayank.jain@gohighlevel.com",
     "company": "Gohighlevel",
     "website": "https://help.gohighlevel.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "vendor",
+    "tags": [
+      "Rentals Private Beta",
+      "GoHighLevel",
+      "Software Vendor"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -16008,13 +23699,52 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-184-0",
+        "content": "This is an inbound email from GoHighLevel, a software vendor, regarding Jahan's participation in their Rentals Private Beta.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-184-1",
+        "content": "Jahan is a user of GoHighLevel, specifically involved in their beta program for a 'Rentals' feature, indicating potential use for clients in the 'restaurant niche' if applicable.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "75e23a1e1677",
         "category": "contact",
         "label": "Phone",
         "value": "1550000066"
+      },
+      {
+        "id": "aif-184-1",
+        "category": "business",
+        "label": "Vendor Company",
+        "value": "Gohighlevel"
+      },
+      {
+        "id": "aif-184-2",
+        "category": "business",
+        "label": "Contact Name",
+        "value": "Mayank Jain"
+      },
+      {
+        "id": "aif-184-3",
+        "category": "business",
+        "label": "Product/Service Mentioned",
+        "value": "GoHighLevel Calendars - Rentals Private Beta"
+      },
+      {
+        "id": "aif-184-4",
+        "category": "business",
+        "label": "Email Type",
+        "value": "Inbound (from vendor)"
       }
     ],
     "opportunities": [],
@@ -16025,17 +23755,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-12-21T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Jahan Taila is a user of GoHighLevel and is participating in their Rentals Private Beta program, receiving a check-in email from Mayank Jain at GoHighLevel."
   },
   {
-    "id": "208",
+    "id": "186",
     "firstName": "Abdal",
     "lastName": "Shah",
     "email": "s.abdaal.sh@gmail.com",
     "company": "",
     "website": "",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "VA",
+      "job applicant"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -16049,8 +23783,42 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-185-0",
+        "content": "Abdal Shah applied for the Marketing & Administrative VA (Full-Time) role at Derby Digital.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-185-1",
+        "content": "Abdal has 9+ years of digital marketing experience.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-185-0",
+        "category": "business",
+        "label": "Email Date",
+        "value": "2026-02-06"
+      },
+      {
+        "id": "aif-185-1",
+        "category": "business",
+        "label": "Role Applied For",
+        "value": "Marketing & Administrative VA (Full-Time)"
+      },
+      {
+        "id": "aif-185-2",
+        "category": "business",
+        "label": "Experience",
+        "value": "9+ years digital marketing"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -16059,17 +23827,20 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-06T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Abdal Shah is a job applicant for the Marketing & Administrative VA role at Derby Digital, with 9+ years of digital marketing experience."
   },
   {
-    "id": "209",
+    "id": "187",
     "firstName": "Emmanuel",
     "lastName": "Obioha",
     "email": "emmanuelobioha87@gmail.com",
     "company": "",
     "website": "https://cloudofeden.com",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "job applicant"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -16083,8 +23854,35 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-186-0",
+        "content": "Emmanuel is applying for a Marketing Assistant role, not seeking digital marketing services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-186-0",
+        "category": "business",
+        "label": "Contact Type",
+        "value": "Job Applicant"
+      },
+      {
+        "id": "aif-186-1",
+        "category": "business",
+        "label": "Role Applied For",
+        "value": "Marketing Assistant"
+      },
+      {
+        "id": "aif-186-2",
+        "category": "business",
+        "label": "Interest",
+        "value": "Building from scratch"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -16093,17 +23891,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-01-25T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "Marketing Assistant",
+    "aiSummary": "This contact is a job applicant for a Marketing Assistant role, expressing interest in building marketing efforts from scratch. Not a prospect for digital marketing services."
   },
   {
-    "id": "210",
+    "id": "188",
     "firstName": "Samson",
     "lastName": "Samuel",
     "email": "samson.samuel@wikiadvisers.com",
     "company": "Wikiadvisers",
     "website": "https://wikiadvisers.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "Wikipedia",
+      "inbound lead"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -16117,8 +23920,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-187-0",
+        "content": "Jahan submitted an inquiry to Wikiadvisers in November about creating a Wikipedia page.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-187-1",
+        "content": "This contact is a follow-up from Wikiadvisers regarding Jahan's inquiry.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-187-0",
+        "category": "business",
+        "label": "Inquiry Date",
+        "value": "November (previous year)"
+      },
+      {
+        "id": "aif-187-1",
+        "category": "business",
+        "label": "Inquiry Topic",
+        "value": "Wikipedia page creation"
+      },
+      {
+        "id": "aif-187-2",
+        "category": "business",
+        "label": "Sender Company",
+        "value": "Wikiadvisers"
+      },
+      {
+        "id": "aif-187-3",
+        "category": "business",
+        "label": "Email Date",
+        "value": "2026-02-10"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -16127,17 +23970,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-10T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "This is an inbound lead from Wikiadvisers following up on Jahan Taila's inquiry from November about creating a Wikipedia page. Jahan is the prospect in this interaction, as he initiated the contact with Wikiadvisers."
   },
   {
-    "id": "211",
+    "id": "189",
     "firstName": "Hafiz",
     "lastName": "Talha",
     "email": "hafiztalha930@gmail.com",
     "company": "",
     "website": "",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "digital marketing",
+      "inbound lead"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -16151,8 +23998,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-188-0",
+        "content": "Hafiz Talha reached out directly, indicating potential interest in digital marketing services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-188-1",
+        "content": "The email subject 'Digital marketer' suggests he might be looking for a digital marketing role or services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-188-0",
+        "category": "contact",
+        "label": "Email Count",
+        "value": "1"
+      },
+      {
+        "id": "aif-188-1",
+        "category": "contact",
+        "label": "Last Contact Date",
+        "value": "2026-02-11"
+      },
+      {
+        "id": "aif-188-2",
+        "category": "contact",
+        "label": "Last Contact Type",
+        "value": "inbound"
+      },
+      {
+        "id": "aif-188-3",
+        "category": "contact",
+        "label": "Email Subject",
+        "value": "Digital marketer"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -16161,17 +24048,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-11T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "Digital Marketer",
+    "aiSummary": "Hafiz Talha is an inbound lead who contacted Derby Digital on 2026-02-11 with the subject 'Digital marketer'. This suggests he is likely a prospect interested in digital marketing services, potentially for a restaurant given Jahan Taila's niche."
   },
   {
-    "id": "212",
+    "id": "190",
     "firstName": "Events",
     "lastName": "Inquiry",
     "email": "events@musica-newyork.com",
     "company": "Musica Newyork",
     "website": "https://sprh.mn",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "events",
+      "website development",
+      "restaurant"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -16185,8 +24078,41 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-189-0",
+        "content": "Musica Newyork is looking for a site developer and was introduced to Jahan by an intermediary. This is an inbound lead for website development.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-189-0",
+        "category": "business",
+        "label": "Inquiry Type",
+        "value": "Website Development"
+      },
+      {
+        "id": "aif-189-1",
+        "category": "business",
+        "label": "Contact Person",
+        "value": "Kekko"
+      },
+      {
+        "id": "aif-189-2",
+        "category": "business",
+        "label": "Industry",
+        "value": "Restaurant/Events"
+      },
+      {
+        "id": "aif-189-3",
+        "category": "business",
+        "label": "Lead Source",
+        "value": "Referral"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -16195,17 +24121,26 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-04T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "city": "New York",
+    "state": "NY",
+    "aiSummary": "Musica Newyork, an events company, is a new prospect interested in Jahan's website development services, referred by an unknown intermediary. The initial contact is an inbound email requesting a proposal for their site."
   },
   {
-    "id": "213",
+    "id": "191",
     "firstName": "Syed",
     "lastName": "Fasih Ul Ali",
     "email": "sfasih171@gmail.com",
     "company": "",
     "website": "",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "branding",
+      "social media management",
+      "VA",
+      "content strategy",
+      "content writing"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -16219,8 +24154,36 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-190-0",
+        "content": "This contact is a VA offering social media management services, which could be a potential vendor for Jahan Taila's agency or a prospect if they are looking for agency services for their own business.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-190-1",
+        "content": "The inbound email indicates an interest in offering services, not necessarily seeking them, so further qualification is needed to determine if they are a prospect for Derby Digital's services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-190-0",
+        "category": "business",
+        "label": "Service Offered",
+        "value": "Social Media Management, Marketing and Administrative VA"
+      },
+      {
+        "id": "aif-190-1",
+        "category": "business",
+        "label": "Expertise",
+        "value": "Content strategy, branding, grid planning, content writing"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -16229,17 +24192,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-07T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "Marketing and Administrative VA",
+    "aiSummary": "Syed Fasih Ul Ali is a VA offering social media management and administrative services. While they are reaching out to offer services, they could potentially be a prospect for Derby Digital's agency services if they represent a business in the restaurant niche, or a vendor if Derby Digital needs VA support."
   },
   {
-    "id": "214",
+    "id": "192",
     "firstName": "Mihai",
     "lastName": "Anghel",
     "email": "mihai@globalfoodsoft.com",
     "company": "Globalfoodsoft",
     "website": "https://globalfoodsoft.com",
     "relationshipType": "vendor",
-    "tags": [],
+    "tags": [
+      "subscription",
+      "billing issue"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -16253,8 +24221,42 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-191-0",
+        "content": "Mihai is contacting Jahan about a subscription renewal for accounts managed in resell-mode, indicating Jahan is a reseller of Globalfoodsoft's services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-191-1",
+        "content": "There's a billing issue with Jahan's credit/debit card (ending in 8869) that needs to be resolved for renewal.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-191-0",
+        "category": "business",
+        "label": "Subscription Status",
+        "value": "Expires today"
+      },
+      {
+        "id": "aif-191-1",
+        "category": "business",
+        "label": "Billing Issue",
+        "value": "Credit/debit card (ending 8869) issue"
+      },
+      {
+        "id": "aif-191-2",
+        "category": "business",
+        "label": "Jahan's Role",
+        "value": "Reseller for Globalfoodsoft"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -16263,17 +24265,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-06T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Mihai Anghel from Globalfoodsoft is contacting Jahan Taila regarding an expiring subscription for accounts Jahan manages in resell-mode. There is a billing issue with Jahan's credit card that needs immediate attention for renewal."
   },
   {
-    "id": "215",
+    "id": "193",
     "firstName": "Charles",
     "lastName": "Binondo",
     "email": "binondo061997@gmail.com",
     "company": "",
     "website": "https://loom.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "vendor",
+    "tags": [
+      "specialist",
+      "6 years experience",
+      "facebook ads"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -16287,13 +24294,33 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-192-0",
+        "content": "Charles is an inbound lead offering Facebook Ads management services. Jahan's agency, Derby Digital, provides digital marketing services, including social media ads, so this is a potential vendor or partner offering a specific service.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "bb31fbee5085",
         "category": "contact",
         "label": "Phone",
         "value": "3460197249"
+      },
+      {
+        "id": "aif-192-1",
+        "category": "business",
+        "label": "Service Offered",
+        "value": "Facebook Ads Management"
+      },
+      {
+        "id": "aif-192-2",
+        "category": "business",
+        "label": "Experience",
+        "value": "6 years"
       }
     ],
     "opportunities": [],
@@ -16304,17 +24331,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-02T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "Facebook Ads Specialist",
+    "aiSummary": "Charles Binondo is an inbound lead offering Facebook Ads management services with 6 years of experience. He could be a potential vendor or partner for Derby Digital."
   },
   {
-    "id": "216",
+    "id": "194",
     "firstName": "Shaha",
     "lastName": "Dolimov",
     "email": "shaha@scaledolimov.com",
     "company": "Scaledolimov",
     "website": "https://scaledolimov.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "partner",
+    "tags": [
+      "Agency Partnership",
+      "LinkedIn Ads"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -16328,8 +24360,36 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-193-0",
+        "content": "Shaha is pitching a partnership to help Derby Digital offer LinkedIn Ads to their clients without increasing overhead.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-193-1",
+        "content": "This could be a valuable service for Derby Digital, especially if they want to expand their offerings in the restaurant niche.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-193-0",
+        "category": "business",
+        "label": "Service Offered",
+        "value": "LinkedIn Ads for Agencies"
+      },
+      {
+        "id": "aif-193-1",
+        "category": "business",
+        "label": "Value Proposition",
+        "value": "Offer LinkedIn Ads without increasing overhead"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -16338,17 +24398,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-03T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Shaha Dolimov from Scaledolimov is proposing a partnership for Derby Digital to offer LinkedIn Ads to their clients, aiming to expand services without increasing overhead. This could be a strategic move for Jahan Taila's agency."
   },
   {
-    "id": "217",
+    "id": "195",
     "firstName": "Michelle",
     "lastName": "Richardson",
     "email": "richardsonpropertymlr@gmail.com",
     "company": "",
     "website": "",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "unqualified",
+      "restaurant_niche"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -16362,8 +24426,42 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-194-0",
+        "content": "Received a 'vacation | test email' from this contact. Unclear intent or relevance to digital marketing services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-194-1",
+        "content": "Email address 'richardsonpropertymlr@gmail.com' suggests a potential real estate or property management background, not directly aligned with restaurant niche.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-194-0",
+        "category": "communication",
+        "label": "Last Email Received",
+        "value": "2026-02-03"
+      },
+      {
+        "id": "aif-194-1",
+        "category": "communication",
+        "label": "Email Subject",
+        "value": "vacation | test email"
+      },
+      {
+        "id": "aif-194-2",
+        "category": "contact",
+        "label": "Email Address",
+        "value": "richardsonpropertymlr@gmail.com"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -16372,17 +24470,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-03T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Michelle Richardson sent a 'vacation | test email' from a personal-sounding email address. No clear indication of interest in digital marketing for restaurants. Requires further qualification."
   },
   {
-    "id": "218",
+    "id": "196",
     "firstName": "Josh",
     "lastName": "Dueck",
     "email": "joshua@gettheoss.com",
     "company": "Gettheoss",
     "website": "https://gettheoss.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "partner",
+    "tags": [
+      "referral partner",
+      "website design"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -16396,8 +24498,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-195-0",
+        "content": "Josh Dueck is interested in referring website design leads to Jahan Taila, potentially creating a partnership for lead generation.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-195-1",
+        "content": "Josh referenced Jahan's success with Al Forno, indicating he's researched Jahan's work and understands his value proposition.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-195-0",
+        "category": "business",
+        "label": "Referral Offer",
+        "value": "2-4 website design businesses per week"
+      },
+      {
+        "id": "aif-195-1",
+        "category": "business",
+        "label": "Referral Source",
+        "value": "Gettheoss"
+      },
+      {
+        "id": "aif-195-2",
+        "category": "business",
+        "label": "Jahan's Niche",
+        "value": "Restaurant digital marketing"
+      },
+      {
+        "id": "aif-195-3",
+        "category": "business",
+        "label": "Jahan's Case Study Referenced",
+        "value": "Al Forno (49.43% call volume boost)"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -16406,17 +24548,20 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-02-02T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Josh Dueck from Gettheoss is proposing a partnership to refer 2-4 website design leads per week to Jahan Taila, demonstrating an understanding of Jahan's expertise in the restaurant niche based on the Al Forno case study."
   },
   {
-    "id": "219",
+    "id": "197",
     "firstName": "Mark",
     "lastName": "Andrew Acosta",
     "email": "markandrewacostawork@gmail.com",
     "company": "",
     "website": "https://linkedin.com",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "job applicant"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -16430,8 +24575,36 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-196-0",
+        "content": "Mark is applying for a Marketing Assistant position at Derby Digital.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-196-1",
+        "content": "He has experience with Google Ads and Facebook/Meta Ads campaign management and optimization.",
+        "category": "skill",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-196-0",
+        "category": "business",
+        "label": "Email Date",
+        "value": "2026-01-25"
+      },
+      {
+        "id": "aif-196-1",
+        "category": "skill",
+        "label": "Experience",
+        "value": "Google Ads, Facebook/Meta Ads"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -16440,17 +24613,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-01-25T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "Marketing Assistant",
+    "aiSummary": "Mark Andrew Acosta is a job applicant for a Marketing Assistant role at Derby Digital, with experience in Google Ads and Facebook/Meta Ads."
   },
   {
-    "id": "220",
+    "id": "198",
     "firstName": "Adam",
     "lastName": "Guild",
     "email": "adam@owner.com",
     "company": "Owner",
     "website": "https://owner.com",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "competitor",
+      "legal threat",
+      "defamation"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -16464,8 +24643,55 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-197-0",
+        "content": "This is a serious legal threat from a competitor (Owner.com) alleging false and defamatory emails sent to their customers.",
+        "category": "legal",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-197-1",
+        "content": "Jahan Taila needs to immediately review the attached 'recent example' and any other communications sent to Owner.com's customers.",
+        "category": "action",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-197-2",
+        "content": "Legal counsel should be consulted to assess the validity of the claims and determine the appropriate response.",
+        "category": "action",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-197-0",
+        "category": "business",
+        "label": "Sender Company",
+        "value": "Owner"
+      },
+      {
+        "id": "aif-197-1",
+        "category": "business",
+        "label": "Sender Name",
+        "value": "Adam Guild"
+      },
+      {
+        "id": "aif-197-2",
+        "category": "business",
+        "label": "Contact Type",
+        "value": "Legal Threat"
+      },
+      {
+        "id": "aif-197-3",
+        "category": "business",
+        "label": "Allegation",
+        "value": "False and defamatory emails"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -16474,17 +24700,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-01-29T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Adam Guild from Owner.com has sent a legal warning to Jahan Taila, alleging false and defamatory emails were sent to their customers. This requires immediate legal review and a strategic response."
   },
   {
-    "id": "221",
+    "id": "199",
     "firstName": "Graciella",
     "lastName": "K",
     "email": "gkamar25@gmail.com",
-    "company": "",
+    "company": "Ramsi's Cafe",
     "website": "",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "client",
+    "tags": [
+      "website update",
+      "restaurant",
+      "happy hour menu"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -16498,12 +24729,38 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-198-0",
+        "content": "Graciella is a contact at Ramsi's Cafe, a restaurant client. She sent their happy hour menu for website integration.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "29b0766e81a7",
         "category": "contact",
         "label": "Phone",
+        "value": "(502) 705-2298"
+      },
+      {
+        "id": "aif-198-1",
+        "category": "business",
+        "label": "Client Name",
+        "value": "Ramsi's Cafe"
+      },
+      {
+        "id": "aif-198-2",
+        "category": "business",
+        "label": "Service Provided",
+        "value": "Website update (happy hour menu)"
+      },
+      {
+        "id": "aif-198-3",
+        "category": "contact",
+        "label": "Phone Number",
         "value": "(502) 705-2298"
       }
     ],
@@ -16515,17 +24772,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-01-27T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "Graciella Kamar from Ramsi's Cafe is a client who sent their happy hour menu for Jahan Taila (Derby Digital) to update on their website."
   },
   {
-    "id": "222",
+    "id": "200",
     "firstName": "Renante",
     "lastName": "Cafe",
     "email": "renantecafe85@gmail.com",
-    "company": "",
+    "company": "Renante Cafe",
     "website": "",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "Google Ads",
+      "restaurant"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -16539,8 +24802,41 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-199-0",
+        "content": "Inbound inquiry regarding Google Ads, indicating interest in digital marketing services for a restaurant.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-199-0",
+        "category": "business",
+        "label": "Niche",
+        "value": "Restaurant"
+      },
+      {
+        "id": "aif-199-1",
+        "category": "business",
+        "label": "Service Interest",
+        "value": "Google Ads"
+      },
+      {
+        "id": "aif-199-2",
+        "category": "contact",
+        "label": "Email Date",
+        "value": "2026-01-24"
+      },
+      {
+        "id": "aif-199-3",
+        "category": "contact",
+        "label": "Email Sender",
+        "value": "Renante"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -16549,17 +24845,24 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-01-24T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "Renante Cafe is a restaurant prospect in Louisville, KY, who initiated contact about Google Ads services, indicating a clear need for digital marketing support."
   },
   {
-    "id": "223",
+    "id": "201",
     "firstName": "Jamie",
     "lastName": "Lankford",
     "email": "justjamiedesserts@gmail.com",
-    "company": "",
+    "company": "Just Jamie Desserts",
     "website": "https://tel.meet",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "desserts",
+      "restaurant",
+      "small business"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -16573,13 +24876,52 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-200-0",
+        "content": "Jamie Lankford has accepted a meeting invitation for Jan 26, 2026, indicating strong interest in Derby Digital's services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-200-1",
+        "content": "Email address suggests a dessert-focused business, aligning with Jahan's restaurant niche.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "0b7221c8b6d0",
         "category": "contact",
         "label": "Phone",
         "value": "219-802-5964"
+      },
+      {
+        "id": "aif-200-1",
+        "category": "business",
+        "label": "Meeting Date",
+        "value": "2026-01-26"
+      },
+      {
+        "id": "aif-200-2",
+        "category": "business",
+        "label": "Meeting Time",
+        "value": "4pm - 4:30pm EST"
+      },
+      {
+        "id": "aif-200-3",
+        "category": "business",
+        "label": "Industry Niche",
+        "value": "Restaurant (Desserts)"
+      },
+      {
+        "id": "aif-200-4",
+        "category": "contact",
+        "label": "Email",
+        "value": "justjamiedesserts@gmail.com"
       }
     ],
     "opportunities": [],
@@ -16590,17 +24932,24 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-01-26T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "Owner/Baker",
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "Jamie Lankford, owner of Just Jamie Desserts, is a strong prospect for Derby Digital, having accepted a meeting. Her business fits Jahan Taila's restaurant niche in Louisville, KY."
   },
   {
-    "id": "224",
+    "id": "202",
     "firstName": "Chloe",
     "lastName": "Hall",
     "email": "chloe.hall@platinumsapp.com",
     "company": "Platinumsapp",
     "website": "https://platinumsapp.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "high intent",
+      "inbound lead"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -16614,12 +24963,51 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-201-0",
+        "content": "Chloe was impressed by Derby Digital's 4.9-star Google rating.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-201-1",
+        "content": "She was planning to call but emailed instead.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "dd92286a9fbc",
         "category": "contact",
         "label": "Phone",
+        "value": "(502) 702-6268"
+      },
+      {
+        "id": "aif-201-1",
+        "category": "business",
+        "label": "Email Date",
+        "value": "2026-01-23"
+      },
+      {
+        "id": "aif-201-2",
+        "category": "business",
+        "label": "Google Rating Mentioned",
+        "value": "4.9 stars"
+      },
+      {
+        "id": "aif-201-3",
+        "category": "business",
+        "label": "Contact Method",
+        "value": "Email (initially planned call)"
+      },
+      {
+        "id": "aif-201-4",
+        "category": "business",
+        "label": "Phone Number Mentioned",
         "value": "(502) 702-6268"
       }
     ],
@@ -16631,17 +25019,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-01-23T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Chloe Hall from Platinumsapp is an inbound prospect who found Derby Digital via Google reviews and was impressed by their 4.9-star rating. She initially planned to call but sent an email on 2026-01-23."
   },
   {
-    "id": "225",
+    "id": "203",
     "firstName": "Awaad",
     "lastName": "Chaudhry",
     "email": "awaad@waslahdevelopment.com",
     "company": "Waslahdevelopment",
     "website": "https://waslahdevelopment.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "industry",
+    "tags": [
+      "feedback request",
+      "LinkedIn lead"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -16655,8 +25047,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-202-0",
+        "content": "Awaad reached out to Jahan for 'honest feedback from an industry expert,' stating he is not selling anything.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-202-1",
+        "content": "This could be an opportunity for Jahan to establish himself as an expert and potentially uncover future collaboration or client opportunities if Awaad is developing something relevant to digital marketing for restaurants.",
+        "category": "opportunity",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-202-0",
+        "category": "business",
+        "label": "Contact Name",
+        "value": "Awaad Chaudhry"
+      },
+      {
+        "id": "aif-202-1",
+        "category": "business",
+        "label": "Email",
+        "value": "awaad@waslahdevelopment.com"
+      },
+      {
+        "id": "aif-202-2",
+        "category": "business",
+        "label": "Source",
+        "value": "LinkedIn"
+      },
+      {
+        "id": "aif-202-3",
+        "category": "business",
+        "label": "Purpose of Contact",
+        "value": "Seeking industry expert feedback"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -16665,17 +25097,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-01-22T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Awaad Chaudhry from Waslahdevelopment contacted Jahan via LinkedIn seeking industry expert feedback, explicitly stating he is not selling anything. This presents an opportunity for Jahan to demonstrate expertise and potentially build a professional relationship."
   },
   {
-    "id": "226",
+    "id": "204",
     "firstName": "Taha",
     "lastName": "Noman",
     "email": "tahabinnooman@gmail.com",
     "company": "",
     "website": "https://activetheory.net",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "website design",
+      "inbound lead"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -16689,8 +25125,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-203-0",
+        "content": "Taha reached out via DM and email, expressing interest in website design services after reviewing a site Jahan mentioned on Twitter.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-203-1",
+        "content": "This is an inbound lead, indicating Taha has some familiarity with Jahan's work or presence.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-203-0",
+        "category": "business",
+        "label": "Contact Email",
+        "value": "tahabinnooman@gmail.com"
+      },
+      {
+        "id": "aif-203-1",
+        "category": "business",
+        "label": "Inquiry Date",
+        "value": "2026-01-08"
+      },
+      {
+        "id": "aif-203-2",
+        "category": "business",
+        "label": "Service Interest",
+        "value": "Website Design"
+      },
+      {
+        "id": "aif-203-3",
+        "category": "business",
+        "label": "Lead Source",
+        "value": "Twitter DM"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -16699,17 +25175,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-01-08T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Taha Noman is an inbound prospect interested in website design services, initiated via Twitter DM and email after reviewing a site Jahan mentioned. This is a strong lead for Derby Digital's services."
   },
   {
-    "id": "227",
+    "id": "205",
     "firstName": "Faizan",
     "lastName": "Afzal",
     "email": "faizan@stallyons-usa.com",
     "company": "Stallyons Usa",
     "website": "https://shalkyqq.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "graphic design",
+      "animation",
+      "WordPress",
+      "website development"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -16723,8 +25205,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-204-0",
+        "content": "Faizan is showcasing his web development and design portfolio, potentially looking for work or collaboration.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-204-1",
+        "content": "The provided websites are not in the restaurant niche, which is Jahan's focus.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-204-0",
+        "category": "business",
+        "label": "Email",
+        "value": "faizan@stallyons-usa.com"
+      },
+      {
+        "id": "aif-204-1",
+        "category": "business",
+        "label": "Company",
+        "value": "Stallyons Usa"
+      },
+      {
+        "id": "aif-204-2",
+        "category": "business",
+        "label": "Website Examples",
+        "value": "shalkyqq.com, firehouse-lawncare.com"
+      },
+      {
+        "id": "aif-204-3",
+        "category": "business",
+        "label": "Skills Highlighted",
+        "value": "WordPress, animation, graphic design"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -16733,51 +25255,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-01-08T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Faizan Afzal from Stallyons Usa is a prospect who has shared his web development and design portfolio, including WordPress sites with animation and graphic design. His current examples are not in the restaurant niche, which is Jahan Taila's specialty."
   },
   {
-    "id": "228",
-    "firstName": "J",
-    "lastName": "",
-    "email": "jmarskitchen@gmail.com",
-    "company": "",
-    "website": "",
-    "relationshipType": "other",
-    "tags": [],
-    "relationshipScore": 10,
-    "interactions": [
-      {
-        "id": "email-189-0",
-        "type": "email",
-        "date": "2026-01-06",
-        "summary": "Guidon Brewing",
-        "subject": "Guidon Brewing",
-        "details": "Hi Jahan\r\n\r\nThis is Lamar from the kitchen at Guidon Brewing in Hendersonville NC. Mike\r\ngave me your email and said I can email you and you'd  make the changes on\r\nthe menu page. Is there also a way I can log in and make changes as well?\r\n\r\nThanks,\r\nLamar",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      }
-    ],
-    "notes": [],
-    "facts": [],
-    "opportunities": [],
-    "aiInsights": [],
-    "groups": [],
-    "connections": [],
-    "lastContactedAt": "2026-01-06",
-    "source": "gmail-import",
-    "createdAt": "2026-01-06T00:00:00",
-    "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
-  },
-  {
-    "id": "229",
+    "id": "206",
     "firstName": "Brijrajsingh",
     "lastName": "Rana",
     "email": "ranabrijraj82@gmail.com",
     "company": "",
     "website": "https://riliantech.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "vendor",
+    "tags": [
+      "freelancer",
+      "developer",
+      "designer",
+      "webflow"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -16791,13 +25285,52 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-205-0",
+        "content": "Brijrajsingh is a Webflow developer and designer who reached out to Jahan, likely offering services. This could be a potential vendor for Derby Digital if they need to outsource Webflow development.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-205-1",
+        "content": "He has over 3 years of experience and specializes in converting Figma files into high-performance websites.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "fb297bf39e06",
         "category": "contact",
         "label": "Phone",
         "value": "7710986909"
+      },
+      {
+        "id": "aif-205-1",
+        "category": "business",
+        "label": "Email Count",
+        "value": "1"
+      },
+      {
+        "id": "aif-205-2",
+        "category": "business",
+        "label": "Last Contact Date",
+        "value": "2026-01-04"
+      },
+      {
+        "id": "aif-205-3",
+        "category": "business",
+        "label": "Expertise",
+        "value": "Webflow Development, Figma to Website Conversion"
+      },
+      {
+        "id": "aif-205-4",
+        "category": "business",
+        "label": "Experience",
+        "value": "3+ years"
       }
     ],
     "opportunities": [],
@@ -16808,17 +25341,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-01-04T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "Webflow Developer and Designer",
+    "aiSummary": "Brijrajsingh Rana is a Webflow developer and designer with over 3 years of experience, specializing in converting Figma files to high-performance websites. He initiated contact with Jahan, likely offering his services as a potential vendor."
   },
   {
-    "id": "230",
+    "id": "207",
     "firstName": "Oliver",
     "lastName": "Munoz",
     "email": "omunoz@thatsgreatnews.com",
     "company": "Thatsgreatnews",
     "website": "https://thatsgreatnews.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "vendor",
+    "tags": [
+      "plaque",
+      "feature article"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -16832,13 +25370,45 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-206-0",
+        "content": "Oliver is assisting Jahan with a feature article and plaque preview, indicating a previous engagement or upcoming publication.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "c35671ef581b",
         "category": "contact",
         "label": "Phone",
         "value": "888-664-5348"
+      },
+      {
+        "id": "aif-206-1",
+        "category": "business",
+        "label": "Latest Email Date",
+        "value": "2025-12-24"
+      },
+      {
+        "id": "aif-206-2",
+        "category": "business",
+        "label": "Email Type",
+        "value": "inbound"
+      },
+      {
+        "id": "aif-206-3",
+        "category": "business",
+        "label": "Email Subject",
+        "value": "Plaque preview for Meet Jahan Taila"
+      },
+      {
+        "id": "aif-206-4",
+        "category": "business",
+        "label": "Contact Role",
+        "value": "Assigned helper for feature article"
       }
     ],
     "opportunities": [],
@@ -16849,17 +25419,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-12-24T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Oliver Munoz from Thatsgreatnews is a vendor providing support for a feature article and plaque preview related to Jahan Taila. This suggests Jahan has been featured or is about to be featured by 'Thatsgreatnews'."
   },
   {
-    "id": "231",
+    "id": "208",
     "firstName": "kevin",
     "lastName": "",
     "email": "kevin@yixinprinting.com",
     "company": "Yixinprinting",
     "website": "https://yixinad.en.alibaba.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "vendor",
+    "tags": [
+      "printing",
+      "flags",
+      "marketing materials"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -16873,13 +25448,52 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-207-0",
+        "content": "Jahan (Derby Digital) is inquiring about purchasing 10 L size teardrop flags, indicating a need for physical marketing materials for clients or internal use.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-207-1",
+        "content": "This contact is a vendor for printing services, specifically flags. Could be a potential partner for client projects requiring physical signage.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "e835b8533396",
         "category": "contact",
         "label": "Phone",
         "value": "1353786820"
+      },
+      {
+        "id": "aif-207-1",
+        "category": "business",
+        "label": "Product Interest",
+        "value": "10 L size teardrop flags"
+      },
+      {
+        "id": "aif-207-2",
+        "category": "business",
+        "label": "Vendor Type",
+        "value": "Printing/Signage"
+      },
+      {
+        "id": "aif-207-3",
+        "category": "business",
+        "label": "Contact Name",
+        "value": "Kevin"
+      },
+      {
+        "id": "aif-207-4",
+        "category": "business",
+        "label": "Email Domain",
+        "value": "yixinprinting.com"
       }
     ],
     "opportunities": [],
@@ -16890,17 +25504,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-01-04T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Jahan Taila from Derby Digital is acting as a buyer, inquiring about teardrop flags from Yixinprinting. This contact represents a vendor relationship for physical marketing materials, potentially for Derby Digital's restaurant clients or internal agency needs."
   },
   {
-    "id": "232",
+    "id": "209",
     "firstName": "Eder",
     "lastName": "Muniz Marquez",
     "email": "emunizmarquez@gmail.com",
     "company": "",
     "website": "https://aka.ms",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "pizzaiolo",
+      "event planning",
+      "restaurant"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -16914,8 +25533,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-208-0",
+        "content": "Eder is forwarding pictures of past events, likely indicating he is a restaurant owner/manager looking for marketing services for his events or restaurant.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-208-1",
+        "content": "The original email from Diana Vargas suggests a potential referral or a previous connection related to event planning.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-208-0",
+        "category": "business",
+        "label": "Email Sender",
+        "value": "Eder Muniz Marquez"
+      },
+      {
+        "id": "aif-208-1",
+        "category": "business",
+        "label": "Email Subject",
+        "value": "Fwd: Pizzaiolo parties"
+      },
+      {
+        "id": "aif-208-2",
+        "category": "business",
+        "label": "Email Content",
+        "value": "Pictures of events done last year"
+      },
+      {
+        "id": "aif-208-3",
+        "category": "business",
+        "label": "Original Sender (forwarded)",
+        "value": "Diana Vargas"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -16924,17 +25583,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-01-02T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Eder Muniz Marquez, likely a restaurant owner/manager, is a prospect interested in digital marketing for his 'Pizzaiolo parties' or restaurant events, as evidenced by him forwarding event pictures to Jahan Taila."
   },
   {
-    "id": "233",
+    "id": "210",
     "firstName": "Emily",
     "lastName": "Mcneilly",
     "email": "emcneilly@onezylarsystem.org",
     "company": "Onezylarsystem",
     "website": "https://onezylarsystem.org",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "cold lead conversion",
+      "marketing agency",
+      "inbound lead"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -16948,8 +25612,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-209-0",
+        "content": "Emily is a marketing agency that helps other agencies convert cold leads. She is interested in Derby Digital's 'Derby 4' system.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-209-1",
+        "content": "This is an inbound lead, indicating a potential partnership or service offering to Derby Digital.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-209-0",
+        "category": "business",
+        "label": "Email Date",
+        "value": "2025-12-16"
+      },
+      {
+        "id": "aif-209-1",
+        "category": "business",
+        "label": "Email Subject",
+        "value": "Jahan - quick question"
+      },
+      {
+        "id": "aif-209-2",
+        "category": "business",
+        "label": "Sender's Interest",
+        "value": "Derby Digital's 'Derby 4' marketing system"
+      },
+      {
+        "id": "aif-209-3",
+        "category": "business",
+        "label": "Sender's Service",
+        "value": "Helps marketing agencies turn cold leads into prequalified leads"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -16958,17 +25662,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-12-16T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Emily Mcneilly from Onezylarsystem is an inbound prospect who helps marketing agencies convert cold leads. She reached out to Jahan Taila, expressing admiration for Derby Digital's 'Derby 4' marketing system, suggesting a potential partnership or service offering to Derby Digital."
   },
   {
-    "id": "234",
+    "id": "211",
     "firstName": "Kelly",
     "lastName": "Bradley",
     "email": "kelly.bradley@flowcobra.life",
     "company": "Flowcobra",
     "website": "https://flowcobra.life",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "unsolicited",
+      "sales pitch"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -16982,8 +25690,42 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-210-0",
+        "content": "This is an unsolicited sales pitch from Flowcobra, a company that seems to offer services for identifying businesses that need a specific service.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-210-1",
+        "content": "The email is generic and doesn't show any specific knowledge of Derby Digital or Jahan Taila's business.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-210-0",
+        "category": "business",
+        "label": "Sender Company",
+        "value": "Flowcobra"
+      },
+      {
+        "id": "aif-210-1",
+        "category": "business",
+        "label": "Email Type",
+        "value": "Inbound Sales Pitch"
+      },
+      {
+        "id": "aif-210-2",
+        "category": "business",
+        "label": "Date Received",
+        "value": "2025-12-23"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -16992,17 +25734,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-12-23T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "An unsolicited sales email from Flowcobra, asking about Derby Digital's method for identifying clients and offering their own services to 'make you look different.'"
   },
   {
-    "id": "235",
+    "id": "212",
     "firstName": "Jenny",
     "lastName": "Cunningham",
     "email": "jenny.c@instantlyaikit.com",
     "company": "Instantlyaikit",
     "website": "https://instantlyaikit.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "sales",
+      "email sequences",
+      "AI"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -17016,8 +25763,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-211-0",
+        "content": "Jenny Cunningham from Instantlyaikit is offering to write cold email sequences for Jahan Taila's company, Derby Digital, targeting business brands needing digital marketing services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-211-1",
+        "content": "This is an inbound lead generation attempt, likely an AI-powered service offering to create sales content.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-211-0",
+        "category": "business",
+        "label": "Service Offered",
+        "value": "Cold email sequence writing"
+      },
+      {
+        "id": "aif-211-1",
+        "category": "business",
+        "label": "Target Audience for Sequences",
+        "value": "Business brands needing comprehensive digital marketing services"
+      },
+      {
+        "id": "aif-211-2",
+        "category": "business",
+        "label": "Sender's Company",
+        "value": "Instantlyaikit"
+      },
+      {
+        "id": "aif-211-3",
+        "category": "business",
+        "label": "Date of Contact",
+        "value": "2025-12-16"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -17026,51 +25813,26 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-12-16T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "Unknown",
+    "city": "Unknown",
+    "state": "Unknown",
+    "aiSummary": "Jenny Cunningham from Instantlyaikit is prospecting Jahan Taila, offering to create three cold email sequences for Derby Digital to sell digital marketing services to business brands. This appears to be an AI-driven sales outreach."
   },
   {
-    "id": "236",
-    "firstName": "Publishing",
-    "lastName": "",
-    "email": "publishing@voyagecontentpartners.com",
-    "company": "Voyagecontentpartners",
-    "website": "https://canvasrebel.com",
-    "relationshipType": "industry",
-    "tags": [],
-    "relationshipScore": 10,
-    "interactions": [
-      {
-        "id": "email-203-0",
-        "type": "email",
-        "date": "2025-12-22",
-        "summary": "Your CanvasRebel Interview is Now Live",
-        "subject": "Your CanvasRebel Interview is Now Live",
-        "details": "Hi Jahan\r\n\r\nJust wanted to let you know that your article is now live!\r\n\r\nHere's the link:\r\nhttps://canvasrebel.com/meet-jahan-taila/\r\n\r\nOn the site, you can find it on the homepage in an article titled:\r\nThe story behind the idea\r\n\r\nCongratulations!  It was great working together again and looking forward\r\nto many more collaborations to come.\r\n\r\nWe'd love to send you editorial-style prints of your article if you are\r\ninterested.\r\n\r\nThe cost is $17 for the first print and $5/each for additional copies - and\r\nfor the Highlighter Series the team will also include one cover page (see\r\nthe PDF below).  We also have discounted pricing if you are interested in\r\n50 or more prints.\r\n\r\nSamples are attached below, you can let me know if you are interested.\r\n\r\n CanvasRebel Print Samples.pdf\r\n<https://drive.google.com/open?id=1bIe2DA6Vn_pCULaeaGGv-KsCXanCn2Ky>\r\n\r\nThanks,\r\nMike",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      }
-    ],
-    "notes": [],
-    "facts": [],
-    "opportunities": [],
-    "aiInsights": [],
-    "groups": [],
-    "connections": [],
-    "lastContactedAt": "2025-12-22",
-    "source": "gmail-import",
-    "createdAt": "2025-12-22T00:00:00",
-    "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
-  },
-  {
-    "id": "237",
+    "id": "213",
     "firstName": "Glenford",
     "lastName": "Jay Degamo",
     "email": "glenfordjaydegamo@gmail.com",
     "company": "",
     "website": "https://gformedia.net",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "facebook ads",
+      "go high level",
+      "digital marketing",
+      "google ads"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -17084,8 +25846,41 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-212-0",
+        "content": "Glenford is reaching out to Jahan, likely for a job opportunity or collaboration given his listed skills and experience.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-212-0",
+        "category": "business",
+        "label": "Experience",
+        "value": "3+ years in Digital Marketing"
+      },
+      {
+        "id": "aif-212-1",
+        "category": "business",
+        "label": "Specializations",
+        "value": "Google Ads, Facebook Ads, Go High Level"
+      },
+      {
+        "id": "aif-212-2",
+        "category": "business",
+        "label": "Contact Type",
+        "value": "Inbound email"
+      },
+      {
+        "id": "aif-212-3",
+        "category": "business",
+        "label": "Date of Contact",
+        "value": "2025-12-20"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -17094,17 +25889,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-12-20T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Glenford Jay Degamo, an inbound contact, possesses 3+ years of experience in Google Ads, Facebook Ads, and Go High Level, indicating a potential interest in a role or partnership with Jahan Taila."
   },
   {
-    "id": "238",
+    "id": "214",
     "firstName": "islandbaromaha",
     "lastName": "",
     "email": "islandbaromaha@gmail.com",
-    "company": "",
+    "company": "Island Bar and Grill",
     "website": "",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "grill",
+      "bar",
+      "restaurant"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -17118,8 +25918,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-213-0",
+        "content": "Inbound email received, indicating potential interest in digital marketing services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-213-1",
+        "content": "Website IslandBarLaVista.com suggests a specific location or brand within the Omaha area.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-213-0",
+        "category": "business",
+        "label": "Email Domain",
+        "value": "islandbaromaha@gmail.com"
+      },
+      {
+        "id": "aif-213-1",
+        "category": "business",
+        "label": "Website",
+        "value": "IslandBarLaVista.com"
+      },
+      {
+        "id": "aif-213-2",
+        "category": "business",
+        "label": "Location",
+        "value": "Omaha, NE"
+      },
+      {
+        "id": "aif-213-3",
+        "category": "business",
+        "label": "Niche",
+        "value": "Restaurant"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -17128,17 +25968,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-12-04T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "city": "Omaha",
+    "state": "NE",
+    "aiSummary": "Island Bar and Grill is a restaurant/bar in Omaha, NE, that has sent an inbound email, indicating they are a prospect for digital marketing services, specifically for Jahan Taila at Derby Digital in the restaurant niche."
   },
   {
-    "id": "239",
+    "id": "215",
     "firstName": "Ian",
     "lastName": "Dulay",
     "email": "ian_clientsuccess@virtualstaff.ph",
-    "company": "Virtualstaff",
+    "company": "VirtualStaff",
     "website": "https://virtualstaff.ph",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "recruitment",
+      "virtual assistant"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -17152,8 +25998,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-214-0",
+        "content": "Ian reached out because Jahan is looking to hire a Virtual Assistant (VA). This is an inbound lead for VA services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-214-1",
+        "content": "Jahan Taila (Derby Digital) is a digital marketing agency owner in Louisville, KY, specializing in the restaurant niche. A VA could support various agency tasks.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-214-0",
+        "category": "business",
+        "label": "Contact Name",
+        "value": "Ian Dulay"
+      },
+      {
+        "id": "aif-214-1",
+        "category": "business",
+        "label": "Contact Email",
+        "value": "ian_clientsuccess@virtualstaff.ph"
+      },
+      {
+        "id": "aif-214-2",
+        "category": "business",
+        "label": "Company",
+        "value": "VirtualStaff"
+      },
+      {
+        "id": "aif-214-3",
+        "category": "business",
+        "label": "Inbound Date",
+        "value": "2025-12-18"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -17162,17 +26048,26 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-12-18T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "Client Success",
+    "aiSummary": "Ian Dulay from VirtualStaff is a prospect for Jahan Taila's VA hiring needs. This is an inbound lead for VA services, indicating Jahan is actively seeking support for Derby Digital."
   },
   {
-    "id": "240",
+    "id": "216",
     "firstName": "arjay",
     "lastName": "dacasin",
     "email": "rjjen12@gmail.com",
     "company": "",
     "website": "",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "marketing automation",
+      "B2B",
+      "brand exposure",
+      "client acquisition",
+      "digital marketing",
+      "B2C"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -17186,8 +26081,42 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-215-0",
+        "content": "Arjay reached out inbound, indicating potential interest or a service offering. His skills align with digital marketing needs.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-215-1",
+        "content": "He identifies as a 'Growth Hacker' with experience in B2B/B2C, suggesting he might be a freelancer or agency himself, potentially a competitor or partner.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-215-0",
+        "category": "business",
+        "label": "Email Date",
+        "value": "2025-12-20"
+      },
+      {
+        "id": "aif-215-1",
+        "category": "business",
+        "label": "Sender Self-Description",
+        "value": "Experienced Growth Hacker"
+      },
+      {
+        "id": "aif-215-2",
+        "category": "business",
+        "label": "Key Skills Mentioned",
+        "value": "Client Acquisition, Brand Exposure, Digital Marketing Automation"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -17196,17 +26125,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-12-20T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "Growth Hacker",
+    "aiSummary": "Arjay Dacasin, a self-proclaimed 'Experienced Growth Hacker,' sent an inbound email on 2025-12-20. His skills in client acquisition, brand exposure, and digital marketing automation suggest he operates in a similar space to Jahan Taila. This contact could be a potential prospect for services, a competitor, or a partner, requiring further qualification to determine the best relationship type."
   },
   {
-    "id": "241",
+    "id": "217",
     "firstName": "Abigail",
     "lastName": "Taylor",
     "email": "abbie@upscaleexecutiveimpact.com",
     "company": "Upscaleexecutiveimpact",
     "website": "https://upscaleexecutiveimpact.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "lead generation",
+      "referral"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -17220,8 +26154,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-216-0",
+        "content": "Abigail is offering to connect Jahan with 2-3 companies per week looking for his services, indicating a potential partnership or lead generation service.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-216-1",
+        "content": "She referenced Jahan's success with Deshawn Marcus, showing she has researched his work.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-216-0",
+        "category": "business",
+        "label": "Email",
+        "value": "abbie@upscaleexecutiveimpact.com"
+      },
+      {
+        "id": "aif-216-1",
+        "category": "business",
+        "label": "Inbound Date",
+        "value": "2025-12-18"
+      },
+      {
+        "id": "aif-216-2",
+        "category": "business",
+        "label": "Referenced Success",
+        "value": "Deshawn Marcus (2-3 additional home remodels/month)"
+      },
+      {
+        "id": "aif-216-3",
+        "category": "business",
+        "label": "Offer",
+        "value": "2-3 company connections/week"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -17230,51 +26204,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-12-18T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Abigail Taylor from Upscaleexecutiveimpact is a prospect offering lead generation services, referencing Jahan's past success and proposing to connect him with 2-3 relevant companies per week."
   },
   {
-    "id": "242",
-    "firstName": "James",
-    "lastName": "Bennett",
-    "email": "james@contentsmashhub.co",
-    "company": "Contentsmashhub",
-    "website": "https://contentsmashhub.co",
-    "relationshipType": "other",
-    "tags": [],
-    "relationshipScore": 10,
-    "interactions": [
-      {
-        "id": "email-209-0",
-        "type": "email",
-        "date": "2025-12-15",
-        "summary": "Re: regarding Jahan",
-        "subject": "Re: regarding Jahan",
-        "details": "Jahan, were you able to see the last email I sent? I'm just checking in. Just tell me if you're not interested.\u00a0\r\n\r\nps! we're actively working with over 100+ agencies and built our own to multi 6-figures through inbound\r\n\r\nThanks,\r\nJames Bennett\r\nCo-Founder\r\nContentSmash(.)io\r\n\u00a0\r\n\r\nOn Wed, December 3, 2025 6:15 PM, James Bennett <james@contentsmashhub.co>\r\n[james@contentsmashhub.co]> wrote:\r\n\r\n> Hey Jahan,\r\n> \r\n> Saw your LinkedIn profile & what you're building with DerbyDigital\r\n> \r\n> Most agency founders I speak with are trapped in client acquisition hell while their competitors build authority and attract clients automatically.\r\n> \r\n> We'd build a complete inbound engine for you that guarantees 100 qualified leads in 90 days or full refund plus we work for free until you get them.\r\n> \r\n> Want me to send over how we'd do this for DerbyDigital?\r\n> \r\n> Best,\r\n> James Bennett\r\n> Co-Founder\r\n> ContentSmash(.)io\r\n>",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      }
-    ],
-    "notes": [],
-    "facts": [],
-    "opportunities": [],
-    "aiInsights": [],
-    "groups": [],
-    "connections": [],
-    "lastContactedAt": "2025-12-15",
-    "source": "gmail-import",
-    "createdAt": "2025-12-15T00:00:00",
-    "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
-  },
-  {
-    "id": "243",
+    "id": "218",
     "firstName": "Lucy",
     "lastName": "Flores",
     "email": "lflores@expediacruises.com",
     "company": "Expediacruises",
     "website": "https://expediacruises.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "SMS marketing",
+      "travel industry",
+      "social media marketing"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -17288,13 +26233,52 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-217-0",
+        "content": "Lucy was referred by Keith, owner of Palma's (a restaurant). This is a strong referral, indicating trust from a current client.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-217-1",
+        "content": "She is interested in SMS messaging and general social media help for her travel business, Expediacruises.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "d54e4c1fa7ef",
         "category": "contact",
         "label": "Phone",
         "value": "(845) 492-9890"
+      },
+      {
+        "id": "aif-217-1",
+        "category": "business",
+        "label": "Referral Source",
+        "value": "Keith, owner of Palma's (restaurant)"
+      },
+      {
+        "id": "aif-217-2",
+        "category": "business",
+        "label": "Primary Interest",
+        "value": "SMS Messaging"
+      },
+      {
+        "id": "aif-217-3",
+        "category": "business",
+        "label": "Secondary Interest",
+        "value": "General Social Media"
+      },
+      {
+        "id": "aif-217-4",
+        "category": "business",
+        "label": "Industry",
+        "value": "Travel"
       }
     ],
     "opportunities": [],
@@ -17305,17 +26289,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-12-16T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Lucy Flores from Expediacruises was referred by Keith of Palma's. She is interested in SMS messaging and general social media assistance for her travel business. This is a warm lead with clear needs."
   },
   {
-    "id": "244",
+    "id": "219",
     "firstName": "Whitney",
     "lastName": "Pierce",
     "email": "whitney.pierce@panelcastpodcastnetwork.co",
     "company": "Panelcastpodcastnetwork",
     "website": "https://panelcastpodcastnetwork.co",
-    "relationshipType": "industry",
-    "tags": [],
+    "relationshipType": "other",
+    "tags": [
+      "podcast outreach",
+      "guest spots",
+      "marketing"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -17329,8 +26318,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-218-0",
+        "content": "Whitney is reaching out to Jahan about appearing on podcasts, likely for personal branding or agency promotion.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-218-1",
+        "content": "This is an inbound lead for podcast guesting services, not directly related to Derby Digital's core service of digital marketing for restaurants.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-218-0",
+        "category": "business",
+        "label": "Sender Company",
+        "value": "Panelcastpodcastnetwork"
+      },
+      {
+        "id": "aif-218-1",
+        "category": "business",
+        "label": "Sender Email",
+        "value": "whitney.pierce@panelcastpodcastnetwork.co"
+      },
+      {
+        "id": "aif-218-2",
+        "category": "business",
+        "label": "Service Offered",
+        "value": "Podcast guest booking"
+      },
+      {
+        "id": "aif-218-3",
+        "category": "business",
+        "label": "Network Size",
+        "value": "75,000 podcast professionals"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -17339,17 +26368,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-12-12T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Whitney Pierce from Panelcastpodcastnetwork is offering podcast guest booking services to Jahan Taila. This is an inbound lead for Jahan's personal branding or agency promotion, not a direct prospect for Derby Digital's restaurant niche services."
   },
   {
-    "id": "245",
+    "id": "220",
     "firstName": "Ryan",
     "lastName": "lockwood",
     "email": "ryan.lockwood@vanillaheartpublishing.com",
     "company": "Vanillaheartpublishing",
     "website": "https://en.wikipedia.org",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "Wikipedia",
+      "inbound lead"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -17363,8 +26396,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-219-0",
+        "content": "Ryan Lockwood from Vanillaheartpublishing responded to Jahan Taila's outreach regarding Wikipedia page creation.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-219-1",
+        "content": "The initial outreach from Jahan was about creating a Wikipedia page, which might not directly align with Derby Digital's core digital marketing services for restaurants.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-219-0",
+        "category": "business",
+        "label": "Last Contact Date",
+        "value": "2025-11-05"
+      },
+      {
+        "id": "aif-219-1",
+        "category": "business",
+        "label": "Contact Type",
+        "value": "Inbound Email"
+      },
+      {
+        "id": "aif-219-2",
+        "category": "business",
+        "label": "Topic of Interest",
+        "value": "Wikipedia Page Creation"
+      },
+      {
+        "id": "aif-219-3",
+        "category": "business",
+        "label": "Company Industry",
+        "value": "Publishing"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -17373,17 +26446,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-11-05T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Ryan Lockwood from Vanillaheartpublishing is an inbound prospect who responded to an offer for Wikipedia page creation. This contact may not be directly in Derby Digital's restaurant niche, and the service offered (Wikipedia) might be a tangential offering rather than core digital marketing."
   },
   {
-    "id": "246",
+    "id": "221",
     "firstName": "Erik",
     "lastName": "Leon",
     "email": "erikleon1991@live.com",
-    "company": "",
+    "company": "Chicano Street Kitchen",
     "website": "https://aka.ms",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "restaurant",
+      "inbound lead"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -17397,8 +26474,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-220-0",
+        "content": "Erik is responding to an outreach regarding 'Chicano Street Kitchen'. This indicates he is likely involved with or owns this restaurant.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-220-1",
+        "content": "His question 'Which platform would that be?' suggests he's interested in learning more about the digital marketing platforms Derby Digital uses or recommends.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-220-0",
+        "category": "business",
+        "label": "Email",
+        "value": "erikleon1991@live.com"
+      },
+      {
+        "id": "aif-220-1",
+        "category": "business",
+        "label": "Restaurant Name",
+        "value": "Chicano Street Kitchen"
+      },
+      {
+        "id": "aif-220-2",
+        "category": "business",
+        "label": "Inbound Date",
+        "value": "2025-11-23"
+      },
+      {
+        "id": "aif-220-3",
+        "category": "business",
+        "label": "Source of Initial Contact",
+        "value": "Fisherman Websites (no-reply@gofisherman.com)"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -17407,17 +26524,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-11-23T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Erik Leon is a prospect associated with 'Chicano Street Kitchen', a restaurant. He responded to an outreach, showing initial interest in Derby Digital's services and asking for clarification on platforms."
   },
   {
-    "id": "247",
+    "id": "222",
     "firstName": "Mike",
     "lastName": "Alvarez",
     "email": "mike@canvasrebel.com",
-    "company": "Canvasrebel",
+    "company": "CanvasRebel",
     "website": "https://canvasrebel.com",
     "relationshipType": "industry",
-    "tags": [],
+    "tags": [
+      "interview",
+      "local business",
+      "media"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -17431,13 +26553,52 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-221-0",
+        "content": "Mike is reaching out for an interview for CanvasRebel Magazine's 'Inspiring Stories' series, focusing on local entrepreneurs.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-221-1",
+        "content": "This is an opportunity for Jahan Taila and Derby Digital to gain local exposure and build brand awareness within the Louisville community.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "4a0075a93b50",
         "category": "contact",
         "label": "Address",
         "value": "9415 Culver Blvd STE 207\r"
+      },
+      {
+        "id": "aif-221-1",
+        "category": "business",
+        "label": "Publication",
+        "value": "CanvasRebel Magazine"
+      },
+      {
+        "id": "aif-221-2",
+        "category": "business",
+        "label": "Series",
+        "value": "Inspiring Stories"
+      },
+      {
+        "id": "aif-221-3",
+        "category": "business",
+        "label": "Focus",
+        "value": "Local entrepreneurs, creatives, community leaders"
+      },
+      {
+        "id": "aif-221-4",
+        "category": "contact",
+        "label": "Email Date",
+        "value": "2025-11-15"
       }
     ],
     "opportunities": [],
@@ -17448,17 +26609,24 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-11-15T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "Editorial Team",
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "Mike Alvarez from CanvasRebel Magazine is inviting Jahan Taila for an interview for their 'Inspiring Stories' series, offering local media exposure for Derby Digital."
   },
   {
-    "id": "248",
+    "id": "223",
     "firstName": "Nicole",
     "lastName": "Katz",
     "email": "nicole.katz@ramp.com",
     "company": "Ramp",
     "website": "https://ramp.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "inbound lead",
+      "congratulations"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -17472,7 +26640,15 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-222-0",
+        "content": "Nicole reached out to congratulate Jahan on his new role at Derby Digital, indicating she found him via LinkedIn. This is an inbound lead.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "8d301fe3faf5",
@@ -17485,6 +26661,24 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "category": "contact",
         "label": "Address",
         "value": "28 W 23rd St, New"
+      },
+      {
+        "id": "aif-222-2",
+        "category": "business",
+        "label": "Source",
+        "value": "LinkedIn (inbound)"
+      },
+      {
+        "id": "aif-222-3",
+        "category": "business",
+        "label": "Contact Date",
+        "value": "2025-11-13"
+      },
+      {
+        "id": "aif-222-4",
+        "category": "business",
+        "label": "Email Count",
+        "value": "1"
       }
     ],
     "opportunities": [],
@@ -17495,17 +26689,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-11-13T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Nicole Katz from Ramp initiated contact to congratulate Jahan Taila on his new role at Derby Digital, making her an inbound prospect."
   },
   {
-    "id": "249",
+    "id": "224",
     "firstName": "Brad",
     "lastName": "Sherrell",
     "email": "rollamaidrite@gmail.com",
-    "company": "",
+    "company": "Maid-Rite",
     "website": "",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "franchise",
+      "maid-rite",
+      "restaurant"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -17519,13 +26718,52 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-223-0",
+        "content": "Brad is currently under contract with another provider ('fisherman') but is open to discussing options, indicating a potential future opportunity.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-223-1",
+        "content": "He provided both his cell and store phone numbers, suggesting a willingness to be contacted directly.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "cfd84799dd93",
         "category": "contact",
         "label": "Phone",
         "value": "573-578-6544"
+      },
+      {
+        "id": "aif-223-1",
+        "category": "business",
+        "label": "Current Contract Status",
+        "value": "Renewed for a year with 'fisherman'"
+      },
+      {
+        "id": "aif-223-2",
+        "category": "contact",
+        "label": "Cell Phone",
+        "value": "573-578-6544"
+      },
+      {
+        "id": "aif-223-3",
+        "category": "contact",
+        "label": "Store Phone",
+        "value": "573-364-1434"
+      },
+      {
+        "id": "aif-223-4",
+        "category": "business",
+        "label": "Last Contact Date",
+        "value": "2025-11-24"
       }
     ],
     "opportunities": [],
@@ -17536,17 +26774,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-11-24T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "state": "MO",
+    "aiSummary": "Brad Sherrell from Maid-Rite is a prospect currently under contract but open to discussion. He provided direct contact numbers and is interested in hearing from Jahan in the morning."
   },
   {
-    "id": "250",
+    "id": "225",
     "firstName": "Brian",
     "lastName": "Finneran",
     "email": "bluefinninc@gmail.com",
-    "company": "",
+    "company": "Blue Finn Inc.",
     "website": "",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "fraternity",
+      "referral",
+      "restaurant"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -17560,8 +26804,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-224-0",
+        "content": "Brian Finneran referred Granville Pub, noting the owners are Phi Kappa Tau fraternity members. This suggests a potential warm introduction or shared network.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-224-1",
+        "content": "The email includes names and DOBs (Mason Alexander Schultz, James Myles Garvey) which might be the owners of Granville Pub or related individuals.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-224-0",
+        "category": "business",
+        "label": "Referred Company",
+        "value": "Granville Pub"
+      },
+      {
+        "id": "aif-224-1",
+        "category": "personal",
+        "label": "Fraternity Affiliation",
+        "value": "Phi Kappa Tau (\u03a6\u039a\u03a4)"
+      },
+      {
+        "id": "aif-224-2",
+        "category": "business",
+        "label": "Referral Source",
+        "value": "Brian Finneran"
+      },
+      {
+        "id": "aif-224-3",
+        "category": "business",
+        "label": "Referral Type",
+        "value": "Warm Introduction"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -17570,17 +26854,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-11-20T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Brian Finneran of Blue Finn Inc. referred Granville Pub, highlighting a shared Phi Kappa Tau fraternity connection with the owners. This is a strong prospect lead for Jahan Taila in the restaurant niche."
   },
   {
-    "id": "251",
+    "id": "226",
     "firstName": "J&S",
     "lastName": "Enterprises",
     "email": "jsvendors4u@gmail.com",
-    "company": "",
+    "company": "J&S Enterprises",
     "website": "",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "restaurant niche",
+      "inbound lead"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -17594,8 +26882,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-225-0",
+        "content": "This is an inbound lead from a website contact form, indicating initial interest. The 'Re: [Melvin\u2019s at Riverside] Contact Request' suggests they are interested in or connected to a restaurant called Melvin's at Riverside.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-225-1",
+        "content": "The email address 'jsvendors4u@gmail.com' might indicate they are a vendor or have multiple business interests, which could be a good discovery point.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-225-0",
+        "category": "business",
+        "label": "Email Domain",
+        "value": "gmail.com"
+      },
+      {
+        "id": "aif-225-1",
+        "category": "business",
+        "label": "Lead Source",
+        "value": "Website Contact Form (via gofisherman.com)"
+      },
+      {
+        "id": "aif-225-2",
+        "category": "business",
+        "label": "Initial Contact Date",
+        "value": "2025-11-22"
+      },
+      {
+        "id": "aif-225-3",
+        "category": "business",
+        "label": "Referenced Restaurant",
+        "value": "Melvin\u2019s at Riverside"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -17604,17 +26932,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-11-23T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Inbound prospect from J&S Enterprises, jsvendors4u@gmail.com, showing interest via a website contact form, specifically referencing 'Melvin\u2019s at Riverside'. This is a strong lead for Jahan Taila in the restaurant niche."
   },
   {
-    "id": "252",
+    "id": "227",
     "firstName": "Frank",
     "lastName": "Collins",
     "email": "frank.collins@getclevelcontacts.com",
     "company": "Getclevelcontacts",
     "website": "https://getclevelcontacts.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "vendor",
+    "tags": [
+      "sales",
+      "cold calling",
+      "lead generation"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -17628,8 +26961,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-226-0",
+        "content": "Frank is offering a free 7-day cold calling sprint to generate 1-3 meetings for Jahan.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-226-1",
+        "content": "This could be a potential lead generation service for Derby Digital's restaurant clients.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-226-0",
+        "category": "business",
+        "label": "Service Offered",
+        "value": "Cold calling sprint (7-day, free)"
+      },
+      {
+        "id": "aif-226-1",
+        "category": "business",
+        "label": "Deliverable",
+        "value": "1-3 meetings"
+      },
+      {
+        "id": "aif-226-2",
+        "category": "business",
+        "label": "Contact Role",
+        "value": "Founder"
+      },
+      {
+        "id": "aif-226-3",
+        "category": "business",
+        "label": "Company Focus",
+        "value": "Lead generation/sales"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -17638,17 +27011,24 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-11-21T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "Founder",
+    "aiSummary": "Frank Collins from Getclevelcontacts is a vendor offering a free 7-day cold calling sprint to generate 1-3 meetings for Jahan. This could be a relevant service for Derby Digital's client acquisition or for their restaurant clients."
   },
   {
-    "id": "253",
+    "id": "228",
     "firstName": "Andrew",
     "lastName": "Masterson",
     "email": "andrew@mastersons.com",
     "company": "Mastersons",
     "website": "https://mastersons.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "video production",
+      "website update",
+      "restaurant",
+      "inbound lead"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -17662,7 +27042,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-227-0",
+        "content": "Andrew is inquiring about website and video updates for Captain's Quarters restaurant.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-227-1",
+        "content": "This is an inbound lead, indicating a clear need and interest in Derby Digital's services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "98ea6e12aa99",
@@ -17675,6 +27070,30 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "category": "contact",
         "label": "Address",
         "value": "1231 Lexington Rd\r"
+      },
+      {
+        "id": "aif-227-2",
+        "category": "business",
+        "label": "Restaurant Name",
+        "value": "Captain's Quarters"
+      },
+      {
+        "id": "aif-227-3",
+        "category": "business",
+        "label": "Service Interest",
+        "value": "Website update, video production"
+      },
+      {
+        "id": "aif-227-4",
+        "category": "business",
+        "label": "Lead Type",
+        "value": "Inbound"
+      },
+      {
+        "id": "aif-227-5",
+        "category": "business",
+        "label": "Contact Date",
+        "value": "2025-07-01"
       }
     ],
     "opportunities": [],
@@ -17685,51 +27104,24 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-07-01T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "city": "Prospect",
+    "state": "KY",
+    "aiSummary": "Andrew Masterson is an inbound prospect from Captain's Quarters restaurant in Prospect, KY, seeking pricing for website and video updates. This is a high-intent lead directly aligned with Jahan Taila's restaurant niche."
   },
   {
-    "id": "254",
-    "firstName": "James",
-    "lastName": "Shields",
-    "email": "james.s@frostmailerreport.info",
-    "company": "Frostmailerreport",
-    "website": "https://frostmailerreport.info",
-    "relationshipType": "other",
-    "tags": [],
-    "relationshipScore": 10,
-    "interactions": [
-      {
-        "id": "email-228-0",
-        "type": "email",
-        "date": "2025-10-14",
-        "summary": "for you Jahan",
-        "subject": "for you Jahan",
-        "details": "Jahan, it's James here from Frostmailer.\u00a0\r\n\r\nWe spoke a while ago about cold email and lead gen.\r\n\r\nI'm reaching out because we launched a new offer where we build your cold email system for completely free.\r\n\r\nLet's jump on a short call to go over it, no pressure, but only doing limited buildouts for free.\r\n\r\nThanks,\r\nJames\r\nFounder of Frostmailer\r\n\r\nPS - one of our recent clients closed 4 high ticket deals in 38 days, you can be next",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      }
-    ],
-    "notes": [],
-    "facts": [],
-    "opportunities": [],
-    "aiInsights": [],
-    "groups": [],
-    "connections": [],
-    "lastContactedAt": "2025-10-14",
-    "source": "gmail-import",
-    "createdAt": "2025-10-14T00:00:00",
-    "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
-  },
-  {
-    "id": "255",
+    "id": "229",
     "firstName": "Motion",
     "lastName": "from Motion",
     "email": "aneesah.emeka@motion-50623759983a.intercom-mail.com",
-    "company": "Motion 50623759983A",
+    "company": "Motion from Motion",
     "website": "https://usemotion.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "potential switch",
+      "ClickUp competitor",
+      "pricing inquiry"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -17743,8 +27135,42 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-228-0",
+        "content": "Jahan is considering switching from ClickUp and is inquiring about Motion's lower-price plans.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-228-1",
+        "content": "This is an inbound lead from Motion, indicating Jahan initiated contact regarding their service.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-228-0",
+        "category": "business",
+        "label": "Current Tool",
+        "value": "ClickUp"
+      },
+      {
+        "id": "aif-228-1",
+        "category": "business",
+        "label": "Inquiry Type",
+        "value": "Pricing for lower-price plan"
+      },
+      {
+        "id": "aif-228-2",
+        "category": "business",
+        "label": "Contact Person (Motion)",
+        "value": "Miguel"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -17753,17 +27179,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-10-29T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Jahan Taila, representing Derby Digital, is a prospect for Motion, inquiring about their lower-priced plans as a potential switch from ClickUp. This is an inbound lead, with Miguel from Motion responding to Jahan's query."
   },
   {
-    "id": "256",
+    "id": "230",
     "firstName": "sarco",
     "lastName": "smith",
     "email": "smithsarco35@gmail.com",
     "company": "",
     "website": "",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "estimation",
+      "inbound lead"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -17777,8 +27207,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-229-0",
+        "content": "This is an inbound lead specifically asking for 'estimation jobs' and requesting plans in PDF format for review and quote.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-229-1",
+        "content": "The contact's email address (smithsarco35@gmail.com) and lack of company name suggest they might be a small business owner, freelancer, or an individual looking for services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-229-0",
+        "category": "business",
+        "label": "Inquiry Type",
+        "value": "Estimation jobs"
+      },
+      {
+        "id": "aif-229-1",
+        "category": "business",
+        "label": "Preferred Format",
+        "value": "PDF for plans"
+      },
+      {
+        "id": "aif-229-2",
+        "category": "business",
+        "label": "Urgency Indicated",
+        "value": "Quick quote"
+      },
+      {
+        "id": "aif-229-3",
+        "category": "contact",
+        "label": "Email Domain",
+        "value": "gmail.com"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -17787,51 +27257,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-10-31T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Sarco Smith is an inbound prospect inquiring about estimation services, preferring PDF plans for a quick quote. The lack of company information suggests a potentially smaller-scale need."
   },
   {
-    "id": "257",
-    "firstName": "Noe",
-    "lastName": "Munoz",
-    "email": "nmainvestmentsllc90@gmail.com",
-    "company": "",
-    "website": "",
-    "relationshipType": "other",
-    "tags": [],
-    "relationshipScore": 10,
-    "interactions": [
-      {
-        "id": "email-235-0",
-        "type": "email",
-        "date": "2025-10-24",
-        "summary": "El Ma\u00f1anero Advertising",
-        "subject": "El Ma\u00f1anero Advertising",
-        "details": "El mananero publicidad 2.11.pdf\r\n<https://drive.google.com/file/d/1oRlXWmfZ2KRw-I8yEvpAp6aFIn4NNxSq/view?usp=drive_web>",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      }
-    ],
-    "notes": [],
-    "facts": [],
-    "opportunities": [],
-    "aiInsights": [],
-    "groups": [],
-    "connections": [],
-    "lastContactedAt": "2025-10-24",
-    "source": "gmail-import",
-    "createdAt": "2025-10-24T00:00:00",
-    "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
-  },
-  {
-    "id": "258",
+    "id": "231",
     "firstName": "MICHELLE",
     "lastName": "doyal",
     "email": "mdoyal2004@msn.com",
     "company": "",
     "website": "",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "bagel bistro",
+      "restaurant",
+      "inbound lead"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -17845,13 +27286,52 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-230-0",
+        "content": "Michelle is interested in discussing digital marketing services for Bruchelle's Bagel Bistro.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-230-1",
+        "content": "She is currently out of town and prefers to schedule a meeting the week after next.",
+        "category": "logistics",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "ee246fe61513",
         "category": "contact",
         "label": "Phone",
         "value": "1502702626"
+      },
+      {
+        "id": "aif-230-1",
+        "category": "business",
+        "label": "Email Address",
+        "value": "mdoyal2004@msn.com"
+      },
+      {
+        "id": "aif-230-2",
+        "category": "business",
+        "label": "Lead Source",
+        "value": "Bruchelle\u2019s Bagel Bistro Site Form"
+      },
+      {
+        "id": "aif-230-3",
+        "category": "logistics",
+        "label": "Preferred Meeting Time",
+        "value": "Week after next (from Oct 17, 2025)"
+      },
+      {
+        "id": "aif-230-4",
+        "category": "communication",
+        "label": "Device Used",
+        "value": "iPhone"
       }
     ],
     "opportunities": [],
@@ -17862,17 +27342,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-10-17T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Michelle Doyal is an inbound prospect for digital marketing services for Bruchelle's Bagel Bistro. She is available to discuss further the week after next."
   },
   {
-    "id": "259",
+    "id": "232",
     "firstName": "kenny",
     "lastName": "",
     "email": "kenny@beanscenecafe.com",
     "company": "Beanscenecafe",
     "website": "https://beanscenecafe.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "ADP compliance",
+      "demo requested",
+      "restaurant"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -17886,13 +27371,45 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-231-0",
+        "content": "Kenny from Bean Scene Cafe is interested in a demo and specifically asked about ADP compliance.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "ee246fe61513",
         "category": "contact",
         "label": "Phone",
         "value": "1502702626"
+      },
+      {
+        "id": "aif-231-1",
+        "category": "business",
+        "label": "Email",
+        "value": "kenny@beanscenecafe.com"
+      },
+      {
+        "id": "aif-231-2",
+        "category": "business",
+        "label": "Company",
+        "value": "Beanscenecafe"
+      },
+      {
+        "id": "aif-231-3",
+        "category": "business",
+        "label": "Interest",
+        "value": "Demo, ADP compliance"
+      },
+      {
+        "id": "aif-231-4",
+        "category": "business",
+        "label": "Source",
+        "value": "Site Form Submitted (getbento.com)"
       }
     ],
     "opportunities": [],
@@ -17903,17 +27420,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-10-17T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Kenny from Bean Scene Cafe is a prospect who submitted a site form, is interested in a demo, and has a specific question about ADP compliance. This indicates a potential need for HR/payroll integration or compliance features within the digital marketing solution."
   },
   {
-    "id": "260",
+    "id": "233",
     "firstName": "Ambiyan",
     "lastName": "Ambiyan",
     "email": "ambiyan@ambiyan.com",
-    "company": "Ambiyan",
+    "company": "Ambiyan Restaurants",
     "website": "https://Ambiyan.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "multi-location",
+      "restaurant",
+      "Indian cuisine"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -17927,13 +27449,52 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-232-0",
+        "content": "Ambiyan is a multi-location Indian restaurant group in the Toronto area, indicating potential for scaling digital marketing efforts.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-232-1",
+        "content": "The contact is Dilpreet Singh, who responded to an inbound inquiry, suggesting active interest in their website or digital presence.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "7324fe4fefa0",
         "category": "contact",
         "label": "Phone",
         "value": "(905) 480-0094"
+      },
+      {
+        "id": "aif-232-1",
+        "category": "business",
+        "label": "Industry",
+        "value": "Restaurant"
+      },
+      {
+        "id": "aif-232-2",
+        "category": "business",
+        "label": "Cuisine",
+        "value": "Indian"
+      },
+      {
+        "id": "aif-232-3",
+        "category": "business",
+        "label": "Locations",
+        "value": "Unionville, Toronto, Vaughan"
+      },
+      {
+        "id": "aif-232-4",
+        "category": "contact",
+        "label": "Contact Name",
+        "value": "Dilpreet Singh"
       }
     ],
     "opportunities": [],
@@ -17944,17 +27505,24 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-10-16T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "city": "Toronto",
+    "state": "ON",
+    "aiSummary": "Ambiyan Restaurants is a multi-location Indian restaurant group in the Toronto area. Dilpreet Singh, a contact from Ambiyan, responded to an inbound inquiry, indicating potential interest in digital marketing services for their restaurant chain."
   },
   {
-    "id": "261",
+    "id": "234",
     "firstName": "Jamaican",
     "lastName": "Breeze Indy",
     "email": "info@jamaicanbreezeindy.com",
-    "company": "Jamaicanbreezeindy",
+    "company": "Jamaican Breeze Sports Bar & Grill",
     "website": "https://jamaicanbreezeindy.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "sports bar",
+      "restaurant",
+      "jamaican cuisine"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -17968,7 +27536,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-233-0",
+        "content": "Inbound email on 2025-10-06 regarding a logo, indicating potential interest in design or branding services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-233-1",
+        "content": "Based in Indianapolis, which is a manageable distance from Louisville, KY for in-person meetings if needed.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "32372d9d3aeb",
@@ -17981,6 +27564,18 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "category": "contact",
         "label": "Address",
         "value": "4189 N Keystone Ave\r"
+      },
+      {
+        "id": "aif-233-2",
+        "category": "business",
+        "label": "Email",
+        "value": "info@jamaicanbreezeindy.com"
+      },
+      {
+        "id": "aif-233-3",
+        "category": "business",
+        "label": "Contact Person",
+        "value": "Doreen Mason"
       }
     ],
     "opportunities": [],
@@ -17991,17 +27586,24 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-10-06T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "city": "Indianapolis",
+    "state": "IN",
+    "aiSummary": "Jamaican Breeze Sports Bar & Grill is an Indianapolis-based restaurant prospect, with an inbound email indicating interest in logo/branding work. Doreen Mason is the contact person."
   },
   {
-    "id": "262",
+    "id": "235",
     "firstName": "Aryan",
     "lastName": "Virk",
     "email": "aryan@topvirkagency.org",
     "company": "Topvirkagency",
     "website": "https://topvirkagency.org",
-    "relationshipType": "industry",
-    "tags": [],
+    "relationshipType": "partner",
+    "tags": [
+      "marketing",
+      "advertising",
+      "podcast"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -18015,8 +27617,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-234-0",
+        "content": "Aryan Virk is inviting Jahan Taila to be a guest on their podcast. This could be a good opportunity for brand exposure.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-234-1",
+        "content": "The podcast is new, suggesting Jahan could be among the first guests, potentially offering more influence on the topic or reach.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-234-0",
+        "category": "business",
+        "label": "Contact Email",
+        "value": "aryan@topvirkagency.org"
+      },
+      {
+        "id": "aif-234-1",
+        "category": "business",
+        "label": "Company Name",
+        "value": "Topvirkagency"
+      },
+      {
+        "id": "aif-234-2",
+        "category": "business",
+        "label": "Interaction Type",
+        "value": "Podcast Invitation"
+      },
+      {
+        "id": "aif-234-3",
+        "category": "business",
+        "label": "Source of Lead",
+        "value": "LinkedIn"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -18025,17 +27667,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-09-22T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Aryan Virk from Topvirkagency is inviting Jahan Taila to be a guest on their new podcast, found via LinkedIn. This presents a potential partnership for brand visibility in the marketing and advertising space."
   },
   {
-    "id": "263",
+    "id": "236",
     "firstName": "Eddie",
     "lastName": "DeAngelis",
     "email": "eddie_d@qualififastereasier.com",
     "company": "Qualififastereasier",
     "website": "https://qualififastereasier.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "digital marketing agency",
+      "B2B",
+      "inbound lead"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -18049,8 +27696,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-235-0",
+        "content": "Eddie's company, Qualififastereasier, targets digital marketing agencies like Derby Digital. This is a B2B lead, not a restaurant lead.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-235-1",
+        "content": "The email is an inbound inquiry, indicating some level of interest in Derby Digital's services, but the intent is likely to sell to Jahan, not buy from him.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-235-0",
+        "category": "business",
+        "label": "Sender Company",
+        "value": "Qualififastereasier"
+      },
+      {
+        "id": "aif-235-1",
+        "category": "business",
+        "label": "Sender Email Domain",
+        "value": "qualififastereasier.com"
+      },
+      {
+        "id": "aif-235-2",
+        "category": "business",
+        "label": "Contact Type",
+        "value": "Inbound Email"
+      },
+      {
+        "id": "aif-235-3",
+        "category": "business",
+        "label": "Sender's Business Model",
+        "value": "Helps digital marketing businesses"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -18059,17 +27746,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-09-03T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "This is an inbound email from Eddie DeAngelis of Qualififastereasier, a company that targets digital marketing agencies. It appears to be a sales outreach to Jahan, not a potential client for Derby Digital's restaurant niche services."
   },
   {
-    "id": "264",
+    "id": "237",
     "firstName": "Do",
     "lastName": "Asian Fusion",
     "email": "doasianfusion@gmail.com",
-    "company": "",
+    "company": "Do Asian Fusion",
     "website": "https://gfhiedh.r.bh.d.sendibt3.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "small business",
+      "pricing sensitive",
+      "restaurant",
+      "asian fusion"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -18083,8 +27776,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-236-0",
+        "content": "Prospect is interested in services but is a small business with one location, making pricing a key factor.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-236-1",
+        "content": "Follow-up email from prospect indicates a delay in response, but continued interest.",
+        "category": "communication",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-236-0",
+        "category": "business",
+        "label": "Business Type",
+        "value": "Restaurant"
+      },
+      {
+        "id": "aif-236-1",
+        "category": "business",
+        "label": "Cuisine",
+        "value": "Asian Fusion"
+      },
+      {
+        "id": "aif-236-2",
+        "category": "business",
+        "label": "Size",
+        "value": "Small business, one location"
+      },
+      {
+        "id": "aif-236-3",
+        "category": "business",
+        "label": "Key Concern",
+        "value": "Pricing"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -18093,17 +27826,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-09-07T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "Do Asian Fusion is a small, single-location Asian Fusion restaurant in Louisville, KY, interested in Derby Digital's services. Pricing is a critical consideration for them."
   },
   {
-    "id": "265",
+    "id": "238",
     "firstName": "James",
     "lastName": "Andrews",
     "email": "jandrews@saasbrowserhq.com",
     "company": "Saasbrowserhq",
     "website": "https://saasbrowserhq.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "inbound lead",
+      "marketing automation"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -18117,13 +27856,52 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-237-0",
+        "content": "James Andrews from Saasbrowserhq reached out, seemingly impressed by Stallion Success (a marketing automation platform). This is an inbound lead for Stallion Success, not Derby Digital.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-237-1",
+        "content": "The email is directed to 'Stallion Success,' indicating Saasbrowserhq is interested in or analyzing marketing automation platforms.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "a00aaec4ed90",
         "category": "contact",
         "label": "Address",
         "value": "680 South Cache St., Unit"
+      },
+      {
+        "id": "aif-237-1",
+        "category": "business",
+        "label": "Sender Company",
+        "value": "Saasbrowserhq"
+      },
+      {
+        "id": "aif-237-2",
+        "category": "business",
+        "label": "Recipient (Implied)",
+        "value": "Stallion Success (Marketing Automation Platform)"
+      },
+      {
+        "id": "aif-237-3",
+        "category": "business",
+        "label": "Email Type",
+        "value": "Inbound Inquiry/Compliment"
+      },
+      {
+        "id": "aif-237-4",
+        "category": "business",
+        "label": "Topic",
+        "value": "Marketing Automation Platforms"
       }
     ],
     "opportunities": [],
@@ -18134,17 +27912,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-09-03T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "This contact is an inbound email from James Andrews of Saasbrowserhq to 'Stallion Success,' a marketing automation platform. It expresses admiration for how Stallion Success empowers small businesses and notes its presence in Saasbrowserhq's database. This contact is not directly relevant to Jahan Taila's Derby Digital or its restaurant niche, as it's an inquiry for a different company."
   },
   {
-    "id": "266",
+    "id": "239",
     "firstName": "Samantha",
     "lastName": "Cruz",
     "email": "samantha@getinterstaffllc.info",
     "company": "Getinterstaffllc",
     "website": "https://getinterstaffllc.info",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "service provider",
+      "cold outreach"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -18158,8 +27940,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-238-0",
+        "content": "Samantha Cruz from Getinterstaffllc is reaching out to Jahan Taila, likely offering a service to help marketing firms scale by providing trained assistants.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-238-1",
+        "content": "The email suggests Getinterstaffllc helps marketing firms add retainers by handling service delivery, which could be relevant to Derby Digital's operations.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-238-0",
+        "category": "business",
+        "label": "Sender Company",
+        "value": "Getinterstaffllc"
+      },
+      {
+        "id": "aif-238-1",
+        "category": "business",
+        "label": "Sender Email",
+        "value": "samantha@getinterstaffllc.info"
+      },
+      {
+        "id": "aif-238-2",
+        "category": "business",
+        "label": "Service Offered",
+        "value": "Trained assistants for service delivery"
+      },
+      {
+        "id": "aif-238-3",
+        "category": "business",
+        "label": "Claimed Benefit",
+        "value": "Add $60,000 in retainers in 6 weeks"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -18168,17 +27990,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-08-08T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "This is a cold outreach from Samantha Cruz of Getinterstaffllc, offering a service to provide trained assistants to marketing firms like Derby Digital, aiming to help them increase retainers by offloading service delivery."
   },
   {
-    "id": "267",
+    "id": "240",
     "firstName": "El",
     "lastName": "Famoso Burrito",
     "email": "elfamousburrito62nd@gmail.com",
-    "company": "",
+    "company": "El Famoso Burrito",
     "website": "",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "restaurant",
+      "catering"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -18192,13 +28018,52 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-239-0",
+        "content": "El Famoso Burrito is only interested in catering services, not digital marketing. They explicitly stated 'Serious catering inquiries only.'",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-239-1",
+        "content": "Jahan Taila previously inquired about 10-guest catering, which seems to be the only point of interest for El Famoso Burrito.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "dd92286a9fbc",
         "category": "contact",
         "label": "Phone",
         "value": "(502) 702-6268"
+      },
+      {
+        "id": "aif-239-1",
+        "category": "business",
+        "label": "Email Address",
+        "value": "elfamousburrito62nd@gmail.com"
+      },
+      {
+        "id": "aif-239-2",
+        "category": "business",
+        "label": "Last Contact Date",
+        "value": "2025-08-09"
+      },
+      {
+        "id": "aif-239-3",
+        "category": "business",
+        "label": "Expressed Interest",
+        "value": "Catering only"
+      },
+      {
+        "id": "aif-239-4",
+        "category": "business",
+        "label": "Previous Inquiry",
+        "value": "10-guest catering"
       }
     ],
     "opportunities": [],
@@ -18209,17 +28074,24 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-08-09T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "El Famoso Burrito is a prospect that has explicitly stated they are only interested in catering services, not digital marketing, based on Jahan Taila's prior inquiry about a 10-guest catering order."
   },
   {
-    "id": "268",
+    "id": "241",
     "firstName": "Juthika",
     "lastName": "Bedi",
     "email": "juthika@paisleyrestaurantnyc.com",
     "company": "Paisleyrestaurantnyc",
     "website": "https://paisleyrestaurantnyc.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "owner",
+      "restaurant",
+      "inbound lead"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -18233,8 +28105,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-240-0",
+        "content": "Juthika is the owner of Paisley Restaurant NYC and responded to an inbound reservation inquiry from Jahan. This indicates a potential need for digital marketing services for their restaurant.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-240-1",
+        "content": "Jahan's initial outreach was for a reservation, which was likely a strategic move to initiate contact and assess Juthika's responsiveness and the restaurant's operational efficiency.",
+        "category": "strategy",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-240-0",
+        "category": "business",
+        "label": "Contact Name",
+        "value": "Juthika Bedi"
+      },
+      {
+        "id": "aif-240-1",
+        "category": "business",
+        "label": "Company Name",
+        "value": "Paisleyrestaurantnyc"
+      },
+      {
+        "id": "aif-240-2",
+        "category": "business",
+        "label": "Role",
+        "value": "Owner"
+      },
+      {
+        "id": "aif-240-3",
+        "category": "interaction",
+        "label": "Recent Interaction Date",
+        "value": "2025-08-08"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -18243,17 +28155,24 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-08-08T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "Owner",
+    "city": "New York",
+    "state": "NY",
+    "aiSummary": "Juthika Bedi, owner of Paisley Restaurant NYC, responded to Jahan's reservation inquiry. This inbound interaction presents an opportunity for Jahan to pivot from a reservation request to a discussion about digital marketing needs for her restaurant, given her role as owner."
   },
   {
-    "id": "269",
+    "id": "242",
     "firstName": "Josh",
     "lastName": "Turner",
     "email": "t.josh@renfuseup.info",
     "company": "Renfuseup",
     "website": "https://renfuseup.info",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "unsolicited",
+      "financing"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -18267,8 +28186,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-241-0",
+        "content": "This is an unsolicited inbound email offering lines of credit, likely a spam or mass outreach.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-241-1",
+        "content": "The offer of 'up to 750k beginning at 1% per month' without PG is a red flag and highly suspicious.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-241-0",
+        "category": "business",
+        "label": "Email Sender",
+        "value": "Josh Turner"
+      },
+      {
+        "id": "aif-241-1",
+        "category": "business",
+        "label": "Sender Email",
+        "value": "t.josh@renfuseup.info"
+      },
+      {
+        "id": "aif-241-2",
+        "category": "business",
+        "label": "Offer",
+        "value": "Lines of credit up to $750k"
+      },
+      {
+        "id": "aif-241-3",
+        "category": "business",
+        "label": "Interest Rate Claim",
+        "value": "Beginning at 1% per month"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -18277,51 +28236,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-08-06T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Unsolicited email from 'Renfuseup' offering suspicious lines of credit up to $750k at 1% per month without personal guarantee. Likely spam or a scam."
   },
   {
-    "id": "270",
-    "firstName": "James",
-    "lastName": "Shields",
-    "email": "james@goscaler.info",
-    "company": "Goscaler",
-    "website": "https://goscaler.info",
-    "relationshipType": "other",
-    "tags": [],
-    "relationshipScore": 10,
-    "interactions": [
-      {
-        "id": "email-254-0",
-        "type": "email",
-        "date": "2025-08-07",
-        "summary": "this you on twitter?",
-        "subject": "this you on twitter?",
-        "details": "hi Jahan - saw you followed @scaling_shields on Twitter, thought it would be relevant to reach out here.\r\n\r\nShort question, if we could build you a free cold email setup that books 15-30 meetingseach month, would you be open to hearing more? (we'll build it for zero service/performance cost)\r\n\r\nJust reply with \"yes\" and i'll send more details\r\n\r\nBest,\r\nJames Shields\r\n\r\nps - my twitter is @scaling_shields",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      }
-    ],
-    "notes": [],
-    "facts": [],
-    "opportunities": [],
-    "aiInsights": [],
-    "groups": [],
-    "connections": [],
-    "lastContactedAt": "2025-08-07",
-    "source": "gmail-import",
-    "createdAt": "2025-08-07T00:00:00",
-    "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
-  },
-  {
-    "id": "271",
+    "id": "243",
     "firstName": "Victor",
     "lastName": "Hernandez",
     "email": "jr92934@yahoo.com",
     "company": "",
     "website": "",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "restaurant",
+      "inbound lead"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -18335,8 +28264,42 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-242-0",
+        "content": "Victor sent 'Tuscany Logo' on 2025-07-21, indicating potential interest in design or branding services for a restaurant.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-242-1",
+        "content": "The email address is a personal Yahoo account, which might suggest a smaller operation or an individual owner/manager.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-242-0",
+        "category": "business",
+        "label": "Last Contact Date",
+        "value": "2025-07-21"
+      },
+      {
+        "id": "aif-242-1",
+        "category": "business",
+        "label": "Last Inbound Email Subject",
+        "value": "Tuscany Logo"
+      },
+      {
+        "id": "aif-242-2",
+        "category": "business",
+        "label": "Email Domain",
+        "value": "yahoo.com"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -18345,17 +28308,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-07-21T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Victor Hernandez is a new prospect who sent an inbound email with 'Tuscany Logo' as the subject, suggesting interest in branding or design for a restaurant. His personal email address might indicate a smaller business or individual owner."
   },
   {
-    "id": "272",
+    "id": "244",
     "firstName": "Jennifer",
     "lastName": "Davis",
     "email": "jenn@smoothproperty.site",
     "company": "Smoothproperty",
     "website": "https://smoothproperty.site",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "pressure_washing",
+      "unsolicited_sales_pitch"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -18369,8 +28336,41 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-243-0",
+        "content": "Jennifer Davis from Smoothproperty sent an unsolicited sales pitch for pressure washing services to Derby Digital.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-243-0",
+        "category": "business",
+        "label": "Sender Company",
+        "value": "Smoothproperty"
+      },
+      {
+        "id": "aif-243-1",
+        "category": "business",
+        "label": "Email Subject",
+        "value": "Pressure Washing - Derby Digital"
+      },
+      {
+        "id": "aif-243-2",
+        "category": "business",
+        "label": "Email Content",
+        "value": "Inquiry about pressure washing services for Derby Digital."
+      },
+      {
+        "id": "aif-243-3",
+        "category": "business",
+        "label": "Sender Service",
+        "value": "Pressure washing, window washing"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -18379,17 +28379,24 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-08-01T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "This is an unsolicited sales pitch from Jennifer Davis at Smoothproperty offering pressure washing and window washing services to Derby Digital. It is not relevant to Jahan Taila's digital marketing services for the restaurant niche."
   },
   {
-    "id": "273",
+    "id": "245",
     "firstName": "Delilah",
     "lastName": "Brooks",
     "email": "delilah@structureworksleadsforyou.info",
     "company": "Structureworksleadsforyou",
     "website": "https://structureworksleadsforyou.info",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "social media management",
+      "lead generation",
+      "Google Ads",
+      "SEO",
+      "cold email"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -18403,8 +28410,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-244-0",
+        "content": "Delilah is offering a pilot cold email campaign to generate sales calls for Jahan's digital marketing services (SEO, Google Ads, SMM).",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-244-1",
+        "content": "The offer is 'no charge' for 3 sales calls, indicating a performance-based or trial offer.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-244-0",
+        "category": "business",
+        "label": "Service Offered",
+        "value": "Lead generation via cold email"
+      },
+      {
+        "id": "aif-244-1",
+        "category": "business",
+        "label": "Target Service",
+        "value": "SEO, Google Ads, Social Media Management"
+      },
+      {
+        "id": "aif-244-2",
+        "category": "business",
+        "label": "Offer Type",
+        "value": "Pilot campaign, no charge for 3 sales calls"
+      },
+      {
+        "id": "aif-244-3",
+        "category": "contact",
+        "label": "Email Domain",
+        "value": "@structureworksleadsforyou.info"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -18413,17 +28460,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-07-24T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Delilah Brooks from Structureworksleadsforyou is a prospect offering a free pilot cold email campaign to generate sales calls for Jahan Taila's digital marketing services (SEO, Google Ads, SMM). This could be a potential lead generation partner or a service Jahan might consider for his own agency."
   },
   {
-    "id": "274",
+    "id": "246",
     "firstName": "Moin",
     "lastName": "Ahmad",
     "email": "moin@techindiasoftware.com",
     "company": "Techindiasoftware",
     "website": "https://techindiasoftware.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "vendor",
+    "tags": [
+      "White Label",
+      "SEO"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -18437,8 +28488,35 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-245-0",
+        "content": "This is an inbound lead from Jahan Taila inquiring about white-label SEO services, indicating a potential need for outsourcing SEO for Derby Digital's clients.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-245-0",
+        "category": "business",
+        "label": "Service Offered",
+        "value": "White Label SEO"
+      },
+      {
+        "id": "aif-245-1",
+        "category": "business",
+        "label": "Contact Person",
+        "value": "Moin Ahmad"
+      },
+      {
+        "id": "aif-245-2",
+        "category": "business",
+        "label": "Referenced Colleague",
+        "value": "Mr John"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -18447,17 +28525,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-07-18T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Moin Ahmad from Techindiasoftware is following up on Jahan Taila's inquiry about white-label SEO services, suggesting Jahan is exploring options to outsource or expand SEO offerings for Derby Digital."
   },
   {
-    "id": "275",
+    "id": "247",
     "firstName": "Jeff",
     "lastName": "Prohaska",
     "email": "jeffrey@servicemasteroflouisville.com",
     "company": "Servicemasteroflouisville",
     "website": "https://servicemasteroflouisville.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "cleaning services",
+      "inbound lead"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -18471,8 +28553,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-246-0",
+        "content": "This is an inbound email from a cleaning service company, ServiceMaster, likely trying to sell their services to Derby Digital.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-246-1",
+        "content": "Jahan Taila's agency, Derby Digital, is being pitched as a potential client for cleaning services, not the other way around.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-246-0",
+        "category": "business",
+        "label": "Sender Company",
+        "value": "Servicemasteroflouisville"
+      },
+      {
+        "id": "aif-246-1",
+        "category": "business",
+        "label": "Sender Name",
+        "value": "Jeff Prohaska"
+      },
+      {
+        "id": "aif-246-2",
+        "category": "business",
+        "label": "Email Type",
+        "value": "Inbound sales pitch (to Jahan)"
+      },
+      {
+        "id": "aif-246-3",
+        "category": "business",
+        "label": "Sender's Service",
+        "value": "Cleaning/Facilities Maintenance"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -18481,17 +28603,24 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-07-17T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "Jeff Prohaska from ServiceMaster of Louisville sent an inbound email to Jahan Taila at Derby Digital, pitching cleaning and facilities maintenance services. This contact is a prospect for ServiceMaster, not for Derby Digital's restaurant niche."
   },
   {
-    "id": "276",
+    "id": "248",
     "firstName": "Bridget",
     "lastName": "Robert",
     "email": "brobert@baronnebistro.com",
     "company": "Baronnebistro",
     "website": "https://baronnebistro.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "menu update",
+      "logo",
+      "restaurant"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -18505,7 +28634,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-247-0",
+        "content": "Bridget sent logo and current food menu. Explicitly stated NOT to put a picture of the current menu on the website as it's being updated.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-247-1",
+        "content": "This indicates a potential need for a dynamic menu solution or a clear plan for when the new menu will be ready.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "7affe0120b62",
@@ -18518,6 +28662,30 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "category": "contact",
         "label": "Address",
         "value": "616 Baronne St\r"
+      },
+      {
+        "id": "aif-247-2",
+        "category": "business",
+        "label": "Email Domain",
+        "value": "baronnebistro.com"
+      },
+      {
+        "id": "aif-247-3",
+        "category": "business",
+        "label": "Contact Name",
+        "value": "Bridget Robert"
+      },
+      {
+        "id": "aif-247-4",
+        "category": "business",
+        "label": "Last Contact Date",
+        "value": "2025-07-17"
+      },
+      {
+        "id": "aif-247-5",
+        "category": "business",
+        "label": "Current Menu Status",
+        "value": "Updating/Changing"
       }
     ],
     "opportunities": [],
@@ -18528,17 +28696,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-07-17T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "Bridget Robert from Baronnebistro, a restaurant prospect, sent their logo and current menu, emphasizing that the menu should not be pictured on the website due to ongoing updates. This indicates a clear need for website development that can accommodate a changing menu."
   },
   {
-    "id": "277",
+    "id": "249",
     "firstName": "CS",
     "lastName": "( Brokers Program )",
     "email": "brokersprogram@printograph.com",
     "company": "Printograph",
     "website": "https://gotprint.com",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "broker program",
+      "printograph"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -18552,13 +28726,46 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-248-0",
+        "content": "Jahan received an email regarding a broker program from Printograph, indicating he inquired about it.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-248-1",
+        "content": "This contact is likely a response to Jahan's outreach, not a lead for Derby Digital's services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "0f8b8284a244",
         "category": "contact",
         "label": "Phone",
         "value": "877.922.7374"
+      },
+      {
+        "id": "aif-248-1",
+        "category": "business",
+        "label": "Email Sender",
+        "value": "CS (Brokers Program)"
+      },
+      {
+        "id": "aif-248-2",
+        "category": "business",
+        "label": "Email Subject",
+        "value": "User ID #4112823 Request for Broker Account"
+      },
+      {
+        "id": "aif-248-3",
+        "category": "business",
+        "label": "Interaction Type",
+        "value": "Inbound response to Jahan's inquiry"
       }
     ],
     "opportunities": [],
@@ -18569,17 +28776,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-07-08T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "Broker Program Contact",
+    "aiSummary": "This contact is an inbound email to Jahan Taila from Printograph, responding to his request for information about their Broker's Program. It's not a direct lead for Derby Digital's digital marketing services but rather Jahan exploring a potential partnership or service for himself/Derby Digital."
   },
   {
-    "id": "278",
+    "id": "250",
     "firstName": "Samuel",
     "lastName": "Darwin",
     "email": "sam@mailprospecttech.com",
     "company": "Mailprospecttech",
     "website": "https://mailprospecttech.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "inbound lead"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -18593,8 +28804,41 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-249-0",
+        "content": "Samuel Darwin from Mailprospecttech sent an inbound email regarding a 'pilot plan' with DerbyDigital. This suggests he is interested in DerbyDigital's services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-249-0",
+        "category": "business",
+        "label": "Email Domain",
+        "value": "mailprospecttech.com"
+      },
+      {
+        "id": "aif-249-1",
+        "category": "business",
+        "label": "Recent Email Subject",
+        "value": "DerbyDigital - pilot plan"
+      },
+      {
+        "id": "aif-249-2",
+        "category": "business",
+        "label": "Recent Email Date",
+        "value": "2025-06-20"
+      },
+      {
+        "id": "aif-249-3",
+        "category": "business",
+        "label": "Total Emails",
+        "value": "1"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -18603,17 +28847,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-06-20T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Samuel Darwin from Mailprospecttech is an inbound prospect interested in a 'pilot plan' with DerbyDigital, indicating potential business."
   },
   {
-    "id": "279",
+    "id": "251",
     "firstName": "Patrick",
     "lastName": "Love",
     "email": "patrick@thegrowingapp.com",
     "company": "Thegrowingapp",
     "website": "https://thegrowingapp.com",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "unsolicited",
+      "LOC",
+      "financing"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -18627,8 +28876,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-250-0",
+        "content": "This is an unsolicited inbound email offering a revolving Line of Credit (LOC) to Derbydigital, not a contact for digital marketing services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-250-1",
+        "content": "The offer includes no personal guarantee and no credit checks, based on revenue.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-250-0",
+        "category": "business",
+        "label": "Sender Company",
+        "value": "Thegrowingapp"
+      },
+      {
+        "id": "aif-250-1",
+        "category": "business",
+        "label": "Offer Type",
+        "value": "Revolving Line of Credit"
+      },
+      {
+        "id": "aif-250-2",
+        "category": "business",
+        "label": "LOC Range",
+        "value": "$50k - $750k"
+      },
+      {
+        "id": "aif-250-3",
+        "category": "business",
+        "label": "Key Terms",
+        "value": "No personal guarantee, no credit checks, revenue-based"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -18637,17 +28926,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-06-30T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Unsolicited inbound email from Patrick Love at Thegrowingapp offering Derbydigital a revenue-based revolving Line of Credit between $50k and $750k, with no personal guarantee or credit checks."
   },
   {
-    "id": "280",
+    "id": "252",
     "firstName": "Daniel",
     "lastName": "Owens",
     "email": "daniel.o@wellnesskite.info",
     "company": "Wellnesskite",
     "website": "https://wellnesskite.info",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "vendor",
+    "tags": [
+      "unsolicited",
+      "funding"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -18661,8 +28954,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-251-0",
+        "content": "Daniel Owens from Wellnesskite is offering flexible capital options to DerbyDigital, with quick funding and no credit checks.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-251-1",
+        "content": "This is an unsolicited inbound email, likely a mass outreach for business funding.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-251-0",
+        "category": "business",
+        "label": "Service Offered",
+        "value": "Flexible capital options"
+      },
+      {
+        "id": "aif-251-1",
+        "category": "business",
+        "label": "Funding Speed",
+        "value": "1-2 days"
+      },
+      {
+        "id": "aif-251-2",
+        "category": "business",
+        "label": "Credit Check",
+        "value": "No credit checks"
+      },
+      {
+        "id": "aif-251-3",
+        "category": "contact",
+        "label": "Contact Name",
+        "value": "Daniel Owens"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -18671,17 +29004,20 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-06-27T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Daniel Owens from Wellnesskite is an unsolicited vendor offering quick, no-credit-check flexible capital options to DerbyDigital. This contact is likely part of a broad outreach campaign."
   },
   {
-    "id": "281",
+    "id": "253",
     "firstName": "Alua",
     "lastName": "Telemtayeva",
     "email": "atelemtayeva@tryramp.co",
     "company": "Tryramp",
     "website": "https://tryramp.co",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "inbound lead"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -18695,8 +29031,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-252-0",
+        "content": "Alua reached out to Jahan after seeing his new role at Derby Digital on LinkedIn, indicating she's familiar with Derby Digital and works with similar companies.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-252-1",
+        "content": "This is an inbound lead, suggesting Alua has a potential need or interest in digital marketing services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-252-0",
+        "category": "business",
+        "label": "Company",
+        "value": "Tryramp"
+      },
+      {
+        "id": "aif-252-1",
+        "category": "business",
+        "label": "Email Domain",
+        "value": "tryramp.co"
+      },
+      {
+        "id": "aif-252-2",
+        "category": "business",
+        "label": "Contact Method",
+        "value": "Email (inbound)"
+      },
+      {
+        "id": "aif-252-3",
+        "category": "business",
+        "label": "Referral Source",
+        "value": "LinkedIn"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -18705,17 +29081,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-05-14T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Alua Telemtayeva from Tryramp is an inbound prospect who reached out to Jahan after seeing his new role at Derby Digital on LinkedIn. She is familiar with Derby Digital and works with similar companies, indicating potential interest in digital marketing services for the restaurant niche."
   },
   {
-    "id": "282",
+    "id": "254",
     "firstName": "Johanna",
     "lastName": "Wiland",
     "email": "w_j@launchbridge.info",
     "company": "Launchbridge",
     "website": "https://launchbridge.info",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "email marketing",
+      "bulk email",
+      "deliverability",
+      "outlook domains"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -18729,8 +29111,42 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-253-0",
+        "content": "This contact appears to be a vendor offering bulk email services and Outlook domains, not a potential client for digital marketing services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-253-1",
+        "content": "The email is a sales pitch for email infrastructure, not related to restaurant digital marketing needs.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-253-0",
+        "category": "business",
+        "label": "Service Offered",
+        "value": "Outlook domains for bulk email sending"
+      },
+      {
+        "id": "aif-253-1",
+        "category": "business",
+        "label": "Pricing Model",
+        "value": "USD120/m for 4 domains (99 mailboxes each, 45,000 sends/month)"
+      },
+      {
+        "id": "aif-253-2",
+        "category": "business",
+        "label": "Deliverability Claim",
+        "value": "Unbeaten deliverability"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -18739,17 +29155,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-06-18T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Johanna Wiland from Launchbridge is a vendor offering bulk email infrastructure and Outlook domains. This contact is not relevant for Jahan Taila's digital marketing agency targeting the restaurant niche."
   },
   {
-    "id": "283",
+    "id": "255",
     "firstName": "Dan",
     "lastName": "Wilson",
     "email": "dan@goodinboxeffect.com",
     "company": "Goodinboxeffect",
     "website": "https://goodinboxeffect.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "SEO",
+      "inbound lead"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -18763,13 +29183,52 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-254-0",
+        "content": "Dan Wilson from Goodinboxeffect reached out, noting Jahan's recent local SEO cert. They help digital marketing and SEO consultancies book sales calls.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-254-1",
+        "content": "This is an inbound lead, indicating potential interest in Derby Digital's services or a partnership opportunity.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "393eb595fc6a",
         "category": "contact",
         "label": "Address",
         "value": "4730 University Way NE, Seattle"
+      },
+      {
+        "id": "aif-254-1",
+        "category": "business",
+        "label": "Contact Name",
+        "value": "Dan Wilson"
+      },
+      {
+        "id": "aif-254-2",
+        "category": "business",
+        "label": "Contact Email",
+        "value": "dan@goodinboxeffect.com"
+      },
+      {
+        "id": "aif-254-3",
+        "category": "business",
+        "label": "Goodinboxeffect Service",
+        "value": "Help digital marketing/SEO consultancies book 10-15 qualified sales calls"
+      },
+      {
+        "id": "aif-254-4",
+        "category": "business",
+        "label": "Trigger for Contact",
+        "value": "Jahan's recent local SEO certification"
       }
     ],
     "opportunities": [],
@@ -18780,17 +29239,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-06-07T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Dan Wilson from Goodinboxeffect, a company that helps digital marketing agencies book sales calls, initiated contact with Jahan Taila, referencing Jahan's recent local SEO certification. This is an inbound lead for Derby Digital."
   },
   {
-    "id": "284",
+    "id": "256",
     "firstName": "Chris",
     "lastName": "Hartlage",
     "email": "chrishartlage@stratuslouisville.com",
     "company": "Stratuslouisville",
     "website": "https://stratuslouisville.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "restaurant niche",
+      "inbound lead"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -18804,8 +29267,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-255-0",
+        "content": "Chris Hartlage is local to Louisville and was intrigued by Derby Digital's simplified marketing strategies.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-255-1",
+        "content": "The email indicates Chris owns a local business, likely a restaurant given Jahan's niche.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-255-0",
+        "category": "business",
+        "label": "Email Date",
+        "value": "2025-06-05"
+      },
+      {
+        "id": "aif-255-1",
+        "category": "business",
+        "label": "Contact Name",
+        "value": "Chris Hartlage"
+      },
+      {
+        "id": "aif-255-2",
+        "category": "business",
+        "label": "Company Name",
+        "value": "Stratuslouisville"
+      },
+      {
+        "id": "aif-255-3",
+        "category": "business",
+        "label": "Location",
+        "value": "Louisville, KY"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -18814,17 +29317,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-06-05T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "Inbound lead from Chris Hartlage of Stratuslouisville, local to Louisville, intrigued by Derby Digital's marketing approach, likely a restaurant owner."
   },
   {
-    "id": "285",
+    "id": "257",
     "firstName": "James",
     "lastName": "Tiffinn",
     "email": "james.t@turningpointbusinesssellers.com",
     "company": "Turningpointbusinesssellers",
     "website": "https://turningpointbusinesssellers.com",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "exit strategy",
+      "business acquisition"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -18838,8 +29347,41 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-256-0",
+        "content": "This is an unsolicited inquiry about acquiring Derby Digital. Jahan needs to decide if he's open to selling or just wants to learn more about the valuation.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-256-0",
+        "category": "business",
+        "label": "Inquiry Type",
+        "value": "Business acquisition"
+      },
+      {
+        "id": "aif-256-1",
+        "category": "business",
+        "label": "Sender Company",
+        "value": "Turningpointbusinesssellers"
+      },
+      {
+        "id": "aif-256-2",
+        "category": "business",
+        "label": "Sender Name",
+        "value": "James Tiffinn"
+      },
+      {
+        "id": "aif-256-3",
+        "category": "business",
+        "label": "Email Date",
+        "value": "2025-05-23"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -18848,17 +29390,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-05-23T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "James Tiffinn from Turningpointbusinesssellers is inquiring about acquiring Derby Digital, suggesting it matches their criteria. This is an unsolicited business acquisition inquiry."
   },
   {
-    "id": "286",
+    "id": "258",
     "firstName": "Elliott,",
     "lastName": "Gracie (ES)",
     "email": "gracie.elliott@adp.com",
-    "company": "Adp",
+    "company": "ADP",
     "website": "https://adp.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "louisville",
+      "f45",
+      "payroll"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -18872,13 +29419,52 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-257-0",
+        "content": "Gracie is inquiring about who Derby Digital uses for payroll, likely as a lead for ADP. She is also an F45 instructor in Louisville.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-257-1",
+        "content": "This contact presents an opportunity to discuss Derby Digital's payroll needs and potentially explore a partnership with ADP, while also subtly positioning Derby Digital's services.",
+        "category": "strategy",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "f981b30bcbb8",
         "category": "contact",
         "label": "Phone",
         "value": "502-595-7696"
+      },
+      {
+        "id": "aif-257-1",
+        "category": "business",
+        "label": "Current Employer",
+        "value": "ADP Payroll"
+      },
+      {
+        "id": "aif-257-2",
+        "category": "business",
+        "label": "Previous Role",
+        "value": "F45 Instructor"
+      },
+      {
+        "id": "aif-257-3",
+        "category": "location",
+        "label": "Location",
+        "value": "Louisville, KY"
+      },
+      {
+        "id": "aif-257-4",
+        "category": "business",
+        "label": "Inquiry Type",
+        "value": "Payroll Vendor"
       }
     ],
     "opportunities": [],
@@ -18889,17 +29475,25 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-05-30T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "F45 Instructor (former)",
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "Gracie Elliott from ADP Payroll in Louisville, KY, is inquiring about Derby Digital's payroll provider. She is also an F45 instructor. This is a potential lead for ADP, but also an opportunity for Derby Digital to discuss their own services."
   },
   {
-    "id": "287",
+    "id": "259",
     "firstName": "Elin",
     "lastName": "Pandey",
     "email": "elin.pandey@marketinginnovationawards.com",
     "company": "Marketinginnovationawards",
     "website": "https://mailsuite.com",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "inbound",
+      "spotlight",
+      "award"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -18913,8 +29507,41 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-258-0",
+        "content": "This is an inbound lead suggesting Jahan's agency, Derby Digital, is being reviewed for a 'spring spotlight' related to brand evolution and marketing data. It's likely an invitation to participate in an award or paid feature.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-258-0",
+        "category": "business",
+        "label": "Sender Email",
+        "value": "elin.pandey@marketinginnovationawards.com"
+      },
+      {
+        "id": "aif-258-1",
+        "category": "business",
+        "label": "Sender Company",
+        "value": "Marketinginnovationawards"
+      },
+      {
+        "id": "aif-258-2",
+        "category": "business",
+        "label": "Email Subject",
+        "value": "Jahan, you\u2019re being reviewed for a spring spotlight!"
+      },
+      {
+        "id": "aif-258-3",
+        "category": "business",
+        "label": "Email Date",
+        "value": "2025-05-30"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -18923,17 +29550,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-05-30T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Inbound email from Elin Pandey at Marketinginnovationawards informing Jahan Taila that Derby Digital is being reviewed for a 'spring spotlight' and inviting him to learn next steps."
   },
   {
-    "id": "288",
+    "id": "260",
     "firstName": "Oliver",
     "lastName": "Bogner",
     "email": "oliverbogner@getsalesninja.org",
     "company": "Getsalesninja",
     "website": "https://digitalagencyassistant.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "partner",
+    "tags": [
+      "agency owner",
+      "potential partner"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -18947,8 +29578,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-259-0",
+        "content": "Oliver recently sold his agency, Team GO, and founded Getsalesninja. He's looking for potential overlap with Derby Digital.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-259-1",
+        "content": "He reached out inbound, suggesting he's actively seeking connections or opportunities.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-259-0",
+        "category": "business",
+        "label": "Previous Company",
+        "value": "Team GO"
+      },
+      {
+        "id": "aif-259-1",
+        "category": "business",
+        "label": "Previous Company Acquirer",
+        "value": "Market Performance Group"
+      },
+      {
+        "id": "aif-259-2",
+        "category": "business",
+        "label": "Current Company",
+        "value": "Getsalesninja"
+      },
+      {
+        "id": "aif-259-3",
+        "category": "business",
+        "label": "Contact Method",
+        "value": "Inbound Email"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -18957,17 +29628,22 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-05-07T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Oliver Bogner, founder of Getsalesninja, reached out to Jahan Taila of Derby Digital. He recently sold his previous agency, Team GO, and is exploring potential partnerships or overlaps, indicating an interest in collaboration or new ventures."
   },
   {
-    "id": "289",
+    "id": "261",
     "firstName": "Russ",
     "lastName": "Kinberger",
     "email": "derbyprinting@bellsouth.net",
-    "company": "Bellsouth",
+    "company": "Derby Printing",
     "website": "https://bellsouth.net",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "printing",
+      "postcard",
+      "inbound lead"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -18981,13 +29657,52 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-260-0",
+        "content": "Russ is requesting a quote for postcard printing, indicating a potential need for marketing materials.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-260-1",
+        "content": "This contact is from a printing company, which could be a potential partner for cross-referrals or a competitor for certain services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "80f3f90b6974",
         "category": "contact",
         "label": "Phone",
         "value": "502-625-0692"
+      },
+      {
+        "id": "aif-260-1",
+        "category": "business",
+        "label": "Service Requested",
+        "value": "Postcard Printing"
+      },
+      {
+        "id": "aif-260-2",
+        "category": "business",
+        "label": "Quantity",
+        "value": "1000"
+      },
+      {
+        "id": "aif-260-3",
+        "category": "business",
+        "label": "Size",
+        "value": "4\"x6\""
+      },
+      {
+        "id": "aif-260-4",
+        "category": "business",
+        "label": "Price Quoted (by Russ)",
+        "value": "$108"
       }
     ],
     "opportunities": [],
@@ -18998,51 +29713,24 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-05-21T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "city": "Louisville",
+    "state": "KY",
+    "aiSummary": "Russ Kinberger from Derby Printing is an inbound prospect requesting a quote for 1000 4\"x6\" postcards. While a printing company, this could indicate a need for digital marketing services to complement their print offerings, or a potential partnership opportunity."
   },
   {
-    "id": "290",
-    "firstName": "DesignRush",
-    "lastName": "",
-    "email": "submissions@designrush.org",
-    "company": "Designrush",
-    "website": "https://designrush.com",
-    "relationshipType": "other",
-    "tags": [],
-    "relationshipScore": 10,
-    "interactions": [
-      {
-        "id": "email-280-0",
-        "type": "email",
-        "date": "2025-04-15",
-        "summary": "Derby Digital selected among The Best Advertising Agencies in Louisville by DesignRush",
-        "subject": "Derby Digital selected among The Best Advertising Agencies in Louisville by DesignRush",
-        "details": "Hey Jahan,\r\n\r\nI am Marija from\u202fDesignRush. A prominent B2B marketplace where top agencies such as SmartSites, Lounge Lizard, Horizon Media, RNO1, and many others showcase their work.\r\n\r\nWe came across your work and we admire what you\u2019re achieving!\r\n\r\nI was particularly impressed by 'Rodriguez Construction and M & M', which is why we want to include Derby Digital among our Leading Advertising Agencies in Louisville: https://www.designrush.com/agency/ad-agencies/kentucky/louisville\u202f\r\n\r\nThis collaboration comes at no charge \u2014 we only ask that you share our partnership on your website.\r\n\r\nIf interested, kindly get back to this email and I\u2019ll\u202fprovide additional details.\r\n\r\nSincerely,\r\n\r\nMarija Petroska\r\nAgency Relationship Coordinator\r\nDESIGNRUSH | B2B Marketplace Connecting Businesses With Agencies\r\n\r\nIf you don\u2019t wish to hear from me, just let me know.",
-        "direction": "inbound",
-        "createdAt": "2026-03-16T12:18:59"
-      }
-    ],
-    "notes": [],
-    "facts": [],
-    "opportunities": [],
-    "aiInsights": [],
-    "groups": [],
-    "connections": [],
-    "lastContactedAt": "2025-04-15",
-    "source": "gmail-import",
-    "createdAt": "2025-04-15T00:00:00",
-    "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
-  },
-  {
-    "id": "291",
+    "id": "262",
     "firstName": "V",
     "lastName": "Design",
     "email": "vickicollier@gmail.com",
-    "company": "",
+    "company": "V Design",
     "website": "https://dropbox.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "graphic design",
+      "branding",
+      "logo design"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -19056,13 +29744,52 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
+    "notes": [
+      {
+        "id": "ai-261-0",
+        "content": "Vicki Collier (V Design) provided detailed font information for a 'Hardwired' logo, indicating she is a graphic designer or branding specialist.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-261-1",
+        "content": "The email suggests she is either creating a logo for a client or has created one and is sharing the details, potentially indicating a need for digital marketing services for her clients or her own business.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
     "facts": [
       {
         "id": "4139e61e7e87",
         "category": "contact",
         "label": "Phone",
         "value": "502-216-2114"
+      },
+      {
+        "id": "aif-261-1",
+        "category": "business",
+        "label": "Contact Name",
+        "value": "Vicki Collier"
+      },
+      {
+        "id": "aif-261-2",
+        "category": "business",
+        "label": "Email Domain",
+        "value": "gmail.com"
+      },
+      {
+        "id": "aif-261-3",
+        "category": "business",
+        "label": "Service Indicated",
+        "value": "Logo Design/Branding"
+      },
+      {
+        "id": "aif-261-4",
+        "category": "business",
+        "label": "Last Contact Date",
+        "value": "2025-05-07"
       }
     ],
     "opportunities": [],
@@ -19073,17 +29800,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-05-07T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "Owner/Designer",
+    "aiSummary": "Vicki Collier from V Design, a graphic designer, provided detailed font information for a 'Hardwired' logo. This contact is a prospect for Jahan Taila, as V Design or its clients may require digital marketing services, especially within the restaurant niche if V Design serves such clients."
   },
   {
-    "id": "292",
+    "id": "263",
     "firstName": "sierra",
     "lastName": "singh",
     "email": "sierra.singh@techandmarketingleaders.com",
     "company": "Techandmarketingleaders",
     "website": "https://mailsuite.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "industry",
+    "tags": [
+      "marketing",
+      "tech",
+      "conference"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -19097,8 +29830,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-262-0",
+        "content": "Sierra is inviting Jahan to a tech and marketing conference in Nevada in 2026, recognizing his leadership.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-262-1",
+        "content": "This contact is an inbound lead, suggesting Sierra found Jahan's profile or company and sees him as a relevant attendee or speaker.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-262-0",
+        "category": "business",
+        "label": "Contact Name",
+        "value": "Sierra Singh"
+      },
+      {
+        "id": "aif-262-1",
+        "category": "business",
+        "label": "Contact Email",
+        "value": "sierra.singh@techandmarketingleaders.com"
+      },
+      {
+        "id": "aif-262-2",
+        "category": "business",
+        "label": "Event Location",
+        "value": "Nevada, US"
+      },
+      {
+        "id": "aif-262-3",
+        "category": "business",
+        "label": "Event Year",
+        "value": "2026"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -19107,17 +29880,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-04-14T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Sierra Singh from Techandmarketingleaders is inviting Jahan Taila to a tech and marketing conference in Nevada in 2026, acknowledging his expertise. This is an inbound lead, indicating potential industry recognition for Jahan."
   },
   {
-    "id": "293",
+    "id": "264",
     "firstName": "Macy",
     "lastName": "from Whop",
     "email": "macy@whop.intercom-mail.com",
     "company": "Whop",
     "website": "https://whop.intercom-mail.com",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "customer support",
+      "billing issue"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -19131,8 +29908,41 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-263-0",
+        "content": "Jahan Taila contacted Whop support regarding charges, indicating a personal billing issue rather than a business inquiry.",
+        "category": "personal",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-263-0",
+        "category": "business",
+        "label": "Company",
+        "value": "Whop"
+      },
+      {
+        "id": "aif-263-1",
+        "category": "business",
+        "label": "Contact Name",
+        "value": "Macy"
+      },
+      {
+        "id": "aif-263-2",
+        "category": "business",
+        "label": "Email Domain",
+        "value": "whop.intercom-mail.com"
+      },
+      {
+        "id": "aif-263-3",
+        "category": "business",
+        "label": "Interaction Type",
+        "value": "Customer Support (billing issue)"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -19141,17 +29951,23 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-03-26T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "title": "Support Representative",
+    "aiSummary": "This contact is with Macy from Whop support regarding a personal billing issue Jahan Taila experienced. It is not a business lead or relevant to Derby Digital's services."
   },
   {
-    "id": "294",
+    "id": "265",
     "firstName": "Abigail",
     "lastName": "Hernandez",
     "email": "abigail@globalcompanyhub.com",
     "company": "Globalcompanyhub",
     "website": "https://globalcompanyhub.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "restaurant niche",
+      "SpotHopper user",
+      "cost-conscious"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -19165,8 +29981,42 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-264-0",
+        "content": "Abigail is currently using SpotHopper and is likely open to alternatives due to cost concerns, as indicated by the inbound email.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-264-1",
+        "content": "Jahan Taila's agency, Derby Digital, offers a competitive pricing model ($199/month) for similar services, which could be a strong selling point.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-264-0",
+        "category": "business",
+        "label": "Current Provider",
+        "value": "SpotHopper"
+      },
+      {
+        "id": "aif-264-1",
+        "category": "business",
+        "label": "Potential Pain Point",
+        "value": "SpotHopper's cost"
+      },
+      {
+        "id": "aif-264-2",
+        "category": "business",
+        "label": "Derby Digital Offering",
+        "value": "$199/month for similar/more services"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -19175,17 +30025,21 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-03-13T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Abigail Hernandez from Globalcompanyhub is a prospect currently using SpotHopper for restaurant digital marketing services. She has expressed concern about SpotHopper's cost, making her a strong candidate for Derby Digital's more affordable and comprehensive offerings. This contact represents a direct opportunity for Jahan Taila to pitch Derby Digital's value proposition."
   },
   {
-    "id": "295",
+    "id": "266",
     "firstName": "Brian",
     "lastName": "Heinrich",
     "email": "bheinrich@helcim.com",
     "company": "Helcim",
     "website": "https://d2bcd604.na1.hs-sales-engage.com",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "payment processing",
+      "Stripe competitor"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -19199,8 +30053,42 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-16T12:18:59"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-265-0",
+        "content": "Brian Heinrich is responding to Jahan Taila's inquiry about switching from Stripe to Helcim for payment processing.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-265-1",
+        "content": "Helcim is a payment processor that sees itself as a competitor to Stripe.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-265-0",
+        "category": "business",
+        "label": "Helcim Role",
+        "value": "Payment Processor"
+      },
+      {
+        "id": "aif-265-1",
+        "category": "business",
+        "label": "Jahan's Inquiry",
+        "value": "Switching from Stripe"
+      },
+      {
+        "id": "aif-265-2",
+        "category": "business",
+        "label": "Helcim's Action",
+        "value": "Provided comparison to Stripe"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -19209,16 +30097,20 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2025-01-29T00:00:00",
     "updatedAt": "2026-03-16T12:18:59",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Jahan Taila, representing Derby Digital, inquired with Brian Heinrich at Helcim about switching payment processors from Stripe. Helcim responded by providing a comparison to Stripe, indicating they are a payment processing prospect for Jahan's agency or its clients."
   },
   {
-    "id": "296",
+    "id": "267",
     "firstName": "Alexander",
     "lastName": "V",
     "email": "alexander@salesdemand.co",
     "company": "Salesdemand",
     "relationshipType": "other",
-    "tags": [],
+    "tags": [
+      "sales",
+      "lead generation"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -19230,8 +30122,48 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-15T23:04:58"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-266-0",
+        "content": "Alexander V from Salesdemand reached out regarding 'Partnering for lead coverage.' This suggests they are a lead generation or sales support company.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-266-1",
+        "content": "Jahan Taila (Derby Digital) might be interested in this if Salesdemand can provide high-quality leads specifically for the restaurant niche in Louisville, KY.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-266-0",
+        "category": "business",
+        "label": "Company Website",
+        "value": "salesdemand.co"
+      },
+      {
+        "id": "aif-266-1",
+        "category": "business",
+        "label": "Contact Email",
+        "value": "alexander@salesdemand.co"
+      },
+      {
+        "id": "aif-266-2",
+        "category": "business",
+        "label": "Last Contact Date",
+        "value": "2026-02-25"
+      },
+      {
+        "id": "aif-266-3",
+        "category": "business",
+        "label": "Subject Line",
+        "value": "RE: Partnering for lead coverage"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -19240,16 +30172,19 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-15T23:04:58",
     "updatedAt": "2026-03-15T23:04:58",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Alexander V from Salesdemand contacted Jahan Taila about a potential partnership for lead coverage. Salesdemand appears to be a lead generation company, and this could be relevant for Derby Digital's restaurant niche in Louisville, KY."
   },
   {
-    "id": "297",
+    "id": "268",
     "firstName": "Martin",
     "lastName": "Rasmussen",
     "email": "martinrasmussen@danishleadco.com",
     "company": "Danishleadco",
-    "relationshipType": "other",
-    "tags": [],
+    "relationshipType": "prospect",
+    "tags": [
+      "email contact"
+    ],
     "relationshipScore": 10,
     "interactions": [
       {
@@ -19261,8 +30196,35 @@ export const SEED_CONTACTS: RolodexContact[] = [
         "createdAt": "2026-03-15T23:04:58"
       }
     ],
-    "notes": [],
-    "facts": [],
+    "notes": [
+      {
+        "id": "ai-267-0",
+        "content": "Initial contact, likely a response to an introduction email from Jahan Taila. Need to understand Danishleadco's business and potential fit for Derby Digital's services.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-267-0",
+        "category": "communication",
+        "label": "Last Email Date",
+        "value": "2025-11-26"
+      },
+      {
+        "id": "aif-267-1",
+        "category": "communication",
+        "label": "Email Subject",
+        "value": "RE: Jahan and Martin - introduction"
+      },
+      {
+        "id": "aif-267-2",
+        "category": "communication",
+        "label": "Total Emails",
+        "value": "1"
+      }
+    ],
     "opportunities": [],
     "aiInsights": [],
     "groups": [],
@@ -19271,6 +30233,166 @@ export const SEED_CONTACTS: RolodexContact[] = [
     "source": "gmail-import",
     "createdAt": "2026-03-15T23:04:58",
     "updatedAt": "2026-03-15T23:04:58",
-    "archived": false
+    "archived": false,
+    "aiSummary": "Martin Rasmussen from Danishleadco is a new prospect, having responded to an introduction email from Jahan Taila. Further qualification is needed to determine if Danishleadco is a good fit for Derby Digital's restaurant niche digital marketing services."
+  },
+  {
+    "id": "269",
+    "firstName": "9x",
+    "lastName": "",
+    "email": "hi@mail.go9x.com",
+    "company": "Mail",
+    "website": "https://go9x.com",
+    "relationshipType": "prospect",
+    "tags": [
+      "template download",
+      "inbound lead"
+    ],
+    "relationshipScore": 10,
+    "interactions": [
+      {
+        "id": "email-81-0",
+        "type": "email",
+        "date": "2026-03-02",
+        "summary": "Jahan, here's your free template: OpenClaw Marketing Team",
+        "subject": "Jahan, here's your free template: OpenClaw Marketing Team",
+        "details": "OpenClaw Marketing Team\r\n\r\nHi Jahan \ud83d\udc4b\r\n\r\nAs promised here's your downloadable resource, ready to implement and test for yourself:\r\n\r\nClick here to access ( https://drive.google.com/drive/folders/143_4Euzp3gzV6na5qRy8PMMkvnjpC6nK?usp=sharing&utm_campaign=YouTube+Resource+Claimed&utm_content=YouTube+Resource+Claimed&utm_medium=email&utm_source=customer.io&utm_term=RMasCAUAAZytMcQwByJfiOlO95zALw%3D%3D )\r\n\r\nPS. Keep an eye out for our next newsletter where you'll find details on our upcoming free weekly AI workshops and latest AI and automation videos from our YouTube channel.\r\n\r\nHappy automating,\r\nAlex, Jan & PYV\r\n\r\n9x Email Footer ( https://go9x.com?utm_campaign=YouTube+Resource+Claimed&utm_content=YouTube+Resource+Claimed&utm_medium=email&utm_source=customer.io&utm_term=RMasCAUAAZytMcQwByJfiOlO95zALw%3D%3D )\r\n\r\nConnect with: \u00a0Alex ( https://www.linkedin.com/in/akantjas/?utm_campaign=YouTube+Resource+Claimed&utm_content=YouTube+Resource+Claimed&utm_medium=email&utm_source=customer.io&utm_term=RMasCAUAAZytMcQwByJfiOlO95zALw%3D%3D ) \u00a0| \u00a0Jan ( https://www.linkedin.com/in/jan-meinecke/?utm_campaign=YouTube+Resource+Claimed&utm_content=YouTube+Resource+Claimed&utm_medium=email&utm_source=customer.io&utm_term=RMasCAUAAZytMcQwByJfiOlO95zALw%3D%3D )\u00a0 | \u00a0PYV ( https://www.linkedin.com/in/thisispyv/?utm_campaign=YouTube+Resource+Claimed&utm_content=YouTube+Resource+Claimed&utm_medium=email&utm_source=customer.io&utm_term=RMasCAUAAZytMcQwByJfiOlO95zALw%3D%3D )\r\n\r\n\u00a0\r\n\r\n\u00a0\r\n\r\nView in the browser ( https://track.customer.io/deliveries/RMasCAUAAZytMcQwByJfiOlO95zALw== )\r\n\r\n\u00a0\r\n\r\nnx UG - B\u00f6dikerstra\u00dfe 31 - 10245 Berlin",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      }
+    ],
+    "notes": [
+      {
+        "id": "ai-268-0",
+        "content": "Jahan downloaded a free template from OpenClaw Marketing Team, indicating interest in marketing resources.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-268-1",
+        "content": "The email is from 'OpenClaw Marketing Team', not directly from Jahan Taila, suggesting Jahan is the recipient of marketing outreach.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-268-0",
+        "category": "business",
+        "label": "Email Address",
+        "value": "hi@mail.go9x.com"
+      },
+      {
+        "id": "aif-268-1",
+        "category": "business",
+        "label": "Company Name (from email)",
+        "value": "Mail"
+      },
+      {
+        "id": "aif-268-2",
+        "category": "business",
+        "label": "Interaction Type",
+        "value": "Template Download"
+      },
+      {
+        "id": "aif-268-3",
+        "category": "business",
+        "label": "Date of Interaction",
+        "value": "2026-03-02"
+      }
+    ],
+    "opportunities": [],
+    "aiInsights": [],
+    "groups": [],
+    "connections": [],
+    "lastContactedAt": "2026-03-02",
+    "source": "gmail-import",
+    "createdAt": "2026-03-02T00:00:00",
+    "updatedAt": "2026-03-16T12:18:59",
+    "archived": false,
+    "aiSummary": "Jahan Taila, associated with 'Mail' (hi@mail.go9x.com), downloaded a free marketing template from OpenClaw Marketing Team on March 2, 2026. This indicates potential interest in digital marketing solutions, making Jahan a prospect for Derby Digital, especially given the restaurant niche focus."
+  },
+  {
+    "id": "270",
+    "firstName": "J",
+    "lastName": "",
+    "email": "jmarskitchen@gmail.com",
+    "company": "Guidon Brewing",
+    "website": "",
+    "relationshipType": "prospect",
+    "tags": [
+      "menu updates",
+      "restaurant"
+    ],
+    "relationshipScore": 10,
+    "interactions": [
+      {
+        "id": "email-189-0",
+        "type": "email",
+        "date": "2026-01-06",
+        "summary": "Guidon Brewing",
+        "subject": "Guidon Brewing",
+        "details": "Hi Jahan\r\n\r\nThis is Lamar from the kitchen at Guidon Brewing in Hendersonville NC. Mike\r\ngave me your email and said I can email you and you'd  make the changes on\r\nthe menu page. Is there also a way I can log in and make changes as well?\r\n\r\nThanks,\r\nLamar",
+        "direction": "inbound",
+        "createdAt": "2026-03-16T12:18:59"
+      }
+    ],
+    "notes": [
+      {
+        "id": "ai-269-0",
+        "content": "Lamar from Guidon Brewing was referred by 'Mike' for menu page changes. This indicates an immediate need for web updates.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      },
+      {
+        "id": "ai-269-1",
+        "content": "The contact explicitly asks 'Is there also a way', suggesting potential for broader digital marketing services beyond just menu updates.",
+        "category": "business",
+        "createdAt": "2026-03-16T12:00:00",
+        "updatedAt": "2026-03-16T12:00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "aif-269-0",
+        "category": "business",
+        "label": "Referral Source",
+        "value": "Mike"
+      },
+      {
+        "id": "aif-269-1",
+        "category": "business",
+        "label": "Initial Request",
+        "value": "Menu page changes"
+      },
+      {
+        "id": "aif-269-2",
+        "category": "business",
+        "label": "Industry",
+        "value": "Brewery/Restaurant"
+      },
+      {
+        "id": "aif-269-3",
+        "category": "contact",
+        "label": "Contact Name",
+        "value": "Lamar"
+      }
+    ],
+    "opportunities": [],
+    "aiInsights": [],
+    "groups": [],
+    "connections": [],
+    "lastContactedAt": "2026-01-06",
+    "source": "gmail-import",
+    "createdAt": "2026-01-06T00:00:00",
+    "updatedAt": "2026-03-16T12:18:59",
+    "archived": false,
+    "title": "Kitchen Staff",
+    "city": "Hendersonville",
+    "state": "NC",
+    "aiSummary": "Lamar from Guidon Brewing (Hendersonville, NC) was referred by 'Mike' to Jahan Taila for menu page updates, with an open-ended question suggesting further digital marketing needs."
   }
 ];
