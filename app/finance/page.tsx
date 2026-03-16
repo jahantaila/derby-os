@@ -83,6 +83,59 @@ const SEED_CLIENT_FINANCES: ClientFinance[] = seedClients.map((c, i) => ({
 const money = (n: number) => `$${n.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 const moneyDetail = (n: number) => `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
+// ─── Monthly Data Generator ───
+// Generate realistic month-by-month snapshots so each month has its own revenue, expenses, clients
+type MonthSnapshot = {
+  key: string; // "2026-03"
+  label: string; // "March 2026"
+  shortLabel: string; // "Mar 2026"
+  mrr: number;
+  expenses: Expense[];
+  clients: ClientFinance[];
+};
+
+function generateMonthSnapshots(): MonthSnapshot[] {
+  const months = seedRevenue.mrrHistory;
+  return months.map((m, idx) => {
+    const [monthName, year] = m.month.split(" ");
+    const monthNum = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"].indexOf(monthName) + 1;
+    const key = `${year}-${String(monthNum).padStart(2, "0")}`;
+    const scale = m.mrr / seedRevenue.mrr; // ratio vs current month
+
+    // Scale expenses — earlier months had fewer tools
+    const expenseScale = 0.7 + (idx / (months.length - 1)) * 0.3; // 70% → 100%
+    const monthExpenses = SEED_EXPENSES.map(e => ({
+      ...e,
+      amount: e.frequency === "monthly" ? Math.round(e.amount * expenseScale) : (idx === months.length - 2 && e.frequency === "one-time" ? e.amount : 0),
+      date: `${key}-01`,
+    })).filter(e => e.amount > 0);
+
+    // Scale client revenue
+    const monthClients = SEED_CLIENT_FINANCES.map(c => {
+      const rev = Math.round(c.monthlyRevenue * scale);
+      const cost = Math.round(rev * (c.monthlyCost / c.monthlyRevenue));
+      return {
+        ...c,
+        monthlyRevenue: rev,
+        monthlyCost: cost,
+        margin: rev > 0 ? Math.round(((rev - cost) / rev) * 100) : 0,
+        paymentStatus: (idx === months.length - 1 ? c.paymentStatus : "paid") as PaymentStatus,
+      };
+    });
+
+    return {
+      key,
+      label: `${monthName} ${year}`,
+      shortLabel: m.month,
+      mrr: m.mrr,
+      expenses: monthExpenses,
+      clients: monthClients,
+    };
+  });
+}
+
+const ALL_MONTHS = generateMonthSnapshots();
+
 type TabId = "overview" | "revenue" | "expenses" | "clients";
 const TABS: { id: TabId; label: string; icon: React.ElementType }[] = [
   { id: "overview", label: "Overview", icon: TrendingUp },
@@ -93,20 +146,37 @@ const TABS: { id: TabId; label: string; icon: React.ElementType }[] = [
 
 export default function FinancePage() {
   const [activeTab, setActiveTab] = useState<TabId>("overview");
-  const [expenses, setExpenses] = useState<Expense[]>(SEED_EXPENSES);
-  const [clients] = useState<ClientFinance[]>(SEED_CLIENT_FINANCES);
+  const [selectedMonth, setSelectedMonth] = useState(ALL_MONTHS[ALL_MONTHS.length - 1].key);
   const [showAddExpense, setShowAddExpense] = useState(false);
   const [selectedClient, setSelectedClient] = useState<string | null>(null);
   const [expenseFilter, setExpenseFilter] = useState<ExpenseCategory | "all">("all");
+  // Custom expenses added by user (only apply to current month for now)
+  const [customExpenses, setCustomExpenses] = useState<Expense[]>([]);
+
+  const currentSnapshot = useMemo(() => ALL_MONTHS.find(m => m.key === selectedMonth) || ALL_MONTHS[ALL_MONTHS.length - 1], [selectedMonth]);
+  const isCurrentMonth = selectedMonth === ALL_MONTHS[ALL_MONTHS.length - 1].key;
+  const prevSnapshot = useMemo(() => {
+    const idx = ALL_MONTHS.findIndex(m => m.key === selectedMonth);
+    return idx > 0 ? ALL_MONTHS[idx - 1] : null;
+  }, [selectedMonth]);
+
+  // Merge seed expenses with any custom ones for the selected month
+  const expenses = useMemo(() => [...currentSnapshot.expenses, ...(isCurrentMonth ? customExpenses : [])], [currentSnapshot, customExpenses, isCurrentMonth]);
+  const clients = currentSnapshot.clients;
 
   // Calculations
-  const totalRevenue = seedRevenue.mrr;
+  const totalRevenue = currentSnapshot.mrr;
   const recurringExpenses = expenses.filter(e => e.frequency === "monthly").reduce((s, e) => s + e.amount, 0);
   const oneTimeExpenses = expenses.filter(e => e.frequency === "one-time").reduce((s, e) => s + e.amount, 0);
   const totalExpenses = recurringExpenses + oneTimeExpenses;
   const profit = totalRevenue - totalExpenses;
-  const profitMargin = Math.round((profit / totalRevenue) * 100);
+  const profitMargin = totalRevenue > 0 ? Math.round((profit / totalRevenue) * 100) : 0;
   const stripeFees = Math.round(totalRevenue * 0.029 + clients.length * 0.3);
+
+  // Month-over-month changes
+  const revChange = prevSnapshot ? ((totalRevenue - prevSnapshot.mrr) / prevSnapshot.mrr * 100).toFixed(1) : null;
+  const prevExpenses = prevSnapshot ? prevSnapshot.expenses.reduce((s, e) => s + e.amount, 0) : 0;
+  const profitChange = prevSnapshot ? (((totalRevenue - totalExpenses) - (prevSnapshot.mrr - prevExpenses)) / (prevSnapshot.mrr - prevExpenses) * 100).toFixed(1) : null;
 
   const expensesByCategory = EXPENSE_CATEGORIES.map(cat => ({
     ...cat,
@@ -118,7 +188,7 @@ export default function FinancePage() {
   const [newExpense, setNewExpense] = useState<Partial<Expense>>({ category: "software", frequency: "monthly" });
   const addExpense = () => {
     if (!newExpense.name || !newExpense.amount) return;
-    setExpenses([...expenses, {
+    setCustomExpenses([...customExpenses, {
       id: `e${Date.now()}`,
       name: newExpense.name!,
       amount: newExpense.amount!,
@@ -129,6 +199,9 @@ export default function FinancePage() {
     }]);
     setNewExpense({ category: "software", frequency: "monthly" });
     setShowAddExpense(false);
+  };
+  const deleteExpense = (id: string) => {
+    setCustomExpenses(customExpenses.filter(e => e.id !== id));
   };
 
   // Monthly P&L data for chart
@@ -174,9 +247,30 @@ export default function FinancePage() {
             <p className="text-[11px] uppercase tracking-[0.24em] text-blue-200/70">Derby Digital</p>
             <h1 className="text-[20px] font-bold text-white">Finance</h1>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            {/* Month selector */}
+            <div className="flex items-center gap-1">
+              <button onClick={() => {
+                const idx = ALL_MONTHS.findIndex(m => m.key === selectedMonth);
+                if (idx > 0) setSelectedMonth(ALL_MONTHS[idx - 1].key);
+              }} disabled={selectedMonth === ALL_MONTHS[0].key}
+                className="p-1.5 rounded-md text-slate-500 hover:text-white hover:bg-white/[0.06] transition-all disabled:opacity-20">
+                <ArrowDown size={14} className="rotate-90" />
+              </button>
+              <select value={selectedMonth} onChange={e => setSelectedMonth(e.target.value)}
+                className="bg-white/[0.06] border border-white/[0.08] rounded-lg px-3 py-1.5 text-[12px] text-white outline-none font-medium min-w-[140px]">
+                {ALL_MONTHS.map(m => <option key={m.key} value={m.key}>{m.label}</option>)}
+              </select>
+              <button onClick={() => {
+                const idx = ALL_MONTHS.findIndex(m => m.key === selectedMonth);
+                if (idx < ALL_MONTHS.length - 1) setSelectedMonth(ALL_MONTHS[idx + 1].key);
+              }} disabled={selectedMonth === ALL_MONTHS[ALL_MONTHS.length - 1].key}
+                className="p-1.5 rounded-md text-slate-500 hover:text-white hover:bg-white/[0.06] transition-all disabled:opacity-20">
+                <ArrowUp size={14} className="rotate-90" />
+              </button>
+            </div>
             <span className="px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.06] text-[11px] text-slate-400">
-              <CreditCard size={12} className="inline mr-1.5" />Stripe: Demo Mode
+              <CreditCard size={12} className="inline mr-1.5" />Stripe: Demo
             </span>
           </div>
         </div>
@@ -185,9 +279,9 @@ export default function FinancePage() {
       {/* Top Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         {[
-          { label: "Revenue", value: money(totalRevenue), sub: "/month", color: "text-blue-400", icon: DollarSign, trend: "+5.6%" },
+          { label: "Revenue", value: money(totalRevenue), sub: "/month", color: "text-blue-400", icon: DollarSign, trend: revChange ? `${Number(revChange) >= 0 ? "+" : ""}${revChange}%` : null },
           { label: "Expenses", value: money(totalExpenses), sub: "/month", color: "text-red-400", icon: Receipt, trend: null },
-          { label: "Profit", value: money(profit), sub: "/month", color: "text-emerald-400", icon: TrendingUp, trend: "+8.2%" },
+          { label: "Profit", value: money(profit), sub: "/month", color: "text-emerald-400", icon: TrendingUp, trend: profitChange ? `${Number(profitChange) >= 0 ? "+" : ""}${profitChange}%` : null },
           { label: "Margin", value: `${profitMargin}%`, sub: "net", color: profitMargin >= 50 ? "text-emerald-400" : "text-amber-400", icon: Target, trend: null },
           { label: "Stripe Fees", value: money(stripeFees), sub: "~2.9%+30¢", color: "text-slate-400", icon: CreditCard, trend: null },
         ].map(s => (
@@ -323,7 +417,7 @@ export default function FinancePage() {
           {/* Client payments table */}
           <div className="glass-panel">
             <div className="px-4 py-3 border-b border-white/[0.06]">
-              <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Client Payments — March 2026</p>
+              <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Client Payments — {currentSnapshot.label}</p>
             </div>
             <table className="w-full text-[11px]">
               <thead>
@@ -463,8 +557,10 @@ export default function FinancePage() {
                       </td>
                       <td className="px-3 py-2.5 text-right font-mono text-red-400">{money(e.amount)}</td>
                       <td className="px-3 py-2.5 text-center">
-                        <button onClick={() => setExpenses(expenses.filter(x => x.id !== e.id))}
-                          className="text-slate-600 hover:text-red-400 transition-colors"><Trash2 size={12} /></button>
+                        <button onClick={() => deleteExpense(e.id)}
+                          className={cn("transition-colors", customExpenses.some(x => x.id === e.id) ? "text-slate-600 hover:text-red-400" : "text-slate-800 cursor-not-allowed")}
+                          disabled={!customExpenses.some(x => x.id === e.id)}
+                          title={customExpenses.some(x => x.id === e.id) ? "Delete" : "Seed expense"}><Trash2 size={12} /></button>
                       </td>
                     </tr>
                   );
