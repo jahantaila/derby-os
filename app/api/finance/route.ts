@@ -52,6 +52,7 @@ const NAME_OVERRIDES: Record<string, string> = {
   "cus_Rq878EUk3N4i0f": "Eulogio Gutierrez (Las Chamas)",
   "cus_S4Loxcg6f8muHE": "Eulogio Gutierrez (Las Chamas)",
   "cus_SB7d29UIqxMwp1": "Eulogio Gutierrez (Las Chamas)",
+  "cus_RyLGnhbSNV2kQP": "Eulogio Gutierrez (Las Chamas)",
 };
 
 // Merge these customer IDs into one entry
@@ -63,6 +64,7 @@ const MERGE_CUSTOMERS: Record<string, string> = {
   "cus_Rq878EUk3N4i0f": "cus_RvkHxkOJLtZ0LK",
   "cus_S4Loxcg6f8muHE": "cus_RvkHxkOJLtZ0LK",
   "cus_SB7d29UIqxMwp1": "cus_RvkHxkOJLtZ0LK",
+  "cus_RyLGnhbSNV2kQP": "cus_RvkHxkOJLtZ0LK",
 };
 
 // ─── GET: Fetch all finance data ───
