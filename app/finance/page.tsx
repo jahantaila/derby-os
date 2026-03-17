@@ -40,7 +40,7 @@ export default function FinancePage() {
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
   const [showAddExpense, setShowAddExpense] = useState(false);
   const [search, setSearch] = useState("");
-  const [showChurned, setShowChurned] = useState(false);
+
 
   // New expense form
   const [newExp, setNewExp] = useState({ name: "", amount: "", type: "recurring", category: "other", client_name: "", notes: "" });
@@ -96,22 +96,21 @@ export default function FinancePage() {
   const summary = data?.summary || {};
   const customers = data?.customers || [];
   const expenses: Expense[] = data?.expenses || [];
-  const activeCustomers = showChurned ? customers : customers.filter((c: any) => c.hasSubscription);
-  const filteredCustomers = activeCustomers.filter((c: any) =>
+  const filteredCustomers = customers.filter((c: any) =>
     !search || c.name.toLowerCase().includes(search.toLowerCase())
   );
 
   // Charts
   const revenueChart = useMemo(() => {
-    const sorted = [...(activeCustomers as any[])].filter(c => c.totalRevenue > 0).sort((a, b) => b.totalRevenue - a.totalRevenue).slice(0, 15);
+    const sorted = [...(customers as any[])].filter(c => c.mrr > 0).sort((a, b) => b.mrr - a.mrr).slice(0, 15);
     return {
       tooltip: { trigger: "axis" as const, backgroundColor: "#1a1a2e", borderColor: "#2093FF44", textStyle: { color: "#fff", fontSize: 11 } },
       grid: { top: 8, right: 8, bottom: 24, left: 8, containLabel: true },
       xAxis: { type: "category" as const, data: sorted.map(c => c.name.length > 14 ? c.name.slice(0, 14) + "…" : c.name), axisLabel: { color: "#64748b", fontSize: 9, rotate: 45 }, axisLine: { show: false }, axisTick: { show: false } },
       yAxis: { type: "value" as const, axisLabel: { color: "#64748b", fontSize: 9, formatter: (v: number) => `$${v}` }, splitLine: { lineStyle: { color: "#ffffff08" } } },
-      series: [{ type: "bar", data: sorted.map(c => ({ value: c.totalRevenue, itemStyle: { color: { type: "linear", x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: "#2093FF" }, { offset: 1, color: "#0026FF" }] }, borderRadius: [4, 4, 0, 0] } })), barWidth: "60%" }],
+      series: [{ type: "bar", data: sorted.map(c => ({ value: c.mrr, itemStyle: { color: { type: "linear", x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: "#2093FF" }, { offset: 1, color: "#0026FF" }] }, borderRadius: [4, 4, 0, 0] } })), barWidth: "60%" }],
     };
-  }, [activeCustomers]);
+  }, [customers]);
 
   const expenseChart = useMemo(() => {
     const catTotals: Record<string, number> = {};
@@ -160,13 +159,14 @@ export default function FinancePage() {
       )}
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
         {[
-          { label: "Gross Revenue", value: fmt(summary.totalRevenue || 0), icon: DollarSign, color: "#22C55E" },
-          { label: "Net Profit", value: fmt(summary.netProfit || 0), icon: TrendingUp, color: "#2093FF" },
-          { label: "Profit Margin", value: pct(summary.profitMargin || 0), icon: Zap, color: "#FFBD59" },
-          { label: "Total Expenses", value: fmt((summary.totalStripeFees || 0) + (summary.totalExpenses || 0)), icon: Receipt, color: "#F93C3C" },
-          { label: "MRR", value: fmt(summary.totalMRR || 0), icon: CreditCard, color: "#2093FF" },
+          { label: "Gross MRR", value: fmt(summary.grossMRR || 0), icon: DollarSign, color: "#22C55E" },
+          { label: "Stripe Fees", value: fmt(summary.totalStripeFees || 0), icon: CreditCard, color: "#EC4899" },
+          { label: "Net MRR", value: fmt(summary.netMRR || 0), icon: TrendingUp, color: "#2093FF" },
+          { label: "Expenses", value: fmt(summary.totalExpenses || 0), icon: Receipt, color: "#F93C3C" },
+          { label: "Profit", value: fmt(summary.profit || 0), icon: Zap, color: "#22C55E" },
+          { label: "Margin", value: pct(summary.profitMargin || 0), icon: TrendingUp, color: "#FFBD59" },
         ].map(kpi => (
           <div key={kpi.label} className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-4">
             <div className="flex items-center gap-2 mb-2">
@@ -182,13 +182,13 @@ export default function FinancePage() {
       <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-4">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm text-slate-400">Annual Run Rate → $1M Goal</span>
-          <span className="text-sm font-mono text-[#2093FF]">{fmt((summary.totalMRR || 0) * 12)}</span>
+          <span className="text-sm font-mono text-[#2093FF]">{fmt(summary.arr || 0)}</span>
         </div>
         <div className="w-full h-3 bg-white/5 rounded-full overflow-hidden">
           <div className="h-full rounded-full bg-gradient-to-r from-[#2093FF] to-[#0026FF] transition-all"
-            style={{ width: `${Math.min(((summary.totalMRR || 0) * 12 / 1000000) * 100, 100)}%` }} />
+            style={{ width: `${Math.min(((summary.arr || 0) / 1000000) * 100, 100)}%` }} />
         </div>
-        <p className="text-[10px] text-slate-600 mt-1">{pct(((summary.totalMRR || 0) * 12 / 1000000) * 100)} of $1M</p>
+        <p className="text-[10px] text-slate-600 mt-1">{pct(((summary.arr || 0) / 1000000) * 100)} of $1M</p>
       </div>
 
       {/* Tabs */}
@@ -218,23 +218,27 @@ export default function FinancePage() {
 
           {/* Summary breakdown */}
           <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-5">
-            <h3 className="text-sm font-medium text-slate-400 mb-4">March Breakdown</h3>
+            <h3 className="text-sm font-medium text-slate-400 mb-4">Monthly P&L</h3>
             <div className="space-y-2">
               <div className="flex justify-between py-1">
-                <span className="text-sm text-slate-400 flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-green-400" /> Client Revenue ({summary.totalCharges || 0} charges)</span>
-                <span className="text-sm font-mono text-green-400">{fmt(summary.totalRevenue || 0)}</span>
+                <span className="text-sm text-slate-400 flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-green-400" /> Gross MRR ({summary.activeSubscriptions || 0} subscriptions)</span>
+                <span className="text-sm font-mono text-green-400">{fmt(summary.grossMRR || 0)}</span>
               </div>
               <div className="flex justify-between py-1">
-                <span className="text-sm text-slate-400 flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-pink-400" /> Stripe Fees (3.01% + $0.30)</span>
+                <span className="text-sm text-slate-400 flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-pink-400" /> Stripe Fees (3.01% + $0.30/txn)</span>
                 <span className="text-sm font-mono text-pink-400">-{fmt(summary.totalStripeFees || 0)}</span>
               </div>
               <div className="flex justify-between py-1">
-                <span className="text-sm text-slate-400 flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-red-400" /> Manual Expenses</span>
+                <span className="text-sm text-slate-400 flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-blue-400" /> Net MRR</span>
+                <span className="text-sm font-mono text-blue-400">{fmt(summary.netMRR || 0)}</span>
+              </div>
+              <div className="flex justify-between py-1">
+                <span className="text-sm text-slate-400 flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-red-400" /> Expenses</span>
                 <span className="text-sm font-mono text-red-400">-{fmt(summary.totalExpenses || 0)}</span>
               </div>
               <div className="border-t border-white/10 pt-2 flex justify-between">
-                <span className="text-sm font-medium">Net Profit</span>
-                <span className={cn("text-lg font-mono font-bold", (summary.netProfit || 0) >= 0 ? "text-green-400" : "text-red-400")}>{fmt(summary.netProfit || 0)}</span>
+                <span className="text-sm font-medium">Monthly Profit</span>
+                <span className={cn("text-lg font-mono font-bold", (summary.profit || 0) >= 0 ? "text-green-400" : "text-red-400")}>{fmt(summary.profit || 0)}</span>
               </div>
             </div>
           </div>
@@ -247,11 +251,6 @@ export default function FinancePage() {
           <div className="flex items-center gap-3">
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search clients..."
               className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm flex-1 focus:outline-none focus:border-[#2093FF]/50" />
-            <label className="flex items-center gap-2 text-sm text-slate-400 cursor-pointer">
-              <input type="checkbox" checked={showChurned} onChange={e => setShowChurned(e.target.checked)}
-                className="rounded" />
-              Show churned
-            </label>
           </div>
 
           {/* Client detail panel */}
@@ -264,41 +263,20 @@ export default function FinancePage() {
                 </div>
                 <button onClick={() => setSelectedCustomer(null)} className="p-2 hover:bg-white/10 rounded-lg"><X className="w-4 h-4" /></button>
               </div>
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <div className="bg-white/[0.03] rounded-lg p-3">
                   <p className="text-[10px] text-slate-500 uppercase">MRR</p>
-                  <p className="text-lg font-mono font-semibold text-blue-400">{fmt(selectedCustomer.mrr)}</p>
-                </div>
-                <div className="bg-white/[0.03] rounded-lg p-3">
-                  <p className="text-[10px] text-slate-500 uppercase">This Month</p>
-                  <p className="text-lg font-mono font-semibold text-green-400">{fmt(selectedCustomer.totalRevenue)}</p>
+                  <p className="text-lg font-mono font-semibold text-green-400">{fmt(selectedCustomer.mrr)}</p>
                 </div>
                 <div className="bg-white/[0.03] rounded-lg p-3">
                   <p className="text-[10px] text-slate-500 uppercase">Stripe Fee</p>
                   <p className="text-lg font-mono font-semibold text-pink-400">{fmt(selectedCustomer.stripeFee)}</p>
                 </div>
                 <div className="bg-white/[0.03] rounded-lg p-3">
-                  <p className="text-[10px] text-slate-500 uppercase">Net Revenue</p>
-                  <p className="text-lg font-mono font-semibold text-green-400">{fmt(selectedCustomer.netRevenue)}</p>
+                  <p className="text-[10px] text-slate-500 uppercase">Net MRR</p>
+                  <p className="text-lg font-mono font-semibold text-blue-400">{fmt(selectedCustomer.netMrr)}</p>
                 </div>
               </div>
-              {/* Charges list */}
-              {selectedCustomer.charges.length > 0 && (
-                <div>
-                  <h4 className="text-xs text-slate-500 uppercase tracking-wider mb-2">Charges this month</h4>
-                  <div className="space-y-1">
-                    {selectedCustomer.charges.map((c: any) => (
-                      <div key={c.id} className="flex items-center justify-between py-2 px-3 bg-white/[0.02] rounded-lg">
-                        <div>
-                          <span className="text-sm">{c.description || "Payment"}</span>
-                          <span className="text-[10px] text-slate-600 ml-2">{new Date(c.created * 1000).toLocaleDateString()}</span>
-                        </div>
-                        <span className="text-sm font-mono text-green-400">{fmt(c.amount)}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
               {/* Client-specific expenses */}
               {expenses.filter(e => e.client_name?.toLowerCase() === selectedCustomer.name.toLowerCase()).length > 0 && (
                 <div>
@@ -323,10 +301,8 @@ export default function FinancePage() {
                 <tr className="border-b border-white/5">
                   <th className="text-left text-[11px] text-slate-500 uppercase tracking-wider p-4">Client</th>
                   <th className="text-right text-[11px] text-slate-500 uppercase tracking-wider p-4">MRR</th>
-                  <th className="text-right text-[11px] text-slate-500 uppercase tracking-wider p-4">Revenue</th>
                   <th className="text-right text-[11px] text-slate-500 uppercase tracking-wider p-4">Stripe Fee</th>
-                  <th className="text-right text-[11px] text-slate-500 uppercase tracking-wider p-4">Net</th>
-                  <th className="text-center text-[11px] text-slate-500 uppercase tracking-wider p-4">Charges</th>
+                  <th className="text-right text-[11px] text-slate-500 uppercase tracking-wider p-4">Net MRR</th>
                 </tr>
               </thead>
               <tbody>
@@ -336,13 +312,11 @@ export default function FinancePage() {
                       selectedCustomer?.stripeId === c.stripeId ? "bg-[#2093FF]/10" : "hover:bg-white/[0.03]")}>
                     <td className="p-4">
                       <span className="text-sm font-medium">{c.name}</span>
-                      {!c.hasSubscription && <span className="text-[9px] ml-2 text-red-400 bg-red-500/10 px-1.5 py-0.5 rounded">churned</span>}
+                      {c.email && <span className="text-[10px] text-slate-600 ml-2">{c.email}</span>}
                     </td>
-                    <td className="p-4 text-right text-sm font-mono text-blue-400">{c.mrr > 0 ? fmt(c.mrr) : "—"}</td>
-                    <td className="p-4 text-right text-sm font-mono text-green-400">{c.totalRevenue > 0 ? fmt(c.totalRevenue) : "—"}</td>
-                    <td className="p-4 text-right text-sm font-mono text-pink-400">{c.stripeFee > 0 ? fmt(c.stripeFee) : "—"}</td>
-                    <td className="p-4 text-right text-sm font-mono text-white">{c.netRevenue > 0 ? fmt(c.netRevenue) : "—"}</td>
-                    <td className="p-4 text-center text-sm font-mono text-slate-400">{c.charges.length}</td>
+                    <td className="p-4 text-right text-sm font-mono text-green-400">{fmt(c.mrr)}</td>
+                    <td className="p-4 text-right text-sm font-mono text-pink-400">{fmt(c.stripeFee)}</td>
+                    <td className="p-4 text-right text-sm font-mono text-blue-400">{fmt(c.netMrr)}</td>
                   </tr>
                 ))}
               </tbody>
