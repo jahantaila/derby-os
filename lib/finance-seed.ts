@@ -649,12 +649,12 @@ export const CLIENT_FINANCES: ClientFinance[] = [
 export const MARCH_SUMMARY = {
   month: "2026-03",
   grossRevenue: 15912.13,
-  totalStripeFees: 15437.48,
+  totalStripeFees: 474.65,
   totalClientExpenses: 117.5,
   generalRecurring: 945.78,
   employeeExpenses: 2955.4,
-  totalExpenditure: 19456.16,
-  netProfit: -3544.03,
+  totalExpenditure: 4493.33,
+  netProfit: 11418.80,
   activeClients: 44,
-  profitMargin: -22.3,
+  profitMargin: 71.8,
 };

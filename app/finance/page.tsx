@@ -273,7 +273,7 @@ export default function FinancePage() {
                 </div>
                 <div className="bg-white/[0.03] rounded-lg p-3">
                   <p className="text-[10px] text-slate-500 uppercase">Stripe Fee</p>
-                  <p className="text-lg font-mono font-semibold text-pink-400">{fmt(selectedClient.stripeFee)}</p>
+                  <p className="text-lg font-mono font-semibold text-pink-400">{fmt(selectedClient.grossRevenue - selectedClient.stripeFee)}</p>
                 </div>
                 <div className="bg-white/[0.03] rounded-lg p-3">
                   <p className="text-[10px] text-slate-500 uppercase">Expenses</p>
@@ -358,7 +358,7 @@ export default function FinancePage() {
                       <span className="text-sm font-mono text-green-400">{client.grossRevenue > 0 ? fmt(client.grossRevenue) : "—"}</span>
                     </td>
                     <td className="p-4 text-right">
-                      <span className="text-sm font-mono text-pink-400">{client.stripeFee > 0 ? fmt(client.stripeFee) : "—"}</span>
+                      <span className="text-sm font-mono text-pink-400">{client.grossRevenue > 0 ? fmt(client.grossRevenue - client.stripeFee) : "—"}</span>
                     </td>
                     <td className="p-4 text-right">
                       <span className="text-sm font-mono text-red-400">{client.totalExpenditure > 0 ? fmt(client.totalExpenditure) : "—"}</span>
