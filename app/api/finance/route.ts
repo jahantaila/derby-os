@@ -108,7 +108,7 @@ export async function GET(req: NextRequest) {
     const unnamed = customers.filter(c => c.name === c.stripeId);
     if (unnamed.length > 0) {
       const details = await Promise.all(
-        unnamed.slice(0, 25).map(c => stripeGet(`/customers/${c.stripeId}`).catch(() => null))
+        unnamed.map(c => stripeGet(`/customers/${c.stripeId}`).catch(() => null))
       );
       for (const d of details) {
         if (!d) continue;
