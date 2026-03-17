@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 import {
-  Activity, Brain, ChevronRight, Clock3, Code2, Cpu, LineChart,
-  MessageSquare, Search, Shield, Target, Zap,
+  Activity, Brain, ChevronRight, Clock3, Code2, Cpu, Crown, Globe,
+  LineChart, Megaphone, MessageSquare, Search, Shield, Target, User,
+  Users, Wrench, Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { AgentRecord } from "@/lib/agents";
@@ -15,185 +15,244 @@ const MODEL_COLORS: Record<string, string> = {
   Codex: "text-violet-400 bg-violet-400/10",
 };
 
+const DEPT_CONFIG: Record<string, { label: string; icon: typeof Brain; color: string; gradient: string }> = {
+  Executive: { label: "Executive", icon: Crown, color: "#FFBD59", gradient: "from-yellow-500/10 to-amber-500/5" },
+  Marketing: { label: "Marketing & Sales", icon: Megaphone, color: "#F93C3C", gradient: "from-red-500/10 to-pink-500/5" },
+  Development: { label: "Engineering", icon: Code2, color: "#2093FF", gradient: "from-blue-500/10 to-cyan-500/5" },
+  Fulfillment: { label: "Fulfillment", icon: Wrench, color: "#22C55E", gradient: "from-green-500/10 to-emerald-500/5" },
+};
+
 const ROLE_ICONS: Record<string, React.ElementType> = {
+  "CEO": Crown,
   "Chief of Staff": Brain,
   "Marketing Analyst": LineChart,
   "Ad Producer": Target,
   "Developer": Code2,
-  "Operations Specialist": Search,
+  "Operations Specialist": Globe,
+  "Landing Pages": Code2,
+  "Fulfillment": Wrench,
 };
 
-function SkillBadge({ skill }: { skill: string }) {
+const STATUS_CONFIG: Record<string, { label: string; color: string; pulse: boolean }> = {
+  active: { label: "Active", color: "#22C55E", pulse: true },
+  working: { label: "Working", color: "#2093FF", pulse: true },
+  idle: { label: "Idle", color: "#FFBD59", pulse: false },
+  offline: { label: "Offline", color: "#64748b", pulse: false },
+};
+
+function AgentCard({ agent, selected, onClick }: { agent: AgentRecord; selected: boolean; onClick: () => void }) {
+  const Icon = ROLE_ICONS[agent.role] || User;
+  const status = STATUS_CONFIG[agent.status] || STATUS_CONFIG.offline;
+  const modelColor = agent.model ? MODEL_COLORS[agent.model] || "text-slate-400 bg-white/5" : "";
+
   return (
-    <span className="px-2 py-0.5 rounded-full bg-white/[0.04] border border-white/[0.06] text-[9px] text-slate-500">
-      {skill.replace(/-/g, " ")}
-    </span>
+    <div onClick={onClick}
+      className={cn(
+        "bg-white/[0.03] border rounded-xl p-4 cursor-pointer transition-all hover:bg-white/[0.05] group",
+        selected ? "border-[#2093FF]/50 bg-[#2093FF]/5" : "border-white/[0.06]",
+      )}>
+      <div className="flex items-start gap-3">
+        {/* Avatar */}
+        <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center",
+          agent.type === "ceo" ? "bg-gradient-to-br from-yellow-500/20 to-amber-500/10" :
+          agent.type === "agent" ? "bg-gradient-to-br from-blue-500/20 to-cyan-500/10" :
+          "bg-white/5")}>
+          <Icon className="w-5 h-5" style={{ color: DEPT_CONFIG[agent.department]?.color || "#64748b" }} />
+        </div>
+
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-semibold">{agent.name}</h3>
+            {/* Status dot */}
+            <div className="flex items-center gap-1">
+              <div className={cn("w-2 h-2 rounded-full", status.pulse && "animate-pulse")}
+                style={{ background: status.color }} />
+              <span className="text-[9px]" style={{ color: status.color }}>{status.label}</span>
+            </div>
+          </div>
+          <p className="text-xs text-slate-500">{agent.role}</p>
+
+          {/* Model badge */}
+          {agent.model && (
+            <span className={cn("inline-block mt-1.5 text-[9px] px-1.5 py-0.5 rounded-full font-mono", modelColor)}>
+              {agent.model}
+            </span>
+          )}
+          {agent.type === "employee" && (
+            <span className="inline-block mt-1.5 text-[9px] px-1.5 py-0.5 rounded-full bg-green-500/10 text-green-400">
+              Human
+            </span>
+          )}
+          {agent.type === "ceo" && (
+            <span className="inline-block mt-1.5 text-[9px] px-1.5 py-0.5 rounded-full bg-yellow-500/10 text-yellow-400">
+              Boss
+            </span>
+          )}
+
+          {/* Current task */}
+          {agent.currentTask && (
+            <p className="text-[10px] text-slate-600 mt-1.5 truncate">→ {agent.currentTask}</p>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
 
 export default function AgentsPage() {
   const [agents, setAgents] = useState<AgentRecord[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
-  const [filter, setFilter] = useState<"all" | "active" | "idle" | "offline">("all");
+  const [filter, setFilter] = useState<"all" | "agent" | "employee">("all");
 
   useEffect(() => {
-    fetch("/api/agents?type=agent").then(r => r.json()).then(setAgents).catch(() => {});
-    const interval = setInterval(() => {
-      fetch("/api/agents?type=agent").then(r => r.json()).then(setAgents).catch(() => {});
-    }, 10000);
-    return () => clearInterval(interval);
+    fetch("/api/agents").then(r => r.json()).then(setAgents).catch(() => {});
   }, []);
 
-  const filtered = agents.filter(a => filter === "all" || a.status === filter);
-  const selectedAgent = agents.find(a => a.id === selected);
+  const selectedAgent = useMemo(() => agents.find(a => a.id === selected), [agents, selected]);
+
+  const departments = useMemo(() => {
+    const depts = ["Executive", "Marketing", "Development", "Fulfillment"];
+    return depts.map(dept => ({
+      ...DEPT_CONFIG[dept],
+      dept,
+      members: agents.filter(a => {
+        if (filter === "agent" && a.type !== "agent") return false;
+        if (filter === "employee" && a.type === "agent") return false;
+        return a.department === dept;
+      }),
+    })).filter(d => d.members.length > 0);
+  }, [agents, filter]);
+
+  const stats = useMemo(() => ({
+    total: agents.length,
+    ai: agents.filter(a => a.type === "agent").length,
+    human: agents.filter(a => a.type === "employee" || a.type === "ceo").length,
+    active: agents.filter(a => a.status === "active" || a.status === "working").length,
+  }), [agents]);
 
   return (
-    <div className="space-y-6 animate-enter">
+    <div className="min-h-screen bg-[#0a0a0f] text-white p-6 space-y-6">
       {/* Header */}
-      <div className="glass-panel p-5">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-[11px] uppercase tracking-[0.24em] text-blue-200/70">Operations</p>
-            <h1 className="text-[20px] font-bold text-white">AI Agents</h1>
-            <p className="text-[12px] text-slate-400 mt-0.5">{agents.filter(a => a.status === "active" || a.status === "working").length} of {agents.length} agents online</p>
-          </div>
-          <div className="flex gap-1">
-            {(["all", "active", "idle", "offline"] as const).map(f => (
-              <button key={f} onClick={() => setFilter(f)}
-                className={cn("px-3 py-1.5 rounded-lg text-[11px] transition-all",
-                  filter === f ? "bg-white/[0.1] text-white" : "text-slate-500 hover:text-white"
-                )}>
-                {f.charAt(0).toUpperCase() + f.slice(1)}
-              </button>
-            ))}
-          </div>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Team</h1>
+          <p className="text-slate-500 text-sm mt-1">
+            {stats.ai} AI agents · {stats.human} humans · {stats.active} active now
+          </p>
+        </div>
+        <div className="flex gap-1 bg-white/5 rounded-lg p-0.5">
+          {(["all", "agent", "employee"] as const).map(f => (
+            <button key={f} onClick={() => setFilter(f)}
+              className={cn("px-3 py-1.5 rounded-md text-xs font-medium capitalize",
+                filter === f ? "bg-[#2093FF] text-white" : "text-slate-400 hover:text-white")}>
+              {f === "all" ? "All" : f === "agent" ? "AI Agents" : "Humans"}
+            </button>
+          ))}
         </div>
       </div>
 
-      <div className="flex gap-4">
-        {/* Agent cards */}
-        <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3">
-          {filtered.map(agent => {
-            const Icon = ROLE_ICONS[agent.role] || Cpu;
-            const modelColor = MODEL_COLORS[agent.model || ""] || "text-slate-400 bg-slate-400/10";
-            const isOnline = agent.status === "active" || agent.status === "working";
-
+      <div className="flex gap-6">
+        {/* Left — Department Grid */}
+        <div className="flex-1 space-y-6">
+          {departments.map(dept => {
+            const DeptIcon = dept.icon;
             return (
-              <button key={agent.id} onClick={() => setSelected(agent.id)}
-                className={cn(
-                  "text-left p-4 rounded-xl border transition-all",
-                  selected === agent.id ? "border-blue-500/30 bg-blue-500/[0.05]" : "border-white/[0.06] bg-white/[0.02] hover:border-white/[0.12]"
-                )}>
-                <div className="flex items-start gap-3">
-                  <div className="relative">
-                    <div className="w-11 h-11 rounded-xl bg-white/[0.05] flex items-center justify-center">
-                      <Icon size={18} className={isOnline ? "text-white" : "text-slate-500"} />
-                    </div>
-                    <div className={cn("absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[#0a0a0f]",
-                      isOnline ? "bg-emerald-400" : agent.status === "idle" ? "bg-amber-400" : "bg-slate-600"
-                    )} />
+              <div key={dept.dept}>
+                {/* Department Header */}
+                <div className="flex items-center gap-2 mb-3">
+                  <div className={cn("w-6 h-6 rounded-md flex items-center justify-center bg-gradient-to-br", dept.gradient)}>
+                    <DeptIcon className="w-3.5 h-3.5" style={{ color: dept.color }} />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="text-[14px] font-bold text-white">{agent.name}</p>
-                      <span className={cn("px-1.5 py-0.5 rounded text-[9px] font-medium", modelColor)}>{agent.model}</span>
-                    </div>
-                    <p className="text-[11px] text-slate-400">{agent.role} · {agent.department}</p>
-                    {agent.currentTask && (
-                      <div className="flex items-center gap-1.5 mt-2">
-                        <Activity size={10} className={cn(isOnline ? "text-emerald-400 animate-pulse" : "text-slate-500")} />
-                        <p className="text-[10px] text-slate-300 truncate">{agent.currentTask}</p>
-                      </div>
-                    )}
-                  </div>
+                  <h2 className="text-sm font-semibold" style={{ color: dept.color }}>{dept.label}</h2>
+                  <span className="text-[10px] text-slate-600 ml-1">({dept.members.length})</span>
                 </div>
 
-                {/* Skills preview */}
-                {agent.skills.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-3">
-                    {agent.skills.slice(0, 4).map(s => <SkillBadge key={s} skill={s} />)}
-                    {agent.skills.length > 4 && (
-                      <span className="text-[9px] text-slate-600">+{agent.skills.length - 4} more</span>
-                    )}
-                  </div>
-                )}
-
-                {/* Last activity */}
-                {agent.history.length > 0 && (
-                  <div className="flex items-center gap-1.5 mt-2.5 pt-2.5 border-t border-white/[0.04]">
-                    <Clock3 size={9} className="text-slate-600" />
-                    <p className="text-[9px] text-slate-500 truncate">{agent.history[0].action}</p>
-                    <span className="text-[8px] text-slate-600 shrink-0">{agent.history[0].timestamp.split(" ")[1]}</span>
-                  </div>
-                )}
-              </button>
+                {/* Agent Cards Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {dept.members.map(agent => (
+                    <AgentCard key={agent.id} agent={agent} selected={selected === agent.id}
+                      onClick={() => setSelected(selected === agent.id ? null : agent.id)} />
+                  ))}
+                </div>
+              </div>
             );
           })}
         </div>
 
-        {/* Detail panel */}
+        {/* Right — Detail Panel */}
         {selectedAgent && (
-          <div className="hidden lg:block w-[350px] glass-panel p-5 self-start sticky top-4">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-white/[0.05] flex items-center justify-center text-[18px]">
-                {(() => { const Icon = ROLE_ICONS[selectedAgent.role] || Cpu; return <Icon size={20} className="text-white" />; })()}
+          <div className="w-96 flex-shrink-0 bg-white/[0.03] border border-white/[0.06] rounded-xl p-5 space-y-5 sticky top-6 self-start">
+            {/* Agent Header */}
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#2093FF]/20 to-[#0026FF]/10 flex items-center justify-center">
+                {(() => { const I = ROLE_ICONS[selectedAgent.role] || User; return <I className="w-6 h-6 text-[#2093FF]" />; })()}
               </div>
               <div>
-                <p className="text-[16px] font-bold text-white">{selectedAgent.name}</p>
-                <p className="text-[11px] text-slate-400">{selectedAgent.role}</p>
+                <h3 className="text-lg font-bold">{selectedAgent.name}</h3>
+                <p className="text-sm text-slate-400">{selectedAgent.role}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  {selectedAgent.model && (
+                    <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-mono", MODEL_COLORS[selectedAgent.model])}>
+                      {selectedAgent.model}
+                    </span>
+                  )}
+                  <span className="text-[10px] px-2 py-0.5 rounded-full" style={{
+                    background: `${DEPT_CONFIG[selectedAgent.department]?.color || "#64748b"}20`,
+                    color: DEPT_CONFIG[selectedAgent.department]?.color || "#64748b",
+                  }}>{selectedAgent.department}</span>
+                </div>
               </div>
             </div>
 
             {/* Status */}
-            <div className="flex items-center gap-2 mb-4">
-              <div className={cn("w-2 h-2 rounded-full",
-                selectedAgent.status === "active" || selectedAgent.status === "working" ? "bg-emerald-400" :
-                selectedAgent.status === "idle" ? "bg-amber-400" : "bg-slate-600"
-              )} />
-              <span className="text-[11px] text-slate-300 capitalize">{selectedAgent.status}</span>
-              <span className={cn("px-1.5 py-0.5 rounded text-[9px] font-medium ml-auto", MODEL_COLORS[selectedAgent.model || ""] || "text-slate-400 bg-slate-400/10")}>{selectedAgent.model}</span>
-            </div>
-
-            {selectedAgent.currentTask && (
-              <div className="p-3 rounded-lg bg-white/[0.03] border border-white/[0.06] mb-4">
-                <p className="text-[9px] text-slate-500 uppercase tracking-wider">Current Task</p>
-                <p className="text-[12px] text-white mt-1">{selectedAgent.currentTask}</p>
+            <div className="bg-white/[0.03] rounded-lg p-3">
+              <div className="flex items-center gap-2">
+                <div className={cn("w-2.5 h-2.5 rounded-full", STATUS_CONFIG[selectedAgent.status]?.pulse && "animate-pulse")}
+                  style={{ background: STATUS_CONFIG[selectedAgent.status]?.color }} />
+                <span className="text-sm font-medium">{STATUS_CONFIG[selectedAgent.status]?.label}</span>
               </div>
-            )}
+              {selectedAgent.currentTask && (
+                <p className="text-xs text-slate-400 mt-1.5">Current: {selectedAgent.currentTask}</p>
+              )}
+            </div>
 
             {/* Skills */}
             {selectedAgent.skills.length > 0 && (
-              <div className="mb-4">
-                <p className="text-[9px] text-slate-500 uppercase tracking-wider mb-2">Skills ({selectedAgent.skills.length})</p>
-                <div className="flex flex-wrap gap-1">
-                  {selectedAgent.skills.map(s => <SkillBadge key={s} skill={s} />)}
+              <div>
+                <h4 className="text-[10px] text-slate-500 uppercase tracking-wider mb-2">Skills ({selectedAgent.skills.length})</h4>
+                <div className="flex flex-wrap gap-1.5">
+                  {selectedAgent.skills.map(skill => (
+                    <span key={skill} className="px-2 py-0.5 rounded-full bg-white/[0.04] border border-white/[0.06] text-[9px] text-slate-500">
+                      {skill.replace(/-/g, " ")}
+                    </span>
+                  ))}
                 </div>
+              </div>
+            )}
+
+            {/* Soul */}
+            {selectedAgent.soul && (
+              <div>
+                <h4 className="text-[10px] text-slate-500 uppercase tracking-wider mb-2">About</h4>
+                <p className="text-xs text-slate-400 leading-relaxed line-clamp-6">{selectedAgent.soul.split("\n")[0]}</p>
               </div>
             )}
 
             {/* History */}
             {selectedAgent.history.length > 0 && (
               <div>
-                <p className="text-[9px] text-slate-500 uppercase tracking-wider mb-2">Activity Log</p>
+                <h4 className="text-[10px] text-slate-500 uppercase tracking-wider mb-2">Recent Activity</h4>
                 <div className="space-y-2">
-                  {selectedAgent.history.map((h, i) => (
+                  {selectedAgent.history.slice(0, 5).map((h, i) => (
                     <div key={i} className="flex items-start gap-2">
-                      <Clock3 size={10} className="text-slate-600 shrink-0 mt-0.5" />
+                      <Clock3 className="w-3 h-3 text-slate-600 mt-0.5 flex-shrink-0" />
                       <div>
-                        <p className="text-[10px] text-slate-300">{h.action}</p>
-                        <p className="text-[8px] text-slate-600">{h.timestamp}</p>
+                        <p className="text-[11px] text-slate-400">{h.action}</p>
+                        <p className="text-[9px] text-slate-600">{h.timestamp}</p>
                       </div>
                     </div>
                   ))}
                 </div>
-              </div>
-            )}
-
-            {/* Soul excerpt */}
-            {selectedAgent.soul && (
-              <div className="mt-4 pt-4 border-t border-white/[0.06]">
-                <p className="text-[9px] text-slate-500 uppercase tracking-wider mb-1">Personality</p>
-                <p className="text-[10px] text-slate-400 leading-relaxed">{selectedAgent.soul.slice(0, 200)}...</p>
               </div>
             )}
           </div>
