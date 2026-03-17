@@ -47,8 +47,10 @@ function calculateScore(c: RolodexContact) {
 function getInitials(c: RolodexContact) { return `${c.firstName?.[0] ?? ""}${c.lastName?.[0] ?? ""}`.toUpperCase() || "?"; }
 function getFullName(c: RolodexContact) { return `${c.firstName} ${c.lastName}`.trim() || "Unknown"; }
 function timeAgo(date?: string) {
-  if (!date) return "Never";
-  const diff = Date.now() - new Date(date).getTime();
+  if (!date) return "";
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return "";
+  const diff = Date.now() - d.getTime();
   const days = Math.floor(diff / 86400000);
   if (days < 0) return `in ${Math.abs(days)}d`;
   if (days === 0) return "Today";
@@ -58,7 +60,7 @@ function timeAgo(date?: string) {
   if (days < 365) return `${Math.floor(days / 30)}mo ago`;
   return `${Math.floor(days / 365)}y ago`;
 }
-function formatDate(d: string) { return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }); }
+function formatDate(d: string) { const dt = new Date(d); if (isNaN(dt.getTime())) return ""; return dt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }); }
 function formatDuration(s?: number) { if (!s) return ""; const m = Math.floor(s / 60); return m < 60 ? `${m}m` : `${Math.floor(m / 60)}h ${m % 60}m`; }
 function scoreColor(s: number) { return s >= 75 ? "text-emerald-400" : s >= 50 ? "text-blue-400" : s >= 25 ? "text-amber-400" : "text-slate-500"; }
 function scoreLabel(s: number) { return s >= 75 ? "Strong" : s >= 50 ? "Moderate" : s >= 25 ? "Weak" : "Cold"; }

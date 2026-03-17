@@ -105,8 +105,11 @@ function getFullName(c: RolodexContact) {
 }
 
 function timeAgo(date?: string) {
-  if (!date) return "Never";
-  const diff = Date.now() - new Date(date).getTime();
+  if (!date) return "";
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return "";
+  const diff = Date.now() - d.getTime();
+  if (diff < 0) return "Today";
   const days = Math.floor(diff / 86400000);
   if (days === 0) return "Today";
   if (days === 1) return "Yesterday";
