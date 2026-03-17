@@ -208,7 +208,7 @@ export default function FinancePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-5">
               <h3 className="text-sm font-medium text-slate-400 mb-4">Revenue by Client (Top 15)</h3>
-              {activeCustomers.length > 0 ? <ReactECharts option={revenueChart} style={{ height: 300 }} /> : <p className="text-slate-600 text-sm">No data</p>}
+              {customers.length > 0 ? <ReactECharts option={revenueChart} style={{ height: 300 }} /> : <p className="text-slate-600 text-sm">No data</p>}
             </div>
             <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-5">
               <h3 className="text-sm font-medium text-slate-400 mb-4">Expense Breakdown</h3>
