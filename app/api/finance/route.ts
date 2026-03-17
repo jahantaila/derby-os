@@ -47,38 +47,60 @@ export async function GET(req: NextRequest) {
       supabaseReq("GET", "expenses", { params: `select=*&month=eq.${month}&order=created_at.asc` }),
     ]);
 
-    // Build customer list from active subscriptions
-    const customers: any[] = [];
-    const seenCustomers = new Set<string>();
+    // Group all subscriptions by customer, sum MRR, apply coupons
+    const custMap: Record<string, { name: string; email: string; subs: any[] }> = {};
 
     for (const sub of subs.data || []) {
       const cid = sub.customer;
-      if (seenCustomers.has(cid)) continue;
-      seenCustomers.add(cid);
+      if (!custMap[cid]) {
+        custMap[cid] = {
+          name: sub.customer_name || sub.metadata?.name || cid,
+          email: sub.customer_email || "",
+          subs: [],
+        };
+      }
+      custMap[cid].subs.push(sub);
+      // Use name/email from whichever sub has it
+      if (sub.customer_name && custMap[cid].name === cid) custMap[cid].name = sub.customer_name;
+      if (sub.customer_email && !custMap[cid].email) custMap[cid].email = sub.customer_email;
+    }
 
-      // Sum all subscription items for this customer
+    const customers: any[] = [];
+    for (const [cid, data] of Object.entries(custMap)) {
       let mrr = 0;
-      for (const item of sub.items?.data || []) {
-        const price = item.price;
-        const amount = (price?.unit_amount || 0) / 100;
-        if (price?.recurring?.interval === "year") {
-          mrr += amount / 12;
-        } else {
-          mrr += amount;
+
+      for (const sub of data.subs) {
+        // Sum all line items in this subscription
+        let subAmount = 0;
+        for (const item of sub.items?.data || []) {
+          const price = item.price;
+          const amount = (price?.unit_amount || 0) / 100;
+          subAmount += price?.recurring?.interval === "year" ? amount / 12 : amount;
         }
+
+        // Apply coupon discount
+        const discount = sub.discount?.coupon;
+        if (discount) {
+          if (discount.percent_off) {
+            subAmount = subAmount * (1 - discount.percent_off / 100);
+          } else if (discount.amount_off) {
+            subAmount = Math.max(0, subAmount - discount.amount_off / 100);
+          }
+        }
+
+        mrr += subAmount;
       }
 
       const stripeFee = mrr * 0.0301 + 0.30;
 
       customers.push({
         stripeId: cid,
-        name: sub.customer_name || sub.metadata?.name || cid,
-        email: sub.customer_email || "",
+        name: data.name,
+        email: data.email,
         mrr,
         stripeFee,
         netMrr: mrr - stripeFee,
-        subscriptionStatus: sub.status,
-        currentPeriodEnd: sub.current_period_end,
+        subscriptionCount: data.subs.length,
       });
     }
 
