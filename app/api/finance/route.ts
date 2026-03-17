@@ -36,6 +36,35 @@ async function supabaseReq(method: string, table: string, opts?: { params?: stri
   return res.json();
 }
 
+// ─── Customer Overrides ───
+// Excluded customers (not real clients)
+const EXCLUDED_CUSTOMERS = new Set([
+  "cus_TuMdAvAiF1vOgV", // Zimri — not a customer
+  "cus_SK4ywbMWCDpPjG", // Kendell Sheppard — churned, paused in Stripe
+]);
+
+// Name overrides (display name corrections)
+const NAME_OVERRIDES: Record<string, string> = {
+  "cus_RvkHxkOJLtZ0LK": "Eulogio Gutierrez (Las Chamas)",
+  "cus_SAgwDJdWJ0QYkH": "Eulogio Gutierrez (Las Chamas)",
+  "cus_RxdlJeuSSjrFBF": "Eulogio Gutierrez (Las Chamas)",
+  "cus_S3CZIo2xIQPI3i": "Eulogio Gutierrez (Las Chamas)",
+  "cus_Rq878EUk3N4i0f": "Eulogio Gutierrez (Las Chamas)",
+  "cus_S4Loxcg6f8muHE": "Eulogio Gutierrez (Las Chamas)",
+  "cus_SB7d29UIqxMwp1": "Eulogio Gutierrez (Las Chamas)",
+};
+
+// Merge these customer IDs into one entry
+const MERGE_CUSTOMERS: Record<string, string> = {
+  // All Eulogio IDs merge into one
+  "cus_SAgwDJdWJ0QYkH": "cus_RvkHxkOJLtZ0LK",
+  "cus_RxdlJeuSSjrFBF": "cus_RvkHxkOJLtZ0LK",
+  "cus_S3CZIo2xIQPI3i": "cus_RvkHxkOJLtZ0LK",
+  "cus_Rq878EUk3N4i0f": "cus_RvkHxkOJLtZ0LK",
+  "cus_S4Loxcg6f8muHE": "cus_RvkHxkOJLtZ0LK",
+  "cus_SB7d29UIqxMwp1": "cus_RvkHxkOJLtZ0LK",
+};
+
 // ─── GET: Fetch all finance data ───
 export async function GET(req: NextRequest) {
   const month = req.nextUrl.searchParams.get("month") || new Date().toISOString().slice(0, 7);
@@ -53,17 +82,25 @@ export async function GET(req: NextRequest) {
     const custMap: Record<string, { name: string; email: string; subs: any[] }> = {};
 
     for (const sub of subs.data || []) {
-      const cid = sub.customer;
+      let cid = sub.customer;
+      
+      // Skip excluded customers
+      if (EXCLUDED_CUSTOMERS.has(cid)) continue;
+      
+      // Merge customer IDs
+      if (MERGE_CUSTOMERS[cid]) cid = MERGE_CUSTOMERS[cid];
+      
       if (!custMap[cid]) {
         custMap[cid] = {
-          name: sub.customer_name || sub.metadata?.name || cid,
+          name: NAME_OVERRIDES[cid] || sub.customer_name || sub.metadata?.name || cid,
           email: sub.customer_email || "",
           subs: [],
         };
       }
       custMap[cid].subs.push(sub);
-      // Use name/email from whichever sub has it
-      if (sub.customer_name && custMap[cid].name === cid) custMap[cid].name = sub.customer_name;
+      // Use name override or from whichever sub has it
+      if (NAME_OVERRIDES[cid]) custMap[cid].name = NAME_OVERRIDES[cid];
+      else if (sub.customer_name && custMap[cid].name === cid) custMap[cid].name = sub.customer_name;
       if (sub.customer_email && !custMap[cid].email) custMap[cid].email = sub.customer_email;
     }
 
