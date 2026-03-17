@@ -41,11 +41,13 @@ export async function GET(req: NextRequest) {
   const month = req.nextUrl.searchParams.get("month") || new Date().toISOString().slice(0, 7);
 
   try {
-    // Fetch Stripe subscriptions + Supabase expenses in parallel
-    const [subs, expenses] = await Promise.all([
+    // Fetch active + past_due subscriptions + Supabase expenses in parallel
+    const [activeSubs, pastDueSubs, expenses] = await Promise.all([
       stripeGet("/subscriptions", { status: "active", limit: "100" }),
+      stripeGet("/subscriptions", { status: "past_due", limit: "100" }),
       supabaseReq("GET", "expenses", { params: `select=*&month=eq.${month}&order=created_at.asc` }),
     ]);
+    const subs = { data: [...(activeSubs.data || []), ...(pastDueSubs.data || [])] };
 
     // Group all subscriptions by customer, sum MRR, apply coupons
     const custMap: Record<string, { name: string; email: string; subs: any[] }> = {};
@@ -69,12 +71,15 @@ export async function GET(req: NextRequest) {
     for (const [cid, data] of Object.entries(custMap)) {
       let mrr = 0;
 
+      let hasPastDue = false;
       for (const sub of data.subs) {
-        // Sum all line items in this subscription
+        if (sub.status === "past_due") hasPastDue = true;
+        // Sum all line items in this subscription (with quantity)
         let subAmount = 0;
         for (const item of sub.items?.data || []) {
           const price = item.price;
-          const amount = (price?.unit_amount || 0) / 100;
+          const qty = item.quantity || 1;
+          const amount = ((price?.unit_amount || 0) / 100) * qty;
           subAmount += price?.recurring?.interval === "year" ? amount / 12 : amount;
         }
 
@@ -101,6 +106,7 @@ export async function GET(req: NextRequest) {
         stripeFee,
         netMrr: mrr - stripeFee,
         subscriptionCount: data.subs.length,
+        pastDue: hasPastDue,
       });
     }
 

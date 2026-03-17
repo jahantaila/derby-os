@@ -312,7 +312,8 @@ export default function FinancePage() {
                       selectedCustomer?.stripeId === c.stripeId ? "bg-[#2093FF]/10" : "hover:bg-white/[0.03]")}>
                     <td className="p-4">
                       <span className="text-sm font-medium">{c.name}</span>
-                      {c.email && <span className="text-[10px] text-slate-600 ml-2">{c.email}</span>}
+                      {c.pastDue && <span className="text-[9px] ml-2 text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded font-medium">PAST DUE</span>}
+                      {c.subscriptionCount > 1 && <span className="text-[9px] ml-1 text-slate-500 bg-white/5 px-1.5 py-0.5 rounded">{c.subscriptionCount} subs</span>}
                     </td>
                     <td className="p-4 text-right text-sm font-mono text-green-400">{fmt(c.mrr)}</td>
                     <td className="p-4 text-right text-sm font-mono text-pink-400">{fmt(c.stripeFee)}</td>
