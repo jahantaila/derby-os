@@ -104,19 +104,18 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    // Fetch names for customers that only have IDs
-    const unnamed = customers.filter(c => c.name === c.stripeId);
-    if (unnamed.length > 0) {
-      const details = await Promise.all(
-        unnamed.map(c => stripeGet(`/customers/${c.stripeId}`).catch(() => null))
-      );
-      for (const d of details) {
-        if (!d) continue;
-        const c = customers.find(x => x.stripeId === d.id);
-        if (c) {
-          c.name = d.name || d.email || c.stripeId;
-          c.email = d.email || c.email;
-        }
+    // Fetch ALL customer details in one call (Stripe supports up to 100)
+    const custList = await stripeGet("/customers", { limit: "100" });
+    const custLookup: Record<string, { name: string; email: string }> = {};
+    for (const c of custList.data || []) {
+      custLookup[c.id] = { name: c.name || "", email: c.email || "" };
+    }
+    // Apply names to all customers
+    for (const c of customers) {
+      const detail = custLookup[c.stripeId];
+      if (detail) {
+        if (!c.name || c.name === c.stripeId) c.name = detail.name || detail.email || c.stripeId;
+        if (!c.email) c.email = detail.email;
       }
     }
 
