@@ -10,6 +10,74 @@ import dynamic from "next/dynamic";
 const ReactECharts = dynamic(() => import("echarts-for-react"), { ssr: false });
 
 const fmt = (n: number) => `$${Math.abs(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}${n < 0 ? "" : ""}`;
+
+// ─── Inline Editable Field ───
+function EditableField({ value, onSave, type = "text", className = "" }: {
+  value: string; onSave: (v: string) => void; type?: string; className?: string;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [val, setVal] = useState(value);
+  useEffect(() => setVal(value), [value]);
+  if (!editing) return (
+    <span onClick={() => setEditing(true)}
+      className={cn("cursor-pointer hover:bg-white/5 rounded px-1 -mx-1 transition-colors border border-transparent hover:border-dashed hover:border-white/20", className)}>
+      {value || <span className="text-slate-600 italic">—</span>}
+    </span>
+  );
+  return (
+    <input autoFocus value={val} type={type} step={type === "number" ? "0.01" : undefined}
+      onChange={e => setVal(e.target.value)}
+      onBlur={() => { setEditing(false); if (val !== value) onSave(val); }}
+      onKeyDown={e => { if (e.key === "Enter") { setEditing(false); if (val !== value) onSave(val); } if (e.key === "Escape") { setEditing(false); setVal(value); } }}
+      className={cn("bg-white/10 border border-[#2093FF]/50 rounded px-1 -mx-1 outline-none text-white", className)}
+      style={{ width: type === "number" ? 80 : undefined }}
+    />
+  );
+}
+
+// ─── Expense Row with inline editing ───
+function ExpenseRow({ expense, onUpdate, onDelete }: {
+  expense: Expense; onUpdate: (id: string, field: string, value: any) => void; onDelete: (id: string) => void;
+}) {
+  return (
+    <div className="flex items-center gap-3 px-4 py-3 group hover:bg-white/[0.02] transition-colors">
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <EditableField value={expense.name} onSave={v => onUpdate(expense.id, "name", v)} className="text-sm font-medium" />
+          {expense.type === "recurring" ? (
+            <span className="text-[8px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 flex-shrink-0">↻ RECURRING</span>
+          ) : (
+            <span className="text-[8px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 flex-shrink-0">① ONE-TIME</span>
+          )}
+        </div>
+        {expense.notes && (
+          <p className="text-[10px] text-slate-600 mt-0.5 truncate">
+            <EditableField value={expense.notes || ""} onSave={v => onUpdate(expense.id, "notes", v)} className="text-[10px] text-slate-600" />
+          </p>
+        )}
+        {!expense.notes && (
+          <p className="text-[10px] text-slate-700 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+            onClick={() => onUpdate(expense.id, "notes", "Add notes...")}>
+            + Add notes
+          </p>
+        )}
+      </div>
+      {expense.client_name && (
+        <span className="text-[10px] text-slate-500 bg-white/5 px-2 py-0.5 rounded flex-shrink-0">
+          {expense.client_name}
+        </span>
+      )}
+      <div className="text-right flex-shrink-0 w-24">
+        <EditableField value={String(expense.amount)} type="number" onSave={v => onUpdate(expense.id, "amount", parseFloat(v))}
+          className="text-sm font-mono text-red-400" />
+      </div>
+      <button onClick={() => onDelete(expense.id)}
+        className="p-1.5 rounded hover:bg-red-500/20 text-slate-700 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all flex-shrink-0">
+        <Trash2 className="w-3.5 h-3.5" />
+      </button>
+    </div>
+  );
+}
 const pct = (n: number) => `${n.toFixed(1)}%`;
 
 const CATEGORIES = ["software", "payroll", "marketing", "hosting", "fulfillment", "operations", "other"] as const;
@@ -90,6 +158,19 @@ export default function FinancePage() {
       load();
     } catch (e: any) {
       alert("Failed: " + e.message);
+    }
+  };
+
+  const updateExpense = async (id: string, field: string, value: any) => {
+    try {
+      await fetch("/api/finance", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, [field]: value }),
+      });
+      load();
+    } catch (e: any) {
+      alert("Failed to update: " + e.message);
     }
   };
 
@@ -328,9 +409,45 @@ export default function FinancePage() {
 
       {/* ─── Expenses Tab ─── */}
       {tab === "expenses" && (
-        <div className="space-y-4">
+        <div className="space-y-6">
+          {/* Category summary cards */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {CATEGORIES.map(cat => {
+              const items = expenses.filter(e => e.category === cat);
+              const total = items.reduce((s, e) => s + Number(e.amount), 0);
+              if (total === 0) return null;
+              const recurring = items.filter(e => e.type === "recurring").reduce((s, e) => s + Number(e.amount), 0);
+              const oneTime = items.filter(e => e.type === "one-time").reduce((s, e) => s + Number(e.amount), 0);
+              return (
+                <div key={cat} className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-4"
+                  style={{ borderLeftWidth: 3, borderLeftColor: CAT_COLORS[cat] }}>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[11px] uppercase tracking-wider font-medium" style={{ color: CAT_COLORS[cat] }}>
+                      {cat}
+                    </span>
+                    <span className="text-[10px] text-slate-600">{items.length} items</span>
+                  </div>
+                  <p className="text-lg font-mono font-semibold text-white">{fmt(total)}</p>
+                  <div className="flex gap-2 mt-1">
+                    {recurring > 0 && <span className="text-[9px] text-slate-500">↻ {fmt(recurring)}</span>}
+                    {oneTime > 0 && <span className="text-[9px] text-slate-500">① {fmt(oneTime)}</span>}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Add button */}
           <div className="flex items-center justify-between">
-            <p className="text-sm text-slate-500">{expenses.length} expenses for {month}</p>
+            <div className="flex items-center gap-3">
+              <p className="text-sm text-slate-500">{expenses.length} expenses</p>
+              <span className="text-[10px] text-slate-600">
+                ↻ {fmt(expenses.filter(e => e.type === "recurring").reduce((s, e) => s + Number(e.amount), 0))} recurring
+              </span>
+              <span className="text-[10px] text-slate-600">
+                ① {fmt(expenses.filter(e => e.type === "one-time").reduce((s, e) => s + Number(e.amount), 0))} one-time
+              </span>
+            </div>
             <button onClick={() => setShowAddExpense(true)}
               className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#2093FF]/20 hover:bg-[#2093FF]/30 text-sm text-[#2093FF] border border-[#2093FF]/30">
               <Plus className="w-4 h-4" /> Add Expense
@@ -341,41 +458,41 @@ export default function FinancePage() {
           {showAddExpense && (
             <div className="bg-white/[0.03] border border-[#2093FF]/30 rounded-xl p-5 space-y-4">
               <h3 className="text-sm font-medium">New Expense</h3>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <div>
                   <label className="text-[10px] text-slate-500 uppercase">Name *</label>
                   <input value={newExp.name} onChange={e => setNewExp({ ...newExp, name: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm mt-1" placeholder="e.g. Cloudways hosting" />
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm mt-1 focus:outline-none focus:border-[#2093FF]/50" placeholder="e.g. Cloudways hosting" />
                 </div>
                 <div>
                   <label className="text-[10px] text-slate-500 uppercase">Amount *</label>
                   <input value={newExp.amount} onChange={e => setNewExp({ ...newExp, amount: e.target.value })} type="number" step="0.01"
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm mt-1" placeholder="0.00" />
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm mt-1 focus:outline-none focus:border-[#2093FF]/50" placeholder="0.00" />
+                </div>
+                <div>
+                  <label className="text-[10px] text-slate-500 uppercase">Category</label>
+                  <select value={newExp.category} onChange={e => setNewExp({ ...newExp, category: e.target.value })}
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm mt-1 text-white focus:outline-none focus:border-[#2093FF]/50">
+                    {CATEGORIES.map(c => <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>)}
+                  </select>
                 </div>
                 <div>
                   <label className="text-[10px] text-slate-500 uppercase">Type</label>
                   <select value={newExp.type} onChange={e => setNewExp({ ...newExp, type: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm mt-1 text-white">
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm mt-1 text-white focus:outline-none focus:border-[#2093FF]/50">
                     <option value="recurring">Recurring</option>
                     <option value="one-time">One-time</option>
                   </select>
                 </div>
                 <div>
-                  <label className="text-[10px] text-slate-500 uppercase">Category</label>
-                  <select value={newExp.category} onChange={e => setNewExp({ ...newExp, category: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm mt-1 text-white">
-                    {CATEGORIES.map(c => <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>)}
-                  </select>
-                </div>
-                <div>
                   <label className="text-[10px] text-slate-500 uppercase">Client (optional)</label>
                   <input value={newExp.client_name} onChange={e => setNewExp({ ...newExp, client_name: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm mt-1" placeholder="Client name" />
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm mt-1 focus:outline-none focus:border-[#2093FF]/50" placeholder="Client name" />
                 </div>
                 <div>
                   <label className="text-[10px] text-slate-500 uppercase">Notes</label>
                   <input value={newExp.notes} onChange={e => setNewExp({ ...newExp, notes: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm mt-1" placeholder="Optional notes" />
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm mt-1 focus:outline-none focus:border-[#2093FF]/50" placeholder="Optional notes" />
                 </div>
               </div>
               <div className="flex gap-2">
@@ -385,69 +502,29 @@ export default function FinancePage() {
             </div>
           )}
 
-          {/* Expense table */}
-          <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl overflow-hidden">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-white/5">
-                  <th className="text-left text-[11px] text-slate-500 uppercase tracking-wider p-4">Expense</th>
-                  <th className="text-left text-[11px] text-slate-500 uppercase tracking-wider p-4">Category</th>
-                  <th className="text-left text-[11px] text-slate-500 uppercase tracking-wider p-4">Type</th>
-                  <th className="text-left text-[11px] text-slate-500 uppercase tracking-wider p-4">Client</th>
-                  <th className="text-right text-[11px] text-slate-500 uppercase tracking-wider p-4">Amount</th>
-                  <th className="text-center text-[11px] text-slate-500 uppercase tracking-wider p-4 w-16"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {expenses.length === 0 && (
-                  <tr><td colSpan={6} className="p-8 text-center text-slate-600 text-sm">No expenses yet. Click "Add Expense" to get started.</td></tr>
-                )}
-                {expenses.map((e: Expense) => (
-                  <tr key={e.id} className="border-b border-white/[0.03] hover:bg-white/[0.03]">
-                    <td className="p-4">
-                      <span className="text-sm font-medium">{e.name}</span>
-                      {e.notes && <span className="text-[10px] text-slate-600 ml-2">— {e.notes}</span>}
-                    </td>
-                    <td className="p-4">
-                      <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: `${CAT_COLORS[e.category] || "#64748b"}15`, color: CAT_COLORS[e.category] || "#64748b" }}>
-                        {e.category}
-                      </span>
-                    </td>
-                    <td className="p-4 text-sm text-slate-400">{e.type}</td>
-                    <td className="p-4 text-sm text-slate-400">{e.client_name || "—"}</td>
-                    <td className="p-4 text-right text-sm font-mono text-red-400">-{fmt(Number(e.amount))}</td>
-                    <td className="p-4 text-center">
-                      <button onClick={() => deleteExpense(e.id)} className="p-1 hover:bg-red-500/20 rounded text-slate-600 hover:text-red-400">
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Expense summary by category */}
-          {expenses.length > 0 && (
-            <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-5">
-              <h3 className="text-sm font-medium text-slate-400 mb-3">By Category</h3>
-              <div className="space-y-2">
-                {CATEGORIES.map(cat => {
-                  const total = expenses.filter(e => e.category === cat).reduce((s, e) => s + Number(e.amount), 0);
-                  if (total === 0) return null;
-                  return (
-                    <div key={cat} className="flex items-center justify-between">
-                      <span className="text-sm text-slate-400 flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full" style={{ background: CAT_COLORS[cat] }} />
-                        {cat.charAt(0).toUpperCase() + cat.slice(1)}
-                      </span>
-                      <span className="text-sm font-mono text-red-400">-{fmt(total)}</span>
-                    </div>
-                  );
-                })}
+          {/* Expenses grouped by category */}
+          {CATEGORIES.map(cat => {
+            const items = expenses.filter(e => e.category === cat);
+            if (items.length === 0) return null;
+            const total = items.reduce((s, e) => s + Number(e.amount), 0);
+            return (
+              <div key={cat} className="bg-white/[0.03] border border-white/[0.06] rounded-xl overflow-hidden">
+                <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full" style={{ background: CAT_COLORS[cat] }} />
+                    <span className="text-sm font-medium capitalize">{cat}</span>
+                    <span className="text-[10px] text-slate-600">{items.length} items</span>
+                  </div>
+                  <span className="text-sm font-mono text-red-400">-{fmt(total)}</span>
+                </div>
+                <div className="divide-y divide-white/[0.03]">
+                  {items.map(e => (
+                    <ExpenseRow key={e.id} expense={e} onUpdate={updateExpense} onDelete={deleteExpense} />
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            );
+          })}
         </div>
       )}
     </div>
