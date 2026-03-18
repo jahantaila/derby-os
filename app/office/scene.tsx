@@ -1,345 +1,345 @@
 "use client";
 
-import { Fragment, useRef } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { Html, OrbitControls, OrthographicCamera } from "@react-three/drei";
-import * as THREE from "three";
+import { useEffect, useRef, useCallback } from "react";
 import type { AgentRecord } from "@/lib/agents-data";
 
-type OfficeSceneProps = {
+type Props = {
   agents: AgentRecord[];
   selectedId: string | null;
   onSelect: (id: string | null) => void;
 };
 
-type DepartmentName = "Executive" | "Marketing" | "Sales" | "Development";
-
-const DEPARTMENT_COLORS: Record<DepartmentName, string> = {
-  Executive: "#2093FF",
-  Marketing: "#F93C3C",
-  Sales: "#22C55E",
-  Development: "#FFBD59",
+const DEPT_COLORS: Record<string, number> = {
+  Executive: 0x2093ff,
+  Marketing: 0xf93c3c,
+  Sales: 0x22c55e,
+  Development: 0xffbd59,
 };
 
-const DESK_LAYOUT: Record<
-  string,
-  {
-    desk: [number, number, number];
-    agent: [number, number, number];
-    rotation: number;
+const SKIN = 0xffdbac;
+
+const DESK_POSITIONS: Record<string, [number, number]> = {
+  kimberly: [-5, -2],
+  alex: [-2, -2],
+  sabri: [1, -2],
+  jordan: [4, 2],
+  kevin: [-2, 2],
+};
+
+function createHumanoid(THREE: any, color: number) {
+  const group = new THREE.Group();
+  // Head
+  const head = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.4), new THREE.MeshLambertMaterial({ color: SKIN }));
+  head.position.y = 1.9;
+  head.castShadow = true;
+  group.add(head);
+  // Body
+  const body = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.6, 0.3), new THREE.MeshLambertMaterial({ color }));
+  body.position.y = 1.35;
+  body.castShadow = true;
+  group.add(body);
+  // Arms
+  for (const side of [-1, 1]) {
+    const arm = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.5, 0.15), new THREE.MeshLambertMaterial({ color }));
+    arm.position.set(side * 0.35, 1.35, 0);
+    arm.castShadow = true;
+    group.add(arm);
   }
-> = {
-  kimberly: { desk: [-4.8, 0, -2.6], agent: [-4.8, 0, -1.55], rotation: Math.PI },
-  alex: { desk: [-4.8, 0, 1.3], agent: [-4.8, 0, 2.35], rotation: Math.PI },
-  sabri: { desk: [-1.9, 0, 1.3], agent: [-1.9, 0, 2.35], rotation: Math.PI },
-  jordan: { desk: [2.2, 0, -0.4], agent: [2.2, 0, 0.65], rotation: Math.PI },
-  kevin: { desk: [5.0, 0, 1.8], agent: [5.0, 0, 2.85], rotation: Math.PI },
-};
-
-const DEPARTMENT_ZONES: Array<{
-  name: DepartmentName;
-  color: string;
-  size: [number, number];
-  position: [number, number, number];
-  label: [number, number, number];
-}> = [
-  {
-    name: "Executive",
-    color: DEPARTMENT_COLORS.Executive,
-    size: [3.2, 3.1],
-    position: [-4.8, 0.01, -2.6],
-    label: [-4.8, 0.7, -4.35],
-  },
-  {
-    name: "Marketing",
-    color: DEPARTMENT_COLORS.Marketing,
-    size: [6.0, 4.2],
-    position: [-3.35, 0.01, 1.3],
-    label: [-3.35, 0.7, -1.1],
-  },
-  {
-    name: "Sales",
-    color: DEPARTMENT_COLORS.Sales,
-    size: [3.1, 3.6],
-    position: [2.2, 0.01, -0.4],
-    label: [2.2, 0.7, -2.4],
-  },
-  {
-    name: "Development",
-    color: DEPARTMENT_COLORS.Development,
-    size: [3.3, 3.8],
-    position: [5.0, 0.01, 1.8],
-    label: [5.0, 0.7, -0.5],
-  },
-];
-
-function getDepartmentColor(department: AgentRecord["department"]) {
-  if (department === "Executive") return DEPARTMENT_COLORS.Executive;
-  if (department === "Marketing") return DEPARTMENT_COLORS.Marketing;
-  if (department === "Sales") return DEPARTMENT_COLORS.Sales;
-  return DEPARTMENT_COLORS.Development;
+  // Legs
+  for (const side of [-1, 1]) {
+    const leg = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.5, 0.18), new THREE.MeshLambertMaterial({ color: 0x333333 }));
+    leg.position.set(side * 0.14, 0.75, 0);
+    leg.castShadow = true;
+    group.add(leg);
+  }
+  return group;
 }
 
-function GridFloor() {
-  return (
-    <group>
-      <mesh rotation-x={-Math.PI / 2} receiveShadow>
-        <planeGeometry args={[24, 24]} />
-        <meshStandardMaterial color="#0f1118" />
-      </mesh>
-      <gridHelper args={[24, 32, "#1b2433", "#151b27"]} position={[0, 0.001, 0]} />
-    </group>
-  );
+function createDesk(THREE: any, accent: number) {
+  const group = new THREE.Group();
+  // Desktop
+  const top = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.06, 0.8), new THREE.MeshLambertMaterial({ color: 0x3a2519 }));
+  top.position.y = 0.72;
+  top.castShadow = true;
+  top.receiveShadow = true;
+  group.add(top);
+  // Legs
+  for (const [lx, lz] of [[-0.7, -0.3], [0.7, -0.3], [-0.7, 0.3], [0.7, 0.3]]) {
+    const leg = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.72, 0.06), new THREE.MeshLambertMaterial({ color: 0x261913 }));
+    leg.position.set(lx, 0.36, lz);
+    group.add(leg);
+  }
+  // Monitor
+  const monitor = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.4, 0.04), new THREE.MeshLambertMaterial({ color: accent, emissive: accent, emissiveIntensity: 0.3 }));
+  monitor.position.set(0, 1.05, -0.25);
+  monitor.castShadow = true;
+  group.add(monitor);
+  // Monitor stand
+  const stand = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.2, 0.08), new THREE.MeshLambertMaterial({ color: 0x333333 }));
+  stand.position.set(0, 0.82, -0.25);
+  group.add(stand);
+  // Chair
+  const seat = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.06, 0.6), new THREE.MeshLambertMaterial({ color: 0x1a1a2e }));
+  seat.position.set(0, 0.5, 0.7);
+  group.add(seat);
+  const back = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.5, 0.06), new THREE.MeshLambertMaterial({ color: 0x1a1a2e }));
+  back.position.set(0, 0.78, 1.0);
+  group.add(back);
+  return group;
 }
 
-function DepartmentZones() {
-  return (
-    <Fragment>
-      {DEPARTMENT_ZONES.map((zone) => (
-        <group key={zone.name}>
-          <mesh rotation-x={-Math.PI / 2} position={zone.position} receiveShadow>
-            <planeGeometry args={zone.size} />
-            <meshStandardMaterial
-              color={zone.color}
-              transparent
-              opacity={0.12}
-              emissive={zone.color}
-              emissiveIntensity={0.1}
-            />
-          </mesh>
-
-          <group position={zone.label}>
-            <mesh castShadow receiveShadow>
-              <boxGeometry args={[2.4, 0.18, 0.4]} />
-              <meshStandardMaterial color="#171c28" roughness={0.85} metalness={0.1} />
-            </mesh>
-            <Html center transform distanceFactor={10}>
-              <div
-                className="rounded-full border border-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-white"
-                style={{ backgroundColor: `${zone.color}22` }}
-              >
-                {zone.name}
-              </div>
-            </Html>
-          </group>
-        </group>
-      ))}
-    </Fragment>
-  );
+function createLabel(THREE: any, name: string, role: string) {
+  const canvas = document.createElement("canvas");
+  canvas.width = 256;
+  canvas.height = 64;
+  const ctx = canvas.getContext("2d")!;
+  ctx.fillStyle = "rgba(10,10,15,0.85)";
+  ctx.roundRect(0, 0, 256, 64, 8);
+  ctx.fill();
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "bold 20px system-ui";
+  ctx.textAlign = "center";
+  ctx.fillText(name, 128, 26);
+  ctx.fillStyle = "#94a3b8";
+  ctx.font = "14px system-ui";
+  ctx.fillText(role, 128, 48);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.minFilter = THREE.LinearFilter;
+  const mat = new THREE.SpriteMaterial({ map: texture, transparent: true });
+  const sprite = new THREE.Sprite(mat);
+  sprite.scale.set(2, 0.5, 1);
+  return sprite;
 }
 
-function Desk({
-  position,
-  rotation,
-  accent,
-  selected,
-}: {
-  position: [number, number, number];
-  rotation: number;
-  accent: string;
-  selected: boolean;
-}) {
-  return (
-    <group position={position} rotation-y={rotation}>
-      <mesh position={[0, 0.72, 0]} castShadow receiveShadow>
-        <boxGeometry args={[1.8, 0.12, 1.0]} />
-        <meshStandardMaterial color="#4a3127" roughness={0.8} />
-      </mesh>
-
-      {[
-        [-0.78, 0.36, -0.4],
-        [0.78, 0.36, -0.4],
-        [-0.78, 0.36, 0.4],
-        [0.78, 0.36, 0.4],
-      ].map((leg, index) => (
-        <mesh key={index} position={leg as [number, number, number]} castShadow>
-          <boxGeometry args={[0.09, 0.72, 0.09]} />
-          <meshStandardMaterial color="#261913" roughness={0.9} />
-        </mesh>
-      ))}
-
-      <mesh position={[0, 1.08, -0.22]} castShadow>
-        <boxGeometry args={[0.76, 0.45, 0.06]} />
-        <meshStandardMaterial
-          color="#9fd2ff"
-          emissive={accent}
-          emissiveIntensity={selected ? 1.1 : 0.7}
-          roughness={0.25}
-        />
-      </mesh>
-      <mesh position={[0, 0.85, -0.18]} castShadow>
-        <boxGeometry args={[0.12, 0.24, 0.12]} />
-        <meshStandardMaterial color="#293242" roughness={0.85} />
-      </mesh>
-
-      <mesh position={[0, 0.42, 0.82]} castShadow receiveShadow>
-        <boxGeometry args={[0.8, 0.1, 0.8]} />
-        <meshStandardMaterial color="#181e2b" roughness={0.78} />
-      </mesh>
-      <mesh position={[0, 0.18, 0.82]} castShadow>
-        <boxGeometry args={[0.18, 0.36, 0.18]} />
-        <meshStandardMaterial color="#111621" roughness={0.85} />
-      </mesh>
-
-      {selected ? (
-        <mesh rotation-x={-Math.PI / 2} position={[0, 0.02, 0]}>
-          <ringGeometry args={[1.05, 1.22, 40]} />
-          <meshBasicMaterial color={accent} transparent opacity={0.5} />
-        </mesh>
-      ) : null}
-    </group>
-  );
+function createDeptZone(THREE: any, color: number, x: number, z: number, w: number, h: number, label: string) {
+  const group = new THREE.Group();
+  // Floor zone
+  const geo = new THREE.PlaneGeometry(w, h);
+  const mat = new THREE.MeshLambertMaterial({ color, transparent: true, opacity: 0.08 });
+  const plane = new THREE.Mesh(geo, mat);
+  plane.rotation.x = -Math.PI / 2;
+  plane.position.set(x, 0.01, z);
+  plane.receiveShadow = true;
+  group.add(plane);
+  // Zone label
+  const canvas = document.createElement("canvas");
+  canvas.width = 256;
+  canvas.height = 48;
+  const ctx = canvas.getContext("2d")!;
+  ctx.fillStyle = `#${color.toString(16).padStart(6, "0")}`;
+  ctx.font = "bold 18px system-ui";
+  ctx.textAlign = "center";
+  ctx.fillText(label.toUpperCase(), 128, 30);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.minFilter = THREE.LinearFilter;
+  const sMat = new THREE.SpriteMaterial({ map: texture, transparent: true });
+  const sprite = new THREE.Sprite(sMat);
+  sprite.scale.set(2.5, 0.5, 1);
+  sprite.position.set(x, 0.3, z - h / 2 - 0.4);
+  group.add(sprite);
+  return group;
 }
 
-function AgentCharacter({
-  agent,
-  position,
-  selected,
-  onSelect,
-}: {
-  agent: AgentRecord;
-  position: [number, number, number];
-  selected: boolean;
-  onSelect: (id: string) => void;
-}) {
-  const groupRef = useRef<THREE.Group>(null);
-  const color = getDepartmentColor(agent.department);
+export function OfficeScene({ agents, selectedId, onSelect }: Props) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const rendererRef = useRef<any>(null);
+  const agentMeshes = useRef<Map<string, any>>(new Map());
+  const raycaster = useRef<any>(null);
+  const mouse = useRef<any>(null);
+  const cameraRef = useRef<any>(null);
 
-  useFrame(({ clock }) => {
-    const group = groupRef.current;
-    if (!group) return;
+  const handleClick = useCallback((e: MouseEvent) => {
+    if (!containerRef.current || !raycaster.current || !mouse.current || !cameraRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    mouse.current.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.current.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+    raycaster.current.setFromCamera(mouse.current, cameraRef.current);
+    
+    let hit: string | null = null;
+    for (const [id, mesh] of agentMeshes.current.entries()) {
+      const intersects = raycaster.current.intersectObjects(mesh.children, true);
+      if (intersects.length > 0) { hit = id; break; }
+    }
+    onSelect(hit);
+  }, [onSelect]);
 
-    const bob = Math.sin(clock.getElapsedTime() * 1.8 + position[0]) * 0.02;
-    group.position.y = bob;
-  });
+  useEffect(() => {
+    if (!containerRef.current) return;
+    let destroyed = false;
 
-  return (
-    <group
-      ref={groupRef}
-      position={position}
-      onClick={(event) => {
-        event.stopPropagation();
-        onSelect(agent.id);
-      }}
-    >
-      <mesh position={[0, 1.74, 0]} castShadow>
-        <boxGeometry args={[0.34, 0.34, 0.34]} />
-        <meshStandardMaterial color="#e7bf9d" roughness={0.95} />
-      </mesh>
+    import("three").then((THREE) => {
+      if (destroyed || !containerRef.current) return;
 
-      <mesh position={[0, 1.3, 0]} castShadow>
-        <boxGeometry args={[0.5, 0.62, 0.28]} />
-        <meshStandardMaterial color={color} roughness={0.76} metalness={0.08} />
-      </mesh>
+      const w = containerRef.current.clientWidth;
+      const h = 680;
 
-      <mesh position={[-0.34, 1.3, 0]} castShadow rotation-z={0.18}>
-        <boxGeometry args={[0.14, 0.54, 0.14]} />
-        <meshStandardMaterial color={color} roughness={0.8} />
-      </mesh>
-      <mesh position={[0.34, 1.3, 0]} castShadow rotation-z={-0.18}>
-        <boxGeometry args={[0.14, 0.54, 0.14]} />
-        <meshStandardMaterial color={color} roughness={0.8} />
-      </mesh>
+      // Scene
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x0a0a0f);
+      scene.fog = new THREE.FogExp2(0x0a0a0f, 0.04);
 
-      <mesh position={[-0.13, 0.82, 0]} castShadow>
-        <boxGeometry args={[0.15, 0.62, 0.15]} />
-        <meshStandardMaterial color="#d9dfeb" roughness={0.88} />
-      </mesh>
-      <mesh position={[0.13, 0.82, 0]} castShadow>
-        <boxGeometry args={[0.15, 0.62, 0.15]} />
-        <meshStandardMaterial color="#d9dfeb" roughness={0.88} />
-      </mesh>
+      // Camera — isometric
+      const d = 8;
+      const aspect = w / h;
+      const camera = new THREE.OrthographicCamera(-d * aspect, d * aspect, d, -d, 0.1, 100);
+      camera.position.set(12, 10, 12);
+      camera.lookAt(0, 0, 0);
+      cameraRef.current = camera;
 
-      {selected ? (
-        <mesh rotation-x={-Math.PI / 2} position={[0, 0.02, 0]}>
-          <ringGeometry args={[0.36, 0.48, 32]} />
-          <meshBasicMaterial color={color} transparent opacity={0.78} />
-        </mesh>
-      ) : null}
+      // Renderer
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+      renderer.setSize(w, h);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      containerRef.current.appendChild(renderer.domElement);
+      rendererRef.current = renderer;
 
-      <Html position={[0, 2.32, 0]} center transform distanceFactor={10}>
-        <div className="rounded-2xl border border-white/10 bg-[linear-gradient(180deg,rgba(18,22,31,0.9),rgba(10,10,15,0.94))] px-3 py-2 text-center text-white shadow-[0_14px_35px_rgba(0,0,0,0.4)]">
-          <div className="text-[12px] font-semibold leading-none">{agent.name}</div>
-          <div className="mt-1 text-[10px] uppercase tracking-[0.18em] text-slate-400">
-            {agent.role}
-          </div>
-        </div>
-      </Html>
-    </group>
-  );
-}
+      // Raycaster
+      raycaster.current = new THREE.Raycaster();
+      mouse.current = new THREE.Vector2();
 
-function SceneContents({ agents, selectedId, onSelect }: OfficeSceneProps) {
-  return (
-    <>
-      <color attach="background" args={["#0a0a0f"]} />
+      // Lights
+      const ambient = new THREE.AmbientLight(0x404060, 1.2);
+      scene.add(ambient);
+      const dir = new THREE.DirectionalLight(0xffffff, 1.5);
+      dir.position.set(8, 12, 8);
+      dir.castShadow = true;
+      dir.shadow.mapSize.width = 2048;
+      dir.shadow.mapSize.height = 2048;
+      dir.shadow.camera.left = -15;
+      dir.shadow.camera.right = 15;
+      dir.shadow.camera.top = 15;
+      dir.shadow.camera.bottom = -15;
+      scene.add(dir);
+      const point = new THREE.PointLight(0x2093ff, 0.5, 20);
+      point.position.set(0, 5, 0);
+      scene.add(point);
 
-      <ambientLight intensity={0.85} color="#dfe8ff" />
-      <directionalLight
-        castShadow
-        intensity={1.4}
-        color="#d9ebff"
-        position={[8, 12, 8]}
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
-        shadow-camera-left={-12}
-        shadow-camera-right={12}
-        shadow-camera-top={12}
-        shadow-camera-bottom={-12}
-      />
-      <directionalLight intensity={0.35} color="#2093FF" position={[-10, 6, -6]} />
+      // Grid floor
+      const floorGeo = new THREE.PlaneGeometry(30, 30);
+      const floorMat = new THREE.MeshLambertMaterial({ color: 0x0f1118 });
+      const floor = new THREE.Mesh(floorGeo, floorMat);
+      floor.rotation.x = -Math.PI / 2;
+      floor.receiveShadow = true;
+      scene.add(floor);
+      const grid = new THREE.GridHelper(30, 40, 0x1b2433, 0x151b27);
+      grid.position.y = 0.005;
+      scene.add(grid);
 
-      <OrthographicCamera makeDefault position={[10, 10, 10]} zoom={58} near={0.1} far={100} />
-      <OrbitControls
-        enablePan={false}
-        minZoom={48}
-        maxZoom={80}
-        minPolarAngle={0.7}
-        maxPolarAngle={1.05}
-        target={[0, 1.2, 0]}
-      />
+      // Department zones
+      const deptGroups: Record<string, { agents: string[]; x: number; z: number }> = {
+        Executive: { agents: ["kimberly"], x: -5, z: -2 },
+        Marketing: { agents: ["alex", "sabri"], x: -0.5, z: -2 },
+        Sales: { agents: ["jordan"], x: 4, z: 2 },
+        Development: { agents: ["kevin"], x: -2, z: 2 },
+      };
+      for (const [dept, info] of Object.entries(deptGroups)) {
+        const zone = createDeptZone(THREE, DEPT_COLORS[dept] || 0x666666, info.x, info.z, 4, 4, dept);
+        scene.add(zone);
+      }
 
-      <GridFloor />
-      <DepartmentZones />
+      // Agents + desks
+      const aiAgents = agents.filter(a => a.id in DESK_POSITIONS);
+      for (const agent of aiAgents) {
+        const [dx, dz] = DESK_POSITIONS[agent.id];
+        const color = DEPT_COLORS[agent.department] || 0x666666;
 
-      {agents.map((agent) => {
-        const layout = DESK_LAYOUT[agent.id];
-        if (!layout) return null;
+        // Desk
+        const desk = createDesk(THREE, color);
+        desk.position.set(dx, 0, dz);
+        scene.add(desk);
 
-        const color = getDepartmentColor(agent.department);
+        // Character
+        const character = createHumanoid(THREE, color);
+        character.position.set(dx, 0, dz + 0.7);
+        character.userData = { id: agent.id };
+        scene.add(character);
+        agentMeshes.current.set(agent.id, character);
 
-        return (
-          <Fragment key={agent.id}>
-            <Desk
-              position={layout.desk}
-              rotation={layout.rotation}
-              accent={color}
-              selected={selectedId === agent.id}
-            />
-            <AgentCharacter
-              agent={agent}
-              position={layout.agent}
-              selected={selectedId === agent.id}
-              onSelect={onSelect}
-            />
-          </Fragment>
+        // Label
+        const label = createLabel(THREE, agent.name, agent.role);
+        label.position.set(dx, 2.5, dz + 0.7);
+        scene.add(label);
+      }
+
+      // Orbit controls (manual)
+      let isDragging = false;
+      let prevX = 0;
+      let prevY = 0;
+      let theta = Math.PI / 4;
+      let phi = Math.PI / 6;
+      let zoom = 8;
+
+      function updateCamera() {
+        const r = 20;
+        camera.position.set(
+          r * Math.cos(phi) * Math.sin(theta),
+          r * Math.sin(phi) + 5,
+          r * Math.cos(phi) * Math.cos(theta)
         );
-      })}
-    </>
-  );
-}
+        camera.lookAt(0, 0, 0);
+        const a = w / h;
+        camera.left = -zoom * a;
+        camera.right = zoom * a;
+        camera.top = zoom;
+        camera.bottom = -zoom;
+        camera.updateProjectionMatrix();
+      }
 
-export function OfficeScene(props: OfficeSceneProps) {
+      const onMouseDown = (e: MouseEvent) => { isDragging = true; prevX = e.clientX; prevY = e.clientY; };
+      const onMouseUp = () => { isDragging = false; };
+      const onMouseMove = (e: MouseEvent) => {
+        if (!isDragging) return;
+        theta += (e.clientX - prevX) * 0.005;
+        phi = Math.max(0.1, Math.min(Math.PI / 3, phi + (e.clientY - prevY) * 0.005));
+        prevX = e.clientX;
+        prevY = e.clientY;
+        updateCamera();
+      };
+      const onWheel = (e: WheelEvent) => {
+        e.preventDefault();
+        zoom = Math.max(3, Math.min(15, zoom + e.deltaY * 0.01));
+        updateCamera();
+      };
+
+      renderer.domElement.addEventListener("mousedown", onMouseDown);
+      renderer.domElement.addEventListener("mouseup", onMouseUp);
+      renderer.domElement.addEventListener("mousemove", onMouseMove);
+      renderer.domElement.addEventListener("wheel", onWheel, { passive: false });
+      renderer.domElement.addEventListener("click", handleClick as any);
+
+      updateCamera();
+
+      // Animate
+      const clock = new THREE.Clock();
+      function animate() {
+        if (destroyed) return;
+        requestAnimationFrame(animate);
+        const t = clock.getElapsedTime();
+        // Idle bob
+        for (const [, mesh] of agentMeshes.current.entries()) {
+          mesh.position.y = Math.sin(t * 2 + mesh.position.x) * 0.03;
+        }
+        renderer.render(scene, camera);
+      }
+      animate();
+    });
+
+    return () => {
+      destroyed = true;
+      if (rendererRef.current && containerRef.current) {
+        containerRef.current.removeChild(rendererRef.current.domElement);
+        rendererRef.current.dispose();
+      }
+    };
+  }, [agents, handleClick]);
+
   return (
-    <div className="h-[720px] overflow-hidden rounded-[28px] border border-white/10 bg-[#0a0a0f]">
-      <Canvas
-        shadows
-        dpr={[1, 2]}
-        onPointerMissed={() => props.onSelect(null)}
-        gl={{ antialias: true }}
-      >
-        <SceneContents {...props} />
-      </Canvas>
-    </div>
+    <div
+      ref={containerRef}
+      className="h-[680px] w-full overflow-hidden rounded-2xl border border-white/10"
+      style={{ background: "#0a0a0f" }}
+    />
   );
 }
