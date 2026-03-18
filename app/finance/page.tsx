@@ -80,13 +80,16 @@ function ExpenseRow({ expense, onUpdate, onDelete }: {
 }
 const pct = (n: number) => `${n.toFixed(1)}%`;
 
-const CATEGORIES = ["software", "payroll", "marketing", "hosting", "fulfillment", "operations", "other"] as const;
+const CATEGORIES = ["software", "marketing", "hosting", "fulfillment", "operations", "other"] as const;
+const PAYROLL_CATS = ["payroll"] as const;
+const COMMISSION_CATS = ["commissions"] as const;
+const ALL_CATS = [...CATEGORIES, ...PAYROLL_CATS, ...COMMISSION_CATS] as const;
 const CAT_COLORS: Record<string, string> = {
   software: "#2093FF", payroll: "#FFBD59", marketing: "#F93C3C", hosting: "#22C55E",
-  fulfillment: "#8B5CF6", operations: "#06B6D4", other: "#64748b",
+  fulfillment: "#8B5CF6", operations: "#06B6D4", other: "#64748b", commissions: "#F97316",
 };
 
-type Tab = "overview" | "clients" | "expenses";
+type Tab = "overview" | "clients" | "expenses" | "payroll" | "commissions";
 
 interface Expense {
   id: string;
@@ -274,7 +277,7 @@ export default function FinancePage() {
 
       {/* Tabs */}
       <div className="flex gap-1 bg-white/[0.03] rounded-lg p-1 w-fit">
-        {(["overview", "clients", "expenses"] as Tab[]).map(t => (
+        {(["overview", "clients", "expenses", "payroll", "commissions"] as Tab[]).map(t => (
           <button key={t} onClick={() => setTab(t)}
             className={cn("px-4 py-2 rounded-md text-sm capitalize transition-colors",
               tab === t ? "bg-[#2093FF]/20 text-[#2093FF]" : "text-slate-500 hover:text-white")}>
@@ -527,6 +530,196 @@ export default function FinancePage() {
           })}
         </div>
       )}
+
+      {/* ─── Payroll Tab ─── */}
+      {tab === "payroll" && (() => {
+        const payrollItems = expenses.filter(e => e.category === "payroll");
+        const total = payrollItems.reduce((s, e) => s + Number(e.amount), 0);
+        return (
+          <div className="space-y-6">
+            {/* Summary */}
+            <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-5"
+              style={{ borderLeftWidth: 3, borderLeftColor: CAT_COLORS.payroll }}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[11px] uppercase tracking-wider text-amber-400 mb-1">Total Payroll</p>
+                  <p className="text-2xl font-mono font-bold text-white">{fmt(total)}</p>
+                  <p className="text-[10px] text-slate-500 mt-1">{payrollItems.length} team members</p>
+                </div>
+                <button onClick={() => { setNewExp({ ...newExp, category: "payroll" }); setShowAddExpense(true); }}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-sm text-amber-400 border border-amber-500/30">
+                  <Plus className="w-4 h-4" /> Add Salary
+                </button>
+              </div>
+            </div>
+
+            {/* Add form (reuses global) */}
+            {showAddExpense && newExp.category === "payroll" && (
+              <div className="bg-white/[0.03] border border-amber-500/30 rounded-xl p-5 space-y-4">
+                <h3 className="text-sm font-medium">New Salary</h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="text-[10px] text-slate-500 uppercase">Name *</label>
+                    <input value={newExp.name} onChange={e => setNewExp({ ...newExp, name: e.target.value })}
+                      className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm mt-1 focus:outline-none focus:border-amber-500/50" placeholder="e.g. Abdul Salary" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-slate-500 uppercase">Amount *</label>
+                    <input value={newExp.amount} onChange={e => setNewExp({ ...newExp, amount: e.target.value })} type="number" step="0.01"
+                      className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm mt-1 focus:outline-none focus:border-amber-500/50" placeholder="0.00" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-slate-500 uppercase">Notes</label>
+                    <input value={newExp.notes} onChange={e => setNewExp({ ...newExp, notes: e.target.value })}
+                      className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm mt-1 focus:outline-none focus:border-amber-500/50" placeholder="Payment schedule, notes" />
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={addExpense} className="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-500/80 text-sm font-medium text-black">Save</button>
+                  <button onClick={() => setShowAddExpense(false)} className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-sm">Cancel</button>
+                </div>
+              </div>
+            )}
+
+            {/* Salary cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {payrollItems.map(e => (
+                <div key={e.id} className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 group hover:border-amber-500/20 transition-colors">
+                  <div className="flex items-center justify-between mb-2">
+                    <EditableField value={e.name} onSave={v => updateExpense(e.id, "name", v)} className="text-sm font-medium" />
+                    <button onClick={() => deleteExpense(e.id)}
+                      className="p-1.5 rounded hover:bg-red-500/20 text-slate-700 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all">
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  <div className="flex items-end justify-between">
+                    <div>
+                      <EditableField value={e.notes || ""} onSave={v => updateExpense(e.id, "notes", v)} className="text-[10px] text-slate-500" />
+                      <div className="mt-1">
+                        {e.type === "recurring" ? (
+                          <span className="text-[8px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400">↻ RECURRING</span>
+                        ) : (
+                          <span className="text-[8px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400">① ONE-TIME</span>
+                        )}
+                      </div>
+                    </div>
+                    <EditableField value={String(e.amount)} type="number" onSave={v => updateExpense(e.id, "amount", parseFloat(v))}
+                      className="text-xl font-mono font-semibold text-amber-400" />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {payrollItems.length === 0 && (
+              <div className="text-center py-12 text-slate-600">No salaries yet. Click &quot;Add Salary&quot; to get started.</div>
+            )}
+          </div>
+        );
+      })()}
+
+      {/* ─── Commissions Tab ─── */}
+      {tab === "commissions" && (() => {
+        const commItems = expenses.filter(e => e.category === "commissions");
+        const total = commItems.reduce((s, e) => s + Number(e.amount), 0);
+        return (
+          <div className="space-y-6">
+            {/* Summary */}
+            <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-5"
+              style={{ borderLeftWidth: 3, borderLeftColor: CAT_COLORS.commissions }}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[11px] uppercase tracking-wider text-orange-400 mb-1">Total Commissions</p>
+                  <p className="text-2xl font-mono font-bold text-white">{fmt(total)}</p>
+                  <p className="text-[10px] text-slate-500 mt-1">{commItems.length} payees</p>
+                </div>
+                <button onClick={() => { setNewExp({ ...newExp, category: "commissions" }); setShowAddExpense(true); }}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg bg-orange-500/20 hover:bg-orange-500/30 text-sm text-orange-400 border border-orange-500/30">
+                  <Plus className="w-4 h-4" /> Add Commission
+                </button>
+              </div>
+            </div>
+
+            {/* Add form */}
+            {showAddExpense && newExp.category === "commissions" && (
+              <div className="bg-white/[0.03] border border-orange-500/30 rounded-xl p-5 space-y-4">
+                <h3 className="text-sm font-medium">New Commission</h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="text-[10px] text-slate-500 uppercase">Name *</label>
+                    <input value={newExp.name} onChange={e => setNewExp({ ...newExp, name: e.target.value })}
+                      className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm mt-1 focus:outline-none focus:border-orange-500/50" placeholder="e.g. Manu Commission" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-slate-500 uppercase">Amount *</label>
+                    <input value={newExp.amount} onChange={e => setNewExp({ ...newExp, amount: e.target.value })} type="number" step="0.01"
+                      className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm mt-1 focus:outline-none focus:border-orange-500/50" placeholder="0.00" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-slate-500 uppercase">Client(s)</label>
+                    <input value={newExp.client_name} onChange={e => setNewExp({ ...newExp, client_name: e.target.value })}
+                      className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm mt-1 focus:outline-none focus:border-orange-500/50" placeholder="Which clients" />
+                  </div>
+                  <div className="col-span-2">
+                    <label className="text-[10px] text-slate-500 uppercase">Notes</label>
+                    <input value={newExp.notes} onChange={e => setNewExp({ ...newExp, notes: e.target.value })}
+                      className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm mt-1 focus:outline-none focus:border-orange-500/50" placeholder="Commission structure, payment timing" />
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={addExpense} className="px-4 py-2 rounded-lg bg-orange-500 hover:bg-orange-500/80 text-sm font-medium text-black">Save</button>
+                  <button onClick={() => setShowAddExpense(false)} className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-sm">Cancel</button>
+                </div>
+              </div>
+            )}
+
+            {/* Commission cards */}
+            <div className="space-y-3">
+              {commItems.map(e => (
+                <div key={e.id} className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 group hover:border-orange-500/20 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <EditableField value={e.name} onSave={v => updateExpense(e.id, "name", v)} className="text-sm font-medium" />
+                        {e.type === "recurring" ? (
+                          <span className="text-[8px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400">↻ RECURRING</span>
+                        ) : (
+                          <span className="text-[8px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400">① ONE-TIME</span>
+                        )}
+                      </div>
+                      {e.notes && (
+                        <EditableField value={e.notes} onSave={v => updateExpense(e.id, "notes", v)} className="text-[11px] text-slate-500" />
+                      )}
+                      {!e.notes && (
+                        <p className="text-[10px] text-slate-700 opacity-0 group-hover:opacity-100 cursor-pointer"
+                          onClick={() => updateExpense(e.id, "notes", "Add notes...")}>+ Add notes</p>
+                      )}
+                      {e.client_name && (
+                        <div className="mt-1">
+                          <span className="text-[10px] text-orange-400/60 bg-orange-500/10 px-2 py-0.5 rounded">
+                            {e.client_name}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <EditableField value={String(e.amount)} type="number" onSave={v => updateExpense(e.id, "amount", parseFloat(v))}
+                        className="text-xl font-mono font-semibold text-orange-400" />
+                      <button onClick={() => deleteExpense(e.id)}
+                        className="p-1.5 rounded hover:bg-red-500/20 text-slate-700 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all">
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {commItems.length === 0 && (
+              <div className="text-center py-12 text-slate-600">No commissions yet. Click &quot;Add Commission&quot; to get started.</div>
+            )}
+          </div>
+        );
+      })()}
     </div>
   );
 }
