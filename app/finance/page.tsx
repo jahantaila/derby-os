@@ -29,8 +29,8 @@ function EditableField({ value, onSave, type = "text", className = "" }: {
       onChange={e => setVal(e.target.value)}
       onBlur={() => { setEditing(false); if (val !== value) onSave(val); }}
       onKeyDown={e => { if (e.key === "Enter") { setEditing(false); if (val !== value) onSave(val); } if (e.key === "Escape") { setEditing(false); setVal(value); } }}
-      className={cn("bg-white/10 border border-[#2093FF]/50 rounded px-1 -mx-1 outline-none text-white", className)}
-      style={{ width: type === "number" ? 80 : undefined }}
+      className={cn("bg-white/10 border border-[#2093FF]/50 rounded px-2 -mx-1 outline-none text-white", className)}
+      style={{ width: type === "number" ? 100 : "100%", minWidth: type === "number" ? 80 : 200 }}
     />
   );
 }
@@ -51,8 +51,8 @@ function ExpenseRow({ expense, onUpdate, onDelete }: {
           )}
         </div>
         {expense.notes && (
-          <p className="text-[10px] text-slate-600 mt-0.5 truncate">
-            <EditableField value={expense.notes || ""} onSave={v => onUpdate(expense.id, "notes", v)} className="text-[10px] text-slate-600" />
+          <p className="text-[11px] text-slate-400 mt-0.5">
+            <EditableField value={expense.notes || ""} onSave={v => onUpdate(expense.id, "notes", v)} className="text-[11px] text-slate-400" />
           </p>
         )}
         {!expense.notes && (
@@ -594,7 +594,7 @@ export default function FinancePage() {
                   </div>
                   <div className="flex items-end justify-between">
                     <div>
-                      <EditableField value={e.notes || ""} onSave={v => updateExpense(e.id, "notes", v)} className="text-[10px] text-slate-500" />
+                      <EditableField value={e.notes || ""} onSave={v => updateExpense(e.id, "notes", v)} className="text-[11px] text-slate-400" />
                       <div className="mt-1">
                         {e.type === "recurring" ? (
                           <span className="text-[8px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400">↻ RECURRING</span>
@@ -687,7 +687,7 @@ export default function FinancePage() {
                         )}
                       </div>
                       {e.notes && (
-                        <EditableField value={e.notes} onSave={v => updateExpense(e.id, "notes", v)} className="text-[11px] text-slate-500" />
+                        <EditableField value={e.notes} onSave={v => updateExpense(e.id, "notes", v)} className="text-[11px] text-slate-400" />
                       )}
                       {!e.notes && (
                         <p className="text-[10px] text-slate-700 opacity-0 group-hover:opacity-100 cursor-pointer"
