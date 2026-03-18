@@ -1,10 +1,10 @@
 "use client";
 
-import { Fragment, useMemo, useRef } from "react";
+import { Fragment, useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Html, OrbitControls, OrthographicCamera, RoundedBox } from "@react-three/drei";
+import { Html, OrbitControls, OrthographicCamera } from "@react-three/drei";
 import * as THREE from "three";
-import type { AgentRecord } from "@/lib/agents";
+import type { AgentRecord } from "@/lib/agents-data";
 
 type OfficeSceneProps = {
   agents: AgentRecord[];
@@ -12,73 +12,82 @@ type OfficeSceneProps = {
   onSelect: (id: string | null) => void;
 };
 
-type DeskConfig = {
-  desk: [number, number, number];
-  walk: [number, number, number];
-};
+type DepartmentName = "Executive" | "Marketing" | "Sales" | "Development";
 
-const DEPARTMENT_COLORS = {
+const DEPARTMENT_COLORS: Record<DepartmentName, string> = {
   Executive: "#2093FF",
   Marketing: "#F93C3C",
   Sales: "#22C55E",
   Development: "#FFBD59",
-} as const;
+};
 
-const DEPARTMENT_ZONES = [
+const DESK_LAYOUT: Record<
+  string,
+  {
+    desk: [number, number, number];
+    agent: [number, number, number];
+    rotation: number;
+  }
+> = {
+  kimberly: { desk: [-4.8, 0, -2.6], agent: [-4.8, 0, -1.55], rotation: Math.PI },
+  alex: { desk: [-4.8, 0, 1.3], agent: [-4.8, 0, 2.35], rotation: Math.PI },
+  sabri: { desk: [-1.9, 0, 1.3], agent: [-1.9, 0, 2.35], rotation: Math.PI },
+  jordan: { desk: [2.2, 0, -0.4], agent: [2.2, 0, 0.65], rotation: Math.PI },
+  kevin: { desk: [5.0, 0, 1.8], agent: [5.0, 0, 2.85], rotation: Math.PI },
+};
+
+const DEPARTMENT_ZONES: Array<{
+  name: DepartmentName;
+  color: string;
+  size: [number, number];
+  position: [number, number, number];
+  label: [number, number, number];
+}> = [
   {
     name: "Executive",
     color: DEPARTMENT_COLORS.Executive,
-    position: [0, 0.02, -3.6] as [number, number, number],
-    size: [5.4, 4.2] as [number, number],
-    sign: [0, 0.65, -6] as [number, number, number],
+    size: [3.2, 3.1],
+    position: [-4.8, 0.01, -2.6],
+    label: [-4.8, 0.7, -4.35],
   },
   {
     name: "Marketing",
     color: DEPARTMENT_COLORS.Marketing,
-    position: [-4.2, 0.02, 1.8] as [number, number, number],
-    size: [4.2, 5.2] as [number, number],
-    sign: [-6.2, 0.65, 1.8] as [number, number, number],
+    size: [6.0, 4.2],
+    position: [-3.35, 0.01, 1.3],
+    label: [-3.35, 0.7, -1.1],
   },
   {
     name: "Sales",
     color: DEPARTMENT_COLORS.Sales,
-    position: [0, 0.02, 2.2] as [number, number, number],
-    size: [3.6, 4.6] as [number, number],
-    sign: [0, 0.65, 5.1] as [number, number, number],
+    size: [3.1, 3.6],
+    position: [2.2, 0.01, -0.4],
+    label: [2.2, 0.7, -2.4],
   },
   {
     name: "Development",
     color: DEPARTMENT_COLORS.Development,
-    position: [4.2, 0.02, 1.8] as [number, number, number],
-    size: [4.2, 5.2] as [number, number],
-    sign: [6.1, 0.65, 1.8] as [number, number, number],
+    size: [3.3, 3.8],
+    position: [5.0, 0.01, 1.8],
+    label: [5.0, 0.7, -0.5],
   },
-] as const;
+];
 
-const DESK_LAYOUT: Record<string, DeskConfig> = {
-  kimberly: { desk: [-1.35, 0, -3.6], walk: [-0.6, 0, -2.55] },
-  alex: { desk: [-4.2, 0, 1.1], walk: [-3.15, 0, 0.15] },
-  sabri: { desk: [-4.2, 0, 3.2], walk: [-3.15, 0, 4.1] },
-  jordan: { desk: [0, 0, 2.2], walk: [1.0, 0, 2.9] },
-  kevin: { desk: [4.2, 0, 2.2], walk: [3.15, 0, 1.25] },
-};
-
-const MONITOR_ACCENTS: Record<string, string> = {
-  kimberly: "#2093FF",
-  alex: "#F93C3C",
-  sabri: "#F93C3C",
-  jordan: "#22C55E",
-  kevin: "#FFBD59",
-};
+function getDepartmentColor(department: AgentRecord["department"]) {
+  if (department === "Executive") return DEPARTMENT_COLORS.Executive;
+  if (department === "Marketing") return DEPARTMENT_COLORS.Marketing;
+  if (department === "Sales") return DEPARTMENT_COLORS.Sales;
+  return DEPARTMENT_COLORS.Development;
+}
 
 function GridFloor() {
   return (
     <group>
-      <mesh rotation-x={-Math.PI / 2} position={[0, -0.01, 0]} receiveShadow>
-        <planeGeometry args={[22, 22]} />
-        <meshStandardMaterial color="#11131b" />
+      <mesh rotation-x={-Math.PI / 2} receiveShadow>
+        <planeGeometry args={[24, 24]} />
+        <meshStandardMaterial color="#0f1118" />
       </mesh>
-      <gridHelper args={[22, 32, "#1e3a5f", "#161c29"]} position={[0, 0.001, 0]} />
+      <gridHelper args={[24, 32, "#1b2433", "#151b27"]} position={[0, 0.001, 0]} />
     </group>
   );
 }
@@ -93,20 +102,21 @@ function DepartmentZones() {
             <meshStandardMaterial
               color={zone.color}
               transparent
-              opacity={0.1}
+              opacity={0.12}
               emissive={zone.color}
-              emissiveIntensity={0.08}
+              emissiveIntensity={0.1}
             />
           </mesh>
 
-          <group position={zone.sign}>
-            <RoundedBox args={[1.8, 0.3, 0.12]} radius={0.04} smoothness={4} castShadow>
-              <meshStandardMaterial color="#151925" metalness={0.2} roughness={0.6} />
-            </RoundedBox>
-            <Html center distanceFactor={10} transform>
+          <group position={zone.label}>
+            <mesh castShadow receiveShadow>
+              <boxGeometry args={[2.4, 0.18, 0.4]} />
+              <meshStandardMaterial color="#171c28" roughness={0.85} metalness={0.1} />
+            </mesh>
+            <Html center transform distanceFactor={10}>
               <div
-                className="rounded-full border border-white/10 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.22em] text-white backdrop-blur-xl"
-                style={{ background: `${zone.color}22`, boxShadow: `0 0 24px ${zone.color}22` }}
+                className="rounded-full border border-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-white"
+                style={{ backgroundColor: `${zone.color}22` }}
               >
                 {zone.name}
               </div>
@@ -120,58 +130,60 @@ function DepartmentZones() {
 
 function Desk({
   position,
+  rotation,
   accent,
-  isSelected,
+  selected,
 }: {
   position: [number, number, number];
+  rotation: number;
   accent: string;
-  isSelected: boolean;
+  selected: boolean;
 }) {
   return (
-    <group position={position}>
-      <mesh position={[0, 0.68, 0]} castShadow receiveShadow>
-        <boxGeometry args={[1.7, 0.12, 1.0]} />
-        <meshStandardMaterial color="#4a2f24" roughness={0.82} metalness={0.08} />
+    <group position={position} rotation-y={rotation}>
+      <mesh position={[0, 0.72, 0]} castShadow receiveShadow>
+        <boxGeometry args={[1.8, 0.12, 1.0]} />
+        <meshStandardMaterial color="#4a3127" roughness={0.8} />
       </mesh>
 
       {[
-        [-0.72, 0.34, -0.38],
-        [0.72, 0.34, -0.38],
-        [-0.72, 0.34, 0.38],
-        [0.72, 0.34, 0.38],
+        [-0.78, 0.36, -0.4],
+        [0.78, 0.36, -0.4],
+        [-0.78, 0.36, 0.4],
+        [0.78, 0.36, 0.4],
       ].map((leg, index) => (
         <mesh key={index} position={leg as [number, number, number]} castShadow>
-          <boxGeometry args={[0.1, 0.68, 0.1]} />
-          <meshStandardMaterial color="#2a1b14" roughness={0.85} />
+          <boxGeometry args={[0.09, 0.72, 0.09]} />
+          <meshStandardMaterial color="#261913" roughness={0.9} />
         </mesh>
       ))}
 
       <mesh position={[0, 1.08, -0.22]} castShadow>
-        <boxGeometry args={[0.7, 0.46, 0.06]} />
+        <boxGeometry args={[0.76, 0.45, 0.06]} />
         <meshStandardMaterial
-          color="#90c7ff"
+          color="#9fd2ff"
           emissive={accent}
-          emissiveIntensity={isSelected ? 1.1 : 0.7}
+          emissiveIntensity={selected ? 1.1 : 0.7}
           roughness={0.25}
         />
       </mesh>
-      <mesh position={[0, 0.82, -0.18]} castShadow>
-        <boxGeometry args={[0.12, 0.22, 0.12]} />
-        <meshStandardMaterial color="#2e3440" roughness={0.8} />
+      <mesh position={[0, 0.85, -0.18]} castShadow>
+        <boxGeometry args={[0.12, 0.24, 0.12]} />
+        <meshStandardMaterial color="#293242" roughness={0.85} />
       </mesh>
 
-      <mesh position={[0, 0.38, 0.88]} castShadow receiveShadow>
-        <boxGeometry args={[0.75, 0.1, 0.75]} />
-        <meshStandardMaterial color="#1b202c" roughness={0.75} />
+      <mesh position={[0, 0.42, 0.82]} castShadow receiveShadow>
+        <boxGeometry args={[0.8, 0.1, 0.8]} />
+        <meshStandardMaterial color="#181e2b" roughness={0.78} />
       </mesh>
-      <mesh position={[0, 0.17, 0.88]} castShadow>
-        <boxGeometry args={[0.18, 0.34, 0.18]} />
-        <meshStandardMaterial color="#151925" roughness={0.8} />
+      <mesh position={[0, 0.18, 0.82]} castShadow>
+        <boxGeometry args={[0.18, 0.36, 0.18]} />
+        <meshStandardMaterial color="#111621" roughness={0.85} />
       </mesh>
 
-      {isSelected ? (
-        <mesh rotation-x={-Math.PI / 2} position={[0, 0.03, 0]}>
-          <ringGeometry args={[1.1, 1.25, 48]} />
+      {selected ? (
+        <mesh rotation-x={-Math.PI / 2} position={[0, 0.02, 0]}>
+          <ringGeometry args={[1.05, 1.22, 40]} />
           <meshBasicMaterial color={accent} transparent opacity={0.5} />
         </mesh>
       ) : null}
@@ -181,149 +193,132 @@ function Desk({
 
 function AgentCharacter({
   agent,
-  deskPosition,
-  walkPosition,
+  position,
   selected,
   onSelect,
 }: {
   agent: AgentRecord;
-  deskPosition: [number, number, number];
-  walkPosition: [number, number, number];
+  position: [number, number, number];
   selected: boolean;
   onSelect: (id: string) => void;
 }) {
   const groupRef = useRef<THREE.Group>(null);
-  const positionRef = useRef(new THREE.Vector3(...deskPosition));
-  const targetRef = useRef(new THREE.Vector3(...deskPosition));
-  const color = DEPARTMENT_COLORS[agent.department as keyof typeof DEPARTMENT_COLORS];
+  const color = getDepartmentColor(agent.department);
 
-  useFrame((state) => {
+  useFrame(({ clock }) => {
     const group = groupRef.current;
     if (!group) return;
 
-    const elapsed = state.clock.getElapsedTime() + deskPosition[0] * 0.2;
-    const bob = Math.sin(elapsed * 1.8) * 0.02;
-    const cycle = elapsed % 14;
-    const movingOut = cycle > 5 && cycle <= 8;
-    const movingBack = cycle > 8 && cycle <= 11;
-    const nextTarget = movingOut
-      ? walkPosition
-      : movingBack
-        ? deskPosition
-        : cycle <= 5
-          ? deskPosition
-          : walkPosition;
-
-    targetRef.current.set(...nextTarget);
-    positionRef.current.lerp(targetRef.current, 0.04);
-
-    group.position.set(positionRef.current.x, bob, positionRef.current.z);
-
-    const dx = targetRef.current.x - positionRef.current.x;
-    const dz = targetRef.current.z - positionRef.current.z;
-    if (Math.abs(dx) > 0.02 || Math.abs(dz) > 0.02) {
-      group.rotation.y = Math.atan2(dx, dz);
-    }
+    const bob = Math.sin(clock.getElapsedTime() * 1.8 + position[0]) * 0.02;
+    group.position.y = bob;
   });
 
   return (
     <group
       ref={groupRef}
+      position={position}
       onClick={(event) => {
         event.stopPropagation();
         onSelect(agent.id);
       }}
     >
-      <group position={[0, 0.95, 0.36]}>
-        <mesh position={[0, 0.8, 0]} castShadow>
-          <boxGeometry args={[0.34, 0.34, 0.34]} />
-          <meshStandardMaterial color="#f1c8a7" roughness={0.95} />
-        </mesh>
+      <mesh position={[0, 1.74, 0]} castShadow>
+        <boxGeometry args={[0.34, 0.34, 0.34]} />
+        <meshStandardMaterial color="#e7bf9d" roughness={0.95} />
+      </mesh>
 
-        <mesh position={[0, 0.42, 0]} castShadow>
-          <boxGeometry args={[0.46, 0.56, 0.26]} />
-          <meshStandardMaterial color={color} roughness={0.75} metalness={0.1} />
-        </mesh>
+      <mesh position={[0, 1.3, 0]} castShadow>
+        <boxGeometry args={[0.5, 0.62, 0.28]} />
+        <meshStandardMaterial color={color} roughness={0.76} metalness={0.08} />
+      </mesh>
 
-        <mesh position={[-0.32, 0.42, 0]} castShadow rotation-z={Math.sin(deskPosition[0]) * 0.15}>
-          <boxGeometry args={[0.13, 0.48, 0.13]} />
-          <meshStandardMaterial color={color} roughness={0.78} />
-        </mesh>
-        <mesh position={[0.32, 0.42, 0]} castShadow rotation-z={-Math.sin(deskPosition[0]) * 0.15}>
-          <boxGeometry args={[0.13, 0.48, 0.13]} />
-          <meshStandardMaterial color={color} roughness={0.78} />
-        </mesh>
+      <mesh position={[-0.34, 1.3, 0]} castShadow rotation-z={0.18}>
+        <boxGeometry args={[0.14, 0.54, 0.14]} />
+        <meshStandardMaterial color={color} roughness={0.8} />
+      </mesh>
+      <mesh position={[0.34, 1.3, 0]} castShadow rotation-z={-0.18}>
+        <boxGeometry args={[0.14, 0.54, 0.14]} />
+        <meshStandardMaterial color={color} roughness={0.8} />
+      </mesh>
 
-        <mesh position={[-0.13, -0.04, 0]} castShadow>
-          <boxGeometry args={[0.14, 0.54, 0.14]} />
-          <meshStandardMaterial color="#d6dde8" roughness={0.88} />
-        </mesh>
-        <mesh position={[0.13, -0.04, 0]} castShadow>
-          <boxGeometry args={[0.14, 0.54, 0.14]} />
-          <meshStandardMaterial color="#d6dde8" roughness={0.88} />
-        </mesh>
-      </group>
+      <mesh position={[-0.13, 0.82, 0]} castShadow>
+        <boxGeometry args={[0.15, 0.62, 0.15]} />
+        <meshStandardMaterial color="#d9dfeb" roughness={0.88} />
+      </mesh>
+      <mesh position={[0.13, 0.82, 0]} castShadow>
+        <boxGeometry args={[0.15, 0.62, 0.15]} />
+        <meshStandardMaterial color="#d9dfeb" roughness={0.88} />
+      </mesh>
 
       {selected ? (
-        <mesh rotation-x={-Math.PI / 2} position={[0, 0.03, 0.34]}>
-          <ringGeometry args={[0.38, 0.48, 40]} />
-          <meshBasicMaterial color={color} transparent opacity={0.72} />
+        <mesh rotation-x={-Math.PI / 2} position={[0, 0.02, 0]}>
+          <ringGeometry args={[0.36, 0.48, 32]} />
+          <meshBasicMaterial color={color} transparent opacity={0.78} />
         </mesh>
       ) : null}
 
-      <Html position={[0, 2.35, 0.34]} center distanceFactor={9} transform occlude>
-        <div className="rounded-2xl border border-white/10 bg-[linear-gradient(180deg,rgba(17,20,31,0.88),rgba(10,10,15,0.94))] px-3 py-2 text-center text-white shadow-[0_14px_35px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+      <Html position={[0, 2.32, 0]} center transform distanceFactor={10}>
+        <div className="rounded-2xl border border-white/10 bg-[linear-gradient(180deg,rgba(18,22,31,0.9),rgba(10,10,15,0.94))] px-3 py-2 text-center text-white shadow-[0_14px_35px_rgba(0,0,0,0.4)]">
           <div className="text-[12px] font-semibold leading-none">{agent.name}</div>
-          <div className="mt-1 text-[10px] uppercase tracking-[0.18em] text-slate-400">{agent.role}</div>
+          <div className="mt-1 text-[10px] uppercase tracking-[0.18em] text-slate-400">
+            {agent.role}
+          </div>
         </div>
       </Html>
     </group>
   );
 }
 
-function OfficeContent({ agents, selectedId, onSelect }: OfficeSceneProps) {
+function SceneContents({ agents, selectedId, onSelect }: OfficeSceneProps) {
   return (
     <>
       <color attach="background" args={["#0a0a0f"]} />
 
-      <ambientLight intensity={0.85} color="#dce6ff" />
+      <ambientLight intensity={0.85} color="#dfe8ff" />
       <directionalLight
         castShadow
-        intensity={1.45}
-        color="#d4e7ff"
-        position={[8, 14, 10]}
+        intensity={1.4}
+        color="#d9ebff"
+        position={[8, 12, 8]}
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
-        shadow-camera-left={-14}
-        shadow-camera-right={14}
-        shadow-camera-top={14}
-        shadow-camera-bottom={-14}
+        shadow-camera-left={-12}
+        shadow-camera-right={12}
+        shadow-camera-top={12}
+        shadow-camera-bottom={-12}
       />
-      <directionalLight intensity={0.35} color="#2093FF" position={[-12, 8, -10]} />
+      <directionalLight intensity={0.35} color="#2093FF" position={[-10, 6, -6]} />
 
-      <OrthographicCamera makeDefault position={[9, 9, 9]} zoom={62} near={0.1} far={100} />
+      <OrthographicCamera makeDefault position={[10, 10, 10]} zoom={58} near={0.1} far={100} />
       <OrbitControls
         enablePan={false}
         minZoom={48}
-        maxZoom={88}
-        minPolarAngle={0.6}
-        maxPolarAngle={1.15}
-        target={[0, 1.1, 0]}
+        maxZoom={80}
+        minPolarAngle={0.7}
+        maxPolarAngle={1.05}
+        target={[0, 1.2, 0]}
       />
 
       <GridFloor />
       <DepartmentZones />
 
       {agents.map((agent) => {
-        const config = DESK_LAYOUT[agent.id];
-        const accent = MONITOR_ACCENTS[agent.id] ?? "#2093FF";
+        const layout = DESK_LAYOUT[agent.id];
+        if (!layout) return null;
+
+        const color = getDepartmentColor(agent.department);
+
         return (
           <Fragment key={agent.id}>
-            <Desk position={config.desk} accent={accent} isSelected={selectedId === agent.id} />
+            <Desk
+              position={layout.desk}
+              rotation={layout.rotation}
+              accent={color}
+              selected={selectedId === agent.id}
+            />
             <AgentCharacter
               agent={agent}
-              deskPosition={config.desk}
-              walkPosition={config.walk}
+              position={layout.agent}
               selected={selectedId === agent.id}
               onSelect={onSelect}
             />
@@ -335,15 +330,15 @@ function OfficeContent({ agents, selectedId, onSelect }: OfficeSceneProps) {
 }
 
 export function OfficeScene(props: OfficeSceneProps) {
-  const agents = useMemo(
-    () => props.agents.filter((agent) => agent.id in DESK_LAYOUT),
-    [props.agents],
-  );
-
   return (
-    <div className="h-[680px] overflow-hidden rounded-[28px] border border-white/10 bg-[#0a0a0f]">
-      <Canvas shadows dpr={[1, 1.75]} onPointerMissed={() => props.onSelect(null)}>
-        <OfficeContent {...props} agents={agents} />
+    <div className="h-[720px] overflow-hidden rounded-[28px] border border-white/10 bg-[#0a0a0f]">
+      <Canvas
+        shadows
+        dpr={[1, 2]}
+        onPointerMissed={() => props.onSelect(null)}
+        gl={{ antialias: true }}
+      >
+        <SceneContents {...props} />
       </Canvas>
     </div>
   );
