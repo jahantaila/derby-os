@@ -45,26 +45,23 @@ const EXCLUDED_CUSTOMERS = new Set([
 
 // Name overrides (display name corrections)
 const NAME_OVERRIDES: Record<string, string> = {
-  "cus_RvkHxkOJLtZ0LK": "Eulogio Gutierrez (Las Chamas)",
-  "cus_SAgwDJdWJ0QYkH": "Eulogio Gutierrez (Las Chamas)",
-  "cus_RxdlJeuSSjrFBF": "Eulogio Gutierrez (Las Chamas)",
-  "cus_S3CZIo2xIQPI3i": "Eulogio Gutierrez (Las Chamas)",
-  "cus_Rq878EUk3N4i0f": "Eulogio Gutierrez (Las Chamas)",
-  "cus_S4Loxcg6f8muHE": "Eulogio Gutierrez (Las Chamas)",
-  "cus_SB7d29UIqxMwp1": "Eulogio Gutierrez (Las Chamas)",
-  "cus_RyLGnhbSNV2kQP": "Eulogio Gutierrez (Las Chamas)",
+  "cus_Rq878EUk3N4i0f": "El Vaquero (Eulogio)",
+  "cus_RvkHxkOJLtZ0LK": "Pina Fiesta (Eulogio)",
+  "cus_SAgwDJdWJ0QYkH": "Las Chamas (Eulogio)",
+  "cus_S3CZIo2xIQPI3i": "Al Forno (Eulogio)",
 };
 
-// Merge these customer IDs into one entry
+// Merge hosting fees under one entry
 const MERGE_CUSTOMERS: Record<string, string> = {
-  // All Eulogio IDs merge into one
-  "cus_SAgwDJdWJ0QYkH": "cus_RvkHxkOJLtZ0LK",
-  "cus_RxdlJeuSSjrFBF": "cus_RvkHxkOJLtZ0LK",
-  "cus_S3CZIo2xIQPI3i": "cus_RvkHxkOJLtZ0LK",
-  "cus_Rq878EUk3N4i0f": "cus_RvkHxkOJLtZ0LK",
-  "cus_S4Loxcg6f8muHE": "cus_RvkHxkOJLtZ0LK",
-  "cus_SB7d29UIqxMwp1": "cus_RvkHxkOJLtZ0LK",
-  "cus_RyLGnhbSNV2kQP": "cus_RvkHxkOJLtZ0LK",
+  "cus_S4Loxcg6f8muHE": "eulogio_hosting",
+  "cus_SB7d29UIqxMwp1": "eulogio_hosting",
+  "cus_RyLGnhbSNV2kQP": "eulogio_hosting",
+  "cus_RxdlJeuSSjrFBF": "eulogio_hosting",
+};
+
+// Virtual customer entries for merged groups
+const VIRTUAL_CUSTOMERS: Record<string, string> = {
+  "eulogio_hosting": "Eulogio - Hosting",
 };
 
 // ─── GET: Fetch all finance data ───
@@ -94,7 +91,7 @@ export async function GET(req: NextRequest) {
       
       if (!custMap[cid]) {
         custMap[cid] = {
-          name: NAME_OVERRIDES[cid] || sub.customer_name || sub.metadata?.name || cid,
+          name: NAME_OVERRIDES[cid] || VIRTUAL_CUSTOMERS[cid] || sub.customer_name || sub.metadata?.name || cid,
           email: sub.customer_email || "",
           subs: [],
         };
@@ -102,6 +99,7 @@ export async function GET(req: NextRequest) {
       custMap[cid].subs.push(sub);
       // Use name override or from whichever sub has it
       if (NAME_OVERRIDES[cid]) custMap[cid].name = NAME_OVERRIDES[cid];
+      else if (VIRTUAL_CUSTOMERS[cid]) custMap[cid].name = VIRTUAL_CUSTOMERS[cid];
       else if (sub.customer_name && custMap[cid].name === cid) custMap[cid].name = sub.customer_name;
       if (sub.customer_email && !custMap[cid].email) custMap[cid].email = sub.customer_email;
     }
