@@ -1,4 +1,5 @@
-import { readPersistentData, writePersistentData } from "@/lib/persistence";
+// Client-safe agent data — no server imports
+// This file can be imported in "use client" components
 
 export type AgentStatus = "active" | "working" | "idle" | "offline";
 export type TeamMemberType = "ceo" | "agent" | "employee";
@@ -20,8 +21,6 @@ export type AgentRecord = {
   soul: string | null;
   history: AgentHistoryEntry[];
 };
-
-export const TEAM_FILE = "team.json";
 
 export const TEAM_SEED: AgentRecord[] = [
   {
@@ -231,90 +230,3 @@ Design quality matters in his remit too. Kevin is expected to build with Derby D
   },
 ];
 
-function hasExpectedBaseline(data: AgentRecord[]): boolean {
-  if (data.length !== TEAM_SEED.length) return false;
-  const byId = new Map(data.map((member) => [member.id, member]));
-  return TEAM_SEED.every((seedMember) => {
-    const existing = byId.get(seedMember.id);
-    return existing && existing.type === seedMember.type;
-  });
-}
-
-function normalizeMemberType(type: string | undefined, id: string): TeamMemberType {
-  if (type === "agent" || type === "employee" || type === "ceo") return type;
-  if (id === "jahan") return "ceo";
-  return "employee";
-}
-
-function normalizeMemberRecord(member: Partial<AgentRecord>): AgentRecord | null {
-  if (!member.id || !member.name || !member.role || !member.department) return null;
-  const seed = TEAM_SEED.find((candidate) => candidate.id === member.id);
-  if (!seed) return null;
-
-  return {
-    ...seed,
-    ...member,
-    type: normalizeMemberType(typeof member.type === "string" ? member.type : undefined, member.id),
-    status: (member.status as AgentStatus) || seed.status,
-    currentTask: typeof member.currentTask === "string" ? member.currentTask : seed.currentTask,
-    skills: Array.isArray(member.skills) ? member.skills : seed.skills,
-    model: member.model ?? seed.model,
-    soul: typeof member.soul === "string" || member.soul === null ? member.soul : seed.soul,
-    history: Array.isArray(member.history) ? member.history : seed.history,
-  };
-}
-
-async function loadTeam(): Promise<AgentRecord[]> {
-  const data = await readPersistentData<Partial<AgentRecord>[]>(TEAM_FILE, []);
-  const normalized = data.map(normalizeMemberRecord).filter(Boolean) as AgentRecord[];
-
-  if (!hasExpectedBaseline(normalized)) {
-    try {
-      await writePersistentData(TEAM_FILE, TEAM_SEED);
-    } catch {
-      // In sandbox-restricted environments we can still serve seed data.
-    }
-    return TEAM_SEED;
-  }
-
-  return normalized;
-}
-
-export async function getAgents(type?: TeamMemberType): Promise<AgentRecord[]> {
-  const data = await loadTeam();
-  if (!type) return data;
-  return data.filter((member) => member.type === type);
-}
-
-export async function getAgentById(id: string): Promise<AgentRecord | null> {
-  const data = await loadTeam();
-  return data.find((agent) => agent.id === id) ?? null;
-}
-
-export async function patchAgentById(
-  id: string,
-  patch: Partial<Pick<AgentRecord, "status" | "currentTask">>,
-): Promise<AgentRecord | null> {
-  const data = await loadTeam();
-  const idx = data.findIndex((agent) => agent.id === id);
-
-  if (idx === -1) return null;
-
-  data[idx] = {
-    ...data[idx],
-    ...(patch.status ? { status: patch.status } : {}),
-    ...(typeof patch.currentTask === "string" ? { currentTask: patch.currentTask } : {}),
-  };
-
-  if (!hasExpectedBaseline(data)) {
-    return null;
-  }
-
-  try {
-    await writePersistentData(TEAM_FILE, data);
-  } catch {
-    // Ignore write failure in restricted environments; return updated in-memory shape.
-  }
-
-  return data[idx];
-}
