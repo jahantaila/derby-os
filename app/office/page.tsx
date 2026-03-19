@@ -2,16 +2,20 @@
 
 import dynamic from "next/dynamic";
 import { useMemo, useState } from "react";
-import { X } from "lucide-react";
+import { X, Cpu, Zap, Crown, Target, TrendingUp, Code } from "lucide-react";
 import { TEAM_SEED } from "@/lib/agents-data";
+import { cn } from "@/lib/utils";
 
 const OfficeScene = dynamic(
   () => import("./scene").then((mod) => mod.OfficeScene),
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-[720px] items-center justify-center rounded-[28px] border border-white/10 bg-white/5 text-sm text-slate-400">
-        Loading office scene...
+      <div className="flex h-[700px] items-center justify-center rounded-2xl border border-white/[0.08] bg-[#0a0a0f]">
+        <div className="text-center space-y-3">
+          <div className="w-8 h-8 border-2 border-[#2093FF] border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-sm text-slate-500">Loading 3D office...</p>
+        </div>
       </div>
     ),
   },
@@ -19,45 +23,58 @@ const OfficeScene = dynamic(
 
 const AI_AGENTS = TEAM_SEED.filter((a) => a.type === "agent");
 
-function formatTask(task: string) {
-  return task.trim() || "Awaiting next assignment";
-}
+const DEPT_ICONS: Record<string, any> = {
+  Executive: Crown,
+  Marketing: Target,
+  Sales: TrendingUp,
+  Development: Code,
+};
+
+const DEPT_COLORS: Record<string, string> = {
+  Executive: "#2093FF",
+  Marketing: "#F93C3C",
+  Sales: "#22C55E",
+  Development: "#FFBD59",
+};
 
 export default function OfficePage() {
-  const [selectedId, setSelectedId] = useState<string | null>(AI_AGENTS[0]?.id ?? null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const selectedAgent = useMemo(
-    () => AI_AGENTS.find((agent) => agent.id === selectedId) ?? null,
-    [selectedId],
+    () => AI_AGENTS.find((a) => a.id === selectedId) ?? null,
+    [selectedId]
   );
 
+  const activeCount = AI_AGENTS.filter((a) => a.status === "active" || a.status === "working").length;
+  const depts = [...new Set(AI_AGENTS.map((a) => a.department))];
+
   return (
-    <section className="rounded-[32px] border border-white/10 bg-[#0a0a0f] p-6 shadow-[0_30px_100px_rgba(0,0,0,0.45)]">
-      <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="flex items-center justify-between">
         <div>
-          <p className="text-[11px] uppercase tracking-[0.34em] text-[#2093FF]">
-            Office Simulation
-          </p>
-          <h1 className="mt-2 text-4xl font-semibold tracking-tight text-white">
-            AI Agent Floor
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-white via-blue-200 to-[#2093FF] bg-clip-text text-transparent">
+            The Office
           </h1>
-          <p className="mt-2 max-w-2xl text-sm text-slate-400">
-            Five AI agents only, grouped by department in a real Three.js isometric office.
+          <p className="text-[11px] text-slate-500 mt-1">
+            Derby Digital HQ · {AI_AGENTS.length} agents · {activeCount} active
           </p>
         </div>
-
-        <div className="flex gap-3">
-          <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-            <p className="text-[10px] uppercase tracking-[0.28em] text-slate-500">Agents</p>
-            <p className="mt-2 text-2xl font-semibold text-white">{AI_AGENTS.length}</p>
-          </div>
-          <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-            <p className="text-[10px] uppercase tracking-[0.28em] text-slate-500">Camera</p>
-            <p className="mt-2 text-2xl font-semibold text-white">Ortho</p>
-          </div>
+        <div className="flex items-center gap-2">
+          {depts.map((dept) => {
+            const Icon = DEPT_ICONS[dept] || Cpu;
+            const color = DEPT_COLORS[dept] || "#666";
+            return (
+              <div key={dept} className="flex items-center gap-1.5 bg-white/[0.03] border border-white/[0.06] rounded-lg px-2.5 py-1.5">
+                <Icon className="w-3 h-3" style={{ color }} />
+                <span className="text-[10px] text-slate-400">{dept}</span>
+              </div>
+            );
+          })}
         </div>
       </div>
 
+      {/* 3D Scene */}
       <div className="relative">
         <OfficeScene
           agents={AI_AGENTS}
@@ -65,74 +82,101 @@ export default function OfficePage() {
           onSelect={setSelectedId}
         />
 
-        <aside className="absolute right-4 top-4 z-10 w-full max-w-sm rounded-[26px] border border-white/10 bg-[linear-gradient(180deg,rgba(20,24,35,0.92),rgba(10,10,15,0.96))] p-5 text-white shadow-[0_20px_60px_rgba(0,0,0,0.42)] backdrop-blur-xl">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="text-[11px] uppercase tracking-[0.28em] text-[#2093FF]">
-                Agent Details
-              </p>
-              <h2 className="mt-2 text-2xl font-semibold">
-                {selectedAgent?.name ?? "No agent selected"}
-              </h2>
-              <p className="mt-1 text-sm text-slate-400">
-                {selectedAgent?.role ?? "Click an agent in the office."}
-              </p>
-            </div>
-
-            {selectedAgent ? (
+        {/* Agent info panel overlay */}
+        {selectedAgent && (
+          <div className="absolute top-4 right-4 w-72 bg-[#0c0c14]/95 backdrop-blur-xl border border-white/10 rounded-xl p-4 shadow-2xl shadow-black/50 z-10">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div
+                  className="w-2 h-2 rounded-full"
+                  style={{ backgroundColor: selectedAgent.status === "active" ? "#22C55E" : selectedAgent.status === "working" ? "#FFBD59" : "#64748b" }}
+                />
+                <h3 className="text-sm font-semibold">{selectedAgent.name}</h3>
+              </div>
               <button
-                type="button"
                 onClick={() => setSelectedId(null)}
-                className="rounded-full border border-white/10 bg-white/5 p-2 text-slate-300 transition hover:border-white/20 hover:text-white"
-                aria-label="Clear selected agent"
+                className="p-1 hover:bg-white/10 rounded-lg transition-colors"
               >
-                <X className="h-4 w-4" />
+                <X className="w-3.5 h-3.5 text-slate-500" />
               </button>
-            ) : null}
-          </div>
-
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
-              <p className="text-[10px] uppercase tracking-[0.28em] text-slate-500">Department</p>
-              <p className="mt-2 text-sm font-medium text-white">
-                {selectedAgent?.department ?? "N/A"}
-              </p>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
-              <p className="text-[10px] uppercase tracking-[0.28em] text-slate-500">Model</p>
-              <p className="mt-2 text-sm font-medium text-white">
-                {selectedAgent?.model ?? "N/A"}
-              </p>
-            </div>
-          </div>
 
-          <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-3">
-            <p className="text-[10px] uppercase tracking-[0.28em] text-slate-500">Current Task</p>
-            <p className="mt-2 text-sm text-slate-200">
-              {selectedAgent ? formatTask(selectedAgent.currentTask) : "Select an agent to inspect their current assignment."}
-            </p>
-          </div>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <span
+                  className="text-[10px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full"
+                  style={{
+                    color: DEPT_COLORS[selectedAgent.department],
+                    backgroundColor: `${DEPT_COLORS[selectedAgent.department]}15`,
+                  }}
+                >
+                  {selectedAgent.department}
+                </span>
+                <span className="text-[10px] text-slate-500">{selectedAgent.role}</span>
+              </div>
 
-          <div className="mt-4">
-            <p className="text-[10px] uppercase tracking-[0.28em] text-slate-500">Skills</p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {selectedAgent?.skills.length ? (
-                selectedAgent.skills.map((skill) => (
-                  <span
-                    key={skill}
-                    className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200"
-                  >
-                    {skill}
-                  </span>
-                ))
-              ) : (
-                <span className="text-sm text-slate-500">No registered skills.</span>
+              {selectedAgent.model && (
+                <div className="flex items-center gap-1.5">
+                  <Cpu className="w-3 h-3 text-slate-500" />
+                  <span className="text-[11px] text-slate-400">{selectedAgent.model}</span>
+                </div>
+              )}
+
+              {selectedAgent.currentTask && (
+                <div className="bg-white/[0.03] rounded-lg p-2.5 border border-white/[0.05]">
+                  <p className="text-[9px] text-slate-500 uppercase tracking-wider mb-1">Current Task</p>
+                  <p className="text-[11px] text-slate-300">{selectedAgent.currentTask}</p>
+                </div>
+              )}
+
+              {selectedAgent.skills.length > 0 && (
+                <div>
+                  <p className="text-[9px] text-slate-500 uppercase tracking-wider mb-1.5">Skills</p>
+                  <div className="flex flex-wrap gap-1">
+                    {selectedAgent.skills.slice(0, 8).map((s) => (
+                      <span
+                        key={s}
+                        className="text-[9px] px-1.5 py-0.5 rounded bg-white/[0.05] text-slate-400 border border-white/[0.05]"
+                      >
+                        {s}
+                      </span>
+                    ))}
+                    {selectedAgent.skills.length > 8 && (
+                      <span className="text-[9px] text-slate-600">+{selectedAgent.skills.length - 8}</span>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {selectedAgent.history.length > 0 && (
+                <div>
+                  <p className="text-[9px] text-slate-500 uppercase tracking-wider mb-1.5">Recent Activity</p>
+                  <div className="space-y-1">
+                    {selectedAgent.history.slice(0, 3).map((h, i) => (
+                      <div key={i} className="flex items-start gap-2">
+                        <Zap className="w-2.5 h-2.5 text-slate-600 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <p className="text-[10px] text-slate-400">{h.action}</p>
+                          <p className="text-[8px] text-slate-600 font-mono">{h.timestamp}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               )}
             </div>
           </div>
-        </aside>
+        )}
+
+        {/* Controls hint */}
+        <div className="absolute bottom-4 left-4 flex items-center gap-3 bg-black/60 backdrop-blur rounded-lg px-3 py-2 border border-white/[0.06]">
+          <span className="text-[10px] text-slate-500">🖱️ Drag to rotate</span>
+          <span className="text-[10px] text-slate-600">·</span>
+          <span className="text-[10px] text-slate-500">🔍 Scroll to zoom</span>
+          <span className="text-[10px] text-slate-600">·</span>
+          <span className="text-[10px] text-slate-500">👆 Click agent for info</span>
+        </div>
       </div>
-    </section>
+    </div>
   );
 }
-// deploy 1773847212
