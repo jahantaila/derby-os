@@ -524,6 +524,7 @@ export function OfficeScene({ agents, selectedId, onSelect }: Props) {
 
       // Agents
       const agentMeshes = new Map<string, any>();
+      const agentLabels = new Map<string, any>();
       const aiAgents = agents.filter(a => a.id in DESK_POSITIONS);
       for (const agent of aiAgents) {
         const config = DESK_POSITIONS[agent.id];
@@ -545,6 +546,7 @@ export function OfficeScene({ agents, selectedId, onSelect }: Props) {
         const label = createLabel(THREE, agent.name, agent.role, agent.department, color);
         label.position.set(config.pos[0], 2.9, charZ);
         scene.add(label);
+        agentLabels.set(agent.id, label);
 
         // Desk glow light
         const deskLight = new THREE.PointLight(color, 0.3, 3);
@@ -617,7 +619,7 @@ export function OfficeScene({ agents, selectedId, onSelect }: Props) {
       };
       const onWheel = (e: WheelEvent) => {
         e.preventDefault();
-        zoom = Math.max(3, Math.min(14, zoom + e.deltaY * 0.008));
+        zoom = Math.max(1.5, Math.min(14, zoom + e.deltaY * 0.015));
         updateCamera();
       };
 
@@ -646,20 +648,170 @@ export function OfficeScene({ agents, selectedId, onSelect }: Props) {
       el.addEventListener("click", onClick);
       el.style.cursor = "grab";
 
+      // ─── Agent walk state ───
+      type WalkState = {
+        isWorking: boolean;
+        homeX: number;
+        homeZ: number;
+        homeFacing: number;
+        targetX: number;
+        targetZ: number;
+        walkTimer: number;
+        walkDuration: number;
+        pauseTimer: number;
+        pauseDuration: number;
+        phase: "seated" | "walking" | "pausing"; // seated at desk, walking around, pausing somewhere
+        legPhase: number;
+      };
+
+      const walkStates = new Map<string, WalkState>();
+      for (const agent of aiAgents) {
+        const config = DESK_POSITIONS[agent.id];
+        const charZ = config.facing === Math.PI ? config.pos[1] - 0.7 : config.pos[1] + 0.7;
+        const isWorking = agent.status === "active" || agent.status === "working";
+        walkStates.set(agent.id, {
+          isWorking,
+          homeX: config.pos[0],
+          homeZ: charZ,
+          homeFacing: config.facing,
+          targetX: config.pos[0],
+          targetZ: charZ,
+          walkTimer: 0,
+          walkDuration: 3 + Math.random() * 4,
+          pauseTimer: 0,
+          pauseDuration: 2 + Math.random() * 5,
+          phase: isWorking ? "seated" : "pausing",
+          legPhase: 0,
+        });
+      }
+
+      function pickWalkTarget(state: WalkState): [number, number] {
+        // Walk to a random spot in the office (within bounds)
+        const spots = [
+          [0, 0], [-3, 0], [3, 0], [0, 4], [-5, 4], [5, 0],
+          [-8, 5], [8, 5], // near horses
+          [0, -5], [-4, 5], [4, 5], // around the room
+        ];
+        const spot = spots[Math.floor(Math.random() * spots.length)];
+        return [spot[0] + (Math.random() - 0.5) * 2, spot[1] + (Math.random() - 0.5) * 2];
+      }
+
       // ─── Animate ───
       const clock = new THREE.Clock();
+      let lastDelta = 0;
       function animate() {
         if (destroyed) return;
         requestAnimationFrame(animate);
         const t = clock.getElapsedTime();
+        const delta = clock.getDelta();
 
-        // Agent idle bob
+        // Agent animation
         for (const [id, mesh] of agentMeshes.entries()) {
-          mesh.position.y = Math.sin(t * 1.8 + mesh.position.x * 2) * 0.025;
-          // Head look around
-          const head = mesh.children[0];
-          if (head) {
-            head.rotation.y = Math.sin(t * 0.5 + mesh.position.x) * 0.15;
+          const state = walkStates.get(id);
+          if (!state) continue;
+
+          if (state.isWorking) {
+            // Seated at desk — subtle bob + head movement
+            mesh.position.x = state.homeX;
+            mesh.position.z = state.homeZ;
+            mesh.position.y = Math.sin(t * 1.5 + state.homeX) * 0.01;
+            mesh.rotation.y = state.homeFacing;
+            const head = mesh.children[0];
+            if (head) head.rotation.y = Math.sin(t * 0.4 + state.homeX) * 0.1;
+          } else {
+            // Idle agent — walks around
+            if (state.phase === "pausing") {
+              // Standing somewhere, subtle bob
+              mesh.position.y = Math.sin(t * 1.8 + state.homeX * 2) * 0.02;
+              const head = mesh.children[0];
+              if (head) head.rotation.y = Math.sin(t * 0.6 + state.homeX) * 0.2;
+              
+              state.pauseTimer += delta;
+              if (state.pauseTimer >= state.pauseDuration) {
+                // Start walking somewhere
+                const [tx, tz] = pickWalkTarget(state);
+                state.targetX = tx;
+                state.targetZ = tz;
+                state.walkTimer = 0;
+                const dx = tx - mesh.position.x;
+                const dz = tz - mesh.position.z;
+                state.walkDuration = Math.sqrt(dx * dx + dz * dz) / 1.2; // speed
+                state.phase = "walking";
+              }
+            } else if (state.phase === "walking") {
+              state.walkTimer += delta;
+              const progress = Math.min(state.walkTimer / state.walkDuration, 1);
+              
+              // Smooth interpolation
+              const startX = mesh.position.x;
+              const startZ = mesh.position.z;
+              const ease = progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+              
+              // Move toward target
+              const nx = state.homeX + (state.targetX - state.homeX) * ease;
+              const nz = state.homeZ + (state.targetZ - state.homeZ) * ease;
+              
+              // Update home for smooth continuation
+              if (progress >= 1) {
+                state.homeX = state.targetX;
+                state.homeZ = state.targetZ;
+              }
+              
+              mesh.position.x = state.homeX + (state.targetX - state.homeX) * ease;
+              mesh.position.z = state.homeZ + (state.targetZ - state.homeZ) * ease;
+              
+              // Face walking direction
+              const dx = state.targetX - state.homeX;
+              const dz = state.targetZ - state.homeZ;
+              if (Math.abs(dx) > 0.01 || Math.abs(dz) > 0.01) {
+                mesh.rotation.y = Math.atan2(dx, dz);
+              }
+              
+              // Walking bob + leg animation
+              state.legPhase += delta * 8;
+              mesh.position.y = Math.abs(Math.sin(state.legPhase)) * 0.06;
+              
+              // Animate legs
+              const leftLeg = mesh.children[4]; // left leg
+              const rightLeg = mesh.children[5]; // right leg
+              if (leftLeg && rightLeg) {
+                leftLeg.rotation.x = Math.sin(state.legPhase) * 0.4;
+                rightLeg.rotation.x = Math.sin(state.legPhase + Math.PI) * 0.4;
+              }
+              // Animate arms
+              const leftArm = mesh.children[2]; // arms
+              const rightArm = mesh.children[3];
+              if (leftArm && rightArm) {
+                leftArm.rotation.x = Math.sin(state.legPhase + Math.PI) * 0.3;
+                rightArm.rotation.x = Math.sin(state.legPhase) * 0.3;
+              }
+              
+              if (progress >= 1) {
+                // Arrived — pause
+                state.phase = "pausing";
+                state.pauseTimer = 0;
+                state.pauseDuration = 3 + Math.random() * 6;
+                // Reset leg/arm rotation
+                if (leftLeg) leftLeg.rotation.x = 0;
+                if (rightLeg) rightLeg.rotation.x = 0;
+                if (leftArm) leftArm.rotation.x = 0;
+                if (rightArm) rightArm.rotation.x = 0;
+              }
+            }
+          }
+
+          // Update label position to follow agent
+          // Labels are added after agents — find the corresponding label
+        }
+
+        // Update labels to follow walking agents
+        for (const agent of aiAgents) {
+          const mesh = agentMeshes.get(agent.id);
+          const label = agentLabels.get(agent.id);
+          if (mesh && label) {
+            label.position.x = mesh.position.x;
+            label.position.z = mesh.position.z;
+            label.position.y = 2.9;
           }
         }
 
