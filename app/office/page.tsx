@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { X, Cpu, Zap, Crown, Target, TrendingUp, Code } from "lucide-react";
 import { TEAM_SEED } from "@/lib/agents-data";
 import { cn } from "@/lib/utils";
@@ -21,6 +21,14 @@ const OfficeScene = dynamic(
   },
 );
 
+interface LiveTask {
+  id: string;
+  title: string;
+  status: string;
+  assignee: string;
+  priority: string;
+}
+
 const AI_AGENTS = TEAM_SEED.filter((a) => a.type === "agent");
 
 const DEPT_ICONS: Record<string, any> = {
@@ -39,13 +47,34 @@ const DEPT_COLORS: Record<string, string> = {
 
 export default function OfficePage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [liveTasks, setLiveTasks] = useState<LiveTask[]>([]);
+
+  const fetchTasks = useCallback(async () => {
+    try {
+      const res = await fetch("/api/tasks");
+      const data = await res.json();
+      if (data.tasks) setLiveTasks(data.tasks.filter((t: LiveTask) => t.status === "in_progress"));
+    } catch (e) { console.error(e); }
+  }, []);
+
+  useEffect(() => { fetchTasks(); const i = setInterval(fetchTasks, 30000); return () => clearInterval(i); }, [fetchTasks]);
+
+  // Map agent id → their current in-progress task
+  const agentTasks = useMemo(() => {
+    const map: Record<string, LiveTask> = {};
+    liveTasks.forEach(t => { if (!map[t.assignee]) map[t.assignee] = t; });
+    return map;
+  }, [liveTasks]);
 
   const selectedAgent = useMemo(
     () => AI_AGENTS.find((a) => a.id === selectedId) ?? null,
     [selectedId]
   );
 
-  const activeCount = AI_AGENTS.filter((a) => a.status === "active" || a.status === "working").length;
+  const activeCount = AI_AGENTS.filter((a) => {
+    const hasTask = !!agentTasks[a.id];
+    return hasTask || a.status === "active" || a.status === "working";
+  }).length;
   const depts = [...new Set(AI_AGENTS.map((a) => a.department))];
 
   return (
@@ -122,10 +151,23 @@ export default function OfficePage() {
                 </div>
               )}
 
-              {selectedAgent.currentTask && (
+              {(agentTasks[selectedAgent.id] || selectedAgent.currentTask) && (
                 <div className="bg-white/[0.03] rounded-lg p-2.5 border border-white/[0.05]">
-                  <p className="text-[9px] text-slate-500 uppercase tracking-wider mb-1">Current Task</p>
-                  <p className="text-[11px] text-slate-300">{selectedAgent.currentTask}</p>
+                  <p className="text-[9px] text-slate-500 uppercase tracking-wider mb-1">
+                    {agentTasks[selectedAgent.id] ? "🔴 Live Task" : "Current Task"}
+                  </p>
+                  <p className="text-[11px] text-slate-300">
+                    {agentTasks[selectedAgent.id]?.title || selectedAgent.currentTask}
+                  </p>
+                  {agentTasks[selectedAgent.id] && (
+                    <span className="text-[9px] mt-1 inline-block px-1.5 py-0.5 rounded bg-green-500/10 text-green-400">In Progress</span>
+                  )}
+                </div>
+              )}
+              {!agentTasks[selectedAgent.id] && !selectedAgent.currentTask && (
+                <div className="bg-white/[0.03] rounded-lg p-2.5 border border-white/[0.05]">
+                  <p className="text-[9px] text-slate-500 uppercase tracking-wider mb-1">Status</p>
+                  <p className="text-[11px] text-slate-500 italic">Idle — no active tasks</p>
                 </div>
               )}
 
