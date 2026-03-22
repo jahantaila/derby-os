@@ -19,10 +19,14 @@ async function sb(method: string, path: string, opts?: { params?: string; body?:
   return ct.includes("json") ? res.json() : null;
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    const events = await sb("GET", "calendar_events", { params: "select=*&order=date.asc,time.asc" });
-    return NextResponse.json({ events });
+    const { searchParams } = new URL(req.url);
+    const search = searchParams.get("q");
+    let params = "select=*&order=last_modified.desc";
+    if (search) params += `&or=(title.ilike.*${search}*,content.ilike.*${search}*,summary.ilike.*${search}*)`;
+    const memories = await sb("GET", "memories", { params });
+    return NextResponse.json({ memories });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
@@ -31,10 +35,10 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { title, date, time, assignee, type, client, description, recurring, cron_id, created_by } = body;
-    if (!title || !date || !assignee) return NextResponse.json({ error: "title, date, assignee required" }, { status: 400 });
-    const result = await sb("POST", "calendar_events", { body: { title, date, time: time || null, assignee, type: type || "task", client: client || null, description: description || null, recurring: recurring || null, cron_id: cron_id || null, created_by: created_by || null } });
-    return NextResponse.json({ event: result?.[0] });
+    const { title, filename, content, summary, category } = body;
+    if (!title || !filename) return NextResponse.json({ error: "title and filename required" }, { status: 400 });
+    const result = await sb("POST", "memories", { body: { title, filename, content: content || null, summary: summary || null, category: category || null } });
+    return NextResponse.json({ memory: result?.[0] });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
@@ -45,9 +49,9 @@ export async function PATCH(req: NextRequest) {
     const body = await req.json();
     const { id, ...updates } = body;
     if (!id) return NextResponse.json({ error: "id required" }, { status: 400 });
-    updates.updated_at = new Date().toISOString();
-    const result = await sb("PATCH", "calendar_events", { params: `id=eq.${id}`, body: updates });
-    return NextResponse.json({ event: result?.[0] });
+    updates.last_modified = new Date().toISOString();
+    const result = await sb("PATCH", "memories", { params: `id=eq.${id}`, body: updates });
+    return NextResponse.json({ memory: result?.[0] });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
@@ -58,7 +62,7 @@ export async function DELETE(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
     if (!id) return NextResponse.json({ error: "id required" }, { status: 400 });
-    await sb("DELETE", "calendar_events", { params: `id=eq.${id}` });
+    await sb("DELETE", "memories", { params: `id=eq.${id}` });
     return NextResponse.json({ ok: true });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });
