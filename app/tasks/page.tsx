@@ -142,6 +142,14 @@ function TaskCard({ task, onStatusChange, onDelete }: {
                 Move to {nextStatus.label}
               </button>
             )}
+            {task.status === "needs_jahan_approval" && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onStatusChange(task.id, "done"); }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:brightness-110 bg-green-500/20 text-green-400">
+                <CheckCircle2 className="w-3 h-3" />
+                Approve &amp; Done
+              </button>
+            )}
             <button
               onClick={(e) => { e.stopPropagation(); if (confirm("Delete this task?")) onDelete(task.id); }}
               className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs text-red-400/60 hover:text-red-400 hover:bg-red-500/10 transition-all ml-auto">
