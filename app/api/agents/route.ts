@@ -31,12 +31,23 @@ export async function GET() {
     const tasksByAgent: Record<string, any[]> = {};
     (tasks || []).forEach((t: any) => { (tasksByAgent[t.assignee] ??= []).push(t); });
     
-    const enriched = (agents || []).map((a: any) => ({
-      ...a,
-      skills: typeof a.skills === "string" ? JSON.parse(a.skills) : a.skills || [],
-      active_tasks: tasksByAgent[a.id] || [],
-      active_task_count: (tasksByAgent[a.id] || []).length,
-    }));
+    const enriched = (agents || []).map((a: any) => {
+      const agentTasks = tasksByAgent[a.id] || [];
+      const inProgress = agentTasks.filter((t: any) => t.status === "in_progress");
+      
+      // Dynamic status: working if has in_progress tasks, idle if not
+      let liveStatus = "idle";
+      if (inProgress.length > 0) liveStatus = "working";
+      
+      return {
+        ...a,
+        status: liveStatus,
+        current_task: inProgress[0]?.title || null,
+        skills: typeof a.skills === "string" ? JSON.parse(a.skills) : a.skills || [],
+        active_tasks: agentTasks,
+        active_task_count: agentTasks.length,
+      };
+    });
     
     return NextResponse.json({ agents: enriched });
   } catch (e: any) {
