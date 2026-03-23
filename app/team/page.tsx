@@ -1,393 +1,339 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  Activity,
-  BadgeCheck,
-  Brain,
-  BriefcaseBusiness,
-  ChevronRight,
-  Clock3,
-  Code2,
-  Crown,
-  Layers3,
-  Megaphone,
-  Sparkles,
-  Target,
+  Activity, ChevronDown, ChevronRight, Circle, Clock, Code,
+  Cpu, Crown, Loader2, RefreshCw, Search, Shield, Target,
+  TrendingUp, User, Zap, X, CheckCircle2,
 } from "lucide-react";
-import { TEAM_SEED } from "@/lib/agents-data";
-import type { AgentRecord } from "@/lib/agents-data";
 import { cn } from "@/lib/utils";
 
-const DEPARTMENT_STYLES = {
-  Executive: {
-    color: "#2093FF",
-    icon: Crown,
-    description: "Leadership, routing, and agency-level decision support.",
-  },
-  Marketing: {
-    color: "#F93C3C",
-    icon: Megaphone,
-    description: "Performance analysis, offer strategy, and campaign production.",
-  },
-  Sales: {
-    color: "#22C55E",
-    icon: Target,
-    description: "Pipeline operations, lead sync, and outbound system throughput.",
-  },
-  Development: {
-    color: "#FFBD59",
-    icon: Code2,
-    description: "Product delivery, infrastructure, and internal platform engineering.",
-  },
-} as const;
+/* ── Types ── */
+interface Agent {
+  id: string;
+  name: string;
+  role: string;
+  department: string;
+  department_color: string;
+  model: string | null;
+  status: string;
+  avatar_emoji: string | null;
+  about: string | null;
+  skills: string[];
+  current_task: string | null;
+  total_tasks_completed: number;
+  last_active: string;
+  active_tasks: { id: string; title: string; status: string; priority: string }[];
+  active_task_count: number;
+}
 
-type DepartmentName = keyof typeof DEPARTMENT_STYLES;
-type ModelName = "Opus" | "Sonnet" | "Codex";
-
-const MODEL_STYLES: Record<ModelName, string> = {
-  Opus: "border-[#2093FF]/30 bg-[#2093FF]/10 text-[#8DC8FF]",
-  Sonnet: "border-[#F93C3C]/25 bg-[#F93C3C]/10 text-[#FF9B9B]",
-  Codex: "border-[#FFBD59]/25 bg-[#FFBD59]/10 text-[#FFD98F]",
+/* ── Constants ── */
+const DEPT_ICONS: Record<string, typeof Crown> = {
+  Executive: Crown,
+  Marketing: Target,
+  Sales: TrendingUp,
+  Development: Code,
 };
 
-const STATUS_STYLES: Record<AgentRecord["status"], { dot: string; label: string }> = {
-  active: { dot: "bg-emerald-400", label: "Active" },
-  working: { dot: "bg-amber-400", label: "Working" },
-  idle: { dot: "bg-zinc-500", label: "Idle" },
-  offline: { dot: "bg-zinc-600", label: "Offline" },
+const STATUS_CONFIG: Record<string, { label: string; color: string; pulse: boolean }> = {
+  active: { label: "Online", color: "#22C55E", pulse: true },
+  working: { label: "Working", color: "#FFBD59", pulse: true },
+  idle: { label: "Idle", color: "#64748b", pulse: false },
+  offline: { label: "Offline", color: "#374151", pulse: false },
 };
 
-function roleIcon(role: AgentRecord["role"]) {
-  if (role === "CEO") return Crown;
-  if (role === "Chief of Staff") return BriefcaseBusiness;
-  if (role === "Marketing Analyst") return Brain;
-  if (role === "Ad Producer") return Megaphone;
-  if (role === "Operations Specialist") return Activity;
-  return Code2;
-}
+const PRIORITY_COLORS: Record<string, string> = {
+  urgent: "#F93C3C",
+  high: "#FFBD59",
+  medium: "#2093FF",
+  low: "#64748b",
+};
 
-function formatTimestamp(timestamp: string) {
-  return timestamp.replace(" ", " · ");
-}
-
-function AgentCard({
-  agent,
-  expanded,
-  onClick,
-}: {
-  agent: AgentRecord;
-  expanded: boolean;
-  onClick: () => void;
-}) {
-  const RoleIcon = roleIcon(agent.role);
-  const status = STATUS_STYLES[agent.status];
-  const recentHistory = agent.history.slice(0, 3);
+/* ── Agent Card ── */
+function AgentCard({ agent, isExpanded, onToggle }: { agent: Agent; isExpanded: boolean; onToggle: () => void }) {
+  const DeptIcon = DEPT_ICONS[agent.department] || Cpu;
+  const statusConf = STATUS_CONFIG[agent.active_task_count > 0 ? "working" : agent.status] || STATUS_CONFIG.active;
+  const topTask = agent.active_tasks[0];
 
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "group w-full rounded-[24px] border bg-white/[0.03] p-5 text-left backdrop-blur-xl transition-all",
-        "border-white/[0.06] hover:border-white/15 hover:bg-white/[0.045]",
-        expanded && "border-[#2093FF]/35 bg-white/[0.055] shadow-[0_0_0_1px_rgba(32,147,255,0.18)]",
-      )}
-      aria-expanded={expanded}
-    >
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex min-w-0 items-start gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/[0.06] bg-white/[0.04]">
-            <RoleIcon className="h-5 w-5 text-white/80" />
+    <div className={cn(
+      "bg-white/[0.02] border rounded-xl transition-all overflow-hidden",
+      isExpanded ? "border-white/[0.12]" : "border-white/[0.06] hover:border-white/[0.1]"
+    )}>
+      {/* Main row */}
+      <div className="flex items-center gap-4 p-4 cursor-pointer" onClick={onToggle}>
+        {/* Avatar */}
+        <div className="relative">
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl"
+            style={{ background: `${agent.department_color}15` }}>
+            {agent.avatar_emoji || "🤖"}
           </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <h3 className="truncate text-[15px] font-semibold text-white">{agent.name}</h3>
-              <span className="flex items-center gap-1">
-                <span className={cn("h-2.5 w-2.5 rounded-full", status.dot)} />
-                <span className="text-[10px] uppercase tracking-[0.18em] text-white/45">{status.label}</span>
-              </span>
-            </div>
-            <p className="mt-1 text-sm text-white/62">{agent.role}</p>
-          </div>
+          <div className={cn("absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-[#0a0a0f]", statusConf.pulse && "animate-pulse")}
+            style={{ background: statusConf.color }} />
         </div>
 
-        <div className="flex items-center gap-2">
-          {agent.model && (
-            <span
-              className={cn(
-                "rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em]",
-                MODEL_STYLES[agent.model as ModelName] ?? "border-white/[0.08] bg-white/[0.06] text-white/70",
-              )}
-            >
-              {agent.model}
-            </span>
-          )}
-          <ChevronRight className={cn("h-4 w-4 text-white/28 transition-transform", expanded && "rotate-90 text-white/55")} />
-        </div>
-      </div>
-
-      <div className="mt-4 rounded-2xl border border-white/[0.05] bg-black/20 p-4">
-        <p className="text-[10px] uppercase tracking-[0.18em] text-white/38">Current Task</p>
-        <p className="mt-2 text-sm text-white/78">{agent.currentTask || "No active task assigned"}</p>
-      </div>
-
-      <div className="mt-4 flex flex-wrap gap-2">
-        {agent.skills.length > 0 ? (
-          agent.skills.slice(0, 6).map((skill) => (
-            <span
-              key={skill}
-              className="rounded-full border border-white/[0.07] bg-white/[0.04] px-2.5 py-1 text-[10px] text-white/60"
-            >
-              {skill}
-            </span>
-          ))
-        ) : (
-          <span className="rounded-full border border-white/[0.07] bg-white/[0.04] px-2.5 py-1 text-[10px] text-white/45">
-            No registered skills
-          </span>
-        )}
-      </div>
-
-      <div className="mt-5 space-y-2.5">
-        {recentHistory.length > 0 ? (
-          recentHistory.map((entry) => (
-            <div key={`${agent.id}-${entry.timestamp}-${entry.action}`} className="flex items-start justify-between gap-3">
-              <p className="min-w-0 flex-1 text-[12px] text-white/72">{entry.action}</p>
-              <span className="shrink-0 font-mono text-[11px] text-white/36">{formatTimestamp(entry.timestamp)}</span>
-            </div>
-          ))
-        ) : (
-          <p className="text-[12px] text-white/40">No recent activity logged.</p>
-        )}
-      </div>
-    </button>
-  );
-}
-
-function DetailPanel({ agent }: { agent: AgentRecord }) {
-  const status = STATUS_STYLES[agent.status];
-  const dept = DEPARTMENT_STYLES[agent.department as DepartmentName];
-
-  return (
-    <div className="rounded-[28px] border border-white/[0.06] bg-white/[0.03] p-6 backdrop-blur-xl">
-      <div className="flex items-start justify-between gap-4">
-        <div>
+        {/* Info */}
+        <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <h2 className="text-2xl font-semibold text-white">{agent.name}</h2>
-            <span className={cn("h-2.5 w-2.5 rounded-full", status.dot)} />
-          </div>
-          <p className="mt-1 text-white/60">{agent.role}</p>
-        </div>
-        {agent.model && (
-          <span
-            className={cn(
-              "rounded-full border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em]",
-              MODEL_STYLES[agent.model as ModelName] ?? "border-white/[0.08] bg-white/[0.06] text-white/70",
-            )}
-          >
-            {agent.model}
-          </span>
-        )}
-      </div>
-
-      <div className="mt-5 grid gap-3 sm:grid-cols-2">
-        <div className="rounded-2xl border border-white/[0.05] bg-black/20 p-4">
-          <p className="text-[10px] uppercase tracking-[0.18em] text-white/38">Department</p>
-          <p className="mt-2 text-sm font-medium" style={{ color: dept?.color ?? "#fff" }}>
-            {agent.department}
-          </p>
-        </div>
-        <div className="rounded-2xl border border-white/[0.05] bg-black/20 p-4">
-          <p className="text-[10px] uppercase tracking-[0.18em] text-white/38">Current Status</p>
-          <p className="mt-2 text-sm text-white/78">{status.label}</p>
-        </div>
-      </div>
-
-      <div className="mt-5 rounded-2xl border border-white/[0.05] bg-black/20 p-4">
-        <p className="text-[10px] uppercase tracking-[0.18em] text-white/38">Tasking</p>
-        <p className="mt-2 text-sm text-white/78">{agent.currentTask || "No active task assigned"}</p>
-      </div>
-
-      <div className="mt-5">
-        <div className="flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-white/48" />
-          <p className="text-[10px] uppercase tracking-[0.18em] text-white/38">Soul Description</p>
-        </div>
-        <div className="mt-3 rounded-2xl border border-white/[0.05] bg-black/20 p-4">
-          <p className="whitespace-pre-line text-sm leading-7 text-white/72">
-            {agent.soul || "No expanded description available."}
-          </p>
-        </div>
-      </div>
-
-      <div className="mt-5">
-        <div className="flex items-center gap-2">
-          <BadgeCheck className="h-4 w-4 text-white/48" />
-          <p className="text-[10px] uppercase tracking-[0.18em] text-white/38">All Skills</p>
-        </div>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {agent.skills.length > 0 ? (
-            agent.skills.map((skill) => (
-              <span
-                key={skill}
-                className="rounded-full border border-white/[0.07] bg-white/[0.04] px-3 py-1.5 text-[11px] text-white/66"
-              >
-                {skill}
-              </span>
-            ))
-          ) : (
-            <span className="rounded-full border border-white/[0.07] bg-white/[0.04] px-3 py-1.5 text-[11px] text-white/45">
-              No registered skills
+            <h3 className="font-semibold text-white">{agent.name}</h3>
+            <span className="text-[10px] px-2 py-0.5 rounded-full font-medium"
+              style={{ background: `${agent.department_color}15`, color: agent.department_color }}>
+              {agent.department}
             </span>
-          )}
+          </div>
+          <p className="text-xs text-slate-500 mt-0.5">{agent.role}</p>
         </div>
+
+        {/* Stats */}
+        <div className="flex items-center gap-6 mr-4">
+          <div className="text-center">
+            <div className="text-lg font-bold font-mono text-white">{agent.active_task_count}</div>
+            <div className="text-[9px] text-slate-600 uppercase tracking-wider">Active</div>
+          </div>
+          <div className="text-center">
+            <div className="text-lg font-bold font-mono text-white">{agent.total_tasks_completed}</div>
+            <div className="text-[9px] text-slate-600 uppercase tracking-wider">Done</div>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-2 h-2 rounded-full" style={{ background: statusConf.color }} />
+            <span className="text-xs" style={{ color: statusConf.color }}>{statusConf.label}</span>
+          </div>
+        </div>
+
+        {/* Current task preview */}
+        {topTask && (
+          <div className="hidden lg:flex items-center gap-2 max-w-[250px] bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-1.5">
+            <Zap className="w-3 h-3 flex-shrink-0" style={{ color: PRIORITY_COLORS[topTask.priority] || "#2093FF" }} />
+            <span className="text-[11px] text-slate-400 truncate">{topTask.title}</span>
+          </div>
+        )}
+
+        {/* Expand arrow */}
+        {isExpanded ? <ChevronDown className="w-4 h-4 text-slate-500" /> : <ChevronRight className="w-4 h-4 text-slate-500" />}
       </div>
 
-      <div className="mt-5">
-        <div className="flex items-center gap-2">
-          <Clock3 className="h-4 w-4 text-white/48" />
-          <p className="text-[10px] uppercase tracking-[0.18em] text-white/38">Full Activity History</p>
-        </div>
-        <div className="mt-3 space-y-3 rounded-2xl border border-white/[0.05] bg-black/20 p-4">
-          {agent.history.length > 0 ? (
-            agent.history.map((entry) => (
-              <div
-                key={`${agent.id}-${entry.timestamp}-${entry.action}`}
-                className="flex items-start justify-between gap-3 border-b border-white/[0.05] pb-3 last:border-b-0 last:pb-0"
-              >
-                <p className="min-w-0 flex-1 text-sm text-white/76">{entry.action}</p>
-                <span className="shrink-0 font-mono text-[11px] text-white/38">{formatTimestamp(entry.timestamp)}</span>
+      {/* Expanded detail panel */}
+      {isExpanded && (
+        <div className="border-t border-white/[0.06] bg-white/[0.01]">
+          <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* About */}
+            <div className="lg:col-span-2 space-y-4">
+              {agent.about && (
+                <div>
+                  <h4 className="text-[10px] text-slate-500 uppercase tracking-wider mb-2">About</h4>
+                  <p className="text-sm text-slate-400 leading-relaxed">{agent.about}</p>
+                </div>
+              )}
+
+              {/* Active Tasks */}
+              <div>
+                <h4 className="text-[10px] text-slate-500 uppercase tracking-wider mb-2">
+                  Active Tasks ({agent.active_task_count})
+                </h4>
+                {agent.active_tasks.length > 0 ? (
+                  <div className="space-y-1.5">
+                    {agent.active_tasks.map(t => (
+                      <div key={t.id} className="flex items-center gap-2 bg-white/[0.03] border border-white/[0.05] rounded-lg px-3 py-2">
+                        <div className="w-1.5 h-1.5 rounded-full" style={{ background: PRIORITY_COLORS[t.priority] || "#2093FF" }} />
+                        <span className="text-xs text-slate-300 flex-1">{t.title}</span>
+                        <span className="text-[9px] px-1.5 py-0.5 rounded-full capitalize"
+                          style={{
+                            background: t.status === "in_progress" ? "#2093FF15" : t.status === "needs_kimberly_approval" ? "#FFBD5915" : t.status === "needs_jahan_approval" ? "#F93C3C15" : "#64748b15",
+                            color: t.status === "in_progress" ? "#2093FF" : t.status === "needs_kimberly_approval" ? "#FFBD59" : t.status === "needs_jahan_approval" ? "#F93C3C" : "#64748b",
+                          }}>
+                          {t.status.replace(/_/g, " ")}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-600 italic">No active tasks — standing by</p>
+                )}
               </div>
-            ))
-          ) : (
-            <p className="text-sm text-white/45">No activity history logged.</p>
-          )}
+            </div>
+
+            {/* Right column: Skills + Meta */}
+            <div className="space-y-4">
+              {/* Model */}
+              {agent.model && (
+                <div>
+                  <h4 className="text-[10px] text-slate-500 uppercase tracking-wider mb-2">Model</h4>
+                  <div className="flex items-center gap-2">
+                    <Cpu className="w-3.5 h-3.5 text-slate-500" />
+                    <span className="text-sm text-slate-300">{agent.model}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Skills */}
+              {agent.skills.length > 0 && (
+                <div>
+                  <h4 className="text-[10px] text-slate-500 uppercase tracking-wider mb-2">Skills ({agent.skills.length})</h4>
+                  <div className="flex flex-wrap gap-1.5">
+                    {agent.skills.map(s => (
+                      <span key={s} className="text-[10px] px-2 py-1 rounded-lg bg-white/[0.04] border border-white/[0.06] text-slate-400">
+                        {s}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Last Active */}
+              <div>
+                <h4 className="text-[10px] text-slate-500 uppercase tracking-wider mb-2">Last Active</h4>
+                <div className="flex items-center gap-2">
+                  <Clock className="w-3.5 h-3.5 text-slate-500" />
+                  <span className="text-xs text-slate-400">
+                    {new Date(agent.last_active).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
 
+/* ── Main Page ── */
 export default function TeamPage() {
-  const agents = useMemo(() => TEAM_SEED.filter((member) => member.type === "agent"), []);
-  const [selectedAgentId, setSelectedAgentId] = useState<string>(agents[0]?.id ?? "");
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [filterDept, setFilterDept] = useState("all");
 
-  const departments = useMemo(() => {
-    const grouped = new Map<DepartmentName, AgentRecord[]>();
+  const fetchAgents = useCallback(async () => {
+    try {
+      const res = await fetch("/api/agents");
+      const data = await res.json();
+      if (data.agents) setAgents(data.agents);
+    } catch (e) { console.error(e); }
+    finally { setLoading(false); }
+  }, []);
 
-    agents.forEach((agent) => {
-      if (!(agent.department in DEPARTMENT_STYLES)) return;
-      const department = agent.department as DepartmentName;
-      const existing = grouped.get(department) ?? [];
-      existing.push(agent);
-      grouped.set(department, existing);
+  useEffect(() => { fetchAgents(); }, [fetchAgents]);
+  useEffect(() => { const i = setInterval(fetchAgents, 30000); return () => clearInterval(i); }, [fetchAgents]);
+
+  const departments = useMemo(() => [...new Set(agents.map(a => a.department))], [agents]);
+
+  const filtered = useMemo(() => {
+    return agents.filter(a => {
+      if (search && !a.name.toLowerCase().includes(search.toLowerCase()) && !a.role.toLowerCase().includes(search.toLowerCase())) return false;
+      if (filterDept !== "all" && a.department !== filterDept) return false;
+      return true;
     });
+  }, [agents, search, filterDept]);
 
-    return Array.from(grouped.entries()).map(([department, members]) => ({
-      department,
-      members,
-      ...DEPARTMENT_STYLES[department],
-    }));
-  }, [agents]);
+  const grouped = useMemo(() => {
+    const map: Record<string, Agent[]> = {};
+    filtered.forEach(a => { (map[a.department] ??= []).push(a); });
+    return map;
+  }, [filtered]);
 
-  const selectedAgent = agents.find((agent) => agent.id === selectedAgentId) ?? agents[0] ?? null;
-  const activeCount = agents.filter((agent) => agent.status === "active").length;
+  const stats = useMemo(() => ({
+    total: agents.length,
+    working: agents.filter(a => a.active_task_count > 0).length,
+    totalTasks: agents.reduce((sum, a) => sum + a.active_task_count, 0),
+    totalCompleted: agents.reduce((sum, a) => sum + a.total_tasks_completed, 0),
+  }), [agents]);
+
+  if (loading) return <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center"><Loader2 className="w-6 h-6 animate-spin text-[#2093FF]" /></div>;
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] px-4 py-6 text-white sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-[1600px]">
-        <div className="overflow-hidden rounded-[32px] border border-white/[0.06] bg-[radial-gradient(circle_at_top_left,rgba(32,147,255,0.16),transparent_28%),radial-gradient(circle_at_top_right,rgba(249,60,60,0.1),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.035),rgba(255,255,255,0.015))] p-6 backdrop-blur-xl sm:p-8">
-          <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
-            <div>
-              <p className="text-[11px] uppercase tracking-[0.24em] text-white/42">Mission Control</p>
-              <h1 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-                Formal AI Agents Dashboard
-              </h1>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-white/58">
-                Live team intelligence sourced directly from the shared agent registry. Departments, status, tasking,
-                and operational history are discovered from seed data without hardcoded rosters.
-              </p>
-            </div>
+    <div className="min-h-screen bg-[#0a0a0f] text-white p-6 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Team</h1>
+          <p className="text-slate-500 text-sm mt-1">
+            {stats.total} agents · {stats.working} working · {stats.totalTasks} active tasks · {stats.totalCompleted} completed
+          </p>
+        </div>
+        <button onClick={fetchAgents} className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400"><RefreshCw className="w-4 h-4" /></button>
+      </div>
 
-            <div className="grid gap-3 sm:grid-cols-3">
-              {[
-                { label: "Total Agents", value: String(agents.length), icon: Brain },
-                { label: "Active", value: String(activeCount), icon: Activity },
-                { label: "Departments", value: String(departments.length), icon: Layers3 },
-              ].map((stat) => (
-                <div
-                  key={stat.label}
-                  className="min-w-[180px] rounded-[22px] border border-white/[0.06] bg-white/[0.03] p-4"
-                >
-                  <div className="flex items-center justify-between">
-                    <p className="text-[10px] uppercase tracking-[0.18em] text-white/38">{stat.label}</p>
-                    <stat.icon className="h-4 w-4 text-white/42" />
-                  </div>
-                  <p className="mt-3 font-mono text-3xl text-white">{stat.value}</p>
-                </div>
+      {/* KPI Cards */}
+      <div className="grid grid-cols-4 gap-4">
+        {[
+          { label: "Total Agents", value: stats.total, color: "#2093FF", icon: User },
+          { label: "Currently Working", value: stats.working, color: "#22C55E", icon: Activity },
+          { label: "Active Tasks", value: stats.totalTasks, color: "#FFBD59", icon: Zap },
+          { label: "Tasks Completed", value: stats.totalCompleted, color: "#A855F7", icon: CheckCircle2 },
+        ].map(kpi => (
+          <div key={kpi.label} className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <kpi.icon className="w-4 h-4" style={{ color: kpi.color }} />
+              <span className="text-[10px] text-slate-500 uppercase tracking-wider">{kpi.label}</span>
+            </div>
+            <div className="text-2xl font-bold font-mono" style={{ color: kpi.color }}>{kpi.value}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Search & Filter */}
+      <div className="flex items-center gap-3">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+          <input type="text" placeholder="Search agents..." value={search} onChange={e => setSearch(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-slate-600 focus:border-[#2093FF] outline-none" />
+        </div>
+        <div className="flex bg-white/5 rounded-lg p-0.5">
+          <button onClick={() => setFilterDept("all")}
+            className={cn("px-3 py-1.5 rounded-md text-xs font-medium", filterDept === "all" ? "bg-[#2093FF] text-white" : "text-slate-400")}>
+            All
+          </button>
+          {departments.map(dept => {
+            const DeptIcon = DEPT_ICONS[dept] || Cpu;
+            const agent = agents.find(a => a.department === dept);
+            const color = agent?.department_color || "#666";
+            return (
+              <button key={dept} onClick={() => setFilterDept(dept)}
+                className={cn("px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5",
+                  filterDept === dept ? "text-white" : "text-slate-400")}
+                style={filterDept === dept ? { background: `${color}30`, color } : {}}>
+                <DeptIcon className="w-3 h-3" />
+                {dept}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Agent List by Department */}
+      {Object.entries(grouped).map(([dept, deptAgents]) => {
+        const DeptIcon = DEPT_ICONS[dept] || Cpu;
+        const color = deptAgents[0]?.department_color || "#666";
+        return (
+          <div key={dept} className="space-y-3">
+            <div className="flex items-center gap-2">
+              <DeptIcon className="w-4 h-4" style={{ color }} />
+              <h2 className="text-sm font-semibold" style={{ color }}>{dept}</h2>
+              <span className="text-[10px] text-slate-600">{deptAgents.length} agent{deptAgents.length > 1 ? "s" : ""}</span>
+            </div>
+            <div className="space-y-2">
+              {deptAgents.map(agent => (
+                <AgentCard
+                  key={agent.id}
+                  agent={agent}
+                  isExpanded={expandedId === agent.id}
+                  onToggle={() => setExpandedId(expandedId === agent.id ? null : agent.id)}
+                />
               ))}
             </div>
           </div>
-        </div>
+        );
+      })}
 
-        <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_420px]">
-          <div className="space-y-6">
-            {departments.map((department) => {
-              const DepartmentIcon = department.icon;
-
-              return (
-                <section
-                  key={department.department}
-                  className="overflow-hidden rounded-[28px] border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl"
-                >
-                  <div
-                    className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
-                    style={{
-                      background: `linear-gradient(90deg, ${department.color} 0%, ${department.color}CC 35%, rgba(255,255,255,0.03) 100%)`,
-                    }}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-black/10 bg-black/15">
-                        <DepartmentIcon className="h-5 w-5 text-white" />
-                      </div>
-                      <div>
-                        <h2 className="text-lg font-semibold text-white">{department.department}</h2>
-                        <p className="text-sm text-white/80">{department.description}</p>
-                      </div>
-                    </div>
-                    <div className="font-mono text-sm text-white/85">{department.members.length} online records</div>
-                  </div>
-
-                  <div className="grid gap-4 p-4 md:grid-cols-2 2xl:grid-cols-3">
-                    {department.members.map((agent) => (
-                      <AgentCard
-                        key={agent.id}
-                        agent={agent}
-                        expanded={selectedAgentId === agent.id}
-                        onClick={() => setSelectedAgentId((current) => (current === agent.id ? "" : agent.id))}
-                      />
-                    ))}
-                  </div>
-                </section>
-              );
-            })}
-          </div>
-
-          <div className="xl:sticky xl:top-6 xl:self-start">
-            {selectedAgent ? (
-              <DetailPanel agent={selectedAgent} />
-            ) : (
-              <div className="rounded-[28px] border border-white/[0.06] bg-white/[0.03] p-6 backdrop-blur-xl">
-                <p className="text-[10px] uppercase tracking-[0.18em] text-white/38">Detail Panel</p>
-                <p className="mt-3 text-sm leading-6 text-white/58">
-                  Select an agent card to inspect the full profile, narrative description, skills registry, and complete
-                  activity history.
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
+      {/* Legend */}
+      <div className="flex items-center gap-4 text-[10px] text-slate-600">
+        <span>Auto-refreshes every 30s</span>
+        <span>·</span>
+        <span>Tasks pulled live from Supabase</span>
+        <span>·</span>
+        <span>Add agents via API — page auto-discovers</span>
       </div>
     </div>
   );
