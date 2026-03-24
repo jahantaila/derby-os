@@ -1,877 +1,399 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
-import type { AgentRecord } from "@/lib/agents-data";
+import type { CSSProperties } from "react";
+
+type AgentTask = {
+  id: string;
+  title: string;
+  status: string;
+  priority?: string | null;
+};
+
+type AgentHistoryEntry = {
+  timestamp: string;
+  action: string;
+};
+
+export type OfficeAgent = {
+  id: string;
+  name: string;
+  role: string;
+  department: "Executive" | "Marketing" | "Sales" | "Development";
+  model: string | null;
+  skills: string[];
+  about: string;
+  history: AgentHistoryEntry[];
+  activeTasks: AgentTask[];
+  inProgressTasks: AgentTask[];
+  currentTask: string | null;
+  status: "working" | "idle";
+  accent: string;
+  initials: string;
+};
 
 type Props = {
-  agents: AgentRecord[];
+  agents: OfficeAgent[];
+  loading: boolean;
   selectedId: string | null;
-  onSelect: (id: string | null) => void;
+  onSelect: (id: string) => void;
 };
 
-const DEPT_COLORS: Record<string, number> = {
-  Executive: 0x2093ff,
-  Marketing: 0xf93c3c,
-  Sales: 0x22c55e,
-  Development: 0xffbd59,
+const ZONE_COPY: Record<OfficeAgent["department"], string> = {
+  Executive: "Executive Suite",
+  Marketing: "Marketing",
+  Sales: "Sales",
+  Development: "Development",
 };
 
-const SKIN = 0xffdbac;
-
-const DESK_POSITIONS: Record<string, { pos: [number, number]; facing: number; dept: string }> = {
-  kimberly: { pos: [-4, -3], facing: 0, dept: "Executive" },
-  alex: { pos: [-1, -3], facing: 0, dept: "Marketing" },
-  sabri: { pos: [2, -3], facing: 0, dept: "Marketing" },
-  jordan: { pos: [5, -3], facing: 0, dept: "Sales" },
-  kevin: { pos: [-4, 3], facing: Math.PI, dept: "Development" },
+const ZONE_LAYOUT: Record<
+  OfficeAgent["department"],
+  { className: string; style: Record<string, string>; labelClassName: string }
+> = {
+  Executive: {
+    className: "left-[23%] top-[7%] h-[32%] w-[54%]",
+    style: { "--zone-color": "#2093FF" },
+    labelClassName: "left-1/2 top-5 -translate-x-1/2",
+  },
+  Marketing: {
+    className: "left-[7%] top-[25%] h-[38%] w-[26%]",
+    style: { "--zone-color": "#F93C3C" },
+    labelClassName: "left-6 top-5",
+  },
+  Sales: {
+    className: "right-[7%] top-[25%] h-[38%] w-[26%]",
+    style: { "--zone-color": "#22C55E" },
+    labelClassName: "right-6 top-5",
+  },
+  Development: {
+    className: "left-[18%] bottom-[7%] h-[30%] w-[64%]",
+    style: { "--zone-color": "#FFBD59" },
+    labelClassName: "left-1/2 top-5 -translate-x-1/2",
+  },
 };
 
-function createMaterial(THREE: any, color: number, opts?: any) {
-  return new THREE.MeshStandardMaterial({ color, roughness: 0.7, metalness: 0.1, ...opts });
+const AGENT_LAYOUT: Record<string, { x: string; y: string; idleX?: string; idleY?: string }> = {
+  kimberly: { x: "50%", y: "23%", idleX: "57%", idleY: "18%" },
+  alex: { x: "18%", y: "43%", idleX: "12%", idleY: "49%" },
+  sabri: { x: "28%", y: "53%", idleX: "21%", idleY: "59%" },
+  jordan: { x: "82%", y: "45%", idleX: "87%", idleY: "52%" },
+  kevin: { x: "50%", y: "77%", idleX: "42%", idleY: "84%" },
+};
+
+function zoneStyle(style: Record<string, string>) {
+  return style as CSSProperties;
 }
 
-// ─── Low-poly horse decoration ───
-function createHorse(THREE: any, color: number, scale: number = 1) {
-  const group = new THREE.Group();
-  const mat = createMaterial(THREE, color);
-  const darkMat = createMaterial(THREE, 0x1a1a1a);
-
-  // Body
-  const body = new THREE.Mesh(new THREE.BoxGeometry(1.8, 1.0, 0.8), mat);
-  body.position.y = 1.4;
-  body.castShadow = true;
-  group.add(body);
-
-  // Neck (angled)
-  const neck = new THREE.Mesh(new THREE.BoxGeometry(0.5, 1.0, 0.5), mat);
-  neck.position.set(0.9, 2.1, 0);
-  neck.rotation.z = -0.4;
-  neck.castShadow = true;
-  group.add(neck);
-
-  // Head
-  const head = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.45, 0.45), mat);
-  head.position.set(1.5, 2.5, 0);
-  head.castShadow = true;
-  group.add(head);
-
-  // Snout
-  const snout = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.3, 0.35), mat);
-  snout.position.set(1.95, 2.35, 0);
-  group.add(snout);
-
-  // Eyes
-  for (const side of [-1, 1]) {
-    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 8), new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.2 }));
-    eye.position.set(1.7, 2.58, side * 0.2);
-    group.add(eye);
-  }
-
-  // Ears
-  for (const side of [-1, 1]) {
-    const ear = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.25, 4), mat);
-    ear.position.set(1.3, 2.8, side * 0.15);
-    ear.rotation.z = side * 0.3;
-    group.add(ear);
-  }
-
-  // Mane
-  for (let i = 0; i < 5; i++) {
-    const mane = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.3, 0.15), darkMat);
-    mane.position.set(0.5 + i * 0.25, 2.0 + i * 0.15, 0);
-    mane.rotation.z = -0.2;
-    group.add(mane);
-  }
-
-  // Legs
-  const legPositions = [[-0.55, -1], [-0.55, 1], [0.55, -1], [0.55, 1]];
-  for (const [lx, lside] of legPositions) {
-    const leg = new THREE.Mesh(new THREE.BoxGeometry(0.2, 1.0, 0.2), mat);
-    leg.position.set(lx, 0.5, lside * 0.25);
-    leg.castShadow = true;
-    group.add(leg);
-    // Hoof
-    const hoof = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.15, 0.22), darkMat);
-    hoof.position.set(lx, 0.05, lside * 0.25);
-    group.add(hoof);
-  }
-
-  // Tail
-  const tail = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.7, 0.12), darkMat);
-  tail.position.set(-1.0, 1.6, 0);
-  tail.rotation.z = 0.3;
-  group.add(tail);
-
-  group.scale.setScalar(scale);
-  return group;
-}
-
-// ─── Character ───
-function createCharacter(THREE: any, color: number) {
-  const group = new THREE.Group();
-  const skinMat = createMaterial(THREE, SKIN);
-  const bodyMat = createMaterial(THREE, color);
-  const darkMat = createMaterial(THREE, 0x2a2a2a);
-  const shoeMat = createMaterial(THREE, 0x111111);
-
-  // Head
-  const head = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.42, 0.42), skinMat);
-  head.position.y = 1.92;
-  head.castShadow = true;
-  group.add(head);
-
-  // Hair
-  const hair = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.15, 0.44), darkMat);
-  hair.position.set(0, 2.15, -0.02);
-  group.add(hair);
-
-  // Body
-  const body = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.65, 0.32), bodyMat);
-  body.position.y = 1.38;
-  body.castShadow = true;
-  group.add(body);
-
-  // Arms
-  for (const side of [-1, 1]) {
-    // Upper arm
-    const arm = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.35, 0.16), bodyMat);
-    arm.position.set(side * 0.36, 1.5, 0);
-    arm.castShadow = true;
-    group.add(arm);
-    // Forearm
-    const forearm = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.3, 0.14), skinMat);
-    forearm.position.set(side * 0.36, 1.2, 0.1);
-    forearm.rotation.x = -0.3;
-    group.add(forearm);
-  }
-
-  // Legs
-  for (const side of [-1, 1]) {
-    const leg = new THREE.Mesh(new THREE.BoxGeometry(0.19, 0.5, 0.19), darkMat);
-    leg.position.set(side * 0.14, 0.75, 0);
-    leg.castShadow = true;
-    group.add(leg);
-    // Shoes
-    const shoe = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.12, 0.28), shoeMat);
-    shoe.position.set(side * 0.14, 0.48, 0.04);
-    group.add(shoe);
-  }
-
-  return group;
-}
-
-// ─── Desk with monitor ───
-function createDesk(THREE: any, accent: number) {
-  const group = new THREE.Group();
-  const woodMat = createMaterial(THREE, 0x4a3828, { roughness: 0.85 });
-  const darkWood = createMaterial(THREE, 0x2a1a10);
-  const metalMat = createMaterial(THREE, 0x555555, { metalness: 0.5, roughness: 0.3 });
-
-  // Desktop surface
-  const top = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.05, 0.9), woodMat);
-  top.position.y = 0.75;
-  top.castShadow = true;
-  top.receiveShadow = true;
-  group.add(top);
-
-  // Desk legs (metal)
-  for (const [lx, lz] of [[-0.8, -0.38], [0.8, -0.38], [-0.8, 0.38], [0.8, 0.38]]) {
-    const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.75, 8), metalMat);
-    leg.position.set(lx, 0.375, lz);
-    group.add(leg);
-  }
-
-  // Under-desk panel
-  const panel = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.5, 0.04), darkWood);
-  panel.position.set(0, 0.5, -0.42);
-  group.add(panel);
-
-  // Monitor
-  const monitorFrame = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.5, 0.04), createMaterial(THREE, 0x1a1a1a));
-  monitorFrame.position.set(0, 1.12, -0.3);
-  monitorFrame.castShadow = true;
-  group.add(monitorFrame);
-
-  // Screen (glowing)
-  const screenMat = new THREE.MeshStandardMaterial({
-    color: accent,
-    emissive: accent,
-    emissiveIntensity: 0.4,
-    roughness: 0.1,
-    metalness: 0.1,
-  });
-  const screen = new THREE.Mesh(new THREE.BoxGeometry(0.68, 0.43, 0.01), screenMat);
-  screen.position.set(0, 1.12, -0.275);
-  group.add(screen);
-
-  // Monitor stand
-  const stand = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.14, 8), metalMat);
-  stand.position.set(0, 0.84, -0.3);
-  group.add(stand);
-
-  // Monitor base
-  const base = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.02, 16), metalMat);
-  base.position.set(0, 0.77, -0.3);
-  group.add(base);
-
-  // Keyboard
-  const kb = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.02, 0.15), createMaterial(THREE, 0x222222));
-  kb.position.set(0, 0.78, 0.1);
-  group.add(kb);
-
-  // Mouse
-  const mouse = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.02, 0.12), createMaterial(THREE, 0x222222));
-  mouse.position.set(0.4, 0.78, 0.1);
-  group.add(mouse);
-
-  // Coffee mug
-  const mug = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.04, 0.1, 12), createMaterial(THREE, accent, { roughness: 0.3 }));
-  mug.position.set(-0.6, 0.82, 0.2);
-  group.add(mug);
-
-  // Chair
-  const chairGroup = new THREE.Group();
-  const chairMat = createMaterial(THREE, 0x1c1c2e, { roughness: 0.6 });
-  // Seat
-  const seat = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.08, 0.55), chairMat);
-  seat.position.set(0, 0.5, 0.8);
-  chairGroup.add(seat);
-  // Backrest
-  const backrest = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.55, 0.06), chairMat);
-  backrest.position.set(0, 0.82, 1.05);
-  chairGroup.add(backrest);
-  // Chair base
-  const chairBase = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.5, 8), metalMat);
-  chairBase.position.set(0, 0.25, 0.8);
-  chairGroup.add(chairBase);
-  // Chair star base
-  for (let i = 0; i < 5; i++) {
-    const angle = (i / 5) * Math.PI * 2;
-    const armMesh = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.03, 0.25), metalMat);
-    armMesh.position.set(Math.sin(angle) * 0.12, 0.02, 0.8 + Math.cos(angle) * 0.12);
-    armMesh.rotation.y = angle;
-    chairGroup.add(armMesh);
-    // Wheels
-    const wheel = new THREE.Mesh(new THREE.SphereGeometry(0.03, 8, 8), createMaterial(THREE, 0x111111));
-    wheel.position.set(Math.sin(angle) * 0.22, 0.02, 0.8 + Math.cos(angle) * 0.22);
-    chairGroup.add(wheel);
-  }
-  group.add(chairGroup);
-
-  return group;
-}
-
-// ─── Room ───
-function createRoom(THREE: any) {
-  const group = new THREE.Group();
-
-  // Floor — dark polished concrete
-  const floorMat = new THREE.MeshStandardMaterial({ color: 0x141820, roughness: 0.4, metalness: 0.05 });
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(22, 18), floorMat);
-  floor.rotation.x = -Math.PI / 2;
-  floor.receiveShadow = true;
-  group.add(floor);
-
-  // Subtle floor grid lines
-  const grid = new THREE.GridHelper(22, 22, 0x1a2030, 0x161c28);
-  grid.position.y = 0.005;
-  group.add(grid);
-
-  // Walls
-  const wallMat = new THREE.MeshStandardMaterial({ color: 0x12161f, roughness: 0.9, metalness: 0 });
-  // Back wall
-  const backWall = new THREE.Mesh(new THREE.PlaneGeometry(22, 6), wallMat);
-  backWall.position.set(0, 3, -9);
-  backWall.receiveShadow = true;
-  group.add(backWall);
-  // Left wall
-  const leftWall = new THREE.Mesh(new THREE.PlaneGeometry(18, 6), wallMat);
-  leftWall.position.set(-11, 3, 0);
-  leftWall.rotation.y = Math.PI / 2;
-  leftWall.receiveShadow = true;
-  group.add(leftWall);
-  // Right wall
-  const rightWall = new THREE.Mesh(new THREE.PlaneGeometry(18, 6), wallMat);
-  rightWall.position.set(11, 3, 0);
-  rightWall.rotation.y = -Math.PI / 2;
-  rightWall.receiveShadow = true;
-  group.add(rightWall);
-
-  // Wall accent strips (neon blue lines)
-  const neonMat = new THREE.MeshStandardMaterial({ color: 0x2093ff, emissive: 0x2093ff, emissiveIntensity: 0.8 });
-  for (const z of [-8.98]) {
-    const strip = new THREE.Mesh(new THREE.BoxGeometry(20, 0.04, 0.02), neonMat);
-    strip.position.set(0, 1.5, z);
-    group.add(strip);
-  }
-  // Left wall accent
-  const lStrip = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.04, 16), neonMat);
-  lStrip.position.set(-10.98, 1.5, 0);
-  group.add(lStrip);
-
-  // "DERBY DIGITAL" sign on back wall
-  const signCanvas = document.createElement("canvas");
-  signCanvas.width = 512;
-  signCanvas.height = 96;
-  const ctx = signCanvas.getContext("2d")!;
-  ctx.clearRect(0, 0, 512, 96);
-  ctx.fillStyle = "#2093FF";
-  ctx.font = "bold 52px system-ui, sans-serif";
-  ctx.textAlign = "center";
-  ctx.fillText("DERBY DIGITAL", 256, 60);
-  const signTex = new THREE.CanvasTexture(signCanvas);
-  signTex.minFilter = THREE.LinearFilter;
-  const signMat = new THREE.MeshStandardMaterial({
-    map: signTex,
-    transparent: true,
-    emissive: 0x2093ff,
-    emissiveIntensity: 0.6,
-    emissiveMap: signTex,
-  });
-  const sign = new THREE.Mesh(new THREE.PlaneGeometry(6, 1.1), signMat);
-  sign.position.set(0, 4.5, -8.95);
-  group.add(sign);
-
-  // Ceiling
-  const ceilMat = new THREE.MeshStandardMaterial({ color: 0x0d1017, roughness: 0.95 });
-  const ceil = new THREE.Mesh(new THREE.PlaneGeometry(22, 18), ceilMat);
-  ceil.rotation.x = Math.PI / 2;
-  ceil.position.y = 6;
-  group.add(ceil);
-
-  // Ceiling lights (recessed)
-  for (const [lx, lz] of [[-4, -3], [0, -3], [4, -3], [-2, 3], [3, 3]]) {
-    const lightPanel = new THREE.Mesh(
-      new THREE.PlaneGeometry(1.2, 0.6),
-      new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xeeeeff, emissiveIntensity: 0.5 })
-    );
-    lightPanel.rotation.x = Math.PI / 2;
-    lightPanel.position.set(lx, 5.98, lz);
-    group.add(lightPanel);
-  }
-
-  // Plant decorations
-  for (const [px, pz] of [[-9.5, -7.5], [9.5, -7.5], [-9.5, 7.5]]) {
-    const pot = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.2, 0.4, 12), createMaterial(THREE, 0x4a3020));
-    pot.position.set(px, 0.2, pz);
-    pot.castShadow = true;
-    group.add(pot);
-    // Plant leaves (simple cones)
-    for (let i = 0; i < 3; i++) {
-      const leaf = new THREE.Mesh(new THREE.ConeGeometry(0.3, 0.8 + i * 0.3, 8), createMaterial(THREE, 0x1a6b3a));
-      leaf.position.set(px, 0.8 + i * 0.25, pz);
-      leaf.castShadow = true;
-      group.add(leaf);
-    }
-  }
-
-  // Whiteboard on left wall
-  const wbFrame = new THREE.Mesh(new THREE.BoxGeometry(0.06, 2, 3), createMaterial(THREE, 0x333333));
-  wbFrame.position.set(-10.95, 3, -2);
-  group.add(wbFrame);
-  const wb = new THREE.Mesh(new THREE.BoxGeometry(0.02, 1.8, 2.8), createMaterial(THREE, 0xf0f0f0, { roughness: 0.3 }));
-  wb.position.set(-10.92, 3, -2);
-  group.add(wb);
-
-  return group;
-}
-
-// ─── Floating label ───
-function createLabel(THREE: any, name: string, role: string, dept: string, color: number) {
-  const canvas = document.createElement("canvas");
-  canvas.width = 320;
-  canvas.height = 80;
-  const ctx = canvas.getContext("2d")!;
-  // Background
-  ctx.fillStyle = "rgba(10,10,15,0.9)";
-  ctx.beginPath();
-  ctx.roundRect(4, 4, 312, 72, 10);
-  ctx.fill();
-  ctx.strokeStyle = `#${color.toString(16).padStart(6, "0")}`;
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.roundRect(4, 4, 312, 72, 10);
-  ctx.stroke();
-  // Name
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "bold 22px system-ui, sans-serif";
-  ctx.textAlign = "center";
-  ctx.fillText(name, 160, 32);
-  // Role
-  ctx.fillStyle = `#${color.toString(16).padStart(6, "0")}`;
-  ctx.font = "14px system-ui, sans-serif";
-  ctx.fillText(role + " · " + dept, 160, 56);
-
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.minFilter = THREE.LinearFilter;
-  const mat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false });
-  const sprite = new THREE.Sprite(mat);
-  sprite.scale.set(2.4, 0.6, 1);
-  return sprite;
-}
-
-// ─── Department zone floor marker ───
-function createZoneMarker(THREE: any, label: string, color: number, x: number, z: number, w: number, h: number) {
-  const group = new THREE.Group();
-  // Glowing floor area
-  const zoneMat = new THREE.MeshStandardMaterial({
-    color,
-    transparent: true,
-    opacity: 0.06,
-    emissive: color,
-    emissiveIntensity: 0.15,
-  });
-  const zonePlane = new THREE.Mesh(new THREE.PlaneGeometry(w, h), zoneMat);
-  zonePlane.rotation.x = -Math.PI / 2;
-  zonePlane.position.set(x, 0.02, z);
-  zonePlane.receiveShadow = true;
-  group.add(zonePlane);
-
-  // Border lines
-  const borderMat = new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 0.5, transparent: true, opacity: 0.4 });
-  const edges = [
-    [x, 0.015, z - h / 2, w, 0.02, 0.04],
-    [x, 0.015, z + h / 2, w, 0.02, 0.04],
-    [x - w / 2, 0.015, z, 0.04, 0.02, h],
-    [x + w / 2, 0.015, z, 0.04, 0.02, h],
-  ];
-  for (const [ex, ey, ez, ew, eh, ed] of edges) {
-    const edge = new THREE.Mesh(new THREE.BoxGeometry(ew, eh, ed), borderMat);
-    edge.position.set(ex, ey, ez);
-    group.add(edge);
-  }
-
-  return group;
-}
-
-export function OfficeScene({ agents, selectedId, onSelect }: Props) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const cleanupRef = useRef<(() => void) | null>(null);
-
-  const handleClickRef = useRef(onSelect);
-  handleClickRef.current = onSelect;
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-    let destroyed = false;
-
-    import("three").then((THREE) => {
-      if (destroyed || !containerRef.current) return;
-
-      const w = containerRef.current.clientWidth;
-      const h = containerRef.current.clientHeight;
-
-      // Scene
-      const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x0a0a0f);
-
-      // Renderer
-      const renderer = new THREE.WebGLRenderer({ antialias: true });
-      renderer.setSize(w, h);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      renderer.shadowMap.enabled = true;
-      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-      renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.1;
-      containerRef.current.appendChild(renderer.domElement);
-
-      // Camera
-      const d = 7;
-      const aspect = w / h;
-      const camera = new THREE.OrthographicCamera(-d * aspect, d * aspect, d, -d, 0.1, 100);
-
-      // Lights
-      const ambient = new THREE.AmbientLight(0x303050, 1.0);
-      scene.add(ambient);
-
-      const mainLight = new THREE.DirectionalLight(0xfff5ee, 2.0);
-      mainLight.position.set(8, 15, 8);
-      mainLight.castShadow = true;
-      mainLight.shadow.mapSize.width = 2048;
-      mainLight.shadow.mapSize.height = 2048;
-      mainLight.shadow.camera.left = -15;
-      mainLight.shadow.camera.right = 15;
-      mainLight.shadow.camera.top = 15;
-      mainLight.shadow.camera.bottom = -15;
-      mainLight.shadow.camera.near = 0.5;
-      mainLight.shadow.camera.far = 40;
-      mainLight.shadow.bias = -0.001;
-      scene.add(mainLight);
-
-      // Blue accent light from the sign
-      const blueLight = new THREE.PointLight(0x2093ff, 2.0, 15);
-      blueLight.position.set(0, 4, -7);
-      scene.add(blueLight);
-
-      // Warm fill light
-      const fillLight = new THREE.PointLight(0xffaa55, 0.4, 20);
-      fillLight.position.set(-5, 3, 5);
-      scene.add(fillLight);
-
-      // Room
-      scene.add(createRoom(THREE));
-
-      // Department zones
-      const zones = [
-        { label: "Executive", color: DEPT_COLORS.Executive, x: -4, z: -3, w: 3.5, h: 3.5 },
-        { label: "Marketing", color: DEPT_COLORS.Marketing, x: 0.5, z: -3, w: 5, h: 3.5 },
-        { label: "Sales", color: DEPT_COLORS.Sales, x: 5, z: -3, w: 3.5, h: 3.5 },
-        { label: "Development", color: DEPT_COLORS.Development, x: -4, z: 3, w: 3.5, h: 3.5 },
-      ];
-      for (const z of zones) {
-        scene.add(createZoneMarker(THREE, z.label, z.color, z.x, z.z, z.w, z.h));
-      }
-
-      // Agents
-      const agentMeshes = new Map<string, any>();
-      const agentLabels = new Map<string, any>();
-      const aiAgents = agents.filter(a => a.id in DESK_POSITIONS);
-      for (const agent of aiAgents) {
-        const config = DESK_POSITIONS[agent.id];
-        const color = DEPT_COLORS[agent.department] || 0x666666;
-
-        const desk = createDesk(THREE, color);
-        desk.position.set(config.pos[0], 0, config.pos[1]);
-        desk.rotation.y = config.facing;
-        scene.add(desk);
-
-        const character = createCharacter(THREE, color);
-        const charZ = config.facing === Math.PI ? config.pos[1] - 0.7 : config.pos[1] + 0.7;
-        character.position.set(config.pos[0], 0, charZ);
-        character.rotation.y = config.facing;
-        character.userData = { id: agent.id };
-        scene.add(character);
-        agentMeshes.set(agent.id, character);
-
-        const label = createLabel(THREE, agent.name, agent.role, agent.department, color);
-        label.position.set(config.pos[0], 2.9, charZ);
-        scene.add(label);
-        agentLabels.set(agent.id, label);
-
-        // Desk glow light
-        const deskLight = new THREE.PointLight(color, 0.3, 3);
-        deskLight.position.set(config.pos[0], 1.5, config.pos[1]);
-        scene.add(deskLight);
-      }
-
-      // ─── Horse decorations! 🐴 ───
-      // Horse 1: by the entrance (right side)
-      const horse1 = createHorse(THREE, 0x2093ff, 0.8);
-      horse1.position.set(8, 0, 5);
-      horse1.rotation.y = -Math.PI / 4;
-      scene.add(horse1);
-
-      // Horse 2: trophy horse on the left
-      const horse2 = createHorse(THREE, 0xc4a35a, 0.6);
-      horse2.position.set(-8, 0, 5);
-      horse2.rotation.y = Math.PI / 3;
-      scene.add(horse2);
-
-      // Horse 3: small desk decoration near Kevin
-      const horse3 = createHorse(THREE, 0xf0f0f0, 0.25);
-      horse3.position.set(-2.5, 0.78, 2.5);
-      scene.add(horse3);
-
-      // Pedestal for trophy horse
-      const pedestal = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.7, 0.3, 16), createMaterial(THREE, 0x222233, { metalness: 0.3 }));
-      pedestal.position.set(-8, 0.15, 5);
-      scene.add(pedestal);
-
-      // Pedestal for blue horse
-      const pedestal2 = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.8, 0.25, 16), createMaterial(THREE, 0x222233, { metalness: 0.3 }));
-      pedestal2.position.set(8, 0.125, 5);
-      scene.add(pedestal2);
-
-      // ─── Camera controls ───
-      let theta = Math.PI / 4;
-      let phi = Math.PI / 5.5;
-      let zoom = 7;
-      let isDragging = false;
-      let prevX = 0;
-      let prevY = 0;
-
-      function updateCamera() {
-        const r = 25;
-        camera.position.set(
-          r * Math.cos(phi) * Math.sin(theta),
-          r * Math.sin(phi) + 3,
-          r * Math.cos(phi) * Math.cos(theta)
-        );
-        camera.lookAt(0, 1, 0);
-        const a = w / h;
-        camera.left = -zoom * a;
-        camera.right = zoom * a;
-        camera.top = zoom;
-        camera.bottom = -zoom;
-        camera.updateProjectionMatrix();
-      }
-      updateCamera();
-
-      const onPointerDown = (e: PointerEvent) => { isDragging = true; prevX = e.clientX; prevY = e.clientY; };
-      const onPointerUp = () => { isDragging = false; };
-      const onPointerMove = (e: PointerEvent) => {
-        if (!isDragging) return;
-        theta += (e.clientX - prevX) * 0.004;
-        phi = Math.max(0.08, Math.min(Math.PI / 2.8, phi + (e.clientY - prevY) * 0.004));
-        prevX = e.clientX;
-        prevY = e.clientY;
-        updateCamera();
-      };
-      const onWheel = (e: WheelEvent) => {
-        e.preventDefault();
-        zoom = Math.max(1.5, Math.min(14, zoom + e.deltaY * 0.015));
-        updateCamera();
-      };
-
-      // Click detection
-      const raycaster = new THREE.Raycaster();
-      const mouseVec = new THREE.Vector2();
-      const onClick = (e: MouseEvent) => {
-        if (!containerRef.current) return;
-        const rect = containerRef.current.getBoundingClientRect();
-        mouseVec.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-        mouseVec.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-        raycaster.setFromCamera(mouseVec, camera);
-        let hit: string | null = null;
-        for (const [id, mesh] of agentMeshes.entries()) {
-          const intersects = raycaster.intersectObjects(mesh.children, true);
-          if (intersects.length > 0) { hit = id; break; }
-        }
-        handleClickRef.current(hit);
-      };
-
-      const el = renderer.domElement;
-      el.addEventListener("pointerdown", onPointerDown);
-      window.addEventListener("pointerup", onPointerUp);
-      window.addEventListener("pointermove", onPointerMove);
-      el.addEventListener("wheel", onWheel, { passive: false });
-      el.addEventListener("click", onClick);
-      el.style.cursor = "grab";
-
-      // ─── Agent walk state ───
-      type WalkState = {
-        isWorking: boolean;
-        homeX: number;
-        homeZ: number;
-        homeFacing: number;
-        targetX: number;
-        targetZ: number;
-        walkTimer: number;
-        walkDuration: number;
-        pauseTimer: number;
-        pauseDuration: number;
-        phase: "seated" | "walking" | "pausing"; // seated at desk, walking around, pausing somewhere
-        legPhase: number;
-      };
-
-      const walkStates = new Map<string, WalkState>();
-      for (const agent of aiAgents) {
-        const config = DESK_POSITIONS[agent.id];
-        const charZ = config.facing === Math.PI ? config.pos[1] - 0.7 : config.pos[1] + 0.7;
-        const isWorking = agent.status === "active" || agent.status === "working";
-        walkStates.set(agent.id, {
-          isWorking,
-          homeX: config.pos[0],
-          homeZ: charZ,
-          homeFacing: config.facing,
-          targetX: config.pos[0],
-          targetZ: charZ,
-          walkTimer: 0,
-          walkDuration: 3 + Math.random() * 4,
-          pauseTimer: 0,
-          pauseDuration: 2 + Math.random() * 5,
-          phase: isWorking ? "seated" : "pausing",
-          legPhase: 0,
-        });
-      }
-
-      function pickWalkTarget(state: WalkState): [number, number] {
-        // Walk to a random spot in the office (within bounds)
-        const spots = [
-          [0, 0], [-3, 0], [3, 0], [0, 4], [-5, 4], [5, 0],
-          [-8, 5], [8, 5], // near horses
-          [0, -5], [-4, 5], [4, 5], // around the room
-        ];
-        const spot = spots[Math.floor(Math.random() * spots.length)];
-        return [spot[0] + (Math.random() - 0.5) * 2, spot[1] + (Math.random() - 0.5) * 2];
-      }
-
-      // ─── Animate ───
-      const clock = new THREE.Clock();
-      let lastDelta = 0;
-      function animate() {
-        if (destroyed) return;
-        requestAnimationFrame(animate);
-        const t = clock.getElapsedTime();
-        const delta = clock.getDelta();
-
-        // Agent animation
-        for (const [id, mesh] of agentMeshes.entries()) {
-          const state = walkStates.get(id);
-          if (!state) continue;
-
-          if (state.isWorking) {
-            // Seated at desk — subtle bob + head movement
-            mesh.position.x = state.homeX;
-            mesh.position.z = state.homeZ;
-            mesh.position.y = Math.sin(t * 1.5 + state.homeX) * 0.01;
-            mesh.rotation.y = state.homeFacing;
-            const head = mesh.children[0];
-            if (head) head.rotation.y = Math.sin(t * 0.4 + state.homeX) * 0.1;
-          } else {
-            // Idle agent — walks around
-            if (state.phase === "pausing") {
-              // Standing somewhere, subtle bob
-              mesh.position.y = Math.sin(t * 1.8 + state.homeX * 2) * 0.02;
-              const head = mesh.children[0];
-              if (head) head.rotation.y = Math.sin(t * 0.6 + state.homeX) * 0.2;
-              
-              state.pauseTimer += delta;
-              if (state.pauseTimer >= state.pauseDuration) {
-                // Start walking somewhere
-                const [tx, tz] = pickWalkTarget(state);
-                state.targetX = tx;
-                state.targetZ = tz;
-                state.walkTimer = 0;
-                const dx = tx - mesh.position.x;
-                const dz = tz - mesh.position.z;
-                state.walkDuration = Math.sqrt(dx * dx + dz * dz) / 1.2; // speed
-                state.phase = "walking";
-              }
-            } else if (state.phase === "walking") {
-              state.walkTimer += delta;
-              const progress = Math.min(state.walkTimer / state.walkDuration, 1);
-              
-              // Smooth interpolation
-              const startX = mesh.position.x;
-              const startZ = mesh.position.z;
-              const ease = progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
-              
-              // Move toward target
-              const nx = state.homeX + (state.targetX - state.homeX) * ease;
-              const nz = state.homeZ + (state.targetZ - state.homeZ) * ease;
-              
-              // Update home for smooth continuation
-              if (progress >= 1) {
-                state.homeX = state.targetX;
-                state.homeZ = state.targetZ;
-              }
-              
-              mesh.position.x = state.homeX + (state.targetX - state.homeX) * ease;
-              mesh.position.z = state.homeZ + (state.targetZ - state.homeZ) * ease;
-              
-              // Face walking direction
-              const dx = state.targetX - state.homeX;
-              const dz = state.targetZ - state.homeZ;
-              if (Math.abs(dx) > 0.01 || Math.abs(dz) > 0.01) {
-                mesh.rotation.y = Math.atan2(dx, dz);
-              }
-              
-              // Walking bob + leg animation
-              state.legPhase += delta * 8;
-              mesh.position.y = Math.abs(Math.sin(state.legPhase)) * 0.06;
-              
-              // Animate legs
-              const leftLeg = mesh.children[4]; // left leg
-              const rightLeg = mesh.children[5]; // right leg
-              if (leftLeg && rightLeg) {
-                leftLeg.rotation.x = Math.sin(state.legPhase) * 0.4;
-                rightLeg.rotation.x = Math.sin(state.legPhase + Math.PI) * 0.4;
-              }
-              // Animate arms
-              const leftArm = mesh.children[2]; // arms
-              const rightArm = mesh.children[3];
-              if (leftArm && rightArm) {
-                leftArm.rotation.x = Math.sin(state.legPhase + Math.PI) * 0.3;
-                rightArm.rotation.x = Math.sin(state.legPhase) * 0.3;
-              }
-              
-              if (progress >= 1) {
-                // Arrived — pause
-                state.phase = "pausing";
-                state.pauseTimer = 0;
-                state.pauseDuration = 3 + Math.random() * 6;
-                // Reset leg/arm rotation
-                if (leftLeg) leftLeg.rotation.x = 0;
-                if (rightLeg) rightLeg.rotation.x = 0;
-                if (leftArm) leftArm.rotation.x = 0;
-                if (rightArm) rightArm.rotation.x = 0;
-              }
-            }
-          }
-
-          // Update label position to follow agent
-          // Labels are added after agents — find the corresponding label
-        }
-
-        // Update labels to follow walking agents
-        for (const agent of aiAgents) {
-          const mesh = agentMeshes.get(agent.id);
-          const label = agentLabels.get(agent.id);
-          if (mesh && label) {
-            label.position.x = mesh.position.x;
-            label.position.z = mesh.position.z;
-            label.position.y = 2.9;
-          }
-        }
-
-        // Horse tail wag
-        if (horse1.children.length > 0) {
-          const tail1 = horse1.children[horse1.children.length - 1];
-          tail1.rotation.x = Math.sin(t * 3) * 0.15;
-        }
-        if (horse2.children.length > 0) {
-          const tail2 = horse2.children[horse2.children.length - 1];
-          tail2.rotation.x = Math.sin(t * 2.5 + 1) * 0.12;
-        }
-
-        // Blue accent light pulse
-        blueLight.intensity = 1.5 + Math.sin(t * 1.5) * 0.5;
-
-        renderer.render(scene, camera);
-      }
-      animate();
-
-      // Handle resize
-      const onResize = () => {
-        if (!containerRef.current) return;
-        const nw = containerRef.current.clientWidth;
-        const nh = containerRef.current.clientHeight;
-        renderer.setSize(nw, nh);
-        const a = nw / nh;
-        camera.left = -zoom * a;
-        camera.right = zoom * a;
-        camera.top = zoom;
-        camera.bottom = -zoom;
-        camera.updateProjectionMatrix();
-      };
-      window.addEventListener("resize", onResize);
-
-      cleanupRef.current = () => {
-        el.removeEventListener("pointerdown", onPointerDown);
-        window.removeEventListener("pointerup", onPointerUp);
-        window.removeEventListener("pointermove", onPointerMove);
-        el.removeEventListener("wheel", onWheel);
-        el.removeEventListener("click", onClick);
-        window.removeEventListener("resize", onResize);
-        if (containerRef.current && el.parentNode === containerRef.current) {
-          containerRef.current.removeChild(el);
-        }
-        renderer.dispose();
-      };
-    });
-
-    return () => {
-      destroyed = true;
-      cleanupRef.current?.();
-    };
-  }, [agents]);
-
+export function OfficeScene({ agents, loading, selectedId, onSelect }: Props) {
   return (
-    <div
-      ref={containerRef}
-      className="h-[700px] w-full overflow-hidden rounded-2xl border border-white/[0.08]"
-      style={{ background: "#0a0a0f" }}
-    />
+    <section className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.08),_transparent_28%),linear-gradient(180deg,_rgba(255,255,255,0.03),_rgba(255,255,255,0.015))] p-4 md:p-6">
+      <div className="mb-4 flex items-center justify-between gap-4">
+        <div>
+          <p className="text-[11px] uppercase tracking-[0.32em] text-slate-500">Interactive Map</p>
+          <h2 className="mt-1 text-xl font-semibold text-white">Virtual Office Floor</h2>
+        </div>
+        <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] uppercase tracking-[0.28em] text-slate-400">
+          Click an agent
+        </div>
+      </div>
+
+      <div className="office-stage relative mx-auto aspect-[16/10] w-full max-w-[1100px]">
+        <div className="office-floor absolute inset-[3%]">
+          <div className="office-floor-grid absolute inset-0 rounded-[30px]" />
+          <div className="office-floor-glow absolute inset-0 rounded-[30px]" />
+
+          {Object.entries(ZONE_LAYOUT).map(([department, layout]) => (
+            <div
+              key={department}
+              className={`office-zone absolute rounded-[26px] border border-white/8 ${layout.className}`}
+              style={zoneStyle(layout.style)}
+            >
+              <div className={`office-zone-label absolute ${layout.labelClassName}`}>
+                <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-[10px] uppercase tracking-[0.28em] text-white/90 backdrop-blur-md">
+                  {ZONE_COPY[department as OfficeAgent["department"]]}
+                </span>
+              </div>
+            </div>
+          ))}
+
+          <div className="office-furniture executive-desk absolute left-[39%] top-[18%] h-[10%] w-[22%] rounded-[22px]" />
+          <div className="office-furniture marketing-desk absolute left-[12%] top-[40%] h-[8%] w-[18%] rounded-[18px]" />
+          <div className="office-furniture marketing-desk absolute left-[15%] top-[52%] h-[8%] w-[18%] rounded-[18px]" />
+          <div className="office-furniture sales-desk absolute right-[12%] top-[44%] h-[8%] w-[17%] rounded-[18px]" />
+          <div className="office-furniture development-desk absolute left-[37%] top-[71%] h-[8.5%] w-[26%] rounded-[20px]" />
+          <div className="coffee-station absolute left-[68%] top-[15%] h-[10%] w-[10%] rounded-[18px]">
+            <span className="coffee-label">Break</span>
+          </div>
+
+          {agents.map((agent) => {
+            const layout = AGENT_LAYOUT[agent.id];
+            if (!layout) return null;
+
+            const isWorking = agent.inProgressTasks.length > 0;
+            const left = isWorking ? layout.x : layout.idleX ?? layout.x;
+            const top = isWorking ? layout.y : layout.idleY ?? layout.y;
+
+            return (
+              <button
+                key={agent.id}
+                type="button"
+                className={[
+                  "agent-node absolute -translate-x-1/2 -translate-y-1/2 text-left transition duration-500",
+                  selectedId === agent.id ? "z-20" : "z-10",
+                  isWorking ? "agent-working" : "agent-idle",
+                ].join(" ")}
+                style={{ left, top, "--agent-color": agent.accent } as CSSProperties}
+                onClick={() => onSelect(agent.id)}
+                aria-label={`Open ${agent.name} details`}
+                title={`${agent.name} · ${isWorking ? "working" : "idle"}`}
+              >
+                <div className="activity-bubble max-w-[200px] rounded-2xl border border-white/10 bg-[rgba(6,8,12,0.88)] px-3 py-2 text-xs text-slate-100 shadow-[0_12px_35px_rgba(0,0,0,0.35)] backdrop-blur-xl">
+                  {agent.currentTask ?? "Standing by"}
+                </div>
+
+                <div className="agent-body mt-3 flex items-center gap-3">
+                  <div className="relative">
+                    <div className="agent-avatar flex h-16 w-16 items-center justify-center rounded-full border-[3px] bg-[#10131b] text-sm font-semibold text-white">
+                      {agent.initials}
+                    </div>
+                    <span className={`status-dot ${isWorking ? "status-working" : "status-idle"}`} />
+                  </div>
+
+                  <div className="agent-label min-w-[120px] rounded-2xl border border-white/10 bg-[rgba(10,12,18,0.82)] px-3 py-2 backdrop-blur-xl">
+                    <p className="text-sm font-semibold text-white">{agent.name}</p>
+                    <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">{agent.role}</p>
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+
+          {loading ? (
+            <div className="absolute inset-0 grid place-items-center rounded-[30px] bg-[rgba(4,5,8,0.5)] backdrop-blur-sm">
+              <div className="rounded-2xl border border-white/10 bg-black/30 px-5 py-4 text-sm text-slate-300">
+                Syncing live office state...
+              </div>
+            </div>
+          ) : null}
+        </div>
+      </div>
+
+      <style jsx>{`
+        .office-stage {
+          perspective: 1800px;
+        }
+
+        .office-floor {
+          transform: rotateX(60deg) rotateZ(-45deg);
+          transform-style: preserve-3d;
+          border-radius: 30px;
+          background:
+            linear-gradient(135deg, rgba(255, 255, 255, 0.05), transparent 45%),
+            linear-gradient(180deg, rgba(10, 14, 22, 0.98), rgba(18, 22, 30, 0.96));
+          box-shadow:
+            0 35px 90px rgba(0, 0, 0, 0.55),
+            inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        }
+
+        .office-floor-grid {
+          background-image:
+            linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+          background-size: 56px 56px;
+          opacity: 0.25;
+        }
+
+        .office-floor-glow {
+          box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+        }
+
+        .office-zone {
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--zone-color) 22%, transparent), transparent 68%),
+            color-mix(in srgb, var(--zone-color) 12%, rgba(255, 255, 255, 0.03));
+          box-shadow:
+            inset 0 0 0 1px color-mix(in srgb, var(--zone-color) 35%, rgba(255, 255, 255, 0.08)),
+            0 20px 50px rgba(0, 0, 0, 0.16);
+        }
+
+        .office-furniture {
+          background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.04)),
+            linear-gradient(180deg, rgba(22, 28, 39, 0.95), rgba(10, 14, 19, 0.98));
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          box-shadow:
+            0 18px 35px rgba(0, 0, 0, 0.25),
+            inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+
+        .executive-desk {
+          box-shadow:
+            0 18px 35px rgba(0, 0, 0, 0.25),
+            0 0 0 1px rgba(32, 147, 255, 0.16),
+            inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+
+        .marketing-desk {
+          box-shadow:
+            0 18px 35px rgba(0, 0, 0, 0.22),
+            0 0 0 1px rgba(249, 60, 60, 0.16),
+            inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+
+        .sales-desk {
+          box-shadow:
+            0 18px 35px rgba(0, 0, 0, 0.22),
+            0 0 0 1px rgba(34, 197, 94, 0.18),
+            inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+
+        .development-desk {
+          box-shadow:
+            0 18px 35px rgba(0, 0, 0, 0.22),
+            0 0 0 1px rgba(255, 189, 89, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+
+        .coffee-station {
+          display: grid;
+          place-items: center;
+          background:
+            radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.18), transparent 35%),
+            linear-gradient(180deg, rgba(22, 28, 39, 0.95), rgba(10, 14, 19, 0.98));
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          box-shadow: 0 18px 35px rgba(0, 0, 0, 0.25);
+        }
+
+        .coffee-label {
+          font-size: 10px;
+          letter-spacing: 0.28em;
+          text-transform: uppercase;
+          color: rgba(255, 255, 255, 0.75);
+        }
+
+        .agent-node {
+          transform-style: preserve-3d;
+        }
+
+        .agent-avatar {
+          border-color: var(--agent-color);
+          box-shadow:
+            0 0 0 7px color-mix(in srgb, var(--agent-color) 18%, transparent),
+            0 14px 28px rgba(0, 0, 0, 0.28);
+        }
+
+        .status-dot {
+          position: absolute;
+          right: 2px;
+          bottom: 1px;
+          width: 14px;
+          height: 14px;
+          border-radius: 999px;
+          border: 2px solid #0a0a0f;
+        }
+
+        .status-working {
+          background: #22c55e;
+          box-shadow: 0 0 0 rgba(34, 197, 94, 0.45);
+          animation: statusPulse 1.8s ease-in-out infinite;
+        }
+
+        .status-idle {
+          background: #ffbd59;
+          box-shadow: 0 0 18px rgba(255, 189, 89, 0.4);
+        }
+
+        .activity-bubble {
+          opacity: 0.96;
+          transform-origin: bottom center;
+          transition:
+            opacity 200ms ease,
+            transform 200ms ease;
+        }
+
+        .agent-node:hover .activity-bubble,
+        .agent-node:focus-visible .activity-bubble {
+          transform: translateY(-2px) scale(1.01);
+        }
+
+        .agent-idle {
+          animation: idleFloat 2s ease-in-out infinite;
+        }
+
+        .agent-working .agent-avatar,
+        .agent-working .agent-label {
+          animation: typingPulse 1.2s ease-in-out infinite;
+        }
+
+        @keyframes idleFloat {
+          0%,
+          100% {
+            transform: translate3d(-50%, -50%, 0) translateY(0);
+          }
+          50% {
+            transform: translate3d(-50%, -50%, 0) translateY(-3px);
+          }
+        }
+
+        @keyframes typingPulse {
+          0%,
+          100% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.03);
+          }
+        }
+
+        @keyframes statusPulse {
+          0%,
+          100% {
+            box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5);
+          }
+          70% {
+            box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
+          }
+        }
+
+        @media (max-width: 900px) {
+          .office-floor {
+            transform: rotateX(56deg) rotateZ(-45deg) scale(0.98);
+          }
+
+          .agent-label {
+            min-width: 102px;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .office-floor {
+            transform: rotateX(52deg) rotateZ(-45deg) scale(1.02);
+          }
+
+          .agent-body {
+            gap: 0.5rem;
+          }
+
+          .agent-avatar {
+            width: 3.25rem;
+            height: 3.25rem;
+          }
+
+          .agent-label {
+            min-width: 88px;
+            padding: 0.55rem 0.7rem;
+          }
+
+          .agent-label p:first-child {
+            font-size: 0.75rem;
+          }
+
+          .activity-bubble {
+            max-width: 140px;
+            font-size: 11px;
+            padding: 0.45rem 0.65rem;
+          }
+        }
+      `}</style>
+    </section>
   );
 }

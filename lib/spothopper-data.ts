@@ -301,7 +301,7 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "notes": "Verified SpotHopper"
   },
   {
-    "restaurant_name": "The Willow: Must-Try Wine Bar in Lexington, KY",
+    "restaurant_name": "The Willow",
     "website": "thewillowlex.com",
     "address": "",
     "city": "Lexington",
@@ -796,7 +796,7 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "notes": "Verified SpotHopper"
   },
   {
-    "restaurant_name": "Authentic Mexican Restaurant in Richmond, KY | El Charro",
+    "restaurant_name": "El Charro",
     "website": "myelcharrotexano.com",
     "address": "",
     "city": "Lexington",
@@ -826,7 +826,7 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "notes": "Verified SpotHopper"
   },
   {
-    "restaurant_name": "Must-Try Pub in Richmond, KY | Gillum's Sports Lounge",
+    "restaurant_name": "Gillum's Sports Lounge",
     "website": "island.gillumssportslounge.com",
     "address": "",
     "city": "Lexington",
@@ -916,7 +916,7 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "notes": "Verified SpotHopper"
   },
   {
-    "restaurant_name": "Wing KYng: The Best Chicken Wings in Lexington, KY",
+    "restaurant_name": "Wing KYng",
     "website": "wingkyng.com",
     "address": "",
     "city": "Lexington",
@@ -1126,21 +1126,6 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "notes": "Verified SpotHopper"
   },
   {
-    "restaurant_name": "SpotHopper Website Alternative for Restaurants | Sociavore",
-    "website": "sociavore.co",
-    "address": "",
-    "city": "Lexington",
-    "state": "KY",
-    "zip": "",
-    "phone": "",
-    "email": "",
-    "cuisine": "",
-    "facebook": "https://www.facebook.com/sociavore",
-    "instagram": "https://www.instagram.com/sociavore/",
-    "region": "Lexington",
-    "notes": "Verified SpotHopper"
-  },
-  {
     "restaurant_name": "Shades Caf\u00e9 & Steakhouse",
     "website": "shadessteakhouse.com",
     "address": "",
@@ -1261,7 +1246,7 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "notes": "Verified SpotHopper"
   },
   {
-    "restaurant_name": "Best American Restaurant in Louisville, KY | Decade",
+    "restaurant_name": "Decade",
     "website": "decaderestaurant.com",
     "address": "",
     "city": "Louisville",
@@ -1456,7 +1441,7 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "notes": "Verified SpotHopper"
   },
   {
-    "restaurant_name": "Must-Try Sushi Bar in Louisville, KY | Juno",
+    "restaurant_name": "Juno",
     "website": "junorestaurants.com",
     "address": "",
     "city": "Louisville",
@@ -1666,22 +1651,7 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "notes": "Verified SpotHopper"
   },
   {
-    "restaurant_name": "Kabuki Hibachi & Ramen",
-    "website": "kabukigroup.com",
-    "address": "",
-    "city": "Jeffersonville",
-    "state": "IN",
-    "zip": "",
-    "phone": "8125903430",
-    "email": "kabukijeffersonville@gmail.com",
-    "cuisine": "",
-    "facebook": "https://www.facebook.com/257329904136010",
-    "instagram": "https://www.instagram.com/kabukigroup",
-    "region": "Louisville",
-    "notes": "Verified SpotHopper"
-  },
-  {
-    "restaurant_name": "Dairy Kastle: Must-Try Ice Cream in Louisville, KY",
+    "restaurant_name": "Dairy Kastle",
     "website": "dairykastle.com",
     "address": "",
     "city": "Louisville",
@@ -1741,51 +1711,6 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "notes": "Verified SpotHopper"
   },
   {
-    "restaurant_name": "The Alcove",
-    "website": "thealcovebar.com",
-    "address": "",
-    "city": "Jeffersonville",
-    "state": "IN",
-    "zip": "",
-    "phone": "8129201218",
-    "email": "partypartyrocknroll@gmail.com",
-    "cuisine": "",
-    "facebook": "https://www.facebook.com/2059779304240732",
-    "instagram": "https://www.instagram.com/thealcove246",
-    "region": "Louisville",
-    "notes": "Verified SpotHopper"
-  },
-  {
-    "restaurant_name": "La Catrina Tacos & Tequila",
-    "website": "lacatrinatacosandtequila.com",
-    "address": "",
-    "city": "Jeffersonville",
-    "state": "IN",
-    "zip": "",
-    "phone": "8129200114",
-    "email": "senoriguanas@yahoo.com",
-    "cuisine": "",
-    "facebook": "https://www.facebook.com/101824436236236",
-    "instagram": "https://www.instagram.com/lacatrina_tacosandtequila",
-    "region": "Louisville",
-    "notes": "Verified SpotHopper"
-  },
-  {
-    "restaurant_name": "Cast Iron Steakhouse",
-    "website": "castironsteak.com",
-    "address": "",
-    "city": "Jeffersonville",
-    "state": "IN",
-    "zip": "",
-    "phone": "8125902298",
-    "email": "castironindiana@gmail.com",
-    "cuisine": "",
-    "facebook": "https://www.facebook.com/855991477811665",
-    "instagram": "https://www.instagram.com/castironsteak",
-    "region": "Louisville",
-    "notes": "Verified SpotHopper"
-  },
-  {
     "restaurant_name": "Sleepy Rooster: Best Breakfast & Brunch in New Albany IN",
     "website": "sleepyroostermk.com",
     "address": "",
@@ -1801,51 +1726,6 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "notes": "Verified SpotHopper"
   },
   {
-    "restaurant_name": "The Fair",
-    "website": "thefairrestaurant.com",
-    "address": "",
-    "city": "New Albany",
-    "state": "IN",
-    "zip": "",
-    "phone": "8125901171",
-    "email": "maxsegoviano.viva@gmail.com",
-    "cuisine": "",
-    "facebook": "https://www.facebook.com/61577360195741",
-    "instagram": "https://www.instagram.com/thefairna",
-    "region": "Louisville",
-    "notes": "Verified SpotHopper"
-  },
-  {
-    "restaurant_name": "Senor Iguanas Restaurantes Mexicanos",
-    "website": "eatatiguanas.com",
-    "address": "",
-    "city": "Sellersburg",
-    "state": "IN",
-    "zip": "",
-    "phone": "8127480136",
-    "email": "senoriguanas@yahoo.com",
-    "cuisine": "",
-    "facebook": "https://www.facebook.com/111393165570304",
-    "instagram": "https://www.instagram.com/senoriguanas.in",
-    "region": "Louisville",
-    "notes": "Verified SpotHopper"
-  },
-  {
-    "restaurant_name": "La Catrina Mexican Kitchen",
-    "website": "lacatrinamexicankitchen.com",
-    "address": "",
-    "city": "New Albany",
-    "state": "IN",
-    "zip": "",
-    "phone": "8127258264",
-    "email": "senoriguanas@yahoo.com",
-    "cuisine": "",
-    "facebook": "https://www.facebook.com/316654675851127",
-    "instagram": "https://www.instagram.com/lacatrinamk",
-    "region": "Louisville",
-    "notes": "Verified SpotHopper"
-  },
-  {
     "restaurant_name": "Los Aztecas Mexican Restaurant",
     "website": "losaztecasnulu.com",
     "address": "",
@@ -1857,21 +1737,6 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "cuisine": "",
     "facebook": "https://www.facebook.com/1449427525273322",
     "instagram": "https://www.instagram.com/losaztecasnulu",
-    "region": "Louisville",
-    "notes": "Verified SpotHopper"
-  },
-  {
-    "restaurant_name": "Mimo's Pizzeria",
-    "website": "mimospizzeriaindiana.com",
-    "address": "",
-    "city": "New Albany",
-    "state": "IN",
-    "zip": "",
-    "phone": "8129457711",
-    "email": "mariaporceddu0929@gmail.com",
-    "cuisine": "",
-    "facebook": "https://www.facebook.com/565192556675214",
-    "instagram": "https://www.instagram.com/antonella.porceddu",
     "region": "Louisville",
     "notes": "Verified SpotHopper"
   },
@@ -1902,21 +1767,6 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "cuisine": "",
     "facebook": "https://www.facebook.com/1703164593312741",
     "instagram": "https://www.instagram.com/lostandfoundalbany",
-    "region": "Louisville",
-    "notes": "Verified SpotHopper"
-  },
-  {
-    "restaurant_name": "The Earl",
-    "website": "theearlbar.com",
-    "address": "",
-    "city": "New Albany",
-    "state": "IN",
-    "zip": "",
-    "phone": "8125902611",
-    "email": "theearl109@gmail.com",
-    "cuisine": "",
-    "facebook": "https://www.facebook.com/1473351479435093",
-    "instagram": "https://www.instagram.com/theearl109",
     "region": "Louisville",
     "notes": "Verified SpotHopper"
   },
@@ -2041,7 +1891,7 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "notes": "Verified SpotHopper"
   },
   {
-    "restaurant_name": "Umami Sushi: Authentic Japanese Restaurant in Bardstown",
+    "restaurant_name": "Umami Sushi",
     "website": "umamisushi.net",
     "address": "",
     "city": "Louisville",
@@ -2142,21 +1992,6 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "cuisine": "",
     "facebook": "https://www.facebook.com/103843982025473",
     "instagram": "https://www.instagram.com/glasshollowtable",
-    "region": "Louisville",
-    "notes": "Verified SpotHopper"
-  },
-  {
-    "restaurant_name": "Mariscos los Plebes | Mexican Seafood & Grill | Muncie, IN",
-    "website": "losplebesky.com",
-    "address": "",
-    "city": "Louisville",
-    "state": "KY",
-    "zip": "",
-    "phone": "5026904350",
-    "email": "mariscoslosplebes15@gmail.com",
-    "cuisine": "",
-    "facebook": "",
-    "instagram": "",
     "region": "Louisville",
     "notes": "Verified SpotHopper"
   },
@@ -2431,21 +2266,6 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "notes": "Verified SpotHopper"
   },
   {
-    "restaurant_name": "A Better Bite Company | Albany & Schenectady, NY | Catering ...",
-    "website": "abetterbiteny.com",
-    "address": "",
-    "city": "Louisville",
-    "state": "KY",
-    "zip": "",
-    "phone": "5186944400",
-    "email": "abetterbitealb@gmail.com",
-    "cuisine": "",
-    "facebook": "https://www.facebook.com/120910981255328",
-    "instagram": "https://www.instagram.com/abetterbite",
-    "region": "Louisville",
-    "notes": "Verified SpotHopper"
-  },
-  {
     "restaurant_name": "Iron Gate Cafe",
     "website": "irongatecafe.com",
     "address": "",
@@ -2506,7 +2326,7 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "notes": "Verified SpotHopper"
   },
   {
-    "restaurant_name": "Finish Line Bar & Grill: Best Bar in Bowling Green, KY",
+    "restaurant_name": "Finish Line Bar & Grill",
     "website": "finishlinebargrillbg.com",
     "address": "",
     "city": "Bowling Green",
@@ -2521,7 +2341,7 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "notes": "Verified SpotHopper"
   },
   {
-    "restaurant_name": "Authentic Mexican Restaurant in Bowling Green | Jalisco",
+    "restaurant_name": "Jalisco",
     "website": "jalisco-cantina.com",
     "address": "",
     "city": "Bowling Green",
@@ -2566,7 +2386,7 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "notes": "Verified SpotHopper"
   },
   {
-    "restaurant_name": "Rylan's: Must-Try Southern Restaurant in Franklin",
+    "restaurant_name": "Rylan's",
     "website": "rylansrestaurantky.com",
     "address": "",
     "city": "Bowling Green",
@@ -2761,7 +2581,7 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "notes": "Verified SpotHopper"
   },
   {
-    "restaurant_name": "Authentic Mexican Restaurant in Florence, KY | Torres",
+    "restaurant_name": "Torres",
     "website": "florence.torresmexicansteakhouse.com",
     "address": "",
     "city": "Covington",
@@ -2836,7 +2656,7 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "notes": "Verified SpotHopper"
   },
   {
-    "restaurant_name": "Must-Visit Mexican Restaurant in Hebron, KY | Agaves",
+    "restaurant_name": "Agaves",
     "website": "hebronagaves.com",
     "address": "",
     "city": "Covington",
@@ -3076,7 +2896,7 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "notes": "Verified SpotHopper"
   },
   {
-    "restaurant_name": "Las Margaritas: Must-Visit Mexican Restaurant in Danville",
+    "restaurant_name": "Las Margaritas",
     "website": "lasmargaritasofdanville.com",
     "address": "",
     "city": "Frankfort",
@@ -3376,7 +3196,7 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "notes": "Verified SpotHopper"
   },
   {
-    "restaurant_name": "The Butcher Block: Must-Visit Steakhouse in London, OH",
+    "restaurant_name": "The Butcher Block",
     "website": "ieatdrinkgather.com",
     "address": "",
     "city": "Eastern KY",
@@ -3391,7 +3211,7 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "notes": "Verified SpotHopper"
   },
   {
-    "restaurant_name": "Authentic Mexican Restaurant in Mt Sterling | Los Rodeos",
+    "restaurant_name": "Los Rodeos",
     "website": "losrodeos-ky.com",
     "address": "",
     "city": "Eastern KY",
@@ -3421,21 +3241,6 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "notes": "Verified SpotHopper"
   },
   {
-    "restaurant_name": "The Workman's Friend: Must-Try Pub in Charlotte, NC",
-    "website": "theworkmansfriend.com",
-    "address": "",
-    "city": "Eastern KY",
-    "state": "KY",
-    "zip": "",
-    "phone": "9802248234",
-    "email": "info@theworkmansfriend.com",
-    "cuisine": "",
-    "facebook": "https://www.facebook.com/859238137466541",
-    "instagram": "https://www.instagram.com/workmansfriend",
-    "region": "Eastern KY",
-    "notes": "Verified SpotHopper"
-  },
-  {
     "restaurant_name": "Port Chilkoot Distillery",
     "website": "portchilkootdistillery.com",
     "address": "",
@@ -3451,7 +3256,7 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "notes": "Verified SpotHopper"
   },
   {
-    "restaurant_name": "Woo Hoo: Authentic Greek Restaurant in Elizabethtown, KY",
+    "restaurant_name": "Woo Hoo",
     "website": "woohooetown.com",
     "address": "",
     "city": "Central KY",
@@ -3492,21 +3297,6 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "cuisine": "",
     "facebook": "https://www.facebook.com/434791699726865",
     "instagram": "https://www.instagram.com/wingspizzanthings.ky",
-    "region": "Central KY",
-    "notes": "Verified SpotHopper"
-  },
-  {
-    "restaurant_name": "Mug-n-Bun",
-    "website": "mug-n-bun.com",
-    "address": "",
-    "city": "Speedway",
-    "state": "IN",
-    "zip": "",
-    "phone": "3172445669",
-    "email": "jaywatson10@yahoo.com",
-    "cuisine": "",
-    "facebook": "",
-    "instagram": "",
     "region": "Central KY",
     "notes": "Verified SpotHopper"
   }
