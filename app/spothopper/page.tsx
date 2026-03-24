@@ -432,7 +432,7 @@ export default function SpotHopperPage() {
                   <select
                     value={selectedRegion}
                     onChange={(event) => setSelectedRegion(event.target.value)}
-                    className="rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-[12px] text-white outline-none"
+                    className="rounded-xl border border-white/[0.08] bg-[#1a1a2e] px-3 py-2 text-[12px] text-white outline-none"
                   >
                     <option value="all">All Regions ({spotLeads.length})</option>
                     {regions.map(([region, count]) => (
@@ -442,7 +442,7 @@ export default function SpotHopperPage() {
                   <select
                     value={selectedState}
                     onChange={(event) => setSelectedState(event.target.value)}
-                    className="rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-[12px] text-white outline-none"
+                    className="rounded-xl border border-white/[0.08] bg-[#1a1a2e] px-3 py-2 text-[12px] text-white outline-none"
                   >
                     <option value="all">All States</option>
                     {states.map(([state, count]) => (
@@ -452,7 +452,7 @@ export default function SpotHopperPage() {
                   <select
                     value={selectedCity}
                     onChange={(event) => setSelectedCity(event.target.value)}
-                    className="rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-[12px] text-white outline-none"
+                    className="rounded-xl border border-white/[0.08] bg-[#1a1a2e] px-3 py-2 text-[12px] text-white outline-none"
                   >
                     <option value="all">All Cities</option>
                     {cityCounts.map(([city, count]) => (
