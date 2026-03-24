@@ -11,7 +11,7 @@ const PRIMARY_NAV_ITEMS = [
   { href: "/tasks", label: "Tasks", icon: CheckSquare },
   { href: "/clients", label: "Clients", icon: BriefcaseBusiness },
   { href: "/rolodex", label: "Rolodex", icon: BookUser },
-  { href: "/spothopper", label: "SpotHopper", icon: Target },
+  { href: "/spothopper", label: "Intel", icon: Target },
   { href: "/calendar", label: "Calendar", icon: CalendarDays },
   { href: "/memory", label: "Memory", icon: Brain },
   { href: "/finance", label: "Finance", icon: DollarSign },
