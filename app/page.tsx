@@ -8,7 +8,7 @@ import {
   Target, TrendingUp, Users, Zap, Clock3, Star, Phone,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { seedRevenue, seedClients } from "@/lib/seed";
+import { seedRevenue } from "@/lib/seed";
 import { SEED_CONTACTS } from "@/lib/rolodex-seed";
 import { RELATIONSHIP_TYPE_COLORS, RELATIONSHIP_TYPE_LABELS } from "@/lib/rolodex-types";
 import type { AgentRecord } from "@/lib/agents";
@@ -22,7 +22,7 @@ export default function HomePage() {
   const [agents, setAgents] = useState<AgentRecord[]>([]);
 
   useEffect(() => {
-    fetch("/api/agents").then(r => r.json()).then(setAgents).catch(() => {});
+    fetch("/api/agents").then(r => r.json()).then(d => setAgents(Array.isArray(d) ? d : d.agents || [])).catch(() => {});
   }, []);
 
   const rev = seedRevenue;
@@ -61,7 +61,7 @@ export default function HomePage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
           { label: "MRR", value: `$${(rev.mrr/1000).toFixed(0)}k`, sub: `${arrProgress}% to $1M ARR`, color: "text-emerald-400", icon: DollarSign },
-          { label: "Clients", value: `${rev.totalClients}`, sub: `$${rev.avgRevenuePerClient}/avg`, color: "text-blue-400", icon: Users },
+          { label: "Subscribers", value: "53", sub: "$16.5k MRR", color: "text-blue-400", icon: Users },
           { label: "Relationships", value: `${contacts.length}`, sub: `${strongCount} strong`, color: "text-indigo-400", icon: BookUser },
           { label: "AI Agents", value: `${activeAgents.length}/${aiAgents.length}`, sub: "active", color: "text-cyan-400", icon: Zap },
         ].map(s => (
