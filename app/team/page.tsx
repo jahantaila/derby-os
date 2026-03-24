@@ -230,7 +230,11 @@ export default function TeamPage() {
   const grouped = useMemo(() => {
     const map: Record<string, Agent[]> = {};
     filtered.forEach(a => { (map[a.department] ??= []).push(a); });
-    return map;
+    // Sort departments: Executive first, then alphabetical
+    const DEPT_ORDER: Record<string, number> = { Executive: 0, Marketing: 1, Sales: 2, Development: 3 };
+    const sorted: Record<string, Agent[]> = {};
+    Object.keys(map).sort((a, b) => (DEPT_ORDER[a] ?? 99) - (DEPT_ORDER[b] ?? 99)).forEach(k => { sorted[k] = map[k]; });
+    return sorted;
   }, [filtered]);
 
   const stats = useMemo(() => ({
