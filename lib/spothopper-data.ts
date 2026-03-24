@@ -1861,21 +1861,6 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "notes": "Verified SpotHopper"
   },
   {
-    "restaurant_name": "Shopey's Pizza",
-    "website": "shopeyslouisville.com",
-    "address": "",
-    "city": "Louisville",
-    "state": "KY",
-    "zip": "",
-    "phone": "",
-    "email": "jaynelson13027@gmail.com",
-    "cuisine": "",
-    "facebook": "https://www.facebook.com/2011460905844852",
-    "instagram": "https://www.instagram.com/shopeyspizzalouisville",
-    "region": "Louisville",
-    "notes": "Verified SpotHopper"
-  },
-  {
     "restaurant_name": "Mile Wide Beer Co.",
     "website": "milewidebeer.com",
     "address": "",
