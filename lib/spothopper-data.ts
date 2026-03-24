@@ -901,10 +901,10 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "notes": "Verified SpotHopper"
   },
   {
-    "restaurant_name": "Serafini-Frankfort",
+    "restaurant_name": "Serafini",
     "website": "serafinifrankfort.com",
     "address": "",
-    "city": "Lexington",
+    "city": "Frankfort",
     "state": "KY",
     "zip": "",
     "phone": "5028755599",
@@ -1441,7 +1441,7 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "notes": "Verified SpotHopper"
   },
   {
-    "restaurant_name": "La Suerte Louisville",
+    "restaurant_name": "La Suerte",
     "website": "lasuerteky.com",
     "address": "",
     "city": "Louisville",
@@ -1771,7 +1771,7 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "notes": "Verified SpotHopper"
   },
   {
-    "restaurant_name": "Mi Casita Shelbyville",
+    "restaurant_name": "Mi Casita",
     "website": "micasita-shelbyville.com",
     "address": "",
     "city": "Shelbyville",
@@ -2026,7 +2026,7 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "notes": "Verified SpotHopper"
   },
   {
-    "restaurant_name": "The Works Pizza Co. Covington",
+    "restaurant_name": "The Works Pizza Co.",
     "website": "theworkspizzacovington.com",
     "address": "",
     "city": "Covington",
@@ -2341,7 +2341,7 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "notes": "Verified SpotHopper"
   },
   {
-    "restaurant_name": "Las Margaritas-Lawrenceburg",
+    "restaurant_name": "Las Margaritas",
     "website": "lasmargaritaslawrenceburg.com",
     "address": "",
     "city": "Lawrenceburg",
@@ -2536,7 +2536,7 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "notes": "Verified SpotHopper"
   },
   {
-    "restaurant_name": "Torres Mexican Steakhouse Williamsburg",
+    "restaurant_name": "Torres Mexican Steakhouse",
     "website": "williamsburg.torresmexicansteakhouse.com",
     "address": "",
     "city": "Williamsburg",
