@@ -238,6 +238,7 @@ export default function SpotHopperPage() {
   const spotStats = useMemo(() => ({
     total: filteredSpotLeads.length,
     withPhone: filteredSpotLeads.filter((lead) => Boolean(lead.phone)).length,
+    withEmail: filteredSpotLeads.filter((lead) => Boolean(lead.email)).length,
     withOwner: filteredSpotLeads.filter((lead) => Boolean(lead.owner_name)).length,
     cities: new Set(filteredSpotLeads.map((lead) => lead.city)).size,
   }), [filteredSpotLeads]);
@@ -275,6 +276,7 @@ export default function SpotHopperPage() {
     ? [
       { label: "Total Restaurants", value: spotStats.total, color: "text-white" },
       { label: "With Phone", value: spotStats.withPhone, color: "text-sky-300" },
+      { label: "With Email", value: spotStats.withEmail, color: "text-emerald-300" },
       { label: "With Owner Name", value: spotStats.withOwner, color: "text-amber-300" },
       { label: "Cities Covered", value: spotStats.cities, color: "text-red-300" },
     ]
