@@ -631,7 +631,7 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "notes": "Verified SpotHopper"
   },
   {
-    "restaurant_name": "Beau's Cafe: Best Cafe in Beaumont, Lexington, KY",
+    "restaurant_name": "Beau's Cafe",
     "website": "beauscafe.com",
     "address": "",
     "city": "Lexington",
@@ -1111,21 +1111,6 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "notes": "Verified SpotHopper"
   },
   {
-    "restaurant_name": "Wise Bird Cider",
-    "website": "spot-sample-10223.spotapps.co",
-    "address": "",
-    "city": "Distillery District",
-    "state": "KY",
-    "zip": "",
-    "phone": "8593091863",
-    "email": "hello@wisebirdcider.com",
-    "cuisine": "",
-    "facebook": "https://www.facebook.com/934992903353802",
-    "instagram": "https://www.instagram.com/wisebirdcider",
-    "region": "Lexington",
-    "notes": "Verified SpotHopper"
-  },
-  {
     "restaurant_name": "Shades Caf\u00e9 & Steakhouse",
     "website": "shadessteakhouse.com",
     "address": "",
@@ -1167,21 +1152,6 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "cuisine": "",
     "facebook": "https://www.facebook.com/102794338029140",
     "instagram": "https://www.instagram.com/thefishhouseandcafebeignet",
-    "region": "Louisville",
-    "notes": "Verified SpotHopper"
-  },
-  {
-    "restaurant_name": "Zanzabar",
-    "website": "spot-sample-10033.spotapps.co",
-    "address": "",
-    "city": "Louisville",
-    "state": "KY",
-    "zip": "",
-    "phone": "5026359227",
-    "email": "",
-    "cuisine": "",
-    "facebook": "https://www.facebook.com/113913301973705",
-    "instagram": "https://www.instagram.com/thezanzabar",
     "region": "Louisville",
     "notes": "Verified SpotHopper"
   },
@@ -1636,21 +1606,6 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "notes": "Verified SpotHopper"
   },
   {
-    "restaurant_name": "Union Pub: Best American Restaurant in Jeffersonville",
-    "website": "uniongameyard.com",
-    "address": "",
-    "city": "Louisville",
-    "state": "KY",
-    "zip": "",
-    "phone": "8125901285",
-    "email": "levi@thesohocompany.com",
-    "cuisine": "",
-    "facebook": "https://www.facebook.com/112638183515825",
-    "instagram": "https://www.instagram.com/union_restaurant_gameyard",
-    "region": "Louisville",
-    "notes": "Verified SpotHopper"
-  },
-  {
     "restaurant_name": "Dairy Kastle",
     "website": "dairykastle.com",
     "address": "",
@@ -1707,21 +1662,6 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "cuisine": "",
     "facebook": "",
     "instagram": "",
-    "region": "Louisville",
-    "notes": "Verified SpotHopper"
-  },
-  {
-    "restaurant_name": "Sleepy Rooster: Best Breakfast & Brunch in New Albany IN",
-    "website": "sleepyroostermk.com",
-    "address": "",
-    "city": "Louisville",
-    "state": "KY",
-    "zip": "",
-    "phone": "8127250814",
-    "email": "viva.ziquio@gmail.com",
-    "cuisine": "",
-    "facebook": "https://www.facebook.com/107679012067222",
-    "instagram": "https://www.instagram.com/sleepyroostermk",
     "region": "Louisville",
     "notes": "Verified SpotHopper"
   },
@@ -1831,21 +1771,6 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "notes": "Verified SpotHopper"
   },
   {
-    "restaurant_name": "Fiesta Mexicana",
-    "website": "spot-sample-10121.spotapps.co",
-    "address": "",
-    "city": "Shelbyville",
-    "state": "KY",
-    "zip": "",
-    "phone": "5024372140",
-    "email": "fiestamex1@yahoo.com",
-    "cuisine": "",
-    "facebook": "",
-    "instagram": "",
-    "region": "Louisville",
-    "notes": "Verified SpotHopper"
-  },
-  {
     "restaurant_name": "Flanagan's Ale House",
     "website": "flanagansalehouse.com",
     "address": "",
@@ -1876,10 +1801,10 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "notes": "Verified SpotHopper"
   },
   {
-    "restaurant_name": "Bardstown, KY: Jose y Los Tres Amigos Mexican Bar & Grill",
+    "restaurant_name": "Los Tres Amigos",
     "website": "joseylostresamigos.com",
     "address": "",
-    "city": "Louisville",
+    "city": "Bardstown",
     "state": "KY",
     "zip": "",
     "phone": "5025077988",
@@ -2971,21 +2896,6 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "notes": "Verified SpotHopper"
   },
   {
-    "restaurant_name": "Abbey Tavern",
-    "website": "spot-sample-10281.spotapps.co",
-    "address": "",
-    "city": "Murray Hill /Gramercy Park /Kips Bay / Flat Iron",
-    "state": "KY",
-    "zip": "",
-    "phone": "2126961011",
-    "email": "contact@abbeytavernnyc.com",
-    "cuisine": "",
-    "facebook": "",
-    "instagram": "https://www.instagram.com/abbeytavernnyc",
-    "region": "Paducah",
-    "notes": "Verified SpotHopper"
-  },
-  {
     "restaurant_name": "ValSof bakery",
     "website": "valsofbakery.com",
     "address": "",
@@ -3121,10 +3031,10 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "notes": "Verified SpotHopper"
   },
   {
-    "restaurant_name": "Corbin, KY: Old Town Grill of Corbin",
+    "restaurant_name": "Old Town Grill",
     "website": "corbin.oldtowngrillinc.com",
     "address": "",
-    "city": "Eastern KY",
+    "city": "Corbin",
     "state": "KY",
     "zip": "",
     "phone": "6065235515",
@@ -3136,10 +3046,10 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "notes": "Verified SpotHopper"
   },
   {
-    "restaurant_name": "LONDON, KY: Old Town Grill of London",
+    "restaurant_name": "Old Town Grill",
     "website": "london.oldtowngrillinc.com",
     "address": "",
-    "city": "Eastern KY",
+    "city": "London",
     "state": "KY",
     "zip": "",
     "phone": "6068621684",
@@ -3226,10 +3136,10 @@ export const SPOTHOPPER_LEADS: SpotHopperLead[] = [
     "notes": "Verified SpotHopper"
   },
   {
-    "restaurant_name": "Mount Sterling, KY: Tomatoes & Flames",
+    "restaurant_name": "Tomatoes & Flames",
     "website": "tandfpizza.com",
     "address": "",
-    "city": "Eastern KY",
+    "city": "Mount Sterling",
     "state": "KY",
     "zip": "",
     "phone": "8595203723",
