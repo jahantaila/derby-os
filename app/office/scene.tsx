@@ -762,7 +762,7 @@ export function OfficeScene({ agents, loading, selectedId, onSelect }: Props) {
         </div>
       </div>
 
-      <div className="relative mx-auto w-full max-w-[1100px]">
+      <div className="relative w-full">
         <canvas
           ref={canvasRef}
           width={SCENE_WIDTH}

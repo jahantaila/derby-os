@@ -105,3 +105,77 @@ export async function GET() {
     timestamp: new Date().toISOString(),
   });
 }
+
+// POST: Update agent status (called by Kimberly when spawning/completing sub-agents)
+export async function POST(req: Request) {
+  try {
+    const body = await req.json();
+    const { agentId, status, task } = body;
+    if (!agentId || !status) {
+      return NextResponse.json({ error: "agentId and status required" }, { status: 400 });
+    }
+
+    // Update the agent's task in Supabase to reflect live status
+    if (status === "working" && task) {
+      // Create or update an in_progress task for this agent
+      const existing = await fetch(
+        `${SB_URL}/tasks?assignee=eq.${agentId}&status=eq.in_progress&limit=1`,
+        { headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` } }
+      );
+      const rows = await existing.json();
+
+      if (rows.length > 0) {
+        // Update existing
+        await fetch(`${SB_URL}/tasks?id=eq.${rows[0].id}`, {
+          method: "PATCH",
+          headers: {
+            apikey: SB_KEY,
+            Authorization: `Bearer ${SB_KEY}`,
+            "Content-Type": "application/json",
+            Prefer: "return=minimal",
+          },
+          body: JSON.stringify({ title: task, updated_at: new Date().toISOString() }),
+        });
+      } else {
+        // Create a live-status task
+        await fetch(`${SB_URL}/tasks`, {
+          method: "POST",
+          headers: {
+            apikey: SB_KEY,
+            Authorization: `Bearer ${SB_KEY}`,
+            "Content-Type": "application/json",
+            Prefer: "return=minimal",
+          },
+          body: JSON.stringify({
+            title: task,
+            assignee: agentId,
+            status: "in_progress",
+            priority: "medium",
+            created_by: "system",
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          }),
+        });
+      }
+    } else if (status === "idle") {
+      // Clear in_progress tasks for this agent (set to todo)
+      await fetch(
+        `${SB_URL}/tasks?assignee=eq.${agentId}&status=eq.in_progress&created_by=eq.system`,
+        {
+          method: "PATCH",
+          headers: {
+            apikey: SB_KEY,
+            Authorization: `Bearer ${SB_KEY}`,
+            "Content-Type": "application/json",
+            Prefer: "return=minimal",
+          },
+          body: JSON.stringify({ status: "todo", updated_at: new Date().toISOString() }),
+        }
+      );
+    }
+
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    return NextResponse.json({ error: "Failed to update status" }, { status: 500 });
+  }
+}
