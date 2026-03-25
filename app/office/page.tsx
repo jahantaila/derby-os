@@ -113,12 +113,43 @@ export default function OfficePage() {
       }
     }
 
+    // Also poll live agent status from OpenClaw bridge
+    async function pollLiveStatus() {
+      try {
+        const res = await fetch("/api/agent-status", { cache: "no-store" });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!data.agents || !active) return;
+        
+        setAgents((prev) =>
+          prev.map((agent) => {
+            const live = data.agents.find((a: any) => a.id === agent.id);
+            if (!live || live.status === "idle") return agent;
+            // Override with live OpenClaw status
+            return {
+              ...agent,
+              status: live.status,
+              currentTask: live.currentTask || agent.currentTask,
+              inProgressTasks: live.status === "working"
+                ? [{ id: "live", title: live.currentTask || "Working", status: "in_progress", priority: null }]
+                : agent.inProgressTasks,
+            };
+          })
+        );
+      } catch {
+        // Silent fail, Supabase data is the fallback
+      }
+    }
+
     loadAgents();
     const refreshId = window.setInterval(loadAgents, 30000);
+    const liveId = window.setInterval(pollLiveStatus, 10000);
+    setTimeout(pollLiveStatus, 2000); // Quick first poll
 
     return () => {
       active = false;
       window.clearInterval(refreshId);
+      window.clearInterval(liveId);
     };
   }, []);
 

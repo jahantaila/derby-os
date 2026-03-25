@@ -479,6 +479,19 @@ function drawFurniture(ctx: CanvasRenderingContext2D) {
   drawBookshelf(ctx, 118, 132, 20, 26);
 }
 
+// Per-agent unique visual features
+const AGENT_FEATURES: Record<string, {
+  hairStyle: "long" | "short" | "spiky" | "buzz" | "curly";
+  accessory?: string; // color of accessory
+  accType?: "glasses" | "headphones" | "badge" | "scarf" | "earring";
+}> = {
+  kimberly: { hairStyle: "long", accessory: "#FFD700", accType: "badge" },
+  alex: { hairStyle: "short", accessory: "#4488CC", accType: "glasses" },
+  sabri: { hairStyle: "buzz", accessory: "#F93C3C", accType: "scarf" },
+  jordan: { hairStyle: "curly", accessory: "#C0C0C0", accType: "earring" },
+  kevin: { hairStyle: "spiky", accessory: "#333333", accType: "headphones" },
+};
+
 function drawAgentSprite(
   ctx: CanvasRenderingContext2D,
   x: number,
@@ -488,6 +501,7 @@ function drawAgentSprite(
   facing: "up" | "down" | "left" | "right",
   typeFrame: number,
   selected: boolean,
+  agentId: string,
 ) {
   const skin = "#FFD5B8";
   const pants = "#4D4A59";
@@ -495,26 +509,84 @@ function drawAgentSprite(
   const outline = "#1B1512";
   const ox = x - 8;
   const oy = y - 13;
+  const features = AGENT_FEATURES[agentId] || { hairStyle: "short" };
 
+  // Selection glow
   if (selected) {
-    fill(ctx, x - 9, y + 2, 18, 2, "#F6E7A7");
-    fill(ctx, x - 7, y + 1, 14, 1, "#D9B85F");
+    fill(ctx, x - 10, y + 2, 20, 3, "#F6E7A7");
+    fill(ctx, x - 8, y + 1, 16, 1, "#D9B85F");
   } else {
     fill(ctx, x - 7, y + 2, 14, 2, "#8C7354");
   }
 
-  fill(ctx, ox + 4, oy, 8, 2, hair);
-  fill(ctx, ox + 3, oy + 2, 10, 2, hair);
-  fill(ctx, ox + 2, oy + 4, 12, 5, skin);
-  fill(ctx, ox + 3, oy + 3, 10, 1, hair);
-  fill(ctx, ox + 4, oy + 6, 1, 1, outline);
-  fill(ctx, ox + 11, oy + 6, 1, 1, outline);
+  // Hair by style
+  switch (features.hairStyle) {
+    case "long": // Kimberly: long flowing hair
+      fill(ctx, ox + 3, oy, 10, 2, hair);
+      fill(ctx, ox + 2, oy + 2, 12, 3, hair);
+      fill(ctx, ox + 1, oy + 4, 2, 6, hair); // left side hair
+      fill(ctx, ox + 13, oy + 4, 2, 6, hair); // right side hair
+      break;
+    case "spiky": // Kevin: spiky/messy
+      fill(ctx, ox + 3, oy + 1, 10, 2, hair);
+      fill(ctx, ox + 4, oy - 1, 2, 2, hair);
+      fill(ctx, ox + 7, oy - 2, 2, 3, hair);
+      fill(ctx, ox + 10, oy - 1, 2, 2, hair);
+      fill(ctx, ox + 2, oy + 3, 12, 1, hair);
+      break;
+    case "buzz": // Sabri: very short/buzz
+      fill(ctx, ox + 4, oy + 1, 8, 1, hair);
+      fill(ctx, ox + 3, oy + 2, 10, 2, hair);
+      break;
+    case "curly": // Jordan: curly/voluminous
+      fill(ctx, ox + 2, oy - 1, 12, 2, hair);
+      fill(ctx, ox + 1, oy + 1, 14, 3, hair);
+      fill(ctx, ox + 3, oy, 2, 1, "#B8662E"); // highlight
+      fill(ctx, ox + 9, oy, 2, 1, "#B8662E"); // highlight
+      break;
+    default: // Alex: neat short
+      fill(ctx, ox + 4, oy, 8, 2, hair);
+      fill(ctx, ox + 3, oy + 2, 10, 2, hair);
+      break;
+  }
 
+  // Face
+  fill(ctx, ox + 2, oy + 4, 12, 5, skin);
+  fill(ctx, ox + 3, oy + 3, 10, 1, hair); // hairline
+  fill(ctx, ox + 4, oy + 6, 1, 1, outline); // left eye
+  fill(ctx, ox + 11, oy + 6, 1, 1, outline); // right eye
+  fill(ctx, ox + 7, oy + 7, 2, 1, "#E88B7B"); // mouth
+
+  // Accessories
+  if (features.accType === "glasses" && features.accessory) {
+    fill(ctx, ox + 3, oy + 5, 4, 2, features.accessory);
+    fill(ctx, ox + 9, oy + 5, 4, 2, features.accessory);
+    fill(ctx, ox + 7, oy + 5, 2, 1, features.accessory);
+  }
+  if (features.accType === "headphones" && features.accessory) {
+    fill(ctx, ox + 1, oy + 3, 2, 4, features.accessory);
+    fill(ctx, ox + 13, oy + 3, 2, 4, features.accessory);
+    fill(ctx, ox + 2, oy + 1, 12, 1, features.accessory);
+  }
+  if (features.accType === "badge" && features.accessory) {
+    fill(ctx, ox + 6, oy + 12, 3, 2, features.accessory);
+  }
+  if (features.accType === "scarf" && features.accessory) {
+    fill(ctx, ox + 3, oy + 9, 10, 2, features.accessory);
+  }
+  if (features.accType === "earring" && features.accessory) {
+    fill(ctx, ox + 1, oy + 7, 1, 2, features.accessory);
+  }
+
+  // Neck
   fill(ctx, ox + 6, oy + 9, 4, 2, skin);
+  // Body
   fill(ctx, ox + 3, oy + 11, 10, 4, shirt);
   fill(ctx, ox + 1, oy + 12, 3, 3, shirt);
   fill(ctx, ox + 12, oy + 12, 3, 3, shirt);
+  // Pants
   fill(ctx, ox + 4, oy + 15, 8, 4, pants);
+  // Shoes
   fill(ctx, ox + 4, oy + 19, 3, 2, shoes);
   fill(ctx, ox + 9, oy + 19, 3, 2, shoes);
 
@@ -522,10 +594,18 @@ function drawAgentSprite(
     fill(ctx, ox + 5, oy + 1, 6, 1, hair);
   }
 
+  // Typing animation
   if (typeFrame) {
     fill(ctx, ox + 1, oy + 13, 2, 1, skin);
     fill(ctx, ox + 13, oy + 13, 2, 1, skin);
   }
+
+  // Name label below character
+  const name = agentId.toUpperCase();
+  const nameW = name.length * 5 + 4;
+  const nameX = x - Math.floor(nameW / 2);
+  fill(ctx, nameX - 1, oy + 22, nameW + 2, 8, "rgba(0,0,0,0.5)");
+  drawPixelText(ctx, name, nameX + 1, oy + 23, shirt, 1);
 }
 
 function drawSpeechBubble(ctx: CanvasRenderingContext2D, text: string, x: number, y: number) {
@@ -557,6 +637,15 @@ function drawScene(ctx: CanvasRenderingContext2D, agents: OfficeAgent[], selecte
     .map((agent) => ({ agent, pose: agentPose(agent, time) }))
     .sort((left, right) => left.pose.y - right.pose.y);
 
+  // Monitor glow effect (animated)
+  const glowAlpha = 0.12 + Math.sin(time / 800) * 0.04;
+  ctx.globalAlpha = glowAlpha;
+  fill(ctx, 54, 50, 14, 6, PALETTE.monitor); // Kimberly's monitor glow
+  fill(ctx, 224, 50, 12, 5, PALETTE.monitor); // Alex's monitor glow
+  fill(ctx, 258, 50, 12, 5, PALETTE.monitor); // Sabri's monitor glow
+  fill(ctx, 46, 148, 24, 5, PALETTE.monitor); // Kevin's dual monitor glow
+  ctx.globalAlpha = 1;
+
   for (const { agent, pose } of poses) {
     drawAgentSprite(
       ctx,
@@ -567,9 +656,10 @@ function drawScene(ctx: CanvasRenderingContext2D, agents: OfficeAgent[], selecte
       pose.station.facing,
       pose.typeFrame,
       selectedId === agent.id,
+      agent.id,
     );
     if (pose.working) {
-      drawSpeechBubble(ctx, truncateTask(agent.currentTask), pose.x, pose.y - 2);
+      drawSpeechBubble(ctx, truncateTask(agent.currentTask), pose.x, pose.y - 6);
     }
   }
 }
