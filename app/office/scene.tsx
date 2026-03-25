@@ -38,11 +38,91 @@ type Props = {
   onSelect: (id: string) => void;
 };
 
+/* ── Pixel Art Character Data ── */
+// Each character is a 9x12 pixel grid drawn via box-shadow
+// Colors: skin=#FFD5B8, hair varies, shirt=dept color, pants=#2a2a3e
+const PX = 4; // pixel scale
+
+type PixelRow = [number, number, string][]; // [col, row, color]
+
+function makePixelArt(hair: string, shirt: string, accessory?: string): PixelRow {
+  const skin = "#FFD5B8";
+  const pants = "#2a2a3e";
+  const shoe = "#1a1a2e";
+  const eye = "#1a1a2e";
+  const acc = accessory || shirt;
+
+  return [
+    // Hair (rows 0-2)
+    [3,0,hair],[4,0,hair],[5,0,hair],
+    [2,1,hair],[3,1,hair],[4,1,hair],[5,1,hair],[6,1,hair],
+    [2,2,hair],[3,2,hair],[4,2,hair],[5,2,hair],[6,2,hair],
+    // Face (rows 3-4)
+    [2,3,skin],[3,3,skin],[4,3,skin],[5,3,skin],[6,3,skin],
+    [3,3,eye],[5,3,eye], // eyes
+    [2,4,skin],[3,4,skin],[4,4,skin],[5,4,skin],[6,4,skin],
+    [4,4,"#E88B8B"], // mouth/blush
+    // Neck (row 5)
+    [4,5,skin],
+    // Shirt (rows 6-8)
+    [2,6,shirt],[3,6,shirt],[4,6,shirt],[5,6,shirt],[6,6,shirt],
+    [1,7,shirt],[2,7,shirt],[3,7,shirt],[4,7,acc],[5,7,shirt],[6,7,shirt],[7,7,shirt],
+    [2,8,shirt],[3,8,shirt],[4,8,shirt],[5,8,shirt],[6,8,shirt],
+    // Pants (rows 9-10)
+    [2,9,pants],[3,9,pants],[4,9,pants],[5,9,pants],[6,9,pants],
+    [2,10,pants],[3,10,pants],[5,10,pants],[6,10,pants],
+    // Shoes (row 11)
+    [1,11,shoe],[2,11,shoe],[3,11,shoe],[5,11,shoe],[6,11,shoe],[7,11,shoe],
+  ];
+}
+
+const AGENT_PIXELS: Record<string, PixelRow> = {
+  kimberly: makePixelArt("#4A2D0A", "#2093FF", "#FFD700"), // dark hair, blue shirt, gold badge
+  alex: makePixelArt("#8B4513", "#F93C3C"),    // brown hair, red shirt
+  sabri: makePixelArt("#1a1a2e", "#F93C3C"),   // black hair, red shirt
+  jordan: makePixelArt("#C4721A", "#22C55E"),  // auburn hair, green shirt
+  kevin: makePixelArt("#2a2a3e", "#FFBD59"),   // dark hair, yellow shirt
+};
+
+function PixelCharacter({ agentId, isWorking, accent }: { agentId: string; isWorking: boolean; accent: string }) {
+  const pixels = AGENT_PIXELS[agentId] || AGENT_PIXELS.kimberly;
+  
+  const shadows = pixels
+    .map(([col, row, color]) => `${col * PX}px ${row * PX}px 0 0 ${color}`)
+    .join(",");
+
+  return (
+    <div className="pixel-character-wrap" style={{ width: 9 * PX, height: 12 * PX }}>
+      <div
+        className={`pixel-character ${isWorking ? "pixel-working" : "pixel-idle"}`}
+        style={{
+          width: PX,
+          height: PX,
+          boxShadow: shadows,
+          imageRendering: "pixelated" as any,
+        }}
+      />
+      {/* Shadow under character */}
+      <div
+        className="pixel-shadow"
+        style={{
+          width: 7 * PX,
+          height: 2 * PX,
+          left: PX,
+          bottom: -PX,
+          background: `radial-gradient(ellipse, ${accent}40, transparent 70%)`,
+        }}
+      />
+    </div>
+  );
+}
+
+/* ── Layout ── */
 const ZONE_COPY: Record<OfficeAgent["department"], string> = {
   Executive: "Executive Suite",
   Marketing: "Marketing",
   Sales: "Sales",
-  Development: "Development",
+  Development: "Engineering",
 };
 
 const ZONE_LAYOUT: Record<
@@ -88,8 +168,8 @@ export function OfficeScene({ agents, loading, selectedId, onSelect }: Props) {
     <section className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.08),_transparent_28%),linear-gradient(180deg,_rgba(255,255,255,0.03),_rgba(255,255,255,0.015))] p-4 md:p-6">
       <div className="mb-4 flex items-center justify-between gap-4">
         <div>
-          <p className="text-[11px] uppercase tracking-[0.32em] text-slate-500">Interactive Map</p>
-          <h2 className="mt-1 text-xl font-semibold text-white">Virtual Office Floor</h2>
+          <p className="text-[11px] uppercase tracking-[0.32em] text-slate-500">🎮 Pixel Office</p>
+          <h2 className="mt-1 text-xl font-semibold text-white">The Derby Digital HQ</h2>
         </div>
         <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] uppercase tracking-[0.28em] text-slate-400">
           Click an agent
@@ -115,15 +195,22 @@ export function OfficeScene({ agents, loading, selectedId, onSelect }: Props) {
             </div>
           ))}
 
+          {/* Furniture */}
           <div className="office-furniture executive-desk absolute left-[39%] top-[18%] h-[10%] w-[22%] rounded-[22px]" />
           <div className="office-furniture marketing-desk absolute left-[12%] top-[40%] h-[8%] w-[18%] rounded-[18px]" />
           <div className="office-furniture marketing-desk absolute left-[15%] top-[52%] h-[8%] w-[18%] rounded-[18px]" />
           <div className="office-furniture sales-desk absolute right-[12%] top-[44%] h-[8%] w-[17%] rounded-[18px]" />
           <div className="office-furniture development-desk absolute left-[37%] top-[71%] h-[8.5%] w-[26%] rounded-[20px]" />
           <div className="coffee-station absolute left-[68%] top-[15%] h-[10%] w-[10%] rounded-[18px]">
-            <span className="coffee-label">Break</span>
+            <span className="coffee-label">☕ Break</span>
           </div>
 
+          {/* Pixel Art Plant Decorations */}
+          <div className="pixel-plant absolute left-[5%] top-[15%]">🌿</div>
+          <div className="pixel-plant absolute right-[5%] top-[68%]">🪴</div>
+          <div className="pixel-plant absolute left-[90%] top-[18%]">🌵</div>
+
+          {/* Agents */}
           {agents.map((agent) => {
             const layout = AGENT_LAYOUT[agent.id];
             if (!layout) return null;
@@ -146,21 +233,20 @@ export function OfficeScene({ agents, loading, selectedId, onSelect }: Props) {
                 aria-label={`Open ${agent.name} details`}
                 title={`${agent.name} · ${isWorking ? "working" : "idle"}`}
               >
-                <div className="activity-bubble max-w-[200px] rounded-2xl border border-white/10 bg-[rgba(6,8,12,0.88)] px-3 py-2 text-xs text-slate-100 shadow-[0_12px_35px_rgba(0,0,0,0.35)] backdrop-blur-xl">
-                  {agent.currentTask ?? "Standing by"}
+                {/* Speech bubble */}
+                <div className="activity-bubble max-w-[200px] rounded-xl border border-white/10 bg-[rgba(6,8,12,0.92)] px-3 py-1.5 text-[11px] text-slate-100 shadow-lg backdrop-blur-xl">
+                  <span className="mr-1">{isWorking ? "💻" : "💤"}</span>
+                  {agent.currentTask ? (agent.currentTask.length > 35 ? agent.currentTask.slice(0, 35) + "..." : agent.currentTask) : "Standing by..."}
                 </div>
 
-                <div className="agent-body mt-3 flex items-center gap-3">
-                  <div className="relative">
-                    <div className="agent-avatar flex h-16 w-16 items-center justify-center rounded-full border-[3px] bg-[#10131b] text-sm font-semibold text-white">
-                      {agent.initials}
-                    </div>
-                    <span className={`status-dot ${isWorking ? "status-working" : "status-idle"}`} />
-                  </div>
-
-                  <div className="agent-label min-w-[120px] rounded-2xl border border-white/10 bg-[rgba(10,12,18,0.82)] px-3 py-2 backdrop-blur-xl">
-                    <p className="text-sm font-semibold text-white">{agent.name}</p>
-                    <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">{agent.role}</p>
+                {/* Pixel character */}
+                <div className="mt-2 flex flex-col items-center">
+                  <PixelCharacter agentId={agent.id} isWorking={isWorking} accent={agent.accent} />
+                  
+                  {/* Name tag */}
+                  <div className="agent-nametag mt-1 rounded-lg border border-white/10 bg-[rgba(10,12,18,0.85)] px-2.5 py-1 backdrop-blur-xl">
+                    <p className="text-center text-[11px] font-bold text-white">{agent.name}</p>
+                    <p className="text-center text-[9px] uppercase tracking-[0.15em]" style={{ color: agent.accent }}>{agent.department}</p>
                   </div>
                 </div>
               </button>
@@ -170,7 +256,7 @@ export function OfficeScene({ agents, loading, selectedId, onSelect }: Props) {
           {loading ? (
             <div className="absolute inset-0 grid place-items-center rounded-[30px] bg-[rgba(4,5,8,0.5)] backdrop-blur-sm">
               <div className="rounded-2xl border border-white/10 bg-black/30 px-5 py-4 text-sm text-slate-300">
-                Syncing live office state...
+                Loading pixel office...
               </div>
             </div>
           ) : null}
@@ -270,97 +356,76 @@ export function OfficeScene({ agents, loading, selectedId, onSelect }: Props) {
           color: rgba(255, 255, 255, 0.75);
         }
 
+        .pixel-plant {
+          font-size: 20px;
+          opacity: 0.7;
+          filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+        }
+
+        .pixel-character-wrap {
+          position: relative;
+          image-rendering: pixelated;
+          image-rendering: crisp-edges;
+        }
+
+        .pixel-character {
+          image-rendering: pixelated;
+          image-rendering: crisp-edges;
+        }
+
+        .pixel-shadow {
+          position: absolute;
+          border-radius: 50%;
+          filter: blur(2px);
+        }
+
         .agent-node {
           transform-style: preserve-3d;
         }
 
-        .agent-avatar {
-          border-color: var(--agent-color);
-          box-shadow:
-            0 0 0 7px color-mix(in srgb, var(--agent-color) 18%, transparent),
-            0 14px 28px rgba(0, 0, 0, 0.28);
+        .agent-idle {
+          animation: idleFloat 2.5s ease-in-out infinite;
         }
 
-        .status-dot {
-          position: absolute;
-          right: 2px;
-          bottom: 1px;
-          width: 14px;
-          height: 14px;
-          border-radius: 999px;
-          border: 2px solid #0a0a0f;
+        .agent-idle .pixel-character-wrap {
+          animation: pixelBounce 2.5s ease-in-out infinite;
         }
 
-        .status-working {
-          background: #22c55e;
-          box-shadow: 0 0 0 rgba(34, 197, 94, 0.45);
-          animation: statusPulse 1.8s ease-in-out infinite;
-        }
-
-        .status-idle {
-          background: #ffbd59;
-          box-shadow: 0 0 18px rgba(255, 189, 89, 0.4);
+        .agent-working .pixel-character-wrap {
+          animation: pixelType 0.6s ease-in-out infinite;
         }
 
         .activity-bubble {
-          opacity: 0.96;
-          transform-origin: bottom center;
-          transition:
-            opacity 200ms ease,
-            transform 200ms ease;
+          opacity: 0;
+          transform: translateY(4px) scale(0.95);
+          transition: opacity 200ms ease, transform 200ms ease;
         }
 
         .agent-node:hover .activity-bubble,
         .agent-node:focus-visible .activity-bubble {
-          transform: translateY(-2px) scale(1.01);
-        }
-
-        .agent-idle {
-          animation: idleFloat 2s ease-in-out infinite;
-        }
-
-        .agent-working .agent-avatar,
-        .agent-working .agent-label {
-          animation: typingPulse 1.2s ease-in-out infinite;
+          opacity: 1;
+          transform: translateY(0) scale(1);
         }
 
         @keyframes idleFloat {
-          0%,
-          100% {
-            transform: translate3d(-50%, -50%, 0) translateY(0);
-          }
-          50% {
-            transform: translate3d(-50%, -50%, 0) translateY(-3px);
-          }
+          0%, 100% { transform: translate3d(-50%, -50%, 0) translateY(0); }
+          50% { transform: translate3d(-50%, -50%, 0) translateY(-4px); }
         }
 
-        @keyframes typingPulse {
-          0%,
-          100% {
-            transform: scale(1);
-          }
-          50% {
-            transform: scale(1.03);
-          }
+        @keyframes pixelBounce {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-3px); }
         }
 
-        @keyframes statusPulse {
-          0%,
-          100% {
-            box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5);
-          }
-          70% {
-            box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
-          }
+        @keyframes pixelType {
+          0%, 100% { transform: translateY(0) scale(1); }
+          25% { transform: translateY(-1px) scale(1.02); }
+          75% { transform: translateY(0px) scale(0.98); }
         }
 
         @media (max-width: 900px) {
           .office-floor {
             transform: rotateX(56deg) rotateZ(-45deg) scale(0.98);
-          }
-
-          .agent-label {
-            min-width: 102px;
           }
         }
 
@@ -369,28 +434,17 @@ export function OfficeScene({ agents, loading, selectedId, onSelect }: Props) {
             transform: rotateX(52deg) rotateZ(-45deg) scale(1.02);
           }
 
-          .agent-body {
-            gap: 0.5rem;
+          .agent-nametag {
+            padding: 0.3rem 0.5rem;
           }
 
-          .agent-avatar {
-            width: 3.25rem;
-            height: 3.25rem;
-          }
-
-          .agent-label {
-            min-width: 88px;
-            padding: 0.55rem 0.7rem;
-          }
-
-          .agent-label p:first-child {
-            font-size: 0.75rem;
+          .agent-nametag p:first-child {
+            font-size: 9px;
           }
 
           .activity-bubble {
             max-width: 140px;
-            font-size: 11px;
-            padding: 0.45rem 0.65rem;
+            font-size: 10px;
           }
         }
       `}</style>
