@@ -36,6 +36,30 @@ async function supabaseReq(method: string, table: string, opts?: { params?: stri
   return res.json();
 }
 
+function getMonthBounds(month: string) {
+  const start = new Date(`${month}-01T00:00:00.000Z`);
+  const end = new Date(start);
+  end.setUTCMonth(end.getUTCMonth() + 1);
+  return { startMs: start.getTime(), endMs: end.getTime() };
+}
+
+function getInvoiceMonthTimestamp(invoice: any) {
+  const candidates = [invoice.status_transitions?.finalized_at, invoice.due_date, invoice.created];
+  for (const value of candidates) {
+    if (typeof value === "number" && value > 0) return value * 1000;
+  }
+  return 0;
+}
+
+function normalizeInvoiceUrl(invoice: any) {
+  return invoice.hosted_invoice_url || invoice.invoice_pdf || "";
+}
+
+function normalizeInvoiceAmount(invoice: any) {
+  const rawAmount = invoice.amount_remaining ?? invoice.amount_due ?? invoice.total ?? 0;
+  return Number(rawAmount) / 100;
+}
+
 // ─── Customer Overrides ───
 // Excluded customers (not real clients)
 const EXCLUDED_CUSTOMERS = new Set([
@@ -67,12 +91,15 @@ const VIRTUAL_CUSTOMERS: Record<string, string> = {
 // ─── GET: Fetch all finance data ───
 export async function GET(req: NextRequest) {
   const month = req.nextUrl.searchParams.get("month") || new Date().toISOString().slice(0, 7);
+  const { startMs, endMs } = getMonthBounds(month);
 
   try {
-    // Fetch active + past_due subscriptions + Supabase expenses in parallel
-    const [activeSubs, pastDueSubs, expenses] = await Promise.all([
+    // Fetch active + past_due subscriptions + failed invoices + Supabase expenses in parallel
+    const [activeSubs, pastDueSubs, openInvoices, uncollectibleInvoices, expenses] = await Promise.all([
       stripeGet("/subscriptions", { status: "active", limit: "100" }),
       stripeGet("/subscriptions", { status: "past_due", limit: "100" }),
+      stripeGet("/invoices", { status: "open", limit: "100" }),
+      stripeGet("/invoices", { status: "uncollectible", limit: "100" }),
       supabaseReq("GET", "expenses", { params: `select=*&month=eq.${month}&order=created_at.asc` }),
     ]);
     const subs = { data: [...(activeSubs.data || []), ...(pastDueSubs.data || [])] };
@@ -162,6 +189,119 @@ export async function GET(req: NextRequest) {
       }
     }
 
+    const failedPaymentsByKey = new Map<string, {
+      customerName: string;
+      email: string;
+      amount: number;
+      dueDate: string | null;
+      invoiceUrl: string;
+      stripeCustomerId: string;
+    }>();
+
+    const recordFailedPayment = (entry: {
+      customerName: string;
+      email: string;
+      amount: number;
+      dueDate: string | null;
+      invoiceUrl: string;
+      stripeCustomerId: string;
+      key?: string;
+    }) => {
+      if (!entry.stripeCustomerId || EXCLUDED_CUSTOMERS.has(entry.stripeCustomerId) || entry.amount <= 0) return;
+      const mergedCustomerId = MERGE_CUSTOMERS[entry.stripeCustomerId] || entry.stripeCustomerId;
+      const customer = customers.find((c) => c.stripeId === mergedCustomerId);
+      const lookup = custLookup[entry.stripeCustomerId] || custLookup[mergedCustomerId];
+      const dueDate = entry.dueDate || null;
+      const key = entry.key || `${mergedCustomerId}:${dueDate || "no-date"}:${entry.amount.toFixed(2)}`;
+      failedPaymentsByKey.set(key, {
+        customerName:
+          NAME_OVERRIDES[mergedCustomerId] ||
+          VIRTUAL_CUSTOMERS[mergedCustomerId] ||
+          customer?.name ||
+          entry.customerName ||
+          lookup?.name ||
+          lookup?.email ||
+          mergedCustomerId,
+        email: customer?.email || entry.email || lookup?.email || "",
+        amount: entry.amount,
+        dueDate,
+        invoiceUrl: entry.invoiceUrl,
+        stripeCustomerId: mergedCustomerId,
+      });
+    };
+
+    const failedInvoices = [...(openInvoices.data || []), ...(uncollectibleInvoices.data || [])]
+      .filter((invoice: any) => {
+        const ts = getInvoiceMonthTimestamp(invoice);
+        return ts >= startMs && ts < endMs;
+      });
+
+    for (const invoice of failedInvoices) {
+      recordFailedPayment({
+        key: invoice.id,
+        customerName: invoice.customer_name || "",
+        email: invoice.customer_email || "",
+        amount: normalizeInvoiceAmount(invoice),
+        dueDate: invoice.due_date ? new Date(invoice.due_date * 1000).toISOString() : null,
+        invoiceUrl: normalizeInvoiceUrl(invoice),
+        stripeCustomerId: invoice.customer || "",
+      });
+    }
+
+    const pastDueInvoiceIds: string[] = Array.from(new Set<string>(
+      (pastDueSubs.data || [])
+        .map((sub: any) => sub.latest_invoice)
+        .filter((invoiceId: any): invoiceId is string => typeof invoiceId === "string" && !failedPaymentsByKey.has(invoiceId))
+    ));
+
+    const pastDueInvoiceDetails = await Promise.all(
+      pastDueInvoiceIds.map(async (invoiceId: string) => {
+        try {
+          return await stripeGet(`/invoices/${invoiceId}`);
+        } catch {
+          return null;
+        }
+      })
+    );
+
+    const pastDueInvoiceMap = new Map(
+      pastDueInvoiceDetails
+        .filter(Boolean)
+        .map((invoice: any) => [invoice.id, invoice])
+    );
+
+    for (const sub of pastDueSubs.data || []) {
+      let cid = sub.customer;
+      if (!cid || EXCLUDED_CUSTOMERS.has(cid)) continue;
+      if (MERGE_CUSTOMERS[cid]) cid = MERGE_CUSTOMERS[cid];
+
+      const latestInvoice =
+        (typeof sub.latest_invoice === "object" && sub.latest_invoice) ||
+        pastDueInvoiceMap.get(sub.latest_invoice);
+
+      const fallbackAmount = (sub.items?.data || []).reduce((sum: number, item: any) => {
+        const price = item.price;
+        const qty = item.quantity || 1;
+        return sum + (((price?.unit_amount || 0) / 100) * qty);
+      }, 0);
+
+      recordFailedPayment({
+        key: typeof sub.latest_invoice === "string" ? sub.latest_invoice : `${cid}:${sub.id}`,
+        customerName: sub.customer_name || "",
+        email: sub.customer_email || "",
+        amount: latestInvoice ? normalizeInvoiceAmount(latestInvoice) : fallbackAmount,
+        dueDate: latestInvoice?.due_date ? new Date(latestInvoice.due_date * 1000).toISOString() : null,
+        invoiceUrl: latestInvoice ? normalizeInvoiceUrl(latestInvoice) : "",
+        stripeCustomerId: cid,
+      });
+    }
+
+    const failedPayments = Array.from(failedPaymentsByKey.values()).sort((a, b) => {
+      const aTime = a.dueDate ? new Date(a.dueDate).getTime() : 0;
+      const bTime = b.dueDate ? new Date(b.dueDate).getTime() : 0;
+      return bTime - aTime;
+    });
+
     // Sort by MRR descending
     customers.sort((a, b) => b.mrr - a.mrr);
 
@@ -170,17 +310,20 @@ export async function GET(req: NextRequest) {
     const totalStripeFees = customers.reduce((s, c) => s + c.stripeFee, 0);
     const netMRR = grossMRR - totalStripeFees;
     const totalExpenses = expenses.reduce((s: number, e: any) => s + Number(e.amount), 0);
+    const totalFailedRevenue = failedPayments.reduce((sum, payment) => sum + payment.amount, 0);
     const profit = netMRR - totalExpenses;
 
     return NextResponse.json({
       month,
       customers,
       expenses,
+      failedPayments,
       summary: {
         grossMRR,
         totalStripeFees,
         netMRR,
         totalExpenses,
+        totalFailedRevenue,
         profit,
         profitMargin: grossMRR > 0 ? (profit / grossMRR) * 100 : 0,
         activeSubscriptions: customers.length,

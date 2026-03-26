@@ -10,6 +10,12 @@ import dynamic from "next/dynamic";
 const ReactECharts = dynamic(() => import("echarts-for-react"), { ssr: false });
 
 const fmt = (n: number) => `$${Math.abs(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}${n < 0 ? "" : ""}`;
+const formatFailedDueDate = (value?: string | null) => {
+  if (!value) return "No due date";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "No due date";
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+};
 
 // ─── Inline Editable Field ───
 function EditableField({ value, onSave, type = "text", className = "" }: {
@@ -103,12 +109,22 @@ interface Expense {
   month: string;
 }
 
+interface FailedPayment {
+  customerName: string;
+  email: string;
+  amount: number;
+  dueDate: string | null;
+  invoiceUrl: string;
+  stripeCustomerId: string;
+}
+
 export default function FinancePage() {
   const [tab, setTab] = useState<Tab>("overview");
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
+  const [showFailedPaymentsModal, setShowFailedPaymentsModal] = useState(false);
   const [showAddExpense, setShowAddExpense] = useState(false);
   const [search, setSearch] = useState("");
 
@@ -180,6 +196,7 @@ export default function FinancePage() {
   const summary = data?.summary || {};
   const customers = data?.customers || [];
   const expenses: Expense[] = data?.expenses || [];
+  const failedPayments: FailedPayment[] = data?.failedPayments || [];
   const filteredCustomers = customers.filter((c: any) =>
     !search || c.name.toLowerCase().includes(search.toLowerCase())
   );
@@ -326,6 +343,31 @@ export default function FinancePage() {
               </div>
             </div>
           </div>
+
+          {failedPayments.length > 0 && (
+            <div className="bg-white/[0.03] border border-[#F93C3C]/20 rounded-xl p-5">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h3 className="text-sm font-medium text-slate-400">Failed Payments</h3>
+                  <p className="text-xs text-slate-500 mt-1">Open, uncollectible, and past-due payment failures for this month.</p>
+                </div>
+                <span className="text-[10px] uppercase tracking-[0.2em] text-[#F93C3C]/70">{failedPayments.length} items</span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowFailedPaymentsModal(true)}
+                className="mt-4 w-full text-left rounded-2xl border border-[#F93C3C]/30 bg-[#F93C3C]/10 px-5 py-4 transition hover:bg-[#F93C3C]/14 hover:border-[#F93C3C]/40"
+              >
+                <div className="flex items-center gap-2 text-[#F93C3C]">
+                  <Minus className="w-4 h-4" />
+                  <span className="text-[11px] uppercase tracking-wider">Total Failed Revenue</span>
+                </div>
+                <p className="mt-2 text-3xl font-bold font-mono text-[#F93C3C]">{fmt(summary.totalFailedRevenue || 0)}</p>
+                <p className="mt-2 text-xs text-slate-400">Click for payment breakdown</p>
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -720,6 +762,64 @@ export default function FinancePage() {
           </div>
         );
       })()}
+
+      {showFailedPaymentsModal && failedPayments.length > 0 && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md px-4">
+          <div className="w-full max-w-2xl rounded-3xl border border-white/10 bg-white/[0.07] shadow-2xl shadow-black/40 backdrop-blur-2xl">
+            <div className="flex items-center justify-between border-b border-white/10 px-6 py-5">
+              <div>
+                <h3 className="text-lg font-semibold text-white">Failed Payments</h3>
+                <p className="text-sm text-slate-400 mt-1">{fmt(summary.totalFailedRevenue || 0)} outstanding this month</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowFailedPaymentsModal(false)}
+                className="rounded-xl border border-white/10 bg-white/5 p-2 text-slate-400 transition hover:bg-white/10 hover:text-white"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="max-h-[70vh] overflow-y-auto px-6 py-4 space-y-3">
+              {failedPayments.map((payment, index) => (
+                <div key={`${payment.stripeCustomerId}-${payment.dueDate || index}-${payment.amount}`} className="rounded-2xl border border-white/8 bg-black/20 px-4 py-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        {payment.invoiceUrl ? (
+                          <a
+                            href={payment.invoiceUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-sm font-medium text-white underline decoration-white/20 underline-offset-4 hover:text-[#F93C3C]"
+                          >
+                            {payment.customerName}
+                          </a>
+                        ) : (
+                          <span className="text-sm font-medium text-white">{payment.customerName}</span>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => navigator.clipboard.writeText(payment.customerName)}
+                          className="rounded-md border border-white/10 bg-white/5 px-2 py-1 text-[10px] uppercase tracking-wider text-slate-400 transition hover:border-[#F93C3C]/30 hover:text-[#F93C3C]"
+                        >
+                          Copy
+                        </button>
+                      </div>
+                      <p className="mt-1 text-xs text-slate-500">{payment.email || payment.stripeCustomerId}</p>
+                    </div>
+                    <span className="text-lg font-mono font-semibold text-[#F93C3C]">{fmt(payment.amount)}</span>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between gap-4 text-xs">
+                    <span className="text-slate-400">Due {formatFailedDueDate(payment.dueDate)}</span>
+                    <span className="text-slate-600">{payment.stripeCustomerId}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
