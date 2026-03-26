@@ -2,52 +2,110 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import {
-  ArrowRight, BarChart3, BookUser, Calendar, DollarSign,
-  Target, TrendingUp, Users, Zap, Clock3, Star, Phone,
+  ArrowRight, BookUser, Calendar, DollarSign, Target, Users, Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { seedRevenue } from "@/lib/seed";
 import { SEED_CONTACTS } from "@/lib/rolodex-seed";
-import { RELATIONSHIP_TYPE_COLORS, RELATIONSHIP_TYPE_LABELS } from "@/lib/rolodex-types";
+import { RELATIONSHIP_TYPE_COLORS } from "@/lib/rolodex-types";
 import type { AgentRecord } from "@/lib/agents";
-
-const ReactEChartsCore = dynamic(() => import("echarts-for-react"), { ssr: false });
 
 function getInitials(first?: string, last?: string) { return `${first?.[0] ?? ""}${last?.[0] ?? ""}`.toUpperCase() || "?"; }
 function timeAgo(d?: string) { if (!d) return "—"; const days = Math.floor((Date.now() - new Date(d).getTime()) / 86400000); return days === 0 ? "Today" : days === 1 ? "Yesterday" : days < 7 ? `${days}d ago` : `${Math.floor(days / 7)}w ago`; }
+function fmtCompactCurrency(value: number) {
+  if (value >= 1000) return `$${(value / 1000).toFixed(1)}k`;
+  return `$${value.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
+}
+function fmtCurrency(value: number) {
+  return `$${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+type FinanceSummary = {
+  grossMRR: number;
+  arr: number;
+  activeSubscriptions: number;
+  totalStripeFees: number;
+  profit: number;
+  profitMargin: number;
+};
+
+type FinanceResponse = {
+  summary?: Partial<FinanceSummary>;
+};
 
 export default function HomePage() {
   const [agents, setAgents] = useState<AgentRecord[]>([]);
+  const [financeSummary, setFinanceSummary] = useState<FinanceSummary>({
+    grossMRR: 0,
+    arr: 0,
+    activeSubscriptions: 0,
+    totalStripeFees: 0,
+    profit: 0,
+    profitMargin: 0,
+  });
 
   useEffect(() => {
-    fetch("/api/agents").then(r => r.json()).then(d => setAgents(Array.isArray(d) ? d : d.agents || [])).catch(() => {});
+    let cancelled = false;
+
+    async function loadHomeData() {
+      try {
+        const [financeRes, agentsRes] = await Promise.all([
+          fetch("/api/finance", { cache: "no-store" }),
+          fetch("/api/agents", { cache: "no-store" }),
+        ]);
+
+        const [financeData, agentsData]: [FinanceResponse, { agents?: AgentRecord[] } | AgentRecord[]] = await Promise.all([
+          financeRes.json(),
+          agentsRes.json(),
+        ]);
+
+        if (cancelled) return;
+
+        const summary = financeData?.summary || {};
+        setFinanceSummary({
+          grossMRR: Number(summary.grossMRR || 0),
+          arr: Number(summary.arr || 0),
+          activeSubscriptions: Number(summary.activeSubscriptions || 0),
+          totalStripeFees: Number(summary.totalStripeFees || 0),
+          profit: Number(summary.profit || 0),
+          profitMargin: Number(summary.profitMargin || 0),
+        });
+
+        const rawAgents = Array.isArray(agentsData) ? agentsData : agentsData?.agents || [];
+        const normalizedAgents = rawAgents.map((agent: any) => ({
+          ...agent,
+          currentTask: agent.currentTask || agent.current_task || null,
+        }));
+        setAgents(normalizedAgents);
+      } catch {
+        if (!cancelled) {
+          setFinanceSummary({
+            grossMRR: 0,
+            arr: 0,
+            activeSubscriptions: 0,
+            totalStripeFees: 0,
+            profit: 0,
+            profitMargin: 0,
+          });
+          setAgents([]);
+        }
+      }
+    }
+
+    loadHomeData();
+    return () => { cancelled = true; };
   }, []);
 
-  const rev = seedRevenue;
   const contacts = SEED_CONTACTS.filter(c => !c.archived);
   const now = Date.now();
   const goingCold = contacts.filter(c => c.lastContactedAt && (now - new Date(c.lastContactedAt).getTime()) / 86400000 > 30);
   const overdue = contacts.filter(c => c.nextFollowUp && new Date(c.nextFollowUp) <= new Date());
   const strongCount = contacts.filter(c => c.relationshipScore >= 75).length;
-  const totalInteractions = contacts.reduce((s, c) => s + c.interactions.length, 0);
   const aiAgents = agents.filter(a => a.type === "agent");
-  const activeAgents = aiAgents.filter(a => a.status === "active" || a.status === "working");
-  const arrProgress = Math.round((rev.arr / rev.target) * 100);
-
-  const mrrOption = {
-    backgroundColor: "transparent",
-    tooltip: { trigger: "axis", backgroundColor: "#1a1a2e", borderColor: "rgba(255,255,255,0.08)", textStyle: { color: "#e2e8f0", fontSize: 11 } },
-    grid: { left: 40, right: 12, top: 8, bottom: 24 },
-    xAxis: { type: "category", data: rev.mrrHistory.map(m => m.month.split(" ")[0]), axisLine: { show: false }, axisTick: { show: false }, axisLabel: { color: "#475569", fontSize: 9 } },
-    yAxis: { type: "value", axisLabel: { color: "#475569", fontSize: 9, formatter: (v: number) => `$${(v/1000).toFixed(0)}k` }, splitLine: { lineStyle: { color: "rgba(255,255,255,0.04)" } } },
-    series: [{
-      type: "line", data: rev.mrrHistory.map(m => m.mrr), smooth: true, showSymbol: false,
-      lineStyle: { color: "#2093FF", width: 2 },
-      areaStyle: { color: { type: "linear", x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: "rgba(32,147,255,0.15)" }, { offset: 1, color: "rgba(32,147,255,0)" }] } },
-    }],
-  };
+  const activeAgents = aiAgents.filter(a => a.status === "working");
+  const currentArr = financeSummary.grossMRR * 12;
+  const arrTarget = 1000000;
+  const arrProgress = Math.min(Math.round((currentArr / arrTarget) * 100), 100);
 
   return (
     <div className="space-y-6 animate-enter">
@@ -60,8 +118,8 @@ export default function HomePage() {
       {/* Top Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
-          { label: "MRR", value: `$${(rev.mrr/1000).toFixed(0)}k`, sub: `${arrProgress}% to $1M ARR`, color: "text-emerald-400", icon: DollarSign },
-          { label: "Subscribers", value: "53", sub: "$16.5k MRR", color: "text-blue-400", icon: Users },
+          { label: "MRR", value: fmtCompactCurrency(financeSummary.grossMRR), sub: `${arrProgress}% to $1M ARR`, color: "text-emerald-400", icon: DollarSign },
+          { label: "Subscribers", value: `${financeSummary.activeSubscriptions}`, sub: `${fmtCompactCurrency(financeSummary.grossMRR)} MRR`, color: "text-blue-400", icon: Users },
           { label: "Relationships", value: `${contacts.length}`, sub: `${strongCount} strong`, color: "text-indigo-400", icon: BookUser },
           { label: "AI Agents", value: `${activeAgents.length}/${aiAgents.length}`, sub: "active", color: "text-cyan-400", icon: Zap },
         ].map(s => (
@@ -80,19 +138,24 @@ export default function HomePage() {
 
       {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* MRR Chart */}
+        {/* MRR Overview */}
         <div className="lg:col-span-2 glass-panel p-4">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">MRR Growth</p>
-            <p className="text-[11px] text-slate-500">${(rev.mrr).toLocaleString()}/mo</p>
+            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">MRR Overview</p>
+            <p className="text-[11px] text-slate-500">Live from finance API</p>
           </div>
-          <div className="h-[180px]">
-            <ReactEChartsCore option={mrrOption} style={{ height: "100%", width: "100%" }} opts={{ renderer: "canvas" }} notMerge />
+          <div className="h-[180px] flex flex-col justify-center">
+            <p className="text-[12px] text-slate-500 uppercase tracking-[0.22em]">Current Gross MRR</p>
+            <p className="text-[44px] leading-none font-bold font-mono mt-3 text-white">{fmtCurrency(financeSummary.grossMRR)}</p>
+            <div className="mt-4 flex items-center gap-5 text-[11px] text-slate-500">
+              <span>{financeSummary.activeSubscriptions} active subscriptions</span>
+              <span>{fmtCurrency(currentArr)} ARR</span>
+            </div>
           </div>
           {/* ARR progress bar */}
           <div className="mt-3">
             <div className="flex justify-between text-[10px] text-slate-500 mb-1">
-              <span>${(rev.arr/1000).toFixed(0)}k ARR</span>
+              <span>{fmtCompactCurrency(currentArr)} ARR</span>
               <span>$1M target</span>
             </div>
             <div className="h-2 bg-white/[0.06] rounded-full overflow-hidden">
@@ -109,7 +172,7 @@ export default function HomePage() {
             <Link href="/agents" className="text-[10px] text-blue-400 hover:text-blue-300 flex items-center gap-1">View all <ArrowRight size={10} /></Link>
           </div>
           <div className="space-y-2.5">
-            {aiAgents.map(a => (
+            {aiAgents.slice(0, 6).map(a => (
               <div key={a.id} className="flex items-center gap-3">
                 <div className="relative">
                   <div className="w-8 h-8 rounded-lg bg-white/[0.05] flex items-center justify-center text-[11px] font-bold text-slate-300">
@@ -123,9 +186,12 @@ export default function HomePage() {
                   <p className="text-[12px] text-white font-medium">{a.name}</p>
                   <p className="text-[10px] text-slate-500 truncate">{a.currentTask || a.role}</p>
                 </div>
-                <span className="text-[9px] text-slate-600 uppercase">{a.model}</span>
+                <span className="text-[9px] text-slate-600 uppercase">{a.status}</span>
               </div>
             ))}
+            {aiAgents.length === 0 && (
+              <p className="text-[11px] text-slate-500">No agents available.</p>
+            )}
           </div>
         </div>
       </div>
@@ -172,26 +238,37 @@ export default function HomePage() {
 
         {/* Revenue by type */}
         <div className="glass-panel p-4">
-          <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-3">Revenue Mix</p>
+          <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-3">Finance Snapshot</p>
           <div className="space-y-3">
-            {rev.byType.map(t => (
-              <div key={t.name}>
+            {[
+              { name: "Gross MRR", value: financeSummary.grossMRR, color: "bg-emerald-500" },
+              { name: "Profit", value: financeSummary.profit, color: "bg-blue-500" },
+              { name: "Stripe Fees", value: financeSummary.totalStripeFees, color: "bg-pink-500" },
+            ].map(item => (
+              <div key={item.name}>
                 <div className="flex justify-between text-[11px] mb-1">
-                  <span className="text-slate-400">{t.name}</span>
-                  <span className="text-white font-mono">${(t.value/1000).toFixed(1)}k</span>
+                  <span className="text-slate-400">{item.name}</span>
+                  <span className="text-white font-mono">{fmtCurrency(item.value)}</span>
                 </div>
                 <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
-                  <div className="h-full rounded-full bg-blue-500 transition-all" style={{ width: `${(t.value / rev.mrr) * 100}%` }} />
+                  <div
+                    className={cn("h-full rounded-full transition-all", item.color)}
+                    style={{ width: `${financeSummary.grossMRR > 0 ? Math.min((item.value / financeSummary.grossMRR) * 100, 100) : 0}%` }}
+                  />
                 </div>
               </div>
             ))}
           </div>
           <div className="mt-4 pt-3 border-t border-white/[0.06]">
-            <p className="text-[9px] text-slate-500 uppercase tracking-wider mb-2">By Service</p>
-            {rev.byService.map(s => (
-              <div key={s.name} className="flex justify-between text-[10px] py-1">
-                <span className="text-slate-500">{s.name}</span>
-                <span className="text-slate-300 font-mono">${(s.value/1000).toFixed(1)}k</span>
+            <p className="text-[9px] text-slate-500 uppercase tracking-wider mb-2">Metrics</p>
+            {[
+              { name: "Net Margin", value: `${financeSummary.profitMargin.toFixed(1)}%` },
+              { name: "ARR", value: fmtCurrency(currentArr) },
+              { name: "Subscriptions", value: `${financeSummary.activeSubscriptions}` },
+            ].map(item => (
+              <div key={item.name} className="flex justify-between text-[10px] py-1">
+                <span className="text-slate-500">{item.name}</span>
+                <span className="text-slate-300 font-mono">{item.value}</span>
               </div>
             ))}
           </div>
@@ -206,7 +283,7 @@ export default function HomePage() {
               { href: "/office", label: "The Office", desc: "See your team working", icon: Users, color: "text-blue-400" },
               { href: "/rolodex", label: "Rolodex", desc: `${contacts.length} contacts`, icon: BookUser, color: "text-indigo-400" },
               { href: "/tasks", label: "Tasks", desc: "Kanban board", icon: Calendar, color: "text-cyan-400" },
-              { href: "/finance", label: "Finance", desc: `$${(rev.mrr/1000).toFixed(0)}k MRR`, icon: DollarSign, color: "text-emerald-400" },
+              { href: "/finance", label: "Finance", desc: `${fmtCompactCurrency(financeSummary.grossMRR)} MRR`, icon: DollarSign, color: "text-emerald-400" },
             ].map(q => (
               <Link key={q.href} href={q.href} className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-white/[0.04] transition-all group">
                 <div className={cn("w-8 h-8 rounded-lg bg-white/[0.04] flex items-center justify-center", q.color)}>

@@ -56,21 +56,34 @@ type OfficeAgent = {
 };
 
 type LayoutBox = { x: number; y: number; w: number; h: number };
+type LayoutPoint = { x: number; y: number };
+type RelativeLayoutBox = { x: number; y: number; w: number; h: number };
+type RelativeLayoutPoint = { x: number; y: number };
 
 type Station = {
-  desk: LayoutBox;
-  sprite: { x: number; y: number };
-  status: LayoutBox;
-  accent: LayoutBox;
-  label: { x: number; y: number };
+  desk: RelativeLayoutBox;
+  sprite: RelativeLayoutPoint;
+  status: RelativeLayoutBox;
+  accent: RelativeLayoutBox;
+  label: RelativeLayoutPoint;
   facing: "up" | "down";
   monitors?: number;
 };
 
-type SceneGeometry = {
-  scale: number;
-  offsetX: number;
-  offsetY: number;
+type ResolvedStation = {
+  desk: LayoutBox;
+  sprite: LayoutPoint;
+  status: LayoutBox;
+  accent: LayoutBox;
+  label: LayoutPoint;
+  facing: "up" | "down";
+  monitors?: number;
+};
+
+type SceneMetrics = {
+  width: number;
+  height: number;
+  unit: number;
 };
 
 const OFFICE_AGENT_IDS = ["kimberly", "alex", "sabri", "kevin", "jordan"] as const;
@@ -85,7 +98,15 @@ const DEPARTMENT_META: Record<Department, { color: string; label: string }> = {
   Sales: { color: "#22C55E", label: "Sales" },
 };
 
-const STATIONS: Record<string, Station> = {
+const RAW_STATIONS: Record<string, {
+  desk: LayoutBox;
+  sprite: LayoutPoint;
+  status: LayoutBox;
+  accent: LayoutBox;
+  label: LayoutPoint;
+  facing: "up" | "down";
+  monitors?: number;
+}> = {
   kimberly: {
     desk: { x: 190, y: 42, w: 100, h: 32 },
     sprite: { x: 230, y: 68 },
@@ -129,6 +150,42 @@ const STATIONS: Record<string, Station> = {
     facing: "up",
   },
 };
+
+const STATIONS: Record<string, Station> = Object.fromEntries(
+  Object.entries(RAW_STATIONS).map(([id, station]) => [
+    id,
+    {
+      desk: {
+        x: station.desk.x / INTERNAL_WIDTH,
+        y: station.desk.y / INTERNAL_HEIGHT,
+        w: station.desk.w / INTERNAL_WIDTH,
+        h: station.desk.h / INTERNAL_HEIGHT,
+      },
+      sprite: {
+        x: station.sprite.x / INTERNAL_WIDTH,
+        y: station.sprite.y / INTERNAL_HEIGHT,
+      },
+      status: {
+        x: station.status.x / INTERNAL_WIDTH,
+        y: station.status.y / INTERNAL_HEIGHT,
+        w: station.status.w / INTERNAL_WIDTH,
+        h: station.status.h / INTERNAL_HEIGHT,
+      },
+      accent: {
+        x: station.accent.x / INTERNAL_WIDTH,
+        y: station.accent.y / INTERNAL_HEIGHT,
+        w: station.accent.w / INTERNAL_WIDTH,
+        h: station.accent.h / INTERNAL_HEIGHT,
+      },
+      label: {
+        x: station.label.x / INTERNAL_WIDTH,
+        y: station.label.y / INTERNAL_HEIGHT,
+      },
+      facing: station.facing,
+      monitors: station.monitors,
+    } satisfies Station,
+  ]),
+) as Record<string, Station>;
 
 const ROOM = {
   background: "#5B4631",
@@ -282,164 +339,243 @@ function drawOutlineRect(
   drawRect(ctx, x + 1, y + 1, w - 2, h - 2, fill);
 }
 
-function drawLabel(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, color: string, align: CanvasTextAlign = "left") {
-  ctx.fillStyle = color;
-  ctx.font = "bold 8px monospace";
-  ctx.textAlign = align;
-  ctx.textBaseline = "top";
-  ctx.fillText(text.toUpperCase(), x, y);
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
 }
 
-function drawDesk(ctx: CanvasRenderingContext2D, station: Station, accent: string) {
+function px(metrics: SceneMetrics, value: number) {
+  return Math.round(metrics.width * (value / INTERNAL_WIDTH));
+}
+
+function py(metrics: SceneMetrics, value: number) {
+  return Math.round(metrics.height * (value / INTERNAL_HEIGHT));
+}
+
+function fontSize(metrics: SceneMetrics, size: number) {
+  return Math.max(8, Math.round(metrics.unit * size));
+}
+
+function bubbleWidth(metrics: SceneMetrics, text: string) {
+  return clamp(Math.round(text.length * metrics.unit * 4 + metrics.unit * 18), Math.round(metrics.unit * 76), Math.round(metrics.width * 0.32));
+}
+
+function resolveBox(metrics: SceneMetrics, box: RelativeLayoutBox): LayoutBox {
+  return {
+    x: Math.round(metrics.width * box.x),
+    y: Math.round(metrics.height * box.y),
+    w: Math.round(metrics.width * box.w),
+    h: Math.round(metrics.height * box.h),
+  };
+}
+
+function resolvePoint(metrics: SceneMetrics, point: RelativeLayoutPoint): LayoutPoint {
+  return {
+    x: Math.round(metrics.width * point.x),
+    y: Math.round(metrics.height * point.y),
+  };
+}
+
+function resolveStation(metrics: SceneMetrics, station: Station): ResolvedStation {
+  return {
+    desk: resolveBox(metrics, station.desk),
+    sprite: resolvePoint(metrics, station.sprite),
+    status: resolveBox(metrics, station.status),
+    accent: resolveBox(metrics, station.accent),
+    label: resolvePoint(metrics, station.label),
+    facing: station.facing,
+    monitors: station.monitors,
+  };
+}
+
+function drawLabel(
+  ctx: CanvasRenderingContext2D,
+  metrics: SceneMetrics,
+  text: string,
+  x: number,
+  y: number,
+  color: string,
+  align: CanvasTextAlign = "left",
+) {
+  const size = fontSize(metrics, 8);
+  ctx.fillStyle = color;
+  ctx.font = `bold ${size}px monospace`;
+  ctx.textAlign = align;
+  ctx.textBaseline = "top";
+  const label = text.toUpperCase();
+  const width = ctx.measureText(label).width;
+  const padding = Math.max(6, Math.round(metrics.unit * 6));
+  const anchorX =
+    align === "center"
+      ? clamp(x, width / 2 + padding, metrics.width - width / 2 - padding)
+      : clamp(x, padding, metrics.width - width - padding);
+  const anchorY = clamp(y, padding, metrics.height - size - padding);
+  ctx.fillText(label, anchorX, anchorY);
+}
+
+function drawDesk(ctx: CanvasRenderingContext2D, metrics: SceneMetrics, station: ResolvedStation, accent: string) {
   drawRect(ctx, station.accent.x, station.accent.y, station.accent.w, station.accent.h, `${accent}44`);
   drawOutlineRect(ctx, station.desk.x, station.desk.y, station.desk.w, station.desk.h, ROOM.deskEdge, ROOM.deskTop);
-  drawRect(ctx, station.desk.x + 8, station.desk.y + station.desk.h - 4, station.desk.w - 16, 3, "#3F2A18");
+  drawRect(ctx, station.desk.x + px(metrics, 8), station.desk.y + station.desk.h - py(metrics, 4), station.desk.w - px(metrics, 16), py(metrics, 3), "#3F2A18");
 
   const monitorCount = station.monitors ?? 1;
   for (let index = 0; index < monitorCount; index += 1) {
-    const gap = 22;
-    const offset = station.desk.x + 12 + index * gap;
-    drawOutlineRect(ctx, offset, station.desk.y + 5, 16, 10, ROOM.monitor, ROOM.monitorGlow);
-    drawRect(ctx, offset + 6, station.desk.y + 15, 4, 3, ROOM.monitor);
+    const gap = px(metrics, 22);
+    const offset = station.desk.x + px(metrics, 12) + index * gap;
+    drawOutlineRect(ctx, offset, station.desk.y + py(metrics, 5), px(metrics, 16), py(metrics, 10), ROOM.monitor, ROOM.monitorGlow);
+    drawRect(ctx, offset + px(metrics, 6), station.desk.y + py(metrics, 15), px(metrics, 4), py(metrics, 3), ROOM.monitor);
   }
 
-  drawOutlineRect(ctx, station.sprite.x - 8, station.sprite.y + 5, 16, 10, ROOM.chairShadow, ROOM.chair);
+  drawOutlineRect(ctx, station.sprite.x - px(metrics, 8), station.sprite.y + py(metrics, 5), px(metrics, 16), py(metrics, 10), ROOM.chairShadow, ROOM.chair);
 }
 
-function drawPlant(ctx: CanvasRenderingContext2D, x: number, y: number) {
-  drawRect(ctx, x + 2, y + 6, 10, 7, ROOM.pot);
-  drawRect(ctx, x + 1, y + 4, 12, 3, "#B17C52");
-  drawRect(ctx, x + 5, y, 4, 8, ROOM.plantDark);
-  drawRect(ctx, x + 1, y + 1, 12, 4, ROOM.plantLeaf);
-  drawRect(ctx, x + 3, y - 2, 8, 4, ROOM.plantLeaf);
+function drawPlant(ctx: CanvasRenderingContext2D, metrics: SceneMetrics, x: number, y: number) {
+  drawRect(ctx, x + px(metrics, 2), y + py(metrics, 6), px(metrics, 10), py(metrics, 7), ROOM.pot);
+  drawRect(ctx, x + px(metrics, 1), y + py(metrics, 4), px(metrics, 12), py(metrics, 3), "#B17C52");
+  drawRect(ctx, x + px(metrics, 5), y, px(metrics, 4), py(metrics, 8), ROOM.plantDark);
+  drawRect(ctx, x + px(metrics, 1), y + py(metrics, 1), px(metrics, 12), py(metrics, 4), ROOM.plantLeaf);
+  drawRect(ctx, x + px(metrics, 3), y - py(metrics, 2), px(metrics, 8), py(metrics, 4), ROOM.plantLeaf);
 }
 
-function drawCoffeeZone(ctx: CanvasRenderingContext2D) {
-  drawOutlineRect(ctx, 18, 118, 58, 32, ROOM.wallTrim, "#B98958");
-  drawLabel(ctx, "Coffee", 47, 122, "#FFF6E2", "center");
-  drawOutlineRect(ctx, 28, 132, 18, 12, "#4B2F1C", ROOM.coffee);
-  drawOutlineRect(ctx, 49, 132, 18, 12, "#4B2F1C", ROOM.coffee);
-  drawRect(ctx, 33, 125, 6, 8, "#EEE2D0");
-  drawRect(ctx, 54, 125, 6, 8, "#EEE2D0");
+function drawCoffeeZone(ctx: CanvasRenderingContext2D, metrics: SceneMetrics) {
+  drawOutlineRect(ctx, px(metrics, 18), py(metrics, 118), px(metrics, 58), py(metrics, 32), ROOM.wallTrim, "#B98958");
+  drawLabel(ctx, metrics, "Coffee", px(metrics, 47), py(metrics, 122), "#FFF6E2", "center");
+  drawOutlineRect(ctx, px(metrics, 28), py(metrics, 132), px(metrics, 18), py(metrics, 12), "#4B2F1C", ROOM.coffee);
+  drawOutlineRect(ctx, px(metrics, 49), py(metrics, 132), px(metrics, 18), py(metrics, 12), "#4B2F1C", ROOM.coffee);
+  drawRect(ctx, px(metrics, 33), py(metrics, 125), px(metrics, 6), py(metrics, 8), "#EEE2D0");
+  drawRect(ctx, px(metrics, 54), py(metrics, 125), px(metrics, 6), py(metrics, 8), "#EEE2D0");
 }
 
-function drawWhiteboard(ctx: CanvasRenderingContext2D) {
-  drawOutlineRect(ctx, 184, 126, 114, 44, ROOM.wallTrim, ROOM.whiteboard);
-  drawLabel(ctx, "Q2 Push", 194, 135, "#0F172A");
-  drawRect(ctx, 194, 148, 44, 2, "#2093FF");
-  drawRect(ctx, 194, 154, 58, 2, "#F93C3C");
-  drawRect(ctx, 194, 160, 34, 2, "#22C55E");
-  drawRect(ctx, 258, 144, 22, 14, "#FFBD59");
+function drawWhiteboard(ctx: CanvasRenderingContext2D, metrics: SceneMetrics) {
+  drawOutlineRect(ctx, px(metrics, 184), py(metrics, 126), px(metrics, 114), py(metrics, 44), ROOM.wallTrim, ROOM.whiteboard);
+  drawLabel(ctx, metrics, "Q2 Push", px(metrics, 194), py(metrics, 135), "#0F172A");
+  drawRect(ctx, px(metrics, 194), py(metrics, 148), px(metrics, 44), py(metrics, 2), "#2093FF");
+  drawRect(ctx, px(metrics, 194), py(metrics, 154), px(metrics, 58), py(metrics, 2), "#F93C3C");
+  drawRect(ctx, px(metrics, 194), py(metrics, 160), px(metrics, 34), py(metrics, 2), "#22C55E");
+  drawRect(ctx, px(metrics, 258), py(metrics, 144), px(metrics, 22), py(metrics, 14), "#FFBD59");
 }
 
-function drawStatusCard(ctx: CanvasRenderingContext2D, station: Station, agent: OfficeAgent, selected: boolean) {
+function drawStatusCard(ctx: CanvasRenderingContext2D, metrics: SceneMetrics, station: ResolvedStation, agent: OfficeAgent, selected: boolean) {
   const light = agent.status === "working" ? "#22C55E" : agent.status === "offline" ? "#EF4444" : "#FBBF24";
   const text = agent.currentTask ? truncate(agent.currentTask.title, 18) : truncate(agent.lastActivity, 18);
 
   drawOutlineRect(ctx, station.status.x, station.status.y, station.status.w, station.status.h, "#3B2D1E", ROOM.bubble);
-  drawRect(ctx, station.status.x + 4, station.status.y + 6, 5, 5, light);
-  drawLabel(ctx, text, station.status.x + 14, station.status.y + 5, ROOM.ink);
+  drawRect(ctx, station.status.x + px(metrics, 4), station.status.y + py(metrics, 6), px(metrics, 5), py(metrics, 5), light);
+  drawLabel(ctx, metrics, text, station.status.x + px(metrics, 14), station.status.y + py(metrics, 5), ROOM.ink);
   if (selected) {
-    drawRect(ctx, station.status.x, station.status.y + station.status.h + 2, station.status.w, 2, agent.accent);
+    drawRect(ctx, station.status.x, station.status.y + station.status.h + py(metrics, 2), station.status.w, py(metrics, 2), agent.accent);
   }
 }
 
-function drawAgent(ctx: CanvasRenderingContext2D, agent: OfficeAgent, station: Station, frame: number, hovered: boolean, selected: boolean) {
+function drawAgent(ctx: CanvasRenderingContext2D, metrics: SceneMetrics, agent: OfficeAgent, station: ResolvedStation, frame: number, hovered: boolean, selected: boolean) {
   const working = agent.status === "working";
-  const bob = working ? 0 : Math.sin(frame / 16) > 0 ? -1 : 0;
-  const typing = working && Math.sin(frame / 6) > 0 ? 1 : 0;
+  const bob = working ? 0 : Math.sin(frame / 16) > 0 ? -py(metrics, 1) : 0;
+  const typing = working && Math.sin(frame / 6) > 0 ? py(metrics, 1) : 0;
   const spriteX = station.sprite.x;
   const spriteY = station.sprite.y + bob;
   const skin = "#F1C27D";
   const hair = agent.id === "alex" ? "#7C4A29" : agent.id === "sabri" ? "#26160F" : agent.id === "jordan" ? "#9A5B2E" : "#3B2818";
   const outline = selected ? agent.accent : hovered ? "#FFF4D8" : "#1F150F";
 
-  drawRect(ctx, spriteX - 9, spriteY - 14, 18, 3, outline);
-  drawRect(ctx, spriteX - 8, spriteY - 13, 16, 2, outline);
-  drawRect(ctx, spriteX - 4, spriteY - 10, 8, 5, hair);
-  drawRect(ctx, spriteX - 3, spriteY - 6, 6, 5, skin);
-  drawRect(ctx, spriteX - 5, spriteY - 1, 10, 7, agent.shirt);
-  drawRect(ctx, spriteX - 6, spriteY + 6, 12, 6, "#1E293B");
-  drawRect(ctx, spriteX - 7, spriteY + 3, 3, 2 + typing, skin);
-  drawRect(ctx, spriteX + 4, spriteY + 3, 3, 2 + (typing ? 0 : 1), skin);
-  drawRect(ctx, spriteX - 5, spriteY + 12, 3, 4, "#111827");
-  drawRect(ctx, spriteX + 2, spriteY + 12, 3, 4, "#111827");
+  drawRect(ctx, spriteX - px(metrics, 9), spriteY - py(metrics, 14), px(metrics, 18), py(metrics, 3), outline);
+  drawRect(ctx, spriteX - px(metrics, 8), spriteY - py(metrics, 13), px(metrics, 16), py(metrics, 2), outline);
+  drawRect(ctx, spriteX - px(metrics, 4), spriteY - py(metrics, 10), px(metrics, 8), py(metrics, 5), hair);
+  drawRect(ctx, spriteX - px(metrics, 3), spriteY - py(metrics, 6), px(metrics, 6), py(metrics, 5), skin);
+  drawRect(ctx, spriteX - px(metrics, 5), spriteY - py(metrics, 1), px(metrics, 10), py(metrics, 7), agent.shirt);
+  drawRect(ctx, spriteX - px(metrics, 6), spriteY + py(metrics, 6), px(metrics, 12), py(metrics, 6), "#1E293B");
+  drawRect(ctx, spriteX - px(metrics, 7), spriteY + py(metrics, 3), px(metrics, 3), py(metrics, 2) + typing, skin);
+  drawRect(ctx, spriteX + px(metrics, 4), spriteY + py(metrics, 3), px(metrics, 3), py(metrics, 2) + (typing ? 0 : py(metrics, 1)), skin);
+  drawRect(ctx, spriteX - px(metrics, 5), spriteY + py(metrics, 12), px(metrics, 3), py(metrics, 4), "#111827");
+  drawRect(ctx, spriteX + px(metrics, 2), spriteY + py(metrics, 12), px(metrics, 3), py(metrics, 4), "#111827");
 
-  drawLabel(ctx, agent.name, spriteX, spriteY + 19, ROOM.ink, "center");
+  drawLabel(ctx, metrics, agent.name, station.label.x, station.label.y, ROOM.ink, "center");
 }
 
-function drawSpeechBubble(ctx: CanvasRenderingContext2D, agent: OfficeAgent, station: Station) {
+function drawSpeechBubble(ctx: CanvasRenderingContext2D, metrics: SceneMetrics, agent: OfficeAgent, station: ResolvedStation) {
   const message = agent.currentTask?.title ?? agent.lastActivity;
-  const bubbleWidth = Math.min(172, Math.max(76, message.length * 4 + 18));
-  const bubbleX = Math.max(6, Math.min(INTERNAL_WIDTH - bubbleWidth - 6, station.sprite.x - bubbleWidth / 2));
-  const bubbleY = Math.max(10, station.sprite.y - 42);
-  drawOutlineRect(ctx, bubbleX, bubbleY, bubbleWidth, 22, "#4A3623", ROOM.bubble);
-  drawRect(ctx, station.sprite.x - 2, bubbleY + 22, 5, 5, ROOM.bubble);
-  drawLabel(ctx, truncate(message, 34), bubbleX + 6, bubbleY + 7, ROOM.ink);
+  const width = bubbleWidth(metrics, message);
+  const height = py(metrics, 22);
+  const inset = Math.max(6, px(metrics, 6));
+  const bubbleX = clamp(Math.round(station.sprite.x - width / 2), inset, metrics.width - width - inset);
+  const bubbleY = clamp(station.sprite.y - py(metrics, 42), inset, metrics.height - height - py(metrics, 12));
+  const tailX = clamp(station.sprite.x - px(metrics, 2), bubbleX + px(metrics, 4), bubbleX + width - px(metrics, 9));
+
+  drawOutlineRect(ctx, bubbleX, bubbleY, width, height, "#4A3623", ROOM.bubble);
+  drawRect(ctx, tailX, bubbleY + height, px(metrics, 5), py(metrics, 5), ROOM.bubble);
+  drawLabel(ctx, metrics, truncate(message, 34), bubbleX + px(metrics, 6), bubbleY + py(metrics, 7), ROOM.ink);
 }
 
-function drawRoom(ctx: CanvasRenderingContext2D, agents: OfficeAgent[], selectedId: string | null, hoveredId: string | null, frame: number) {
-  drawRect(ctx, 0, 0, INTERNAL_WIDTH, INTERNAL_HEIGHT, ROOM.background);
-  drawRect(ctx, 0, 0, INTERNAL_WIDTH, 72, ROOM.wallTop);
-  drawRect(ctx, 0, 72, INTERNAL_WIDTH, 6, ROOM.wallTrim);
+function drawRoom(
+  ctx: CanvasRenderingContext2D,
+  metrics: SceneMetrics,
+  agents: OfficeAgent[],
+  selectedId: string | null,
+  hoveredId: string | null,
+  frame: number,
+) {
+  drawRect(ctx, 0, 0, metrics.width, metrics.height, ROOM.background);
+  drawRect(ctx, 0, 0, metrics.width, py(metrics, 72), ROOM.wallTop);
+  drawRect(ctx, 0, py(metrics, 72), metrics.width, py(metrics, 6), ROOM.wallTrim);
 
-  for (let y = 78; y < INTERNAL_HEIGHT; y += 16) {
-    for (let x = 0; x < INTERNAL_WIDTH; x += 16) {
-      drawRect(ctx, x, y, 16, 16, (Math.floor(x / 16) + Math.floor(y / 16)) % 2 === 0 ? ROOM.floorA : ROOM.floorB);
+  for (let y = py(metrics, 78); y < metrics.height; y += py(metrics, 16)) {
+    for (let x = 0; x < metrics.width; x += px(metrics, 16)) {
+      drawRect(ctx, x, y, px(metrics, 16), py(metrics, 16), (Math.floor(x / px(metrics, 16)) + Math.floor(y / py(metrics, 16))) % 2 === 0 ? ROOM.floorA : ROOM.floorB);
     }
   }
 
-  drawRect(ctx, 0, INTERNAL_HEIGHT - 12, INTERNAL_WIDTH, 12, ROOM.floorShadow);
-  drawLabel(ctx, "Executive", 240, 14, DEPARTMENT_META.Executive.color, "center");
-  drawLabel(ctx, "Marketing", 382, 14, DEPARTMENT_META.Marketing.color, "center");
-  drawLabel(ctx, "Development", 116, 156, DEPARTMENT_META.Development.color, "center");
-  drawLabel(ctx, "Sales", 374, 162, DEPARTMENT_META.Sales.color, "center");
+  drawRect(ctx, 0, metrics.height - py(metrics, 12), metrics.width, py(metrics, 12), ROOM.floorShadow);
+  drawLabel(ctx, metrics, "Executive", px(metrics, 240), py(metrics, 14), DEPARTMENT_META.Executive.color, "center");
+  drawLabel(ctx, metrics, "Marketing", px(metrics, 382), py(metrics, 14), DEPARTMENT_META.Marketing.color, "center");
+  drawLabel(ctx, metrics, "Development", px(metrics, 116), py(metrics, 156), DEPARTMENT_META.Development.color, "center");
+  drawLabel(ctx, metrics, "Sales", px(metrics, 374), py(metrics, 162), DEPARTMENT_META.Sales.color, "center");
 
-  drawOutlineRect(ctx, 212, 0, 56, 18, "#725230", "#EFD9AE");
-  drawLabel(ctx, "HQ", 240, 6, ROOM.ink, "center");
-  drawCoffeeZone(ctx);
-  drawWhiteboard(ctx);
-  drawPlant(ctx, 146, 108);
-  drawPlant(ctx, 324, 120);
-  drawPlant(ctx, 430, 118);
-  drawOutlineRect(ctx, 408, 118, 42, 26, "#6C4A2A", "#E9D7B6");
-  drawLabel(ctx, "Ideas", 429, 127, ROOM.ink, "center");
-  drawRect(ctx, 414, 137, 30, 2, "#2093FF");
+  drawOutlineRect(ctx, px(metrics, 212), 0, px(metrics, 56), py(metrics, 18), "#725230", "#EFD9AE");
+  drawLabel(ctx, metrics, "HQ", px(metrics, 240), py(metrics, 6), ROOM.ink, "center");
+  drawCoffeeZone(ctx, metrics);
+  drawWhiteboard(ctx, metrics);
+  drawPlant(ctx, metrics, px(metrics, 146), py(metrics, 108));
+  drawPlant(ctx, metrics, px(metrics, 324), py(metrics, 120));
+  drawPlant(ctx, metrics, px(metrics, 430), py(metrics, 118));
+  drawOutlineRect(ctx, px(metrics, 408), py(metrics, 118), px(metrics, 42), py(metrics, 26), "#6C4A2A", "#E9D7B6");
+  drawLabel(ctx, metrics, "Ideas", px(metrics, 429), py(metrics, 127), ROOM.ink, "center");
+  drawRect(ctx, px(metrics, 414), py(metrics, 137), px(metrics, 30), py(metrics, 2), "#2093FF");
 
   agents.forEach((agent) => {
-    const station = STATIONS[agent.id];
+    const baseStation = STATIONS[agent.id];
+    const station = baseStation ? resolveStation(metrics, baseStation) : null;
     if (!station) return;
-    drawDesk(ctx, station, agent.accent);
-    drawStatusCard(ctx, station, agent, selectedId === agent.id);
+    drawDesk(ctx, metrics, station, agent.accent);
+    drawStatusCard(ctx, metrics, station, agent, selectedId === agent.id);
   });
 
   agents.forEach((agent) => {
-    const station = STATIONS[agent.id];
+    const baseStation = STATIONS[agent.id];
+    const station = baseStation ? resolveStation(metrics, baseStation) : null;
     if (!station) return;
-    drawAgent(ctx, agent, station, frame, hoveredId === agent.id, selectedId === agent.id);
+    drawAgent(ctx, metrics, agent, station, frame, hoveredId === agent.id, selectedId === agent.id);
   });
 
   if (hoveredId) {
     const hovered = agents.find((agent) => agent.id === hoveredId);
     const station = hovered ? STATIONS[hovered.id] : null;
-    if (hovered && station) drawSpeechBubble(ctx, hovered, station);
+    if (hovered && station) drawSpeechBubble(ctx, metrics, hovered, resolveStation(metrics, station));
   }
 }
 
-function hitAgent(x: number, y: number, agents: OfficeAgent[]) {
+function hitAgent(x: number, y: number, agents: OfficeAgent[], metrics: SceneMetrics) {
   for (const agent of agents) {
-    const station = STATIONS[agent.id];
+    const baseStation = STATIONS[agent.id];
+    const station = baseStation ? resolveStation(metrics, baseStation) : null;
     if (!station) continue;
     const withinSprite =
-      x >= station.sprite.x - 12 &&
-      x <= station.sprite.x + 12 &&
-      y >= station.sprite.y - 16 &&
-      y <= station.sprite.y + 20;
+      x >= station.sprite.x - px(metrics, 12) &&
+      x <= station.sprite.x + px(metrics, 12) &&
+      y >= station.sprite.y - py(metrics, 16) &&
+      y <= station.sprite.y + py(metrics, 20);
     const withinStatus =
       x >= station.status.x &&
       x <= station.status.x + station.status.w &&
       y >= station.status.y &&
-      y <= station.status.y + station.status.h + 4;
+      y <= station.status.y + station.status.h + py(metrics, 4);
     if (withinSprite || withinStatus) return agent.id;
   }
   return null;
@@ -456,40 +592,14 @@ function SceneCanvas({
 }) {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const geometryRef = useRef<SceneGeometry>({ scale: 1, offsetX: 0, offsetY: 0 });
   const [hoveredId, setHoveredId] = useState<string | null>(null);
-
-  useEffect(() => {
-    const wrapper = wrapperRef.current;
-    if (!wrapper) return;
-
-    const resize = () => {
-      const rect = wrapper.getBoundingClientRect();
-      const scale = Math.max(rect.width / INTERNAL_WIDTH, rect.height / INTERNAL_HEIGHT);
-      geometryRef.current = {
-        scale,
-        offsetX: (rect.width - INTERNAL_WIDTH * scale) / 2,
-        offsetY: (rect.height - INTERNAL_HEIGHT * scale) / 2,
-      };
-    };
-
-    resize();
-    const observer = new ResizeObserver(resize);
-    observer.observe(wrapper);
-    return () => observer.disconnect();
-  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     const wrapper = wrapperRef.current;
     if (!canvas || !wrapper) return;
-
-    const offscreen = document.createElement("canvas");
-    offscreen.width = INTERNAL_WIDTH;
-    offscreen.height = INTERNAL_HEIGHT;
-    const offscreenCtx = offscreen.getContext("2d");
     const visibleCtx = canvas.getContext("2d");
-    if (!offscreenCtx || !visibleCtx) return;
+    if (!visibleCtx) return;
 
     let frame = 0;
     let rafId = 0;
@@ -502,26 +612,14 @@ function SceneCanvas({
         canvas.height = Math.floor(rect.height * dpr);
       }
 
-      offscreenCtx.imageSmoothingEnabled = false;
       visibleCtx.imageSmoothingEnabled = false;
-      offscreenCtx.clearRect(0, 0, INTERNAL_WIDTH, INTERNAL_HEIGHT);
-      drawRoom(offscreenCtx, agents, selectedId, hoveredId, frame);
-
       visibleCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
       visibleCtx.clearRect(0, 0, rect.width, rect.height);
-
-      const geometry = geometryRef.current;
-      visibleCtx.drawImage(
-        offscreen,
-        0,
-        0,
-        INTERNAL_WIDTH,
-        INTERNAL_HEIGHT,
-        geometry.offsetX,
-        geometry.offsetY,
-        INTERNAL_WIDTH * geometry.scale,
-        INTERNAL_HEIGHT * geometry.scale,
-      );
+      drawRoom(visibleCtx, {
+        width: Math.max(1, Math.round(rect.width)),
+        height: Math.max(1, Math.round(rect.height)),
+        unit: Math.max(1, Math.min(rect.width / INTERNAL_WIDTH, rect.height / INTERNAL_HEIGHT)),
+      }, agents, selectedId, hoveredId, frame);
 
       frame += 1;
       rafId = window.requestAnimationFrame(render);
@@ -534,11 +632,18 @@ function SceneCanvas({
   const toInternalPoint = (event: ReactPointerEvent<HTMLCanvasElement>) => {
     const rect = canvasRef.current?.getBoundingClientRect();
     if (!rect) return null;
-    const geometry = geometryRef.current;
-    const x = (event.clientX - rect.left - geometry.offsetX) / geometry.scale;
-    const y = (event.clientY - rect.top - geometry.offsetY) / geometry.scale;
-    if (x < 0 || y < 0 || x > INTERNAL_WIDTH || y > INTERNAL_HEIGHT) return null;
-    return { x, y };
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    if (x < 0 || y < 0 || x > rect.width || y > rect.height) return null;
+    return {
+      x,
+      y,
+      metrics: {
+        width: Math.max(1, Math.round(rect.width)),
+        height: Math.max(1, Math.round(rect.height)),
+        unit: Math.max(1, Math.min(rect.width / INTERNAL_WIDTH, rect.height / INTERNAL_HEIGHT)),
+      },
+    };
   };
 
   return (
@@ -548,12 +653,12 @@ function SceneCanvas({
         className="h-full w-full cursor-pointer touch-none [image-rendering:pixelated]"
         onPointerMove={(event) => {
           const point = toInternalPoint(event);
-          setHoveredId(point ? hitAgent(point.x, point.y, agents) : null);
+          setHoveredId(point ? hitAgent(point.x, point.y, agents, point.metrics) : null);
         }}
         onPointerLeave={() => setHoveredId(null)}
         onClick={(event) => {
           const point = toInternalPoint(event);
-          onSelect(point ? hitAgent(point.x, point.y, agents) : null);
+          onSelect(point ? hitAgent(point.x, point.y, agents, point.metrics) : null);
         }}
       />
     </div>
