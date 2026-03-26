@@ -465,7 +465,7 @@ function SceneCanvas({
 
     const resize = () => {
       const rect = wrapper.getBoundingClientRect();
-      const scale = Math.min(rect.width / INTERNAL_WIDTH, rect.height / INTERNAL_HEIGHT);
+      const scale = Math.max(rect.width / INTERNAL_WIDTH, rect.height / INTERNAL_HEIGHT);
       geometryRef.current = {
         scale,
         offsetX: (rect.width - INTERNAL_WIDTH * scale) / 2,
@@ -574,8 +574,15 @@ function DetailPanel({
   const statusColor = agent.status === "working" ? "#22C55E" : agent.status === "offline" ? "#EF4444" : "#FBBF24";
 
   return (
-    <div className="fixed inset-0 z-40 bg-black/55 backdrop-blur-sm md:absolute md:left-auto md:w-[380px] md:bg-black/20">
-      <aside className="absolute inset-0 overflow-y-auto border-l border-white/10 bg-[linear-gradient(180deg,rgba(17,12,7,0.98),rgba(10,10,15,0.98))] p-5 shadow-[-24px_0_80px_rgba(0,0,0,0.55)] md:left-auto md:w-[380px]">
+    <div
+      className="absolute inset-0 z-40 bg-black/45 backdrop-blur-md"
+      onClick={onClose}
+      role="presentation"
+    >
+      <aside
+        className="absolute left-1/2 top-1/2 flex max-h-[calc(100%-2rem)] w-[min(92vw,420px)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-[28px] border border-white/15 bg-[linear-gradient(180deg,rgba(14,14,18,0.82),rgba(8,8,12,0.72))] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.55)] backdrop-blur-2xl"
+        onClick={(event) => event.stopPropagation()}
+      >
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-[11px] uppercase tracking-[0.28em] text-[#D7BE9A]">Agent Detail</p>
@@ -607,11 +614,11 @@ function DetailPanel({
           </span>
         </div>
 
-        <div className="mt-6 grid gap-3">
+        <div className="mt-6 space-y-3 overflow-y-auto pr-1">
           <section className="rounded-3xl border border-white/10 bg-white/5 p-4">
             <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Current Task</p>
             <p className="mt-3 text-base text-white">{agent.currentTask?.title ?? "No active task"}</p>
-            <div className="mt-3 flex items-center gap-3 text-xs text-slate-400">
+            <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-slate-400">
               <span className="inline-flex items-center gap-2">
                 <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: statusColor }} />
                 {agent.lastActivity}
@@ -633,6 +640,21 @@ function DetailPanel({
           </section>
 
           <section className="rounded-3xl border border-white/10 bg-white/5 p-4">
+            <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Skills</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {agent.skills.length > 0 ? (
+                agent.skills.map((skill) => (
+                  <span key={skill} className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs text-slate-300">
+                    {skill}
+                  </span>
+                ))
+              ) : (
+                <span className="text-sm text-slate-500">No skills listed.</span>
+              )}
+            </div>
+          </section>
+
+          <section className="rounded-3xl border border-white/10 bg-white/5 p-4">
             <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Recent Completed Tasks</p>
             <div className="mt-3 space-y-2">
               {agent.completedTasks.slice(0, 5).length > 0 ? (
@@ -646,21 +668,6 @@ function DetailPanel({
                 ))
               ) : (
                 <p className="text-sm text-slate-500">No completed tasks recorded yet.</p>
-              )}
-            </div>
-          </section>
-
-          <section className="rounded-3xl border border-white/10 bg-white/5 p-4">
-            <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Skills</p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {agent.skills.length > 0 ? (
-                agent.skills.map((skill) => (
-                  <span key={skill} className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs text-slate-300">
-                    {skill}
-                  </span>
-                ))
-              ) : (
-                <span className="text-sm text-slate-500">No skills listed.</span>
               )}
             </div>
           </section>
@@ -773,8 +780,8 @@ export default function OfficePage() {
   const workingCount = agents.filter((agent) => agent.status === "working").length;
 
   return (
-    <div className="-mb-5 -ml-5 -mr-5 -mt-6 h-[calc(100vh-8.5rem)] min-h-[620px] overflow-hidden rounded-b-[1rem] bg-[#120d08] text-white md:h-[calc(100vh-7.75rem)]">
-      <section className="relative h-full">
+    <div className="fixed inset-y-0 right-0 left-[60px] overflow-hidden bg-[#120d08] text-white">
+      <section className="relative h-full w-full">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,189,89,0.14),_transparent_32%),radial-gradient(circle_at_bottom_right,_rgba(34,197,94,0.12),_transparent_28%)]" />
         <div className="pointer-events-none absolute left-4 top-4 z-20 rounded-3xl border border-white/10 bg-black/30 px-4 py-3 backdrop-blur-xl">
           <p className="text-[11px] uppercase tracking-[0.32em] text-[#D7BE9A]">Office</p>
