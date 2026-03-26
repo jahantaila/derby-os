@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { BookUser, Brain, Building2, CalendarDays, CheckSquare, DollarSign, FileText, Settings, Target, Users } from "lucide-react";
+import { BookUser, Brain, Building2, CalendarDays, CheckSquare, DollarSign, Settings, Target, Users } from "lucide-react";
 
 const PRIMARY_NAV_ITEMS = [
   { href: "/office", label: "Office", icon: Building2 },
@@ -14,7 +14,7 @@ const PRIMARY_NAV_ITEMS = [
   { href: "/calendar", label: "Calendar", icon: CalendarDays },
   { href: "/memory", label: "Memory", icon: Brain },
   { href: "/finance", label: "Finance", icon: DollarSign },
-  { href: "/documents", label: "Documents", icon: FileText },
+
 ] as const;
 
 const SECONDARY_NAV_ITEMS = [{ href: "/settings", label: "Settings", icon: Settings }] as const;
