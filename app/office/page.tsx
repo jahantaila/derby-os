@@ -86,10 +86,19 @@ type SceneMetrics = {
   unit: number;
 };
 
+type SafeInsets = {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+};
+
 const OFFICE_AGENT_IDS = ["kimberly", "alex", "sabri", "kevin", "jordan"] as const;
 const OFFICE_AGENT_ID_SET = new Set<string>(OFFICE_AGENT_IDS);
 const INTERNAL_WIDTH = 480;
 const INTERNAL_HEIGHT = 320;
+const SAFE_EDGE_X = 0.08;
+const SAFE_EDGE_Y = 0.08;
 
 const DEPARTMENT_META: Record<Department, { color: string; label: string }> = {
   Executive: { color: "#2093FF", label: "Executive" },
@@ -98,94 +107,71 @@ const DEPARTMENT_META: Record<Department, { color: string; label: string }> = {
   Sales: { color: "#22C55E", label: "Sales" },
 };
 
-const RAW_STATIONS: Record<string, {
-  desk: LayoutBox;
-  sprite: LayoutPoint;
-  status: LayoutBox;
-  accent: LayoutBox;
-  label: LayoutPoint;
-  facing: "up" | "down";
-  monitors?: number;
-}> = {
+function boxFromCenter(x: number, y: number, w: number, h: number): RelativeLayoutBox {
+  return { x: x - w / 2, y: y - h / 2, w, h };
+}
+
+function point(x: number, y: number): RelativeLayoutPoint {
+  return { x, y };
+}
+
+const STATIONS: Record<string, Station> = {
   kimberly: {
-    desk: { x: 190, y: 42, w: 100, h: 32 },
-    sprite: { x: 230, y: 68 },
-    status: { x: 178, y: 18, w: 124, h: 18 },
-    accent: { x: 178, y: 34, w: 124, h: 48 },
-    label: { x: 206, y: 8 },
+    desk: boxFromCenter(0.5, 0.2, 0.2, 0.1),
+    sprite: point(0.5, 0.245),
+    status: boxFromCenter(0.5, 0.115, 0.24, 0.06),
+    accent: boxFromCenter(0.5, 0.2, 0.24, 0.15),
+    label: point(0.5, 0.085),
     facing: "up",
     monitors: 2,
   },
-  alex: {
-    desk: { x: 314, y: 70, w: 62, h: 26 },
-    sprite: { x: 340, y: 95 },
-    status: { x: 294, y: 42, w: 102, h: 18 },
-    accent: { x: 306, y: 62, w: 78, h: 42 },
-    label: { x: 314, y: 18 },
-    facing: "up",
-  },
-  sabri: {
-    desk: { x: 392, y: 70, w: 62, h: 26 },
-    sprite: { x: 418, y: 95 },
-    status: { x: 378, y: 42, w: 92, h: 18 },
-    accent: { x: 384, y: 62, w: 78, h: 42 },
-    label: { x: 398, y: 18 },
-    facing: "up",
-  },
   kevin: {
-    desk: { x: 60, y: 208, w: 108, h: 30 },
-    sprite: { x: 102, y: 232 },
-    status: { x: 44, y: 180, w: 140, h: 18 },
-    accent: { x: 44, y: 200, w: 144, h: 50 },
-    label: { x: 66, y: 160 },
+    desk: boxFromCenter(0.25, 0.7, 0.22, 0.095),
+    sprite: point(0.25, 0.75),
+    status: boxFromCenter(0.25, 0.615, 0.28, 0.06),
+    accent: boxFromCenter(0.25, 0.705, 0.3, 0.16),
+    label: point(0.25, 0.575),
     facing: "up",
     monitors: 3,
   },
+  alex: {
+    desk: boxFromCenter(0.75, 0.25, 0.14, 0.08),
+    sprite: point(0.75, 0.29),
+    status: boxFromCenter(0.75, 0.165, 0.2, 0.06),
+    accent: boxFromCenter(0.75, 0.25, 0.22, 0.13),
+    label: point(0.75, 0.13),
+    facing: "up",
+  },
+  sabri: {
+    desk: boxFromCenter(0.75, 0.35, 0.14, 0.08),
+    sprite: point(0.75, 0.39),
+    status: boxFromCenter(0.75, 0.265, 0.2, 0.06),
+    accent: boxFromCenter(0.75, 0.35, 0.22, 0.13),
+    label: point(0.75, 0.23),
+    facing: "up",
+  },
   jordan: {
-    desk: { x: 334, y: 218, w: 84, h: 28 },
-    sprite: { x: 368, y: 242 },
-    status: { x: 320, y: 188, w: 112, h: 18 },
-    accent: { x: 320, y: 210, w: 116, h: 48 },
-    label: { x: 342, y: 166 },
+    desk: boxFromCenter(0.75, 0.7, 0.18, 0.09),
+    sprite: point(0.75, 0.745),
+    status: boxFromCenter(0.75, 0.615, 0.22, 0.06),
+    accent: boxFromCenter(0.75, 0.705, 0.24, 0.15),
+    label: point(0.75, 0.575),
     facing: "up",
   },
 };
 
-const STATIONS: Record<string, Station> = Object.fromEntries(
-  Object.entries(RAW_STATIONS).map(([id, station]) => [
-    id,
-    {
-      desk: {
-        x: station.desk.x / INTERNAL_WIDTH,
-        y: station.desk.y / INTERNAL_HEIGHT,
-        w: station.desk.w / INTERNAL_WIDTH,
-        h: station.desk.h / INTERNAL_HEIGHT,
-      },
-      sprite: {
-        x: station.sprite.x / INTERNAL_WIDTH,
-        y: station.sprite.y / INTERNAL_HEIGHT,
-      },
-      status: {
-        x: station.status.x / INTERNAL_WIDTH,
-        y: station.status.y / INTERNAL_HEIGHT,
-        w: station.status.w / INTERNAL_WIDTH,
-        h: station.status.h / INTERNAL_HEIGHT,
-      },
-      accent: {
-        x: station.accent.x / INTERNAL_WIDTH,
-        y: station.accent.y / INTERNAL_HEIGHT,
-        w: station.accent.w / INTERNAL_WIDTH,
-        h: station.accent.h / INTERNAL_HEIGHT,
-      },
-      label: {
-        x: station.label.x / INTERNAL_WIDTH,
-        y: station.label.y / INTERNAL_HEIGHT,
-      },
-      facing: station.facing,
-      monitors: station.monitors,
-    } satisfies Station,
-  ]),
-) as Record<string, Station>;
+const DEPARTMENT_ZONES: Array<{ department: Department; box: RelativeLayoutBox }> = [
+  { department: "Executive", box: boxFromCenter(0.5, 0.18, 0.34, 0.22) },
+  { department: "Marketing", box: boxFromCenter(0.77, 0.29, 0.22, 0.31) },
+  { department: "Development", box: boxFromCenter(0.24, 0.68, 0.3, 0.24) },
+  { department: "Sales", box: boxFromCenter(0.76, 0.69, 0.26, 0.24) },
+];
+
+const COFFEE_ZONE = boxFromCenter(0.15, 0.5, 0.13, 0.1);
+const WHITEBOARD = boxFromCenter(0.5, 0.5, 0.24, 0.14);
+const IDEAS_BOARD = boxFromCenter(0.85, 0.5, 0.11, 0.08);
+const HQ_SIGN = boxFromCenter(0.5, 0.08, 0.12, 0.06);
+const PLANTS = [point(0.31, 0.43), point(0.66, 0.5), point(0.88, 0.49)];
 
 const ROOM = {
   background: "#5B4631",
@@ -343,6 +329,15 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
 
+function safeInsets(metrics: SceneMetrics): SafeInsets {
+  return {
+    left: Math.round(metrics.width * SAFE_EDGE_X),
+    right: Math.round(metrics.width * SAFE_EDGE_X),
+    top: Math.round(metrics.height * SAFE_EDGE_Y),
+    bottom: Math.round(metrics.height * SAFE_EDGE_Y),
+  };
+}
+
 function px(metrics: SceneMetrics, value: number) {
   return Math.round(metrics.width * (value / INTERNAL_WIDTH));
 }
@@ -356,32 +351,39 @@ function fontSize(metrics: SceneMetrics, size: number) {
 }
 
 function bubbleWidth(metrics: SceneMetrics, text: string) {
-  return clamp(Math.round(text.length * metrics.unit * 4 + metrics.unit * 18), Math.round(metrics.unit * 76), Math.round(metrics.width * 0.32));
+  return clamp(
+    Math.round(text.length * metrics.unit * 4 + metrics.unit * 18),
+    Math.round(metrics.unit * 76),
+    Math.round(metrics.width * 0.24),
+  );
 }
 
-function resolveBox(metrics: SceneMetrics, box: RelativeLayoutBox): LayoutBox {
+function resolveBox(metrics: SceneMetrics, box: RelativeLayoutBox, inset = safeInsets(metrics)): LayoutBox {
+  const w = Math.round(metrics.width * box.w);
+  const h = Math.round(metrics.height * box.h);
   return {
-    x: Math.round(metrics.width * box.x),
-    y: Math.round(metrics.height * box.y),
-    w: Math.round(metrics.width * box.w),
-    h: Math.round(metrics.height * box.h),
+    x: clamp(Math.round(metrics.width * box.x), inset.left, metrics.width - inset.right - w),
+    y: clamp(Math.round(metrics.height * box.y), inset.top, metrics.height - inset.bottom - h),
+    w,
+    h,
   };
 }
 
-function resolvePoint(metrics: SceneMetrics, point: RelativeLayoutPoint): LayoutPoint {
+function resolvePoint(metrics: SceneMetrics, point: RelativeLayoutPoint, inset = safeInsets(metrics)): LayoutPoint {
   return {
-    x: Math.round(metrics.width * point.x),
-    y: Math.round(metrics.height * point.y),
+    x: clamp(Math.round(metrics.width * point.x), inset.left, metrics.width - inset.right),
+    y: clamp(Math.round(metrics.height * point.y), inset.top, metrics.height - inset.bottom),
   };
 }
 
 function resolveStation(metrics: SceneMetrics, station: Station): ResolvedStation {
+  const inset = safeInsets(metrics);
   return {
-    desk: resolveBox(metrics, station.desk),
-    sprite: resolvePoint(metrics, station.sprite),
-    status: resolveBox(metrics, station.status),
-    accent: resolveBox(metrics, station.accent),
-    label: resolvePoint(metrics, station.label),
+    desk: resolveBox(metrics, station.desk, inset),
+    sprite: resolvePoint(metrics, station.sprite, inset),
+    status: resolveBox(metrics, station.status, inset),
+    accent: resolveBox(metrics, station.accent, inset),
+    label: resolvePoint(metrics, station.label, inset),
     facing: station.facing,
     monitors: station.monitors,
   };
@@ -403,12 +405,12 @@ function drawLabel(
   ctx.textBaseline = "top";
   const label = text.toUpperCase();
   const width = ctx.measureText(label).width;
-  const padding = Math.max(6, Math.round(metrics.unit * 6));
+  const inset = safeInsets(metrics);
   const anchorX =
     align === "center"
-      ? clamp(x, width / 2 + padding, metrics.width - width / 2 - padding)
-      : clamp(x, padding, metrics.width - width - padding);
-  const anchorY = clamp(y, padding, metrics.height - size - padding);
+      ? clamp(x, width / 2 + inset.left, metrics.width - inset.right - width / 2)
+      : clamp(x, inset.left, metrics.width - inset.right - width);
+  const anchorY = clamp(y, inset.top, metrics.height - inset.bottom - size);
   ctx.fillText(label, anchorX, anchorY);
 }
 
@@ -437,21 +439,30 @@ function drawPlant(ctx: CanvasRenderingContext2D, metrics: SceneMetrics, x: numb
 }
 
 function drawCoffeeZone(ctx: CanvasRenderingContext2D, metrics: SceneMetrics) {
-  drawOutlineRect(ctx, px(metrics, 18), py(metrics, 118), px(metrics, 58), py(metrics, 32), ROOM.wallTrim, "#B98958");
-  drawLabel(ctx, metrics, "Coffee", px(metrics, 47), py(metrics, 122), "#FFF6E2", "center");
-  drawOutlineRect(ctx, px(metrics, 28), py(metrics, 132), px(metrics, 18), py(metrics, 12), "#4B2F1C", ROOM.coffee);
-  drawOutlineRect(ctx, px(metrics, 49), py(metrics, 132), px(metrics, 18), py(metrics, 12), "#4B2F1C", ROOM.coffee);
-  drawRect(ctx, px(metrics, 33), py(metrics, 125), px(metrics, 6), py(metrics, 8), "#EEE2D0");
-  drawRect(ctx, px(metrics, 54), py(metrics, 125), px(metrics, 6), py(metrics, 8), "#EEE2D0");
+  const zone = resolveBox(metrics, COFFEE_ZONE);
+  drawOutlineRect(ctx, zone.x, zone.y, zone.w, zone.h, ROOM.wallTrim, "#B98958");
+  drawLabel(ctx, metrics, "Coffee", zone.x + zone.w / 2, zone.y + py(metrics, 6), "#FFF6E2", "center");
+  drawOutlineRect(ctx, zone.x + Math.round(zone.w * 0.16), zone.y + Math.round(zone.h * 0.42), Math.round(zone.w * 0.3), Math.round(zone.h * 0.32), "#4B2F1C", ROOM.coffee);
+  drawOutlineRect(ctx, zone.x + Math.round(zone.w * 0.54), zone.y + Math.round(zone.h * 0.42), Math.round(zone.w * 0.3), Math.round(zone.h * 0.32), "#4B2F1C", ROOM.coffee);
+  drawRect(ctx, zone.x + Math.round(zone.w * 0.24), zone.y + Math.round(zone.h * 0.18), Math.round(zone.w * 0.1), Math.round(zone.h * 0.24), "#EEE2D0");
+  drawRect(ctx, zone.x + Math.round(zone.w * 0.6), zone.y + Math.round(zone.h * 0.18), Math.round(zone.w * 0.1), Math.round(zone.h * 0.24), "#EEE2D0");
 }
 
 function drawWhiteboard(ctx: CanvasRenderingContext2D, metrics: SceneMetrics) {
-  drawOutlineRect(ctx, px(metrics, 184), py(metrics, 126), px(metrics, 114), py(metrics, 44), ROOM.wallTrim, ROOM.whiteboard);
-  drawLabel(ctx, metrics, "Q2 Push", px(metrics, 194), py(metrics, 135), "#0F172A");
-  drawRect(ctx, px(metrics, 194), py(metrics, 148), px(metrics, 44), py(metrics, 2), "#2093FF");
-  drawRect(ctx, px(metrics, 194), py(metrics, 154), px(metrics, 58), py(metrics, 2), "#F93C3C");
-  drawRect(ctx, px(metrics, 194), py(metrics, 160), px(metrics, 34), py(metrics, 2), "#22C55E");
-  drawRect(ctx, px(metrics, 258), py(metrics, 144), px(metrics, 22), py(metrics, 14), "#FFBD59");
+  const board = resolveBox(metrics, WHITEBOARD);
+  drawOutlineRect(ctx, board.x, board.y, board.w, board.h, ROOM.wallTrim, ROOM.whiteboard);
+  drawLabel(ctx, metrics, "Q2 Push", board.x + Math.round(board.w * 0.1), board.y + Math.round(board.h * 0.18), "#0F172A");
+  drawRect(ctx, board.x + Math.round(board.w * 0.1), board.y + Math.round(board.h * 0.48), Math.round(board.w * 0.32), py(metrics, 2), "#2093FF");
+  drawRect(ctx, board.x + Math.round(board.w * 0.1), board.y + Math.round(board.h * 0.62), Math.round(board.w * 0.42), py(metrics, 2), "#F93C3C");
+  drawRect(ctx, board.x + Math.round(board.w * 0.1), board.y + Math.round(board.h * 0.76), Math.round(board.w * 0.24), py(metrics, 2), "#22C55E");
+  drawRect(ctx, board.x + Math.round(board.w * 0.66), board.y + Math.round(board.h * 0.4), Math.round(board.w * 0.18), Math.round(board.h * 0.26), "#FFBD59");
+}
+
+function drawZoneBackground(ctx: CanvasRenderingContext2D, metrics: SceneMetrics, department: Department, box: RelativeLayoutBox) {
+  const zone = resolveBox(metrics, box);
+  drawRect(ctx, zone.x, zone.y, zone.w, zone.h, `${DEPARTMENT_META[department].color}18`);
+  drawRect(ctx, zone.x, zone.y, zone.w, py(metrics, 2), `${DEPARTMENT_META[department].color}55`);
+  drawLabel(ctx, metrics, department, zone.x + zone.w / 2, zone.y + py(metrics, 6), DEPARTMENT_META[department].color, "center");
 }
 
 function drawStatusCard(ctx: CanvasRenderingContext2D, metrics: SceneMetrics, station: ResolvedStation, agent: OfficeAgent, selected: boolean) {
@@ -494,13 +505,15 @@ function drawSpeechBubble(ctx: CanvasRenderingContext2D, metrics: SceneMetrics, 
   const message = agent.currentTask?.title ?? agent.lastActivity;
   const width = bubbleWidth(metrics, message);
   const height = py(metrics, 22);
-  const inset = Math.max(6, px(metrics, 6));
-  const bubbleX = clamp(Math.round(station.sprite.x - width / 2), inset, metrics.width - width - inset);
-  const bubbleY = clamp(station.sprite.y - py(metrics, 42), inset, metrics.height - height - py(metrics, 12));
+  const inset = safeInsets(metrics);
+  const bubbleX = clamp(Math.round(station.sprite.x - width / 2), inset.left, metrics.width - inset.right - width);
+  const bubbleY = clamp(station.sprite.y - py(metrics, 42), inset.top, metrics.height - inset.bottom - height - py(metrics, 8));
   const tailX = clamp(station.sprite.x - px(metrics, 2), bubbleX + px(metrics, 4), bubbleX + width - px(metrics, 9));
 
   drawOutlineRect(ctx, bubbleX, bubbleY, width, height, "#4A3623", ROOM.bubble);
-  drawRect(ctx, tailX, bubbleY + height, px(metrics, 5), py(metrics, 5), ROOM.bubble);
+  if (bubbleY + height + py(metrics, 5) <= metrics.height - inset.bottom) {
+    drawRect(ctx, tailX, bubbleY + height, px(metrics, 5), py(metrics, 5), ROOM.bubble);
+  }
   drawLabel(ctx, metrics, truncate(message, 34), bubbleX + px(metrics, 6), bubbleY + py(metrics, 7), ROOM.ink);
 }
 
@@ -512,6 +525,9 @@ function drawRoom(
   hoveredId: string | null,
   frame: number,
 ) {
+  const hq = resolveBox(metrics, HQ_SIGN);
+  const ideas = resolveBox(metrics, IDEAS_BOARD);
+
   drawRect(ctx, 0, 0, metrics.width, metrics.height, ROOM.background);
   drawRect(ctx, 0, 0, metrics.width, py(metrics, 72), ROOM.wallTop);
   drawRect(ctx, 0, py(metrics, 72), metrics.width, py(metrics, 6), ROOM.wallTrim);
@@ -523,21 +539,20 @@ function drawRoom(
   }
 
   drawRect(ctx, 0, metrics.height - py(metrics, 12), metrics.width, py(metrics, 12), ROOM.floorShadow);
-  drawLabel(ctx, metrics, "Executive", px(metrics, 240), py(metrics, 14), DEPARTMENT_META.Executive.color, "center");
-  drawLabel(ctx, metrics, "Marketing", px(metrics, 382), py(metrics, 14), DEPARTMENT_META.Marketing.color, "center");
-  drawLabel(ctx, metrics, "Development", px(metrics, 116), py(metrics, 156), DEPARTMENT_META.Development.color, "center");
-  drawLabel(ctx, metrics, "Sales", px(metrics, 374), py(metrics, 162), DEPARTMENT_META.Sales.color, "center");
 
-  drawOutlineRect(ctx, px(metrics, 212), 0, px(metrics, 56), py(metrics, 18), "#725230", "#EFD9AE");
-  drawLabel(ctx, metrics, "HQ", px(metrics, 240), py(metrics, 6), ROOM.ink, "center");
+  DEPARTMENT_ZONES.forEach((zone) => drawZoneBackground(ctx, metrics, zone.department, zone.box));
+
+  drawOutlineRect(ctx, hq.x, hq.y, hq.w, hq.h, "#725230", "#EFD9AE");
+  drawLabel(ctx, metrics, "HQ", hq.x + hq.w / 2, hq.y + py(metrics, 4), ROOM.ink, "center");
   drawCoffeeZone(ctx, metrics);
   drawWhiteboard(ctx, metrics);
-  drawPlant(ctx, metrics, px(metrics, 146), py(metrics, 108));
-  drawPlant(ctx, metrics, px(metrics, 324), py(metrics, 120));
-  drawPlant(ctx, metrics, px(metrics, 430), py(metrics, 118));
-  drawOutlineRect(ctx, px(metrics, 408), py(metrics, 118), px(metrics, 42), py(metrics, 26), "#6C4A2A", "#E9D7B6");
-  drawLabel(ctx, metrics, "Ideas", px(metrics, 429), py(metrics, 127), ROOM.ink, "center");
-  drawRect(ctx, px(metrics, 414), py(metrics, 137), px(metrics, 30), py(metrics, 2), "#2093FF");
+  PLANTS.forEach((plant) => {
+    const resolved = resolvePoint(metrics, plant);
+    drawPlant(ctx, metrics, resolved.x, resolved.y);
+  });
+  drawOutlineRect(ctx, ideas.x, ideas.y, ideas.w, ideas.h, "#6C4A2A", "#E9D7B6");
+  drawLabel(ctx, metrics, "Ideas", ideas.x + ideas.w / 2, ideas.y + py(metrics, 8), ROOM.ink, "center");
+  drawRect(ctx, ideas.x + Math.round(ideas.w * 0.15), ideas.y + Math.round(ideas.h * 0.68), Math.round(ideas.w * 0.7), py(metrics, 2), "#2093FF");
 
   agents.forEach((agent) => {
     const baseStation = STATIONS[agent.id];
