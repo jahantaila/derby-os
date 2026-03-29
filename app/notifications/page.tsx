@@ -1,31 +1,24 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Bell, BookUser, CheckCheck, CircleDot, Inbox } from "lucide-react";
+import { Bell, CheckCheck, CircleDot, Inbox, Rocket, ShieldAlert, Info, ClipboardCheck } from "lucide-react";
+import type { NotificationRecord, NotificationsResponse, NotificationType } from "@/lib/notification-types";
 
-type NotificationType = "rolodex";
 type NotificationFilter = "all" | NotificationType;
-
-type NotificationRecord = {
-  id: string;
-  title: string;
-  timestamp: string;
-  type: NotificationType;
-  read: boolean;
-};
-
-type NotificationsResponse = {
-  notifications?: NotificationRecord[];
-  unreadCount?: number;
-};
 
 const FILTERS: Array<{ key: NotificationFilter; label: string }> = [
   { key: "all", label: "All" },
-  { key: "rolodex", label: "Rolodex" },
+  { key: "task_complete", label: "Task Complete" },
+  { key: "deploy", label: "Deploys" },
+  { key: "alert", label: "Alerts" },
+  { key: "info", label: "Info" },
 ];
 
 const TYPE_META: Record<NotificationType, { label: string; icon: typeof Bell; iconClass: string }> = {
-  rolodex: { label: "Rolodex", icon: BookUser, iconClass: "text-blue-100 bg-blue-500/12 border-blue-400/30" },
+  task_complete: { label: "Task Complete", icon: ClipboardCheck, iconClass: "text-emerald-100 bg-emerald-500/12 border-emerald-400/30" },
+  deploy: { label: "Deploy", icon: Rocket, iconClass: "text-sky-100 bg-sky-500/12 border-sky-400/30" },
+  alert: { label: "Alert", icon: ShieldAlert, iconClass: "text-amber-100 bg-amber-500/12 border-amber-400/30" },
+  info: { label: "Info", icon: Info, iconClass: "text-slate-100 bg-white/8 border-white/15" },
 };
 
 const relativeTimeFormatter = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
@@ -180,6 +173,7 @@ export default function NotificationsPage() {
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <p className="text-sm text-white">{notification.title}</p>
+                        {notification.message ? <p className="mt-1 text-sm text-slate-400">{notification.message}</p> : null}
                         <div className="mt-2 flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.16em] text-slate-500">
                           <span>{meta.label}</span>
                           <span className="text-slate-600">•</span>
@@ -202,7 +196,7 @@ export default function NotificationsPage() {
                   {loading ? "Loading Notifications" : "No Notifications"}
                 </h2>
                 <p className="mt-2 text-sm text-slate-400">
-                  {loading ? "Fetching the latest rolodex activity." : "There are no notifications in the current filter."}
+                  {loading ? "Fetching the latest activity." : "There are no notifications in the current filter."}
                 </p>
               </div>
             </div>
