@@ -2,16 +2,28 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  AlertTriangle, ArrowRight, Calendar, CheckCircle2, ChevronDown,
-  Circle, Clock, Eye, Filter, GripVertical, LayoutGrid, List, Loader2,
-  Plus, Search, Shield, ShieldAlert, User, X, Zap, RefreshCw,
+  AlertTriangle,
+  Calendar,
+  CheckCircle2,
+  Circle,
+  Filter,
+  LayoutGrid,
+  List,
+  Loader2,
+  Plus,
+  RefreshCw,
+  Search,
+  Shield,
+  ShieldAlert,
+  X,
+  Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-/* ── Types ── */
 type TaskStatus = "todo" | "in_progress" | "needs_kimberly_approval" | "needs_jahan_approval" | "done";
 type TaskPriority = "urgent" | "high" | "medium" | "low";
 type ViewMode = "kanban" | "list";
+type BoardColumnId = "todo" | "in_progress" | "approval" | "done";
 
 interface Task {
   id: string;
@@ -28,496 +40,863 @@ interface Task {
   updated_at: string;
 }
 
-/* ── Constants ── */
-const STATUSES: { id: TaskStatus; label: string; color: string }[] = [
-  { id: "todo", label: "To Do", color: "#64748b" },
-  { id: "in_progress", label: "In Progress", color: "#2093FF" },
-  { id: "needs_kimberly_approval", label: "Needs Kimberly Approval", color: "#FFBD59" },
-  { id: "needs_jahan_approval", label: "Needs Jahan Approval", color: "#F93C3C" },
-  { id: "done", label: "Done", color: "#22C55E" },
-];
-
-const STATUS_ICONS: Record<TaskStatus, typeof Circle> = {
-  todo: Circle,
-  in_progress: Loader2,
-  needs_kimberly_approval: Shield,
-  needs_jahan_approval: ShieldAlert,
-  done: CheckCircle2,
-};
-
-const PRIORITY_CONFIG: Record<TaskPriority, { label: string; color: string; icon: typeof Zap }> = {
-  urgent: { label: "Urgent", color: "#F93C3C", icon: AlertTriangle },
-  high: { label: "High", color: "#FFBD59", icon: Zap },
-  medium: { label: "Medium", color: "#2093FF", icon: Circle },
-  low: { label: "Low", color: "#64748b", icon: Circle },
+type QuickAddPayload = {
+  title: string;
+  assignee: string;
+  priority: TaskPriority;
+  due_date: string | null;
 };
 
 const TEAM_MEMBERS = [
-  { id: "jahan", name: "Jahan" },
-  { id: "kimberly", name: "Kimberly" },
-  { id: "alex", name: "Alex" },
-  { id: "sabri", name: "Sabri" },
-  { id: "kevin", name: "Kevin" },
-  { id: "jordan", name: "Jordan" },
-  { id: "hamza", name: "Hamza" },
-  { id: "abdul", name: "Abdul" },
-  { id: "elang", name: "Elang" },
+  { id: "kimberly", name: "Kimberly", initials: "KI" },
+  { id: "kevin", name: "Kevin", initials: "KE" },
+  { id: "sabri", name: "Sabri", initials: "SA" },
+  { id: "alex", name: "Alex", initials: "AL" },
+  { id: "jordan", name: "Jordan", initials: "JO" },
+  { id: "jahan", name: "Jahan", initials: "JA" },
+] as const;
+
+const FILTER_ASSIGNEES = TEAM_MEMBERS.filter((member) => member.id !== "jahan");
+
+const PRIORITY_CONFIG: Record<TaskPriority, { label: string; tone: string; icon: typeof Zap }> = {
+  urgent: { label: "Urgent", tone: "border-red-500/40 bg-red-500/12 text-red-300", icon: AlertTriangle },
+  high: { label: "High", tone: "border-amber-400/40 bg-amber-400/12 text-amber-200", icon: Zap },
+  medium: { label: "Medium", tone: "border-sky-400/40 bg-sky-400/12 text-sky-200", icon: Circle },
+  low: { label: "Low", tone: "border-slate-400/30 bg-slate-400/10 text-slate-300", icon: Circle },
+};
+
+const STATUS_META: Record<TaskStatus, { label: string; icon: typeof Circle; tone: string }> = {
+  todo: { label: "Todo", icon: Circle, tone: "text-slate-300" },
+  in_progress: { label: "In Progress", icon: Loader2, tone: "text-sky-300" },
+  needs_kimberly_approval: { label: "Kimberly Approval", icon: Shield, tone: "text-amber-200" },
+  needs_jahan_approval: { label: "Jahan Approval", icon: ShieldAlert, tone: "text-rose-300" },
+  done: { label: "Done", icon: CheckCircle2, tone: "text-emerald-300" },
+};
+
+const COLUMNS: Array<{
+  id: BoardColumnId;
+  label: string;
+  accent: string;
+  description: string;
+}> = [
+  { id: "todo", label: "Todo", accent: "from-slate-500/35 to-slate-500/5", description: "Queued and unstarted." },
+  { id: "in_progress", label: "In Progress", accent: "from-sky-500/35 to-sky-500/5", description: "Actively moving." },
+  {
+    id: "approval",
+    label: "Needs Approval",
+    accent: "from-amber-400/35 to-rose-500/5",
+    description: "Kimberly and Jahan review stages.",
+  },
+  { id: "done", label: "Done", accent: "from-emerald-500/35 to-emerald-500/5", description: "Completed and cleared." },
 ];
 
-const CATEGORIES = ["development", "marketing", "sales", "operations", "finance"];
-
-function getNextStatus(current: TaskStatus): typeof STATUSES[number] | null {
-  const order: TaskStatus[] = ["todo", "in_progress", "needs_kimberly_approval", "needs_jahan_approval", "done"];
-  const idx = order.indexOf(current);
-  if (idx < 0 || idx >= order.length - 1) return null;
-  const nextId = order[idx + 1];
-  if (nextId === "done") return null; // Only Jahan moves to done
-  return STATUSES.find(s => s.id === nextId) || null;
+function getBoardColumn(status: TaskStatus): BoardColumnId {
+  if (status === "needs_kimberly_approval" || status === "needs_jahan_approval") return "approval";
+  return status;
 }
 
-/* ── Task Card ── */
-function TaskCard({ task, onStatusChange, onDelete }: {
-  task: Task;
-  onStatusChange: (id: string, status: TaskStatus) => void;
-  onDelete: (id: string) => void;
+function getMember(id: string) {
+  return TEAM_MEMBERS.find((member) => member.id === id);
+}
+
+function formatShortDate(value: string | null) {
+  if (!value) return "No date";
+  return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(new Date(value));
+}
+
+function formatCreatedDate(value: string) {
+  return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(new Date(value));
+}
+
+function isOverdue(task: Task) {
+  if (!task.due_date || task.status === "done") return false;
+  const due = new Date(task.due_date);
+  due.setHours(23, 59, 59, 999);
+  return due.getTime() < Date.now();
+}
+
+function sortTasks(tasks: Task[]) {
+  const rank: Record<TaskPriority, number> = { urgent: 0, high: 1, medium: 2, low: 3 };
+  return [...tasks].sort((left, right) => {
+    const priorityDelta = rank[left.priority] - rank[right.priority];
+    if (priorityDelta !== 0) return priorityDelta;
+    return new Date(right.created_at).getTime() - new Date(left.created_at).getTime();
+  });
+}
+
+function getDropStatus(task: Task, target: BoardColumnId): TaskStatus | null {
+  switch (target) {
+    case "todo":
+      return "todo";
+    case "in_progress":
+      return "in_progress";
+    case "approval":
+      if (task.status === "needs_jahan_approval") return "needs_jahan_approval";
+      if (task.status === "needs_kimberly_approval") return "needs_kimberly_approval";
+      return "needs_kimberly_approval";
+    case "done":
+      return task.status === "needs_jahan_approval" || task.status === "done" ? "done" : null;
+    default:
+      return null;
+  }
+}
+
+function getNextApprovalStatus(task: Task): TaskStatus | null {
+  if (task.status === "todo") return "in_progress";
+  if (task.status === "in_progress") return "needs_kimberly_approval";
+  if (task.status === "needs_kimberly_approval") return "needs_jahan_approval";
+  if (task.status === "needs_jahan_approval") return "done";
+  return null;
+}
+
+function QuickAddModal({
+  onClose,
+  onSubmit,
+  saving,
+}: {
+  onClose: () => void;
+  onSubmit: (payload: QuickAddPayload) => Promise<void>;
+  saving: boolean;
 }) {
-  const [expanded, setExpanded] = useState(false);
-  const priority = PRIORITY_CONFIG[task.priority];
-  const status = STATUSES.find(s => s.id === task.status)!;
-  const StatusIcon = STATUS_ICONS[task.status];
-  const assignee = TEAM_MEMBERS.find(m => m.id === task.assignee);
-  const nextStatus = getNextStatus(task.status);
-  const isAI = task.created_by && task.created_by !== "jahan";
+  const [title, setTitle] = useState("");
+  const [assignee, setAssignee] = useState("kimberly");
+  const [priority, setPriority] = useState<TaskPriority>("medium");
+  const [dueDate, setDueDate] = useState("");
+
+  const handleSubmit = async () => {
+    if (!title.trim() || saving) return;
+    await onSubmit({
+      title: title.trim(),
+      assignee,
+      priority,
+      due_date: dueDate || null,
+    });
+  };
 
   return (
-    <div className={cn(
-      "bg-white/[0.03] border rounded-lg p-3 hover:bg-white/[0.05] transition-all cursor-pointer group",
-      task.priority === "urgent" ? "border-red-500/30" : "border-white/[0.06]",
-    )} onClick={() => setExpanded(!expanded)}>
-      <div className="flex items-start gap-2">
-        <StatusIcon className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: status.color }} />
-        <div className="flex-1 min-w-0">
-          <p className={cn("text-sm font-medium leading-tight", task.status === "done" && "line-through text-slate-500")}>
-            {task.title}
-          </p>
-          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-            <span className="text-[9px] px-1.5 py-0.5 rounded-full font-medium" style={{ background: `${priority.color}20`, color: priority.color }}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#020611]/80 px-4 backdrop-blur-md" onClick={onClose}>
+      <div
+        className="w-full max-w-2xl rounded-[28px] border border-white/10 bg-[#07111f] p-5 shadow-[0_30px_120px_rgba(0,0,0,0.55)]"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h2 className="text-xl font-semibold text-white">Quick Add Task</h2>
+            <p className="mt-1 text-sm text-slate-400">Title, assignee, and priority in one line. Optional due date below.</p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full border border-white/10 bg-white/5 p-2 text-slate-400 transition hover:bg-white/10 hover:text-white"
+            aria-label="Close task modal"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="mt-6 grid gap-3 lg:grid-cols-[minmax(0,1.9fr)_170px_150px]">
+          <input
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                void handleSubmit();
+              }
+            }}
+            placeholder="Ship the new task board"
+            className="rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-sky-400/50"
+          />
+          <select
+            value={assignee}
+            onChange={(event) => setAssignee(event.target.value)}
+            className="rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-sm text-white outline-none transition focus:border-sky-400/50"
+          >
+            {TEAM_MEMBERS.map((member) => (
+              <option key={member.id} value={member.id}>
+                {member.name}
+              </option>
+            ))}
+          </select>
+          <select
+            value={priority}
+            onChange={(event) => setPriority(event.target.value as TaskPriority)}
+            className="rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-sm text-white outline-none transition focus:border-sky-400/50"
+          >
+            {Object.entries(PRIORITY_CONFIG).map(([id, config]) => (
+              <option key={id} value={id}>
+                {config.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <label className="block text-sm text-slate-400">
+            <span className="mb-2 block text-[11px] uppercase tracking-[0.24em] text-slate-500">Due Date</span>
+            <input
+              type="date"
+              value={dueDate}
+              onChange={(event) => setDueDate(event.target.value)}
+              className="rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-sm text-white outline-none transition focus:border-sky-400/50"
+            />
+          </label>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-2xl border border-white/10 px-4 py-3 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              disabled={!title.trim() || saving}
+              onClick={() => void handleSubmit()}
+              className="inline-flex items-center gap-2 rounded-2xl bg-sky-500 px-4 py-3 text-sm font-medium text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+              Create Task
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TaskCard({
+  task,
+  dragging,
+  onDelete,
+  onStatusChange,
+  onDragStart,
+  onDragEnd,
+}: {
+  task: Task;
+  dragging: boolean;
+  onDelete: (id: string) => void;
+  onStatusChange: (task: Task, nextStatus: TaskStatus) => void;
+  onDragStart: (taskId: string) => void;
+  onDragEnd: () => void;
+}) {
+  const member = getMember(task.assignee);
+  const priority = PRIORITY_CONFIG[task.priority];
+  const statusMeta = STATUS_META[task.status];
+  const StatusIcon = statusMeta.icon;
+  const nextApprovalStatus = getNextApprovalStatus(task);
+  const overdue = isOverdue(task);
+  const createdByAi = task.created_by && task.created_by !== "jahan";
+
+  return (
+    <article
+      draggable
+      onDragStart={(event) => {
+        event.dataTransfer.effectAllowed = "move";
+        event.dataTransfer.setData("text/plain", task.id);
+        onDragStart(task.id);
+      }}
+      onDragEnd={onDragEnd}
+      className={cn(
+        "group rounded-[24px] border bg-[#081224]/95 p-4 shadow-[0_12px_40px_rgba(0,0,0,0.24)] transition",
+        overdue ? "border-red-500/40" : "border-white/8 hover:border-white/16",
+        dragging && "opacity-55"
+      )}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <StatusIcon className={cn("h-4 w-4 flex-shrink-0", task.status === "in_progress" && "animate-spin", statusMeta.tone)} />
+            <h3 className="text-sm font-semibold leading-5 text-white">{task.title}</h3>
+          </div>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <span className={cn("inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-medium", priority.tone)}>
+              <priority.icon className="h-3 w-3" />
               {priority.label}
             </span>
-            {task.category && (
-              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-white/5 text-slate-500 capitalize">{task.category}</span>
+            <span className={cn("inline-flex items-center rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px]", statusMeta.tone)}>
+              {statusMeta.label}
+            </span>
+            {overdue && (
+              <span className="inline-flex items-center gap-1 rounded-full border border-red-500/40 bg-red-500/12 px-2.5 py-1 text-[11px] font-medium text-red-300">
+                <AlertTriangle className="h-3 w-3" />
+                Overdue
+              </span>
             )}
-            {isAI && (
-              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-purple-500/10 text-purple-400">AI</span>
-            )}
-            {task.due_date && (
-              <span className={cn("text-[9px] flex items-center gap-0.5",
-                new Date(task.due_date) < new Date() && task.status !== "done" ? "text-red-400" : "text-slate-600")}>
-                <Calendar className="w-2.5 h-2.5" />
-                {new Date(task.due_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+            {createdByAi && (
+              <span className="rounded-full border border-violet-400/30 bg-violet-500/12 px-2.5 py-1 text-[11px] text-violet-200">
+                AI Assigned
               </span>
             )}
           </div>
         </div>
-        {assignee && (
-          <div className="flex items-center gap-1 bg-white/5 px-2 py-0.5 rounded-full">
-            <User className="w-2.5 h-2.5 text-slate-500" />
-            <span className="text-[9px] text-slate-400">{assignee.name}</span>
-          </div>
-        )}
+
+        <button
+          type="button"
+          onClick={() => onDelete(task.id)}
+          className="rounded-full p-1.5 text-slate-500 opacity-0 transition hover:bg-red-500/12 hover:text-red-300 group-hover:opacity-100"
+          aria-label={`Delete ${task.title}`}
+        >
+          <X className="h-4 w-4" />
+        </button>
       </div>
 
-      {expanded && (
-        <div className="mt-3 pt-3 border-t border-white/5 space-y-2">
-          {task.description && <p className="text-xs text-slate-400 leading-relaxed">{task.description}</p>}
-          {task.notes && <p className="text-[10px] text-yellow-400/80 italic">{task.notes}</p>}
-
-          <div className="flex items-center gap-2 pt-2">
-            {task.status !== "done" && nextStatus && (
-              <button
-                onClick={(e) => { e.stopPropagation(); onStatusChange(task.id, nextStatus.id); }}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:brightness-110"
-                style={{ background: `${nextStatus.color}20`, color: nextStatus.color }}>
-                <ArrowRight className="w-3 h-3" />
-                Move to {nextStatus.label}
-              </button>
-            )}
-            {task.status === "needs_jahan_approval" && (
-              <button
-                onClick={(e) => { e.stopPropagation(); onStatusChange(task.id, "done"); }}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:brightness-110 bg-green-500/20 text-green-400">
-                <CheckCircle2 className="w-3 h-3" />
-                Approve &amp; Done
-              </button>
-            )}
-            <button
-              onClick={(e) => { e.stopPropagation(); if (confirm("Delete this task?")) onDelete(task.id); }}
-              className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs text-red-400/60 hover:text-red-400 hover:bg-red-500/10 transition-all ml-auto">
-              <X className="w-3 h-3" /> Delete
-            </button>
+      <div className="mt-4 grid gap-3 text-xs text-slate-300 sm:grid-cols-2">
+        <div className="flex items-center gap-2 rounded-2xl border border-white/8 bg-white/4 px-3 py-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-sky-400 to-cyan-300 text-[11px] font-semibold text-slate-950">
+            {member?.initials ?? task.assignee.slice(0, 2).toUpperCase()}
           </div>
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Assignee</p>
+            <p className="mt-0.5 font-medium text-white">{member?.name ?? task.assignee}</p>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-white/8 bg-white/4 px-3 py-2">
+          <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Timeline</p>
+          <div className="mt-1 flex items-center justify-between gap-2">
+            <span className={cn("inline-flex items-center gap-1", overdue ? "text-red-300" : "text-slate-200")}>
+              <Calendar className="h-3.5 w-3.5" />
+              Due {formatShortDate(task.due_date)}
+            </span>
+            <span className="text-slate-500">Created {formatCreatedDate(task.created_at)}</span>
+          </div>
+        </div>
+      </div>
+
+      {(task.description || task.notes) && (
+        <div className="mt-4 rounded-2xl border border-white/8 bg-[#06111f] px-3 py-3 text-xs leading-5 text-slate-300">
+          {task.description && <p>{task.description}</p>}
+          {task.notes && <p className={cn(task.description && "mt-2", "text-slate-400")}>{task.notes}</p>}
         </div>
       )}
-    </div>
-  );
-}
 
-/* ── Add Task Modal ── */
-function AddTaskModal({ onClose, onAdd }: { onClose: () => void; onAdd: (t: Partial<Task>) => void }) {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [assignee, setAssignee] = useState("kimberly");
-  const [priority, setPriority] = useState<TaskPriority>("medium");
-  const [category, setCategory] = useState("");
-  const [dueDate, setDueDate] = useState("");
-
-  return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center" onClick={onClose}>
-      <div className="bg-[#12121a] border border-white/10 rounded-xl p-6 w-full max-w-lg space-y-4" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">New Task</h3>
-          <button onClick={onClose} className="text-slate-500 hover:text-white"><X className="w-5 h-5" /></button>
-        </div>
-
-        <div className="space-y-3">
-          <div>
-            <label className="text-[10px] text-slate-500 uppercase tracking-wider block mb-1">Title *</label>
-            <input value={title} onChange={e => setTitle(e.target.value)} placeholder="What needs to be done?"
-              className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-slate-600 outline-none focus:border-[#2093FF]" />
-          </div>
-          <div>
-            <label className="text-[10px] text-slate-500 uppercase tracking-wider block mb-1">Description</label>
-            <textarea value={description} onChange={e => setDescription(e.target.value)} placeholder="Details..." rows={3}
-              className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-slate-600 outline-none focus:border-[#2093FF] resize-none" />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-[10px] text-slate-500 uppercase tracking-wider block mb-1">Assignee</label>
-              <select value={assignee} onChange={e => setAssignee(e.target.value)}
-                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white outline-none">
-                {TEAM_MEMBERS.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="text-[10px] text-slate-500 uppercase tracking-wider block mb-1">Priority</label>
-              <select value={priority} onChange={e => setPriority(e.target.value as TaskPriority)}
-                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white outline-none">
-                {Object.entries(PRIORITY_CONFIG).map(([id, c]) => <option key={id} value={id}>{c.label}</option>)}
-              </select>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-[10px] text-slate-500 uppercase tracking-wider block mb-1">Category</label>
-              <select value={category} onChange={e => setCategory(e.target.value)}
-                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white outline-none">
-                <option value="">None</option>
-                {CATEGORIES.map(c => <option key={c} value={c} className="capitalize">{c}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="text-[10px] text-slate-500 uppercase tracking-wider block mb-1">Due Date</label>
-              <input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)}
-                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white outline-none" />
-            </div>
-          </div>
-        </div>
-
-        <div className="flex justify-end gap-2 pt-2">
-          <button onClick={onClose} className="px-4 py-2 text-sm text-slate-400 hover:text-white">Cancel</button>
+      {nextApprovalStatus && nextApprovalStatus !== task.status && (
+        <div className="mt-4 flex items-center gap-2">
           <button
-            disabled={!title.trim()}
-            onClick={() => { onAdd({ title, description: description || null, assignee, priority, category: category || null, due_date: dueDate || null, created_by: "jahan" }); onClose(); }}
-            className="px-4 py-2 bg-[#2093FF] text-white text-sm font-medium rounded-lg hover:brightness-110 disabled:opacity-30 disabled:cursor-not-allowed">
-            Create Task
+            type="button"
+            onClick={() => onStatusChange(task, nextApprovalStatus)}
+            className="rounded-2xl border border-sky-400/30 bg-sky-500/12 px-3 py-2 text-xs font-medium text-sky-200 transition hover:bg-sky-500/18"
+          >
+            {nextApprovalStatus === "in_progress" && "Start Work"}
+            {nextApprovalStatus === "needs_kimberly_approval" && "Send to Kimberly"}
+            {nextApprovalStatus === "needs_jahan_approval" && "Kimberly Approved"}
+            {nextApprovalStatus === "done" && "Jahan Approved"}
           </button>
         </div>
-      </div>
-    </div>
+      )}
+    </article>
   );
 }
 
-/* ── Main Page ── */
 export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [savingQuickAdd, setSavingQuickAdd] = useState(false);
   const [view, setView] = useState<ViewMode>("kanban");
   const [search, setSearch] = useState("");
-  const [filterAssignee, setFilterAssignee] = useState("all");
-  const [filterPriority, setFilterPriority] = useState("all");
+  const [assigneeFilter, setAssigneeFilter] = useState("all");
+  const [priorityFilter, setPriorityFilter] = useState("all");
+  const [myTasksOnly, setMyTasksOnly] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const [showAdd, setShowAdd] = useState(false);
+  const [showQuickAdd, setShowQuickAdd] = useState(false);
+  const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
+  const [dropColumn, setDropColumn] = useState<BoardColumnId | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const fetchTasks = useCallback(async () => {
+  const fetchTasks = useCallback(async (mode: "initial" | "refresh" = "initial") => {
+    if (mode === "refresh") setRefreshing(true);
     try {
-      const res = await fetch("/api/tasks");
-      const data = await res.json();
-      if (data.tasks) setTasks(data.tasks);
-    } catch (e) {
-      console.error("Failed to fetch tasks:", e);
+      const response = await fetch("/api/tasks", { cache: "no-store" });
+      if (!response.ok) throw new Error("Failed to fetch tasks");
+      const payload = await response.json();
+      setTasks(Array.isArray(payload.tasks) ? payload.tasks : []);
+      setError(null);
+    } catch (fetchError) {
+      console.error(fetchError);
+      setError("Could not load tasks from Supabase.");
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, []);
 
-  useEffect(() => { fetchTasks(); }, [fetchTasks]);
-
-  // Auto-refresh every 30s
   useEffect(() => {
-    const i = setInterval(fetchTasks, 30000);
-    return () => clearInterval(i);
+    void fetchTasks();
   }, [fetchTasks]);
 
-  const handleStatusChange = async (id: string, newStatus: TaskStatus) => {
-    // Optimistic update
-    setTasks(prev => prev.map(t => t.id === id ? { ...t, status: newStatus } : t));
+  useEffect(() => {
+    const interval = window.setInterval(() => void fetchTasks("refresh"), 30000);
+    return () => window.clearInterval(interval);
+  }, [fetchTasks]);
+
+  const updateTaskStatus = useCallback(async (task: Task, nextStatus: TaskStatus) => {
+    if (task.status === nextStatus) return;
+
+    setTasks((current) => current.map((item) => (item.id === task.id ? { ...item, status: nextStatus } : item)));
+
     try {
-      await fetch("/api/tasks", {
+      const response = await fetch("/api/tasks", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, status: newStatus }),
+        body: JSON.stringify({ id: task.id, status: nextStatus }),
       });
-    } catch (e) {
-      fetchTasks(); // Revert on error
-    }
-  };
 
-  const handleDelete = async (id: string) => {
-    setTasks(prev => prev.filter(t => t.id !== id));
-    try {
-      await fetch(`/api/tasks?id=${id}`, { method: "DELETE" });
-    } catch (e) {
-      fetchTasks();
+      if (!response.ok) throw new Error("Failed to update task");
+      setError(null);
+    } catch (updateError) {
+      console.error(updateError);
+      setError("Task update failed. Reloading board.");
+      void fetchTasks("refresh");
     }
-  };
+  }, [fetchTasks]);
 
-  const handleAdd = async (taskData: Partial<Task>) => {
+  const handleDelete = useCallback(async (taskId: string) => {
+    const previous = tasks;
+    setTasks((current) => current.filter((task) => task.id !== taskId));
+
     try {
-      const res = await fetch("/api/tasks", {
+      const response = await fetch(`/api/tasks?id=${taskId}`, { method: "DELETE" });
+      if (!response.ok) throw new Error("Failed to delete task");
+      setError(null);
+    } catch (deleteError) {
+      console.error(deleteError);
+      setError("Delete failed. Restoring board.");
+      setTasks(previous);
+    }
+  }, [tasks]);
+
+  const handleQuickAdd = useCallback(async (payload: QuickAddPayload) => {
+    setSavingQuickAdd(true);
+
+    try {
+      const response = await fetch("/api/tasks", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(taskData),
+        body: JSON.stringify({
+          ...payload,
+          status: "todo",
+          created_by: "jahan",
+        }),
       });
-      const data = await res.json();
-      if (data.task) {
-        fetchTasks(); // Refresh to get server-generated id
+
+      if (!response.ok) throw new Error("Failed to create task");
+      const body = await response.json();
+      const createdTask = body.task as Task | undefined;
+
+      if (createdTask?.id) {
+        setTasks((current) => [createdTask, ...current]);
+      } else {
+        await fetchTasks("refresh");
       }
-    } catch (e) {
-      console.error("Failed to create task:", e);
+
+      setShowQuickAdd(false);
+      setError(null);
+    } catch (createError) {
+      console.error(createError);
+      setError("Quick add failed. Try again.");
+    } finally {
+      setSavingQuickAdd(false);
     }
-  };
+  }, [fetchTasks]);
 
-  const filtered = useMemo(() => {
-    return tasks.filter(t => {
-      if (search && !t.title.toLowerCase().includes(search.toLowerCase())) return false;
-      if (filterAssignee !== "all" && t.assignee !== filterAssignee) return false;
-      if (filterPriority !== "all" && t.priority !== filterPriority) return false;
-      return true;
+  const filteredTasks = useMemo(() => {
+    return tasks.filter((task) => {
+      const matchesSearch =
+        !search.trim() ||
+        task.title.toLowerCase().includes(search.toLowerCase()) ||
+        task.description?.toLowerCase().includes(search.toLowerCase());
+
+      const matchesAssignee =
+        assigneeFilter === "all" ? true : task.assignee === assigneeFilter;
+
+      const matchesPriority =
+        priorityFilter === "all" ? true : task.priority === priorityFilter;
+
+      const matchesMyTasks = myTasksOnly ? task.assignee === "jahan" : true;
+
+      return matchesSearch && matchesAssignee && matchesPriority && matchesMyTasks;
     });
-  }, [tasks, search, filterAssignee, filterPriority]);
+  }, [assigneeFilter, myTasksOnly, priorityFilter, search, tasks]);
 
-  const byStatus = useMemo(() => {
-    const map: Record<TaskStatus, Task[]> = { todo: [], in_progress: [], needs_kimberly_approval: [], needs_jahan_approval: [], done: [] };
-    filtered.forEach(t => map[t.status]?.push(t));
-    return map;
-  }, [filtered]);
+  const tasksByColumn = useMemo(() => {
+    const grouped: Record<BoardColumnId, Task[]> = {
+      todo: [],
+      in_progress: [],
+      approval: [],
+      done: [],
+    };
 
-  const stats = useMemo(() => ({
-    total: tasks.length,
-    active: tasks.filter(t => t.status !== "done").length,
-    overdue: tasks.filter(t => t.due_date && new Date(t.due_date) < new Date() && t.status !== "done").length,
-    needsApproval: tasks.filter(t => t.status === "needs_jahan_approval").length,
-  }), [tasks]);
+    for (const task of filteredTasks) {
+      grouped[getBoardColumn(task.status)].push(task);
+    }
+
+    return {
+      todo: sortTasks(grouped.todo),
+      in_progress: sortTasks(grouped.in_progress),
+      approval: sortTasks(grouped.approval),
+      done: sortTasks(grouped.done),
+    };
+  }, [filteredTasks]);
+
+  const stats = useMemo(() => {
+    const overdue = tasks.filter((task) => isOverdue(task)).length;
+    const active = tasks.filter((task) => task.status !== "done").length;
+    const approvals = tasks.filter((task) => getBoardColumn(task.status) === "approval").length;
+    const urgent = tasks.filter((task) => task.priority === "urgent" && task.status !== "done").length;
+
+    return { active, overdue, approvals, urgent };
+  }, [tasks]);
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0f] text-white flex items-center justify-center">
-        <Loader2 className="w-6 h-6 animate-spin text-[#2093FF]" />
+      <div className="flex min-h-screen items-center justify-center bg-[#030711] text-white">
+        <Loader2 className="h-7 w-7 animate-spin text-sky-400" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Tasks</h1>
-          <p className="text-slate-500 text-sm mt-1">
-            {stats.active} active
-            {stats.overdue > 0 && <span className="text-red-400"> · {stats.overdue} overdue</span>}
-            {stats.needsApproval > 0 && <span className="text-yellow-400"> · {stats.needsApproval} awaiting approval</span>}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <button onClick={fetchTasks} className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all" title="Refresh">
-            <RefreshCw className="w-4 h-4" />
-          </button>
-          <button onClick={() => setShowAdd(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-[#2093FF] text-white text-sm font-medium rounded-lg hover:brightness-110">
-            <Plus className="w-4 h-4" /> Add Task
-          </button>
-          <div className="flex bg-white/5 rounded-lg p-0.5">
-            <button onClick={() => setView("kanban")} className={cn("p-2 rounded-md", view === "kanban" && "bg-[#2093FF] text-white")}>
-              <LayoutGrid className="w-4 h-4" />
-            </button>
-            <button onClick={() => setView("list")} className={cn("p-2 rounded-md", view === "list" && "bg-[#2093FF] text-white")}>
-              <List className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      </div>
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.18),_transparent_30%),linear-gradient(180deg,#020611_0%,#07101f_48%,#020611_100%)] px-4 py-6 text-white sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-[1600px] space-y-6">
+        <section className="overflow-hidden rounded-[32px] border border-white/10 bg-[#07111f]/92 p-6 shadow-[0_30px_100px_rgba(0,0,0,0.35)]">
+          <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.32em] text-sky-300">Task Board V2</p>
+              <h1 className="mt-2 text-3xl font-semibold tracking-tight text-white">Daily operations, approvals, and overdue work in one board.</h1>
+              <p className="mt-3 max-w-3xl text-sm text-slate-400">
+                Native HTML drag and drop between board columns, fast Supabase-backed quick add, and a single approval lane that still preserves Kimberly and Jahan as separate review stages.
+              </p>
+            </div>
 
-      {/* Search & Filters */}
-      <div className="flex items-center gap-3">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-          <input type="text" placeholder="Search tasks..." value={search} onChange={e => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-slate-600 focus:border-[#2093FF] outline-none" />
-        </div>
-        <button onClick={() => setShowFilters(!showFilters)}
-          className={cn("flex items-center gap-2 px-3 py-2 rounded-lg text-sm border",
-            showFilters ? "bg-[#2093FF]/10 border-[#2093FF]/30 text-[#2093FF]" : "bg-white/5 border-white/10 text-slate-400")}>
-          <Filter className="w-4 h-4" /> Filters
-        </button>
-      </div>
-
-      {showFilters && (
-        <div className="flex items-center gap-4 bg-white/[0.03] border border-white/[0.06] rounded-lg p-3">
-          <div>
-            <label className="text-[10px] text-slate-500 uppercase tracking-wider block mb-1">Assignee</label>
-            <select value={filterAssignee} onChange={e => setFilterAssignee(e.target.value)}
-              className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white outline-none">
-              <option value="all">All</option>
-              {TEAM_MEMBERS.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="text-[10px] text-slate-500 uppercase tracking-wider block mb-1">Priority</label>
-            <select value={filterPriority} onChange={e => setFilterPriority(e.target.value)}
-              className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white outline-none">
-              <option value="all">All</option>
-              {Object.entries(PRIORITY_CONFIG).map(([id, c]) => <option key={id} value={id}>{c.label}</option>)}
-            </select>
-          </div>
-        </div>
-      )}
-
-      {/* Empty State */}
-      {tasks.length === 0 && !loading && (
-        <div className="text-center py-20">
-          <Circle className="w-12 h-12 text-slate-700 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-slate-400">No tasks yet</h3>
-          <p className="text-sm text-slate-600 mt-1">Add a task or Kimberly will start populating this board as work gets assigned.</p>
-        </div>
-      )}
-
-      {/* Kanban View */}
-      {view === "kanban" && tasks.length > 0 && (
-        <div className="grid grid-cols-5 gap-4">
-          {STATUSES.map(status => {
-            const statusTasks = byStatus[status.id] || [];
-            return (
-              <div key={status.id} className="space-y-3">
-                <div className="flex items-center gap-2 pb-2 border-b border-white/5">
-                  <div className="w-2 h-2 rounded-full" style={{ background: status.color }} />
-                  <span className="text-xs font-medium text-slate-300">{status.label}</span>
-                  <span className="text-[10px] bg-white/5 px-1.5 py-0.5 rounded-full text-slate-500 ml-auto">{statusTasks.length}</span>
-                </div>
-                <div className="space-y-2 min-h-[200px]">
-                  {statusTasks.sort((a, b) => {
-                    const p = { urgent: 0, high: 1, medium: 2, low: 3 };
-                    return p[a.priority] - p[b.priority];
-                  }).map(task => (
-                    <TaskCard key={task.id} task={task} onStatusChange={handleStatusChange} onDelete={handleDelete} />
-                  ))}
-                </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={() => void fetchTasks("refresh")}
+                className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-slate-200 transition hover:bg-white/10"
+              >
+                <RefreshCw className={cn("h-4 w-4", refreshing && "animate-spin")} />
+                Refresh
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowQuickAdd(true)}
+                className="inline-flex items-center gap-2 rounded-2xl bg-sky-500 px-4 py-2.5 text-sm font-medium text-white transition hover:brightness-110"
+              >
+                <Plus className="h-4 w-4" />
+                Quick Add
+              </button>
+              <div className="inline-flex rounded-2xl border border-white/10 bg-white/5 p-1">
+                <button
+                  type="button"
+                  onClick={() => setView("kanban")}
+                  className={cn(
+                    "rounded-xl px-3 py-2 text-sm text-slate-300 transition",
+                    view === "kanban" && "bg-sky-500 text-white"
+                  )}
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setView("list")}
+                  className={cn(
+                    "rounded-xl px-3 py-2 text-sm text-slate-300 transition",
+                    view === "list" && "bg-sky-500 text-white"
+                  )}
+                >
+                  <List className="h-4 w-4" />
+                </button>
               </div>
-            );
-          })}
-        </div>
-      )}
+            </div>
+          </div>
 
-      {/* List View */}
-      {view === "list" && tasks.length > 0 && (
-        <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-white/5">
-                <th className="text-left text-[11px] text-slate-500 uppercase tracking-wider p-4">Task</th>
-                <th className="text-left text-[11px] text-slate-500 uppercase tracking-wider p-4">Assignee</th>
-                <th className="text-left text-[11px] text-slate-500 uppercase tracking-wider p-4">Priority</th>
-                <th className="text-left text-[11px] text-slate-500 uppercase tracking-wider p-4">Status</th>
-                <th className="text-left text-[11px] text-slate-500 uppercase tracking-wider p-4">Due</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.sort((a, b) => {
-                const p = { urgent: 0, high: 1, medium: 2, low: 3 };
-                return p[a.priority] - p[b.priority];
-              }).map(task => {
-                const priority = PRIORITY_CONFIG[task.priority];
-                const status = STATUSES.find(s => s.id === task.status)!;
-                const StatusIcon = STATUS_ICONS[task.status];
-                const assignee = TEAM_MEMBERS.find(m => m.id === task.assignee);
-                const overdue = task.due_date && new Date(task.due_date) < new Date() && task.status !== "done";
-                const isAI = task.created_by && task.created_by !== "jahan";
+          <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+            <div className="rounded-[24px] border border-white/8 bg-white/4 p-4">
+              <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Active</p>
+              <p className="mt-3 text-3xl font-semibold text-white">{stats.active}</p>
+              <p className="mt-1 text-sm text-slate-400">Open tasks across the workflow.</p>
+            </div>
+            <div className="rounded-[24px] border border-red-500/20 bg-red-500/8 p-4">
+              <p className="text-[11px] uppercase tracking-[0.24em] text-red-200/80">Overdue</p>
+              <p className="mt-3 text-3xl font-semibold text-red-200">{stats.overdue}</p>
+              <p className="mt-1 text-sm text-red-200/70">Tasks past due date and not done.</p>
+            </div>
+            <div className="rounded-[24px] border border-amber-400/20 bg-amber-400/8 p-4">
+              <p className="text-[11px] uppercase tracking-[0.24em] text-amber-200/80">Approvals</p>
+              <p className="mt-3 text-3xl font-semibold text-amber-100">{stats.approvals}</p>
+              <p className="mt-1 text-sm text-amber-100/70">Waiting on Kimberly or Jahan.</p>
+            </div>
+            <div className="rounded-[24px] border border-sky-400/20 bg-sky-400/8 p-4">
+              <p className="text-[11px] uppercase tracking-[0.24em] text-sky-200/80">Urgent</p>
+              <p className="mt-3 text-3xl font-semibold text-sky-100">{stats.urgent}</p>
+              <p className="mt-1 text-sm text-sky-100/70">High-pressure items still open.</p>
+            </div>
+          </div>
+        </section>
+
+        <section className="rounded-[28px] border border-white/10 bg-[#07111f]/92 p-4 shadow-[0_25px_80px_rgba(0,0,0,0.28)] sm:p-5">
+          <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+            <div className="relative w-full xl:max-w-lg">
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+              <input
+                type="text"
+                placeholder="Search task title or details"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                className="w-full rounded-2xl border border-white/10 bg-white/5 py-3 pl-11 pr-4 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-sky-400/50"
+              />
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setMyTasksOnly((current) => !current)}
+                className={cn(
+                  "rounded-2xl border px-4 py-2.5 text-sm transition",
+                  myTasksOnly
+                    ? "border-sky-400/40 bg-sky-500/12 text-sky-200"
+                    : "border-white/10 bg-white/5 text-slate-300"
+                )}
+              >
+                My Tasks
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowFilters((current) => !current)}
+                className={cn(
+                  "inline-flex items-center gap-2 rounded-2xl border px-4 py-2.5 text-sm transition",
+                  showFilters
+                    ? "border-sky-400/40 bg-sky-500/12 text-sky-200"
+                    : "border-white/10 bg-white/5 text-slate-300"
+                )}
+              >
+                <Filter className="h-4 w-4" />
+                Filters
+              </button>
+            </div>
+          </div>
+
+          {showFilters && (
+            <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-[220px_180px_auto]">
+              <label className="block text-sm text-slate-400">
+                <span className="mb-2 block text-[11px] uppercase tracking-[0.24em] text-slate-500">Assignee</span>
+                <select
+                  value={assigneeFilter}
+                  onChange={(event) => setAssigneeFilter(event.target.value)}
+                  className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none transition focus:border-sky-400/50"
+                >
+                  <option value="all">All Assignees</option>
+                  {FILTER_ASSIGNEES.map((member) => (
+                    <option key={member.id} value={member.id}>
+                      {member.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="block text-sm text-slate-400">
+                <span className="mb-2 block text-[11px] uppercase tracking-[0.24em] text-slate-500">Priority</span>
+                <select
+                  value={priorityFilter}
+                  onChange={(event) => setPriorityFilter(event.target.value)}
+                  className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none transition focus:border-sky-400/50"
+                >
+                  <option value="all">All Priorities</option>
+                  {Object.entries(PRIORITY_CONFIG).map(([id, config]) => (
+                    <option key={id} value={id}>
+                      {config.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <div className="flex items-end">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAssigneeFilter("all");
+                    setPriorityFilter("all");
+                    setMyTasksOnly(false);
+                    setSearch("");
+                  }}
+                  className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-300 transition hover:bg-white/10 hover:text-white"
+                >
+                  Clear Filters
+                </button>
+              </div>
+            </div>
+          )}
+
+          {error && (
+            <div className="mt-4 rounded-2xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+              {error}
+            </div>
+          )}
+        </section>
+
+        {filteredTasks.length === 0 ? (
+          <section className="rounded-[28px] border border-dashed border-white/12 bg-[#07111f]/85 px-6 py-16 text-center">
+            <p className="text-lg font-medium text-white">No tasks match the current filters.</p>
+            <p className="mt-2 text-sm text-slate-400">Clear filters or add a new task to seed the board.</p>
+          </section>
+        ) : view === "kanban" ? (
+          <section className="overflow-x-auto pb-2">
+            <div className="grid min-w-[1100px] gap-4 xl:grid-cols-4">
+              {COLUMNS.map((column) => {
+                const columnTasks = tasksByColumn[column.id];
+                const isDropTarget = dropColumn === column.id;
 
                 return (
-                  <tr key={task.id} className="border-b border-white/[0.03] hover:bg-white/[0.03]">
-                    <td className="p-4">
-                      <div className="flex items-center gap-2">
-                        <StatusIcon className="w-4 h-4 flex-shrink-0" style={{ color: status.color }} />
-                        <span className={cn("text-sm", task.status === "done" && "line-through text-slate-500")}>{task.title}</span>
-                        {isAI && <span className="text-[8px] px-1 py-0.5 rounded bg-purple-500/10 text-purple-400">AI</span>}
+                  <div
+                    key={column.id}
+                    onDragOver={(event) => {
+                      event.preventDefault();
+                      event.dataTransfer.dropEffect = "move";
+                      setDropColumn(column.id);
+                    }}
+                    onDragLeave={() => {
+                      if (dropColumn === column.id) setDropColumn(null);
+                    }}
+                    onDrop={(event) => {
+                      event.preventDefault();
+                      const taskId = event.dataTransfer.getData("text/plain") || draggedTaskId;
+                      const task = tasks.find((item) => item.id === taskId);
+                      setDropColumn(null);
+                      setDraggedTaskId(null);
+
+                      if (!task) return;
+                      const nextStatus = getDropStatus(task, column.id);
+                      if (!nextStatus) {
+                        setError("This move skips the approval workflow. Move approval tasks through Kimberly and Jahan first.");
+                        return;
+                      }
+
+                      setError(null);
+                      void updateTaskStatus(task, nextStatus);
+                    }}
+                    className={cn(
+                      "rounded-[28px] border border-white/10 bg-[#06111f]/90 p-4 transition",
+                      isDropTarget && "border-sky-400/40 bg-[#081629]"
+                    )}
+                  >
+                    <div className={cn("rounded-[22px] bg-gradient-to-r p-[1px]", column.accent)}>
+                      <div className="rounded-[21px] bg-[#091526] px-4 py-4">
+                        <div className="flex items-start justify-between gap-4">
+                          <div>
+                            <h2 className="text-base font-semibold text-white">{column.label}</h2>
+                            <p className="mt-1 text-xs text-slate-400">{column.description}</p>
+                          </div>
+                          <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-slate-300">
+                            {columnTasks.length}
+                          </span>
+                        </div>
                       </div>
-                    </td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-1">
-                        <User className="w-3 h-3 text-slate-500" />
-                        <span className="text-sm text-slate-400">{assignee?.name || task.assignee}</span>
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <span className="text-[10px] px-2 py-0.5 rounded-full font-medium"
-                        style={{ background: `${priority.color}20`, color: priority.color }}>
-                        {priority.label}
-                      </span>
-                    </td>
-                    <td className="p-4">
-                      <span className="text-[10px] px-2 py-0.5 rounded-full"
-                        style={{ background: `${status.color}20`, color: status.color }}>
-                        {status.label}
-                      </span>
-                    </td>
-                    <td className="p-4">
-                      {task.due_date ? (
-                        <span className={cn("text-xs font-mono", overdue ? "text-red-400" : "text-slate-500")}>
-                          {new Date(task.due_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                        </span>
-                      ) : <span className="text-xs text-slate-600">—</span>}
-                    </td>
-                  </tr>
+                    </div>
+
+                    <div className="mt-4 space-y-3">
+                      {columnTasks.length === 0 ? (
+                        <div className="rounded-[22px] border border-dashed border-white/10 bg-white/[0.03] px-4 py-8 text-center text-sm text-slate-500">
+                          Drop a task here.
+                        </div>
+                      ) : (
+                        columnTasks.map((task) => (
+                          <TaskCard
+                            key={task.id}
+                            task={task}
+                            dragging={draggedTaskId === task.id}
+                            onDelete={handleDelete}
+                            onStatusChange={(currentTask, nextStatus) => void updateTaskStatus(currentTask, nextStatus)}
+                            onDragStart={setDraggedTaskId}
+                            onDragEnd={() => {
+                              setDraggedTaskId(null);
+                              setDropColumn(null);
+                            }}
+                          />
+                        ))
+                      )}
+                    </div>
+                  </div>
                 );
               })}
-            </tbody>
-          </table>
-        </div>
-      )}
+            </div>
+          </section>
+        ) : (
+          <section className="overflow-hidden rounded-[28px] border border-white/10 bg-[#07111f]/92 shadow-[0_25px_80px_rgba(0,0,0,0.28)]">
+            <div className="overflow-x-auto">
+              <table className="min-w-full">
+                <thead className="border-b border-white/8 bg-white/[0.03] text-left">
+                  <tr className="text-[11px] uppercase tracking-[0.26em] text-slate-500">
+                    <th className="px-5 py-4">Task</th>
+                    <th className="px-5 py-4">Assignee</th>
+                    <th className="px-5 py-4">Priority</th>
+                    <th className="px-5 py-4">Stage</th>
+                    <th className="px-5 py-4">Due</th>
+                    <th className="px-5 py-4">Created</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortTasks(filteredTasks).map((task) => {
+                    const member = getMember(task.assignee);
+                    const priority = PRIORITY_CONFIG[task.priority];
+                    const statusMeta = STATUS_META[task.status];
+                    const overdue = isOverdue(task);
 
-      {/* Legend */}
-      <div className="flex items-center gap-4 text-[10px] text-slate-600">
-        <span>Only Jahan can move tasks to Done</span>
-        <span>·</span>
-        <span className="text-purple-400">AI = assigned by Kimberly</span>
-        <span>·</span>
-        <span className="text-red-400">Red dates = overdue</span>
-        <span>·</span>
-        <span>Auto-refreshes every 30s</span>
+                    return (
+                      <tr key={task.id} className="border-b border-white/6 text-sm text-slate-200 transition hover:bg-white/[0.03]">
+                        <td className="px-5 py-4">
+                          <div className="font-medium text-white">{task.title}</div>
+                          {task.description && <div className="mt-1 max-w-xl text-xs text-slate-400">{task.description}</div>}
+                        </td>
+                        <td className="px-5 py-4">
+                          <div className="inline-flex items-center gap-2">
+                            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-sky-400 to-cyan-300 text-[11px] font-semibold text-slate-950">
+                              {member?.initials ?? task.assignee.slice(0, 2).toUpperCase()}
+                            </span>
+                            <span>{member?.name ?? task.assignee}</span>
+                          </div>
+                        </td>
+                        <td className="px-5 py-4">
+                          <span className={cn("rounded-full border px-2.5 py-1 text-xs font-medium", priority.tone)}>
+                            {priority.label}
+                          </span>
+                        </td>
+                        <td className="px-5 py-4">
+                          <span className={cn("rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs", statusMeta.tone)}>
+                            {statusMeta.label}
+                          </span>
+                        </td>
+                        <td className="px-5 py-4">
+                          <span className={cn("rounded-full px-2.5 py-1 text-xs", overdue ? "bg-red-500/12 text-red-300" : "bg-white/5 text-slate-300")}>
+                            {task.due_date ? formatShortDate(task.due_date) : "No due date"}
+                          </span>
+                        </td>
+                        <td className="px-5 py-4 text-slate-400">{formatCreatedDate(task.created_at)}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
+
+        <p className="text-xs text-slate-500">
+          Dragging into <span className="text-slate-300">Done</span> only works after a task reaches <span className="text-slate-300">Jahan Approval</span>. The board visually combines both approval stages without removing the underlying five-step workflow.
+        </p>
       </div>
 
-      {/* Add Modal */}
-      {showAdd && <AddTaskModal onClose={() => setShowAdd(false)} onAdd={handleAdd} />}
+      {showQuickAdd && (
+        <QuickAddModal
+          onClose={() => {
+            if (!savingQuickAdd) setShowQuickAdd(false);
+          }}
+          onSubmit={handleQuickAdd}
+          saving={savingQuickAdd}
+        />
+      )}
     </div>
   );
 }
