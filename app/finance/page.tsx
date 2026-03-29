@@ -119,7 +119,7 @@ function getCurrentMonth() {
 
 function formatMonthLabel(month: string) {
   const [year, monthNumber] = month.split("-").map(Number);
-  return new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" }).format(
+  return new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric", timeZone: "UTC" }).format(
     new Date(Date.UTC(year, monthNumber - 1, 1))
   );
 }
