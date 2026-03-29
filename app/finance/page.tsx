@@ -124,17 +124,10 @@ function formatMonthLabel(month: string) {
   );
 }
 
-function buildMonthOptions(count: number, historyMonths: string[] = []) {
-  const start = new Date(`${getCurrentMonth()}-01T00:00:00.000Z`);
-  const values = new Set(historyMonths);
-
-  Array.from({ length: count }, (_, index) => {
-    const date = new Date(start);
-    date.setUTCMonth(date.getUTCMonth() - index);
-    const month = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
-    values.add(month);
-    return month;
-  });
+function buildMonthOptions(_count: number, historyMonths: string[] = []) {
+  const current = getCurrentMonth();
+  const values = new Set<string>([current]);
+  for (const m of historyMonths) values.add(m);
 
   return Array.from(values)
     .sort((a, b) => b.localeCompare(a))
