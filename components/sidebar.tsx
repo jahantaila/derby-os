@@ -10,7 +10,7 @@ const PRIMARY_NAV_ITEMS = [
   { href: "/tasks", label: "Tasks", icon: CheckSquare },
 
   { href: "/rolodex", label: "Rolodex", icon: BookUser },
-  { href: "/spothopper", label: "Intel", icon: Target },
+  { href: "/intel", label: "Intel", icon: Target },
   { href: "/calendar", label: "Calendar", icon: CalendarDays },
   { href: "/memory", label: "Memory", icon: Brain },
   { href: "/finance", label: "Finance", icon: DollarSign },
