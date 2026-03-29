@@ -1,825 +1,1197 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import {
-  AlertCircle, CreditCard, DollarSign, Minus, Plus, Receipt, RefreshCw,
-  TrendingUp, Trash2, Users, X, Zap,
+  AlertCircle,
+  Archive,
+  CalendarDays,
+  CreditCard,
+  DollarSign,
+  Minus,
+  Plus,
+  Receipt,
+  RefreshCw,
+  TrendingUp,
+  Trash2,
+  X,
+  Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import dynamic from "next/dynamic";
+
 const ReactECharts = dynamic(() => import("echarts-for-react"), { ssr: false });
 
-const fmt = (n: number) => `$${Math.abs(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}${n < 0 ? "" : ""}`;
-const formatFailedDueDate = (value?: string | null) => {
-  if (!value) return "No due date";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "No due date";
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-};
-
-// ─── Inline Editable Field ───
-function EditableField({ value, onSave, type = "text", className = "" }: {
-  value: string; onSave: (v: string) => void; type?: string; className?: string;
-}) {
-  const [editing, setEditing] = useState(false);
-  const [val, setVal] = useState(value);
-  useEffect(() => setVal(value), [value]);
-  if (!editing) return (
-    <span onClick={() => setEditing(true)}
-      className={cn("cursor-pointer hover:bg-white/5 rounded px-1 -mx-1 transition-colors border border-transparent hover:border-dashed hover:border-white/20", className)}>
-      {value || <span className="text-slate-600 italic">—</span>}
-    </span>
-  );
-  return (
-    <input autoFocus value={val} type={type} step={type === "number" ? "0.01" : undefined}
-      onChange={e => setVal(e.target.value)}
-      onBlur={() => { setEditing(false); if (val !== value) onSave(val); }}
-      onKeyDown={e => { if (e.key === "Enter") { setEditing(false); if (val !== value) onSave(val); } if (e.key === "Escape") { setEditing(false); setVal(value); } }}
-      className={cn("bg-white/10 border border-[#2093FF]/50 rounded px-2 -mx-1 outline-none text-white", className)}
-      style={{ width: type === "number" ? 100 : "100%", minWidth: type === "number" ? 80 : 200 }}
-    />
-  );
-}
-
-// ─── Expense Row with inline editing ───
-function ExpenseRow({ expense, onUpdate, onDelete }: {
-  expense: Expense; onUpdate: (id: string, field: string, value: any) => void; onDelete: (id: string) => void;
-}) {
-  return (
-    <div className="flex items-center gap-3 px-4 py-3 group hover:bg-white/[0.02] transition-colors">
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <EditableField value={expense.name} onSave={v => onUpdate(expense.id, "name", v)} className="text-sm font-medium" />
-          {expense.type === "recurring" ? (
-            <span className="text-[8px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 flex-shrink-0">↻ RECURRING</span>
-          ) : (
-            <span className="text-[8px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 flex-shrink-0">① ONE-TIME</span>
-          )}
-        </div>
-        {expense.notes && (
-          <p className="text-[11px] text-slate-400 mt-0.5">
-            <EditableField value={expense.notes || ""} onSave={v => onUpdate(expense.id, "notes", v)} className="text-[11px] text-slate-400" />
-          </p>
-        )}
-        {!expense.notes && (
-          <p className="text-[10px] text-slate-700 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-            onClick={() => onUpdate(expense.id, "notes", "Add notes...")}>
-            + Add notes
-          </p>
-        )}
-      </div>
-      {expense.client_name && (
-        <span className="text-[10px] text-slate-500 bg-white/5 px-2 py-0.5 rounded flex-shrink-0">
-          {expense.client_name}
-        </span>
-      )}
-      <div className="text-right flex-shrink-0 w-24">
-        <EditableField value={String(expense.amount)} type="number" onSave={v => onUpdate(expense.id, "amount", parseFloat(v))}
-          className="text-sm font-mono text-red-400" />
-      </div>
-      <button onClick={() => onDelete(expense.id)}
-        className="p-1.5 rounded hover:bg-red-500/20 text-slate-700 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all flex-shrink-0">
-        <Trash2 className="w-3.5 h-3.5" />
-      </button>
-    </div>
-  );
-}
-const pct = (n: number) => `${n.toFixed(1)}%`;
-
 const CATEGORIES = ["software", "marketing", "hosting", "fulfillment", "operations", "other"] as const;
-const PAYROLL_CATS = ["payroll"] as const;
-const COMMISSION_CATS = ["commissions"] as const;
-const ALL_CATS = [...CATEGORIES, ...PAYROLL_CATS, ...COMMISSION_CATS] as const;
 const CAT_COLORS: Record<string, string> = {
-  software: "#2093FF", payroll: "#FFBD59", marketing: "#F93C3C", hosting: "#22C55E",
-  fulfillment: "#8B5CF6", operations: "#06B6D4", other: "#64748b", commissions: "#F97316",
+  software: "#2093FF",
+  payroll: "#FFBD59",
+  marketing: "#F93C3C",
+  hosting: "#22C55E",
+  fulfillment: "#8B5CF6",
+  operations: "#06B6D4",
+  other: "#64748b",
+  commissions: "#F97316",
+  stripe: "#EC4899",
 };
 
 type Tab = "overview" | "clients" | "expenses" | "payroll" | "commissions";
 
-interface Expense {
+type Expense = {
   id: string;
   name: string;
   amount: number;
   type: string;
   category: string;
-  client_id?: string;
   client_name?: string;
   notes?: string;
   month: string;
-}
+};
 
-interface FailedPayment {
+type FailedPayment = {
   customerName: string;
   email: string;
   amount: number;
   dueDate: string | null;
   invoiceUrl: string;
   stripeCustomerId: string;
+};
+
+type Customer = {
+  stripeId: string;
+  name: string;
+  email: string;
+  mrr: number;
+  stripeFee: number;
+  netMrr: number;
+  subscriptionCount: number;
+  pastDue: boolean;
+};
+
+type FinanceSummary = {
+  grossMRR: number;
+  totalStripeFees: number;
+  netMRR: number;
+  totalExpenses: number;
+  totalFailedRevenue: number;
+  profit: number;
+  profitMargin: number;
+  activeSubscriptions: number;
+  arr: number;
+};
+
+type FinanceResponse = {
+  month: string;
+  monthLabel: string;
+  source: "live" | "snapshot";
+  hasSnapshot: boolean;
+  noSnapshot: boolean;
+  snapshotCreatedAt: string | null;
+  customers: Customer[];
+  expenses: Expense[];
+  failedPayments: FailedPayment[];
+  summary: FinanceSummary;
+  error?: string;
+};
+
+type SnapshotRow = {
+  id: string;
+  month: string;
+  gross_mrr: number;
+  total_expenses: number;
+  profit: number;
+  created_at: string;
+};
+
+const fmt = (value: number) =>
+  `$${Math.abs(value).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const pct = (value: number) => `${value.toFixed(1)}%`;
+
+function getCurrentMonth() {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/New_York",
+    year: "numeric",
+    month: "2-digit",
+  }).formatToParts(new Date());
+  const year = parts.find((part) => part.type === "year")?.value ?? "2026";
+  const month = parts.find((part) => part.type === "month")?.value ?? "03";
+  return `${year}-${month}`;
+}
+
+function formatMonthLabel(month: string) {
+  const [year, monthNumber] = month.split("-").map(Number);
+  return new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" }).format(
+    new Date(Date.UTC(year, monthNumber - 1, 1))
+  );
+}
+
+function buildMonthOptions(count: number, historyMonths: string[] = []) {
+  const start = new Date(`${getCurrentMonth()}-01T00:00:00.000Z`);
+  const values = new Set(historyMonths);
+
+  Array.from({ length: count }, (_, index) => {
+    const date = new Date(start);
+    date.setUTCMonth(date.getUTCMonth() - index);
+    const month = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
+    values.add(month);
+    return month;
+  });
+
+  return Array.from(values)
+    .sort((a, b) => b.localeCompare(a))
+    .map((month) => ({ value: month, label: formatMonthLabel(month) }));
+}
+
+function formatSnapshotTime(value: string | null) {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+function formatFailedDueDate(value?: string | null) {
+  if (!value) return "No due date";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "No due date";
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
+
+function EditableField({
+  value,
+  onSave,
+  disabled = false,
+  type = "text",
+  className = "",
+}: {
+  value: string;
+  onSave: (value: string) => void;
+  disabled?: boolean;
+  type?: string;
+  className?: string;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value);
+
+  useEffect(() => setDraft(value), [value]);
+
+  if (disabled) {
+    return <span className={className}>{value || <span className="text-slate-600 italic">—</span>}</span>;
+  }
+
+  if (!editing) {
+    return (
+      <span
+        onClick={() => setEditing(true)}
+        className={cn(
+          "cursor-pointer rounded px-1 -mx-1 transition-colors border border-transparent hover:bg-white/5 hover:border-dashed hover:border-white/20",
+          className
+        )}
+      >
+        {value || <span className="text-slate-600 italic">—</span>}
+      </span>
+    );
+  }
+
+  return (
+    <input
+      autoFocus
+      type={type}
+      step={type === "number" ? "0.01" : undefined}
+      value={draft}
+      onChange={(event) => setDraft(event.target.value)}
+      onBlur={() => {
+        setEditing(false);
+        if (draft !== value) onSave(draft);
+      }}
+      onKeyDown={(event) => {
+        if (event.key === "Enter") {
+          setEditing(false);
+          if (draft !== value) onSave(draft);
+        }
+        if (event.key === "Escape") {
+          setEditing(false);
+          setDraft(value);
+        }
+      }}
+      className={cn("rounded border border-[#2093FF]/50 bg-white/10 px-2 -mx-1 text-white outline-none", className)}
+      style={{ width: type === "number" ? 100 : "100%", minWidth: type === "number" ? 80 : 160 }}
+    />
+  );
+}
+
+function ExpenseRow({
+  expense,
+  readOnly,
+  onUpdate,
+  onDelete,
+}: {
+  expense: Expense;
+  readOnly: boolean;
+  onUpdate: (id: string, field: string, value: string | number) => void;
+  onDelete: (id: string) => void;
+}) {
+  return (
+    <div className="group flex items-center gap-3 px-4 py-3 hover:bg-white/[0.02] transition-colors">
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          <EditableField
+            value={expense.name}
+            onSave={(value) => onUpdate(expense.id, "name", value)}
+            disabled={readOnly}
+            className="text-sm font-medium"
+          />
+          <span
+            className={cn(
+              "rounded px-1.5 py-0.5 text-[8px] flex-shrink-0",
+              expense.type === "recurring" ? "bg-blue-500/10 text-blue-400" : "bg-amber-500/10 text-amber-400"
+            )}
+          >
+            {expense.type === "recurring" ? "↻ RECURRING" : "① ONE-TIME"}
+          </span>
+        </div>
+        <div className="mt-0.5 text-[11px] text-slate-400">
+          <EditableField
+            value={expense.notes || ""}
+            onSave={(value) => onUpdate(expense.id, "notes", value)}
+            disabled={readOnly}
+            className="text-[11px] text-slate-400"
+          />
+        </div>
+      </div>
+      {expense.client_name ? (
+        <span className="rounded bg-white/5 px-2 py-0.5 text-[10px] text-slate-500">{expense.client_name}</span>
+      ) : null}
+      <div className="w-24 flex-shrink-0 text-right">
+        <EditableField
+          value={String(expense.amount)}
+          type="number"
+          disabled={readOnly}
+          onSave={(value) => onUpdate(expense.id, "amount", Number.parseFloat(value))}
+          className="text-sm font-mono text-red-400"
+        />
+      </div>
+      {!readOnly ? (
+        <button
+          onClick={() => onDelete(expense.id)}
+          className="rounded p-1.5 text-slate-700 opacity-0 transition-all hover:bg-red-500/20 hover:text-red-400 group-hover:opacity-100"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+        </button>
+      ) : null}
+    </div>
+  );
 }
 
 export default function FinancePage() {
+  const currentMonth = getCurrentMonth();
   const [tab, setTab] = useState<Tab>("overview");
-  const [data, setData] = useState<any>(null);
+  const [selectedMonth, setSelectedMonth] = useState(currentMonth);
+  const [data, setData] = useState<FinanceResponse | null>(null);
+  const [history, setHistory] = useState<SnapshotRow[]>([]);
+  const [currentLiveSummary, setCurrentLiveSummary] = useState<FinanceSummary | null>(null);
   const [loading, setLoading] = useState(true);
+  const [historyLoading, setHistoryLoading] = useState(true);
   const [error, setError] = useState("");
-  const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
+  const [historyError, setHistoryError] = useState("");
+  const [search, setSearch] = useState("");
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [showFailedPaymentsModal, setShowFailedPaymentsModal] = useState(false);
   const [showAddExpense, setShowAddExpense] = useState(false);
-  const [search, setSearch] = useState("");
+  const [snapshotSaving, setSnapshotSaving] = useState(false);
+  const [newExp, setNewExp] = useState({
+    name: "",
+    amount: "",
+    type: "recurring",
+    category: "other",
+    client_name: "",
+    notes: "",
+  });
 
+  const isCurrentMonth = selectedMonth === currentMonth;
+  const readOnly = !isCurrentMonth;
+  const monthOptions = buildMonthOptions(
+    12,
+    history.map((snapshot) => snapshot.month).filter((month): month is string => Boolean(month))
+  );
 
-  // New expense form
-  const [newExp, setNewExp] = useState({ name: "", amount: "", type: "recurring", category: "other", client_name: "", notes: "" });
+  const loadHistory = useCallback(async () => {
+    setHistoryLoading(true);
+    setHistoryError("");
+    try {
+      const res = await fetch("/api/finance/history", { cache: "no-store" });
+      const json = await res.json();
+      setHistory(Array.isArray(json.snapshots) ? json.snapshots : []);
+      if (json.error) setHistoryError(String(json.error));
+    } catch (err: any) {
+      setHistory([]);
+      setHistoryError(err.message || "Failed to load finance history");
+    } finally {
+      setHistoryLoading(false);
+    }
+  }, []);
 
-  const month = "2026-03"; // Current month
+  const loadCurrentLiveSummary = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/finance?month=${currentMonth}`, { cache: "no-store" });
+      const json = (await res.json()) as FinanceResponse;
+      if (!(json as { error?: string }).error && json.summary) {
+        setCurrentLiveSummary(json.summary);
+      }
+    } catch {
+      setCurrentLiveSummary(null);
+    }
+  }, [currentMonth]);
 
-  const load = useCallback(async () => {
+  const loadMonth = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch(`/api/finance?month=${month}`);
-      const json = await res.json();
-      if (json.error) throw new Error(json.error);
+      const res = await fetch(`/api/finance?month=${selectedMonth}`, { cache: "no-store" });
+      const json = (await res.json()) as FinanceResponse;
+      if ((json as { error?: string }).error) throw new Error((json as { error?: string }).error);
       setData(json);
-    } catch (e: any) {
-      setError(e.message);
+      setSelectedCustomer(null);
+    } catch (err: any) {
+      setError(err.message || "Failed to load finance data");
+      setData(null);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-  }, [month]);
+  }, [selectedMonth]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    loadHistory();
+  }, [loadHistory]);
+
+  useEffect(() => {
+    loadCurrentLiveSummary();
+  }, [loadCurrentLiveSummary]);
+
+  useEffect(() => {
+    loadMonth();
+  }, [loadMonth]);
 
   const addExpense = async () => {
-    if (!newExp.name || !newExp.amount) return;
+    if (readOnly || !newExp.name || !newExp.amount) return;
     try {
-      await fetch("/api/finance", {
+      const res = await fetch("/api/finance", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...newExp, amount: parseFloat(newExp.amount), month }),
+        body: JSON.stringify({ ...newExp, amount: Number.parseFloat(newExp.amount), month: currentMonth }),
       });
+      const json = await res.json();
+      if (json?.error) throw new Error(json.error);
       setNewExp({ name: "", amount: "", type: "recurring", category: "other", client_name: "", notes: "" });
       setShowAddExpense(false);
-      load();
-    } catch (e: any) {
-      alert("Failed to add expense: " + e.message);
+      await loadMonth();
+    } catch (err: any) {
+      setError(err.message || "Failed to add expense");
     }
   };
 
   const deleteExpense = async (id: string) => {
-    if (!confirm("Delete this expense?")) return;
+    if (readOnly || !confirm("Delete this expense?")) return;
     try {
-      await fetch("/api/finance", {
+      const res = await fetch("/api/finance", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
       });
-      load();
-    } catch (e: any) {
-      alert("Failed: " + e.message);
+      const json = await res.json();
+      if (json?.error) throw new Error(json.error);
+      await loadMonth();
+    } catch (err: any) {
+      setError(err.message || "Failed to delete expense");
     }
   };
 
-  const updateExpense = async (id: string, field: string, value: any) => {
+  const updateExpense = async (id: string, field: string, value: string | number) => {
+    if (readOnly) return;
     try {
-      await fetch("/api/finance", {
+      const res = await fetch("/api/finance", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, [field]: value }),
       });
-      load();
-    } catch (e: any) {
-      alert("Failed to update: " + e.message);
+      const json = await res.json();
+      if (json?.error) throw new Error(json.error);
+      await loadMonth();
+    } catch (err: any) {
+      setError(err.message || "Failed to update expense");
     }
   };
 
-  const summary = data?.summary || {};
-  const customers = data?.customers || [];
-  const expenses: Expense[] = data?.expenses || [];
-  const failedPayments: FailedPayment[] = data?.failedPayments || [];
-  const filteredCustomers = customers.filter((c: any) =>
-    !search || c.name.toLowerCase().includes(search.toLowerCase())
+  const captureSnapshot = async () => {
+    setSnapshotSaving(true);
+    setError("");
+    try {
+      const res = await fetch("/api/finance/snapshot", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ month: currentMonth }),
+      });
+      const json = await res.json();
+      if (json?.error) throw new Error(json.error);
+      await Promise.all([loadHistory(), loadMonth()]);
+    } catch (err: any) {
+      setError(err.message || "Failed to capture snapshot");
+    } finally {
+      setSnapshotSaving(false);
+    }
+  };
+
+  const summary = data?.summary ?? {
+    grossMRR: 0,
+    totalStripeFees: 0,
+    netMRR: 0,
+    totalExpenses: 0,
+    totalFailedRevenue: 0,
+    profit: 0,
+    profitMargin: 0,
+    activeSubscriptions: 0,
+    arr: 0,
+  };
+  const customers = data?.customers ?? [];
+  const expenses = data?.expenses ?? [];
+  const failedPayments = data?.failedPayments ?? [];
+  const filteredCustomers = customers.filter((customer) =>
+    !search || customer.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  // Charts
-  const revenueChart = useMemo(() => {
-    const sorted = [...(customers as any[])].filter(c => c.mrr > 0).sort((a, b) => b.mrr - a.mrr).slice(0, 15);
-    return {
-      tooltip: { trigger: "axis" as const, backgroundColor: "#1a1a2e", borderColor: "#2093FF44", textStyle: { color: "#fff", fontSize: 11 } },
-      grid: { top: 8, right: 8, bottom: 24, left: 8, containLabel: true },
-      xAxis: { type: "category" as const, data: sorted.map(c => c.name.length > 14 ? c.name.slice(0, 14) + "…" : c.name), axisLabel: { color: "#64748b", fontSize: 9, rotate: 45 }, axisLine: { show: false }, axisTick: { show: false } },
-      yAxis: { type: "value" as const, axisLabel: { color: "#64748b", fontSize: 9, formatter: (v: number) => `$${v}` }, splitLine: { lineStyle: { color: "#ffffff08" } } },
-      series: [{ type: "bar", data: sorted.map(c => ({ value: c.mrr, itemStyle: { color: { type: "linear", x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: "#2093FF" }, { offset: 1, color: "#0026FF" }] }, borderRadius: [4, 4, 0, 0] } })), barWidth: "60%" }],
-    };
-  }, [customers]);
+  const categoryTotals = expenses.reduce<Record<string, number>>((acc, expense) => {
+    acc[expense.category] = (acc[expense.category] || 0) + Number(expense.amount);
+    return acc;
+  }, {});
+  if (summary.totalStripeFees > 0) categoryTotals.stripe = summary.totalStripeFees;
 
-  const expenseChart = useMemo(() => {
-    const catTotals: Record<string, number> = {};
-    for (const e of expenses) {
-      catTotals[e.category] = (catTotals[e.category] || 0) + Number(e.amount);
-    }
-    // Add Stripe fees
-    if (summary.totalStripeFees > 0) catTotals["stripe"] = summary.totalStripeFees;
-    const cats = Object.entries(catTotals).filter(([, v]) => v > 0).map(([k, v]) => ({
-      name: k === "stripe" ? "Stripe Fees" : k.charAt(0).toUpperCase() + k.slice(1),
-      value: Math.round(v * 100) / 100,
-      itemStyle: { color: k === "stripe" ? "#EC4899" : CAT_COLORS[k] || "#64748b" },
-    }));
-    return {
-      tooltip: { backgroundColor: "#1a1a2e", borderColor: "#2093FF44", textStyle: { color: "#fff", fontSize: 11 }, formatter: (p: any) => `${p.name}: ${fmt(p.value)}` },
-      series: [{ type: "pie", radius: ["45%", "70%"], data: cats, label: { show: true, color: "#94a3b8", fontSize: 10, formatter: "{b}\n{d}%" }, emphasis: { label: { fontSize: 12, fontWeight: "bold" } } }],
-    };
-  }, [expenses, summary]);
+  const clientChartData = [...customers]
+    .filter((customer) => customer.mrr > 0)
+    .sort((a, b) => b.mrr - a.mrr)
+    .slice(0, 15);
+
+  const trendMap = new Map<string, { month: string; grossMRR: number; totalExpenses: number; profit: number }>();
+  for (const snapshot of history) {
+    trendMap.set(snapshot.month, {
+      month: snapshot.month,
+      grossMRR: Number(snapshot.gross_mrr || 0),
+      totalExpenses: Number(snapshot.total_expenses || 0),
+      profit: Number(snapshot.profit || 0),
+    });
+  }
+  trendMap.set(currentMonth, {
+    month: currentMonth,
+    grossMRR: Number((isCurrentMonth ? summary : currentLiveSummary)?.grossMRR || 0),
+    totalExpenses: Number((isCurrentMonth ? summary : currentLiveSummary)?.totalExpenses || 0),
+    profit: Number((isCurrentMonth ? summary : currentLiveSummary)?.profit || 0),
+  });
+  const trendSeries = Array.from(trendMap.values()).sort((a, b) => a.month.localeCompare(b.month));
+
+  const revenueTrendOption = {
+    tooltip: {
+      trigger: "axis" as const,
+      backgroundColor: "#111827",
+      borderColor: "#334155",
+      textStyle: { color: "#fff" },
+    },
+    legend: {
+      top: 0,
+      textStyle: { color: "#94a3b8" },
+    },
+    grid: { top: 36, right: 20, bottom: 20, left: 20, containLabel: true },
+    xAxis: {
+      type: "category" as const,
+      data: trendSeries.map((entry) => formatMonthLabel(entry.month)),
+      axisLabel: { color: "#64748b", fontSize: 10 },
+      axisLine: { lineStyle: { color: "#1e293b" } },
+    },
+    yAxis: {
+      type: "value" as const,
+      axisLabel: {
+        color: "#64748b",
+        formatter: (value: number) => `$${Math.round(value).toLocaleString("en-US")}`,
+      },
+      splitLine: { lineStyle: { color: "#ffffff10" } },
+    },
+    series: [
+      {
+        name: "MRR",
+        type: "line",
+        smooth: true,
+        data: trendSeries.map((entry) => entry.grossMRR),
+        lineStyle: { color: "#22C55E", width: 3 },
+        itemStyle: { color: "#22C55E" },
+      },
+      {
+        name: "Expenses",
+        type: "line",
+        smooth: true,
+        data: trendSeries.map((entry) => entry.totalExpenses),
+        lineStyle: { color: "#F93C3C", width: 3 },
+        itemStyle: { color: "#F93C3C" },
+      },
+      {
+        name: "Profit",
+        type: "line",
+        smooth: true,
+        data: trendSeries.map((entry) => entry.profit),
+        lineStyle: { color: "#2093FF", width: 3 },
+        itemStyle: { color: "#2093FF" },
+      },
+    ],
+  };
+
+  const revenueByClientOption = {
+    tooltip: {
+      trigger: "axis" as const,
+      backgroundColor: "#111827",
+      borderColor: "#334155",
+      textStyle: { color: "#fff" },
+    },
+    grid: { top: 8, right: 8, bottom: 24, left: 8, containLabel: true },
+    xAxis: {
+      type: "category" as const,
+      data: clientChartData.map((customer) =>
+        customer.name.length > 14 ? `${customer.name.slice(0, 14)}…` : customer.name
+      ),
+      axisLabel: { color: "#64748b", fontSize: 9, rotate: 35 },
+      axisLine: { show: false },
+      axisTick: { show: false },
+    },
+    yAxis: {
+      type: "value" as const,
+      axisLabel: { color: "#64748b", fontSize: 9, formatter: (value: number) => `$${value}` },
+      splitLine: { lineStyle: { color: "#ffffff10" } },
+    },
+    series: [
+      {
+        type: "bar",
+        data: clientChartData.map((customer) => ({
+          value: customer.mrr,
+          itemStyle: {
+            color: {
+              type: "linear",
+              x: 0,
+              y: 0,
+              x2: 0,
+              y2: 1,
+              colorStops: [
+                { offset: 0, color: "#2093FF" },
+                { offset: 1, color: "#0026FF" },
+              ],
+            },
+            borderRadius: [4, 4, 0, 0],
+          },
+        })),
+        barWidth: "60%",
+      },
+    ],
+  };
+
+  const expenseBreakdownOption = {
+    tooltip: {
+      backgroundColor: "#111827",
+      borderColor: "#334155",
+      textStyle: { color: "#fff" },
+      formatter: (params: { name: string; value: number }) => `${params.name}: ${fmt(params.value)}`,
+    },
+    series: [
+      {
+        type: "pie",
+        radius: ["45%", "70%"],
+        label: { show: true, color: "#94a3b8", fontSize: 10, formatter: "{b}\n{d}%" },
+        data: Object.entries(categoryTotals)
+          .filter(([, value]) => value > 0)
+          .map(([key, value]) => ({
+            name: key === "stripe" ? "Stripe Fees" : `${key.charAt(0).toUpperCase()}${key.slice(1)}`,
+            value: Math.round(value * 100) / 100,
+            itemStyle: { color: CAT_COLORS[key] || "#64748b" },
+          })),
+      },
+    ],
+  };
 
   if (loading && !data) {
     return (
-      <div className="min-h-screen bg-[#0a0a0f] text-white flex items-center justify-center">
-        <RefreshCw className="w-6 h-6 animate-spin text-[#2093FF]" />
+      <div className="flex min-h-screen items-center justify-center bg-[#0a0a0f] text-white">
+        <RefreshCw className="h-6 w-6 animate-spin text-[#2093FF]" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="min-h-screen space-y-6 bg-[#0a0a0f] p-6 text-white">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h1 className="text-2xl font-bold">Finance</h1>
-          <p className="text-slate-500 text-sm mt-1">March 2026 — Live from Stripe + Supabase</p>
+          <p className="mt-1 text-sm text-slate-500">
+            {data?.monthLabel || formatMonthLabel(selectedMonth)}{" "}
+            {data?.source === "live" ? "Live from Stripe + Supabase" : "Historical snapshot"}
+          </p>
+          {data?.snapshotCreatedAt ? (
+            <p className="mt-1 text-xs text-slate-600">Snapshot captured {formatSnapshotTime(data.snapshotCreatedAt)}</p>
+          ) : null}
         </div>
-        <button onClick={load} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-sm border border-white/10">
-          <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} />
-          Refresh
-        </button>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <label className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-300">
+            <CalendarDays className="h-4 w-4 text-slate-500" />
+            <select
+              value={selectedMonth}
+              onChange={(event) => setSelectedMonth(event.target.value)}
+              className="bg-transparent text-sm outline-none"
+            >
+              {monthOptions.map((option) => (
+                <option key={option.value} value={option.value} className="bg-slate-900">
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <button
+            onClick={loadMonth}
+            className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm hover:bg-white/10"
+          >
+            <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
+            Refresh
+          </button>
+
+          <button
+            onClick={captureSnapshot}
+            disabled={!isCurrentMonth || snapshotSaving}
+            className={cn(
+              "flex items-center gap-2 rounded-lg border px-3 py-2 text-sm",
+              isCurrentMonth
+                ? "border-[#2093FF]/30 bg-[#2093FF]/20 text-[#2093FF] hover:bg-[#2093FF]/30"
+                : "cursor-not-allowed border-white/10 bg-white/5 text-slate-500"
+            )}
+          >
+            <Archive className={cn("h-4 w-4", snapshotSaving && "animate-pulse")} />
+            Save Snapshot
+          </button>
+        </div>
       </div>
 
-      {error && (
-        <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-sm text-red-400 flex items-center gap-2">
-          <AlertCircle className="w-4 h-4" /> {error}
+      {error ? (
+        <div className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-400">
+          <AlertCircle className="h-4 w-4" />
+          {error}
         </div>
-      )}
+      ) : null}
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+      {!isCurrentMonth && data?.noSnapshot ? (
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4">
+          <p className="text-sm font-medium text-amber-300">No data captured for {data.monthLabel}.</p>
+          <p className="mt-1 text-xs text-amber-100/70">
+            Historical months load only from `monthly_snapshots`. Select the current month to view live data or capture
+            a snapshot at month end.
+          </p>
+        </div>
+      ) : null}
+
+      {!isCurrentMonth && data?.hasSnapshot ? (
+        <div className="rounded-xl border border-blue-500/20 bg-blue-500/10 p-4 text-sm text-blue-100">
+          Historical snapshot loaded. Expense edits are disabled for archived months.
+        </div>
+      ) : null}
+
+      {historyError ? (
+        <div className="rounded-lg border border-white/10 bg-white/5 p-3 text-xs text-slate-400">
+          Revenue history fallback: {historyError}
+        </div>
+      ) : null}
+
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-6">
         {[
-          { label: "Gross MRR", value: fmt(summary.grossMRR || 0), icon: DollarSign, color: "#22C55E" },
-          { label: "Stripe Fees", value: fmt(summary.totalStripeFees || 0), icon: CreditCard, color: "#EC4899" },
-          { label: "Net MRR", value: fmt(summary.netMRR || 0), icon: TrendingUp, color: "#2093FF" },
-          { label: "Expenses", value: fmt(summary.totalExpenses || 0), icon: Receipt, color: "#F93C3C" },
-          { label: "Profit", value: fmt(summary.profit || 0), icon: Zap, color: "#22C55E" },
-          { label: "Margin", value: pct(summary.profitMargin || 0), icon: TrendingUp, color: "#FFBD59" },
-        ].map(kpi => (
-          <div key={kpi.label} className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <kpi.icon className="w-4 h-4" style={{ color: kpi.color }} />
-              <span className="text-[11px] text-slate-500 uppercase tracking-wider">{kpi.label}</span>
+          { label: "Gross MRR", value: fmt(summary.grossMRR), icon: DollarSign, color: "#22C55E" },
+          { label: "Stripe Fees", value: fmt(summary.totalStripeFees), icon: CreditCard, color: "#EC4899" },
+          { label: "Net MRR", value: fmt(summary.netMRR), icon: TrendingUp, color: "#2093FF" },
+          { label: "Expenses", value: fmt(summary.totalExpenses), icon: Receipt, color: "#F93C3C" },
+          { label: "Profit", value: fmt(summary.profit), icon: Zap, color: "#22C55E" },
+          { label: "Margin", value: pct(summary.profitMargin), icon: TrendingUp, color: "#FFBD59" },
+        ].map((card) => (
+          <div key={card.label} className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4">
+            <div className="mb-2 flex items-center gap-2">
+              <card.icon className="h-4 w-4" style={{ color: card.color }} />
+              <span className="text-[11px] uppercase tracking-wider text-slate-500">{card.label}</span>
             </div>
-            <p className="text-xl font-semibold font-mono">{kpi.value}</p>
+            <p className="font-mono text-xl font-semibold">{card.value}</p>
           </div>
         ))}
       </div>
 
-      {/* ARR Progress */}
-      <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-4">
-        <div className="flex items-center justify-between mb-2">
+      <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4">
+        <div className="mb-2 flex items-center justify-between">
           <span className="text-sm text-slate-400">Annual Run Rate → $1M Goal</span>
-          <span className="text-sm font-mono text-[#2093FF]">{fmt(summary.arr || 0)}</span>
+          <span className="font-mono text-sm text-[#2093FF]">{fmt(summary.arr)}</span>
         </div>
-        <div className="w-full h-3 bg-white/5 rounded-full overflow-hidden">
-          <div className="h-full rounded-full bg-gradient-to-r from-[#2093FF] to-[#0026FF] transition-all"
-            style={{ width: `${Math.min(((summary.arr || 0) / 1000000) * 100, 100)}%` }} />
+        <div className="h-3 w-full overflow-hidden rounded-full bg-white/5">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-[#2093FF] to-[#0026FF] transition-all"
+            style={{ width: `${Math.min((summary.arr / 1000000) * 100, 100)}%` }}
+          />
         </div>
-        <p className="text-[10px] text-slate-600 mt-1">{pct(((summary.arr || 0) / 1000000) * 100)} of $1M</p>
+        <p className="mt-1 text-[10px] text-slate-600">{pct((summary.arr / 1000000) * 100)} of $1M</p>
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-1 bg-white/[0.03] rounded-lg p-1 w-fit">
-        {(["overview", "clients", "expenses", "payroll", "commissions"] as Tab[]).map(t => (
-          <button key={t} onClick={() => setTab(t)}
-            className={cn("px-4 py-2 rounded-md text-sm capitalize transition-colors",
-              tab === t ? "bg-[#2093FF]/20 text-[#2093FF]" : "text-slate-500 hover:text-white")}>
-            {t}
+      <div className="flex w-fit gap-1 rounded-lg bg-white/[0.03] p-1">
+        {(["overview", "clients", "expenses", "payroll", "commissions"] as Tab[]).map((item) => (
+          <button
+            key={item}
+            onClick={() => setTab(item)}
+            className={cn(
+              "rounded-md px-4 py-2 text-sm capitalize transition-colors",
+              tab === item ? "bg-[#2093FF]/20 text-[#2093FF]" : "text-slate-500 hover:text-white"
+            )}
+          >
+            {item}
           </button>
         ))}
       </div>
 
-      {/* ─── Overview Tab ─── */}
-      {tab === "overview" && (
+      {tab === "overview" ? (
         <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-5">
-              <h3 className="text-sm font-medium text-slate-400 mb-4">Revenue by Client (Top 15)</h3>
-              {customers.length > 0 ? <ReactECharts option={revenueChart} style={{ height: 300 }} /> : <p className="text-slate-600 text-sm">No data</p>}
+          <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+            <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-5 xl:col-span-2">
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="text-sm font-medium text-slate-400">Revenue Trends</h3>
+                <span className="text-[10px] uppercase tracking-[0.2em] text-slate-600">
+                  {historyLoading ? "Loading" : `${Math.max(trendSeries.length, 1)} months`}
+                </span>
+              </div>
+              <ReactECharts option={revenueTrendOption} style={{ height: 320 }} />
             </div>
-            <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-5">
-              <h3 className="text-sm font-medium text-slate-400 mb-4">Expense Breakdown</h3>
-              {(expenses.length > 0 || summary.totalStripeFees > 0) ? <ReactECharts option={expenseChart} style={{ height: 300 }} /> : <p className="text-slate-600 text-sm">No expenses yet — add some in the Expenses tab</p>}
+
+            <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-5">
+              <h3 className="mb-4 text-sm font-medium text-slate-400">Monthly P&amp;L</h3>
+              <div className="space-y-2">
+                <div className="flex justify-between py-1">
+                  <span className="flex items-center gap-2 text-sm text-slate-400">
+                    <span className="h-2 w-2 rounded-full bg-green-400" />
+                    Gross MRR ({summary.activeSubscriptions} subscriptions)
+                  </span>
+                  <span className="font-mono text-sm text-green-400">{fmt(summary.grossMRR)}</span>
+                </div>
+                <div className="flex justify-between py-1">
+                  <span className="flex items-center gap-2 text-sm text-slate-400">
+                    <span className="h-2 w-2 rounded-full bg-pink-400" />
+                    Stripe Fees
+                  </span>
+                  <span className="font-mono text-sm text-pink-400">-{fmt(summary.totalStripeFees)}</span>
+                </div>
+                <div className="flex justify-between py-1">
+                  <span className="flex items-center gap-2 text-sm text-slate-400">
+                    <span className="h-2 w-2 rounded-full bg-blue-400" />
+                    Net MRR
+                  </span>
+                  <span className="font-mono text-sm text-blue-400">{fmt(summary.netMRR)}</span>
+                </div>
+                <div className="flex justify-between py-1">
+                  <span className="flex items-center gap-2 text-sm text-slate-400">
+                    <span className="h-2 w-2 rounded-full bg-red-400" />
+                    Expenses
+                  </span>
+                  <span className="font-mono text-sm text-red-400">-{fmt(summary.totalExpenses)}</span>
+                </div>
+                <div className="flex justify-between border-t border-white/10 pt-2">
+                  <span className="text-sm font-medium">Monthly Profit</span>
+                  <span className={cn("font-mono text-lg font-bold", summary.profit >= 0 ? "text-green-400" : "text-red-400")}>
+                    {fmt(summary.profit)}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Summary breakdown */}
-          <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-5">
-            <h3 className="text-sm font-medium text-slate-400 mb-4">Monthly P&L</h3>
-            <div className="space-y-2">
-              <div className="flex justify-between py-1">
-                <span className="text-sm text-slate-400 flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-green-400" /> Gross MRR ({summary.activeSubscriptions || 0} subscriptions)</span>
-                <span className="text-sm font-mono text-green-400">{fmt(summary.grossMRR || 0)}</span>
-              </div>
-              <div className="flex justify-between py-1">
-                <span className="text-sm text-slate-400 flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-pink-400" /> Stripe Fees (3.01% + $0.30/txn)</span>
-                <span className="text-sm font-mono text-pink-400">-{fmt(summary.totalStripeFees || 0)}</span>
-              </div>
-              <div className="flex justify-between py-1">
-                <span className="text-sm text-slate-400 flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-blue-400" /> Net MRR</span>
-                <span className="text-sm font-mono text-blue-400">{fmt(summary.netMRR || 0)}</span>
-              </div>
-              <div className="flex justify-between py-1">
-                <span className="text-sm text-slate-400 flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-red-400" /> Expenses</span>
-                <span className="text-sm font-mono text-red-400">-{fmt(summary.totalExpenses || 0)}</span>
-              </div>
-              <div className="border-t border-white/10 pt-2 flex justify-between">
-                <span className="text-sm font-medium">Monthly Profit</span>
-                <span className={cn("text-lg font-mono font-bold", (summary.profit || 0) >= 0 ? "text-green-400" : "text-red-400")}>{fmt(summary.profit || 0)}</span>
-              </div>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-5">
+              <h3 className="mb-4 text-sm font-medium text-slate-400">Revenue by Client (Top 15)</h3>
+              {clientChartData.length > 0 ? (
+                <ReactECharts option={revenueByClientOption} style={{ height: 300 }} />
+              ) : (
+                <p className="text-sm text-slate-600">No revenue data for this month.</p>
+              )}
+            </div>
+
+            <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-5">
+              <h3 className="mb-4 text-sm font-medium text-slate-400">Expense Breakdown</h3>
+              {Object.keys(categoryTotals).length > 0 ? (
+                <ReactECharts option={expenseBreakdownOption} style={{ height: 300 }} />
+              ) : (
+                <p className="text-sm text-slate-600">No expenses captured for this month.</p>
+              )}
             </div>
           </div>
 
-          {failedPayments.length > 0 && (
-            <div className="bg-white/[0.03] border border-[#F93C3C]/20 rounded-xl p-5">
+          {failedPayments.length > 0 ? (
+            <div className="rounded-xl border border-[#F93C3C]/20 bg-white/[0.03] p-5">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <h3 className="text-sm font-medium text-slate-400">Failed Payments</h3>
-                  <p className="text-xs text-slate-500 mt-1">Open, uncollectible, and past-due payment failures for this month.</p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    Open, uncollectible, and past-due payment failures for this month.
+                  </p>
                 </div>
                 <span className="text-[10px] uppercase tracking-[0.2em] text-[#F93C3C]/70">{failedPayments.length} items</span>
               </div>
-
               <button
                 type="button"
                 onClick={() => setShowFailedPaymentsModal(true)}
-                className="mt-4 w-full text-left rounded-2xl border border-[#F93C3C]/30 bg-[#F93C3C]/10 px-5 py-4 transition hover:bg-[#F93C3C]/14 hover:border-[#F93C3C]/40"
+                className="mt-4 w-full rounded-2xl border border-[#F93C3C]/30 bg-[#F93C3C]/10 px-5 py-4 text-left transition hover:border-[#F93C3C]/40 hover:bg-[#F93C3C]/14"
               >
                 <div className="flex items-center gap-2 text-[#F93C3C]">
-                  <Minus className="w-4 h-4" />
+                  <Minus className="h-4 w-4" />
                   <span className="text-[11px] uppercase tracking-wider">Total Failed Revenue</span>
                 </div>
-                <p className="mt-2 text-3xl font-bold font-mono text-[#F93C3C]">{fmt(summary.totalFailedRevenue || 0)}</p>
+                <p className="mt-2 font-mono text-3xl font-bold text-[#F93C3C]">{fmt(summary.totalFailedRevenue)}</p>
                 <p className="mt-2 text-xs text-slate-400">Click for payment breakdown</p>
               </button>
             </div>
-          )}
+          ) : null}
         </div>
-      )}
+      ) : null}
 
-      {/* ─── Clients Tab ─── */}
-      {tab === "clients" && (
+      {tab === "clients" ? (
         <div className="space-y-4">
           <div className="flex items-center gap-3">
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search clients..."
-              className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm flex-1 focus:outline-none focus:border-[#2093FF]/50" />
+            <input
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search clients..."
+              className="flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm focus:border-[#2093FF]/50 focus:outline-none"
+            />
           </div>
 
-          {/* Client detail panel */}
-          {selectedCustomer && (
-            <div className="bg-white/[0.03] border border-[#2093FF]/30 rounded-xl p-5 space-y-4">
+          {selectedCustomer ? (
+            <div className="space-y-4 rounded-xl border border-[#2093FF]/30 bg-white/[0.03] p-5">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-lg font-semibold">{selectedCustomer.name}</h3>
                   <span className="text-xs text-slate-500">{selectedCustomer.email}</span>
                 </div>
-                <button onClick={() => setSelectedCustomer(null)} className="p-2 hover:bg-white/10 rounded-lg"><X className="w-4 h-4" /></button>
+                <button onClick={() => setSelectedCustomer(null)} className="rounded-lg p-2 hover:bg-white/10">
+                  <X className="h-4 w-4" />
+                </button>
               </div>
               <div className="grid grid-cols-3 gap-4">
-                <div className="bg-white/[0.03] rounded-lg p-3">
-                  <p className="text-[10px] text-slate-500 uppercase">MRR</p>
-                  <p className="text-lg font-mono font-semibold text-green-400">{fmt(selectedCustomer.mrr)}</p>
-                </div>
-                <div className="bg-white/[0.03] rounded-lg p-3">
-                  <p className="text-[10px] text-slate-500 uppercase">Stripe Fee</p>
-                  <p className="text-lg font-mono font-semibold text-pink-400">{fmt(selectedCustomer.stripeFee)}</p>
-                </div>
-                <div className="bg-white/[0.03] rounded-lg p-3">
-                  <p className="text-[10px] text-slate-500 uppercase">Net MRR</p>
-                  <p className="text-lg font-mono font-semibold text-blue-400">{fmt(selectedCustomer.netMrr)}</p>
-                </div>
-              </div>
-              {/* Client-specific expenses */}
-              {expenses.filter(e => e.client_name?.toLowerCase() === selectedCustomer.name.toLowerCase()).length > 0 && (
-                <div>
-                  <h4 className="text-xs text-slate-500 uppercase tracking-wider mb-2">Expenses</h4>
-                  <div className="space-y-1">
-                    {expenses.filter(e => e.client_name?.toLowerCase() === selectedCustomer.name.toLowerCase()).map(e => (
-                      <div key={e.id} className="flex items-center justify-between py-2 px-3 bg-white/[0.02] rounded-lg">
-                        <span className="text-sm">{e.name}</span>
-                        <span className="text-sm font-mono text-red-400">-{fmt(Number(e.amount))}</span>
-                      </div>
-                    ))}
+                {[
+                  { label: "MRR", value: fmt(selectedCustomer.mrr), color: "text-green-400" },
+                  { label: "Stripe Fee", value: fmt(selectedCustomer.stripeFee), color: "text-pink-400" },
+                  { label: "Net MRR", value: fmt(selectedCustomer.netMrr), color: "text-blue-400" },
+                ].map((item) => (
+                  <div key={item.label} className="rounded-lg bg-white/[0.03] p-3">
+                    <p className="text-[10px] uppercase text-slate-500">{item.label}</p>
+                    <p className={cn("font-mono text-lg font-semibold", item.color)}>{item.value}</p>
                   </div>
-                </div>
-              )}
+                ))}
+              </div>
             </div>
-          )}
+          ) : null}
 
-          {/* Client table */}
-          <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl overflow-hidden">
+          <div className="overflow-hidden rounded-xl border border-white/[0.06] bg-white/[0.03]">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-white/5">
-                  <th className="text-left text-[11px] text-slate-500 uppercase tracking-wider p-4">Client</th>
-                  <th className="text-right text-[11px] text-slate-500 uppercase tracking-wider p-4">MRR</th>
-                  <th className="text-right text-[11px] text-slate-500 uppercase tracking-wider p-4">Stripe Fee</th>
-                  <th className="text-right text-[11px] text-slate-500 uppercase tracking-wider p-4">Net MRR</th>
+                  <th className="p-4 text-left text-[11px] uppercase tracking-wider text-slate-500">Client</th>
+                  <th className="p-4 text-right text-[11px] uppercase tracking-wider text-slate-500">MRR</th>
+                  <th className="p-4 text-right text-[11px] uppercase tracking-wider text-slate-500">Stripe Fee</th>
+                  <th className="p-4 text-right text-[11px] uppercase tracking-wider text-slate-500">Net MRR</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredCustomers.map((c: any) => (
-                  <tr key={c.stripeId} onClick={() => setSelectedCustomer(c)}
-                    className={cn("border-b border-white/[0.03] cursor-pointer transition-colors",
-                      selectedCustomer?.stripeId === c.stripeId ? "bg-[#2093FF]/10" : "hover:bg-white/[0.03]")}>
+                {filteredCustomers.map((customer) => (
+                  <tr
+                    key={customer.stripeId}
+                    onClick={() => setSelectedCustomer(customer)}
+                    className={cn(
+                      "cursor-pointer border-b border-white/[0.03] transition-colors",
+                      selectedCustomer?.stripeId === customer.stripeId ? "bg-[#2093FF]/10" : "hover:bg-white/[0.03]"
+                    )}
+                  >
                     <td className="p-4">
-                      <span className="text-sm font-medium">{c.name}</span>
-                      {c.pastDue && <span className="text-[9px] ml-2 text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded font-medium">PAST DUE</span>}
-                      {c.subscriptionCount > 1 && <span className="text-[9px] ml-1 text-slate-500 bg-white/5 px-1.5 py-0.5 rounded">{c.subscriptionCount} subs</span>}
+                      <span className="text-sm font-medium">{customer.name}</span>
+                      {customer.pastDue ? (
+                        <span className="ml-2 rounded bg-amber-500/10 px-1.5 py-0.5 text-[9px] font-medium text-amber-400">
+                          PAST DUE
+                        </span>
+                      ) : null}
+                      {customer.subscriptionCount > 1 ? (
+                        <span className="ml-1 rounded bg-white/5 px-1.5 py-0.5 text-[9px] text-slate-500">
+                          {customer.subscriptionCount} subs
+                        </span>
+                      ) : null}
                     </td>
-                    <td className="p-4 text-right text-sm font-mono text-green-400">{fmt(c.mrr)}</td>
-                    <td className="p-4 text-right text-sm font-mono text-pink-400">{fmt(c.stripeFee)}</td>
-                    <td className="p-4 text-right text-sm font-mono text-blue-400">{fmt(c.netMrr)}</td>
+                    <td className="p-4 text-right font-mono text-sm text-green-400">{fmt(customer.mrr)}</td>
+                    <td className="p-4 text-right font-mono text-sm text-pink-400">{fmt(customer.stripeFee)}</td>
+                    <td className="p-4 text-right font-mono text-sm text-blue-400">{fmt(customer.netMrr)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         </div>
-      )}
+      ) : null}
 
-      {/* ─── Expenses Tab ─── */}
-      {tab === "expenses" && (
+      {tab === "expenses" ? (
         <div className="space-y-6">
-          {/* Category summary cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {CATEGORIES.map(cat => {
-              const items = expenses.filter(e => e.category === cat);
-              const total = items.reduce((s, e) => s + Number(e.amount), 0);
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+            {CATEGORIES.map((category) => {
+              const items = expenses.filter((expense) => expense.category === category);
+              const total = items.reduce((sum, expense) => sum + Number(expense.amount), 0);
               if (total === 0) return null;
-              const recurring = items.filter(e => e.type === "recurring").reduce((s, e) => s + Number(e.amount), 0);
-              const oneTime = items.filter(e => e.type === "one-time").reduce((s, e) => s + Number(e.amount), 0);
               return (
-                <div key={cat} className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-4"
-                  style={{ borderLeftWidth: 3, borderLeftColor: CAT_COLORS[cat] }}>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-[11px] uppercase tracking-wider font-medium" style={{ color: CAT_COLORS[cat] }}>
-                      {cat}
+                <div
+                  key={category}
+                  className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4"
+                  style={{ borderLeftWidth: 3, borderLeftColor: CAT_COLORS[category] }}
+                >
+                  <div className="mb-1 flex items-center justify-between">
+                    <span className="text-[11px] font-medium uppercase tracking-wider" style={{ color: CAT_COLORS[category] }}>
+                      {category}
                     </span>
                     <span className="text-[10px] text-slate-600">{items.length} items</span>
                   </div>
-                  <p className="text-lg font-mono font-semibold text-white">{fmt(total)}</p>
-                  <div className="flex gap-2 mt-1">
-                    {recurring > 0 && <span className="text-[9px] text-slate-500">↻ {fmt(recurring)}</span>}
-                    {oneTime > 0 && <span className="text-[9px] text-slate-500">① {fmt(oneTime)}</span>}
-                  </div>
+                  <p className="font-mono text-lg font-semibold text-white">{fmt(total)}</p>
                 </div>
               );
             })}
           </div>
 
-          {/* Add button */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <p className="text-sm text-slate-500">{expenses.length} expenses</p>
-              <span className="text-[10px] text-slate-600">
-                ↻ {fmt(expenses.filter(e => e.type === "recurring").reduce((s, e) => s + Number(e.amount), 0))} recurring
-              </span>
-              <span className="text-[10px] text-slate-600">
-                ① {fmt(expenses.filter(e => e.type === "one-time").reduce((s, e) => s + Number(e.amount), 0))} one-time
-              </span>
+              {readOnly ? <span className="text-[10px] text-slate-600">Historical snapshot</span> : null}
             </div>
-            <button onClick={() => setShowAddExpense(true)}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#2093FF]/20 hover:bg-[#2093FF]/30 text-sm text-[#2093FF] border border-[#2093FF]/30">
-              <Plus className="w-4 h-4" /> Add Expense
-            </button>
+            {!readOnly ? (
+              <button
+                onClick={() => setShowAddExpense((value) => !value)}
+                className="flex items-center gap-2 rounded-lg border border-[#2093FF]/30 bg-[#2093FF]/20 px-3 py-2 text-sm text-[#2093FF] hover:bg-[#2093FF]/30"
+              >
+                <Plus className="h-4 w-4" />
+                Add Expense
+              </button>
+            ) : null}
           </div>
 
-          {/* Add expense form */}
-          {showAddExpense && (
-            <div className="bg-white/[0.03] border border-[#2093FF]/30 rounded-xl p-5 space-y-4">
+          {showAddExpense && !readOnly ? (
+            <div className="space-y-4 rounded-xl border border-[#2093FF]/30 bg-white/[0.03] p-5">
               <h3 className="text-sm font-medium">New Expense</h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="text-[10px] text-slate-500 uppercase">Name *</label>
-                  <input value={newExp.name} onChange={e => setNewExp({ ...newExp, name: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm mt-1 focus:outline-none focus:border-[#2093FF]/50" placeholder="e.g. Cloudways hosting" />
-                </div>
-                <div>
-                  <label className="text-[10px] text-slate-500 uppercase">Amount *</label>
-                  <input value={newExp.amount} onChange={e => setNewExp({ ...newExp, amount: e.target.value })} type="number" step="0.01"
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm mt-1 focus:outline-none focus:border-[#2093FF]/50" placeholder="0.00" />
-                </div>
-                <div>
-                  <label className="text-[10px] text-slate-500 uppercase">Category</label>
-                  <select value={newExp.category} onChange={e => setNewExp({ ...newExp, category: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm mt-1 text-white focus:outline-none focus:border-[#2093FF]/50">
-                    {CATEGORIES.map(c => <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="text-[10px] text-slate-500 uppercase">Type</label>
-                  <select value={newExp.type} onChange={e => setNewExp({ ...newExp, type: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm mt-1 text-white focus:outline-none focus:border-[#2093FF]/50">
-                    <option value="recurring">Recurring</option>
-                    <option value="one-time">One-time</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="text-[10px] text-slate-500 uppercase">Client (optional)</label>
-                  <input value={newExp.client_name} onChange={e => setNewExp({ ...newExp, client_name: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm mt-1 focus:outline-none focus:border-[#2093FF]/50" placeholder="Client name" />
-                </div>
-                <div>
-                  <label className="text-[10px] text-slate-500 uppercase">Notes</label>
-                  <input value={newExp.notes} onChange={e => setNewExp({ ...newExp, notes: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm mt-1 focus:outline-none focus:border-[#2093FF]/50" placeholder="Optional notes" />
-                </div>
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+                <input
+                  value={newExp.name}
+                  onChange={(event) => setNewExp({ ...newExp, name: event.target.value })}
+                  className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm focus:border-[#2093FF]/50 focus:outline-none"
+                  placeholder="Expense name"
+                />
+                <input
+                  value={newExp.amount}
+                  onChange={(event) => setNewExp({ ...newExp, amount: event.target.value })}
+                  type="number"
+                  step="0.01"
+                  className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm focus:border-[#2093FF]/50 focus:outline-none"
+                  placeholder="0.00"
+                />
+                <select
+                  value={newExp.category}
+                  onChange={(event) => setNewExp({ ...newExp, category: event.target.value })}
+                  className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm focus:border-[#2093FF]/50 focus:outline-none"
+                >
+                  {[
+                    ...CATEGORIES,
+                    "payroll",
+                    "commissions",
+                  ].map((category) => (
+                    <option key={category} value={category} className="bg-slate-900">
+                      {category}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={newExp.type}
+                  onChange={(event) => setNewExp({ ...newExp, type: event.target.value })}
+                  className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm focus:border-[#2093FF]/50 focus:outline-none"
+                >
+                  <option value="recurring" className="bg-slate-900">
+                    Recurring
+                  </option>
+                  <option value="one-time" className="bg-slate-900">
+                    One-time
+                  </option>
+                </select>
+                <input
+                  value={newExp.client_name}
+                  onChange={(event) => setNewExp({ ...newExp, client_name: event.target.value })}
+                  className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm focus:border-[#2093FF]/50 focus:outline-none"
+                  placeholder="Client name"
+                />
+                <input
+                  value={newExp.notes}
+                  onChange={(event) => setNewExp({ ...newExp, notes: event.target.value })}
+                  className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm focus:border-[#2093FF]/50 focus:outline-none"
+                  placeholder="Notes"
+                />
               </div>
               <div className="flex gap-2">
-                <button onClick={addExpense} className="px-4 py-2 rounded-lg bg-[#2093FF] hover:bg-[#2093FF]/80 text-sm font-medium">Save</button>
-                <button onClick={() => setShowAddExpense(false)} className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-sm">Cancel</button>
+                <button onClick={addExpense} className="rounded-lg bg-[#2093FF] px-4 py-2 text-sm font-medium hover:bg-[#2093FF]/80">
+                  Save
+                </button>
+                <button onClick={() => setShowAddExpense(false)} className="rounded-lg bg-white/5 px-4 py-2 text-sm hover:bg-white/10">
+                  Cancel
+                </button>
               </div>
             </div>
-          )}
+          ) : null}
 
-          {/* Expenses grouped by category */}
-          {CATEGORIES.map(cat => {
-            const items = expenses.filter(e => e.category === cat);
+          {["software", "marketing", "hosting", "fulfillment", "operations", "other"].map((category) => {
+            const items = expenses.filter((expense) => expense.category === category);
             if (items.length === 0) return null;
-            const total = items.reduce((s, e) => s + Number(e.amount), 0);
             return (
-              <div key={cat} className="bg-white/[0.03] border border-white/[0.06] rounded-xl overflow-hidden">
-                <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
+              <div key={category} className="overflow-hidden rounded-xl border border-white/[0.06] bg-white/[0.03]">
+                <div className="flex items-center justify-between border-b border-white/5 px-4 py-3">
                   <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full" style={{ background: CAT_COLORS[cat] }} />
-                    <span className="text-sm font-medium capitalize">{cat}</span>
+                    <span className="h-2.5 w-2.5 rounded-full" style={{ background: CAT_COLORS[category] }} />
+                    <span className="text-sm font-medium capitalize">{category}</span>
                     <span className="text-[10px] text-slate-600">{items.length} items</span>
                   </div>
-                  <span className="text-sm font-mono text-red-400">-{fmt(total)}</span>
+                  <span className="font-mono text-sm text-red-400">-{fmt(items.reduce((sum, expense) => sum + Number(expense.amount), 0))}</span>
                 </div>
                 <div className="divide-y divide-white/[0.03]">
-                  {items.map(e => (
-                    <ExpenseRow key={e.id} expense={e} onUpdate={updateExpense} onDelete={deleteExpense} />
+                  {items.map((expense) => (
+                    <ExpenseRow
+                      key={expense.id}
+                      expense={expense}
+                      readOnly={readOnly}
+                      onUpdate={updateExpense}
+                      onDelete={deleteExpense}
+                    />
                   ))}
                 </div>
               </div>
             );
           })}
         </div>
-      )}
+      ) : null}
 
-      {/* ─── Payroll Tab ─── */}
-      {tab === "payroll" && (() => {
-        const payrollItems = expenses.filter(e => e.category === "payroll");
-        const total = payrollItems.reduce((s, e) => s + Number(e.amount), 0);
-        return (
-          <div className="space-y-6">
-            {/* Summary */}
-            <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-5"
-              style={{ borderLeftWidth: 3, borderLeftColor: CAT_COLORS.payroll }}>
+      {tab === "payroll" ? (
+        <div className="space-y-4">
+          {expenses.filter((expense) => expense.category === "payroll").map((expense) => (
+            <div key={expense.id} className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[11px] uppercase tracking-wider text-amber-400 mb-1">Total Payroll</p>
-                  <p className="text-2xl font-mono font-bold text-white">{fmt(total)}</p>
-                  <p className="text-[10px] text-slate-500 mt-1">{payrollItems.length} team members</p>
+                  <EditableField
+                    value={expense.name}
+                    onSave={(value) => updateExpense(expense.id, "name", value)}
+                    disabled={readOnly}
+                    className="text-sm font-medium"
+                  />
+                  <p className="mt-1 text-[11px] text-slate-400">{expense.notes || "No notes"}</p>
                 </div>
-                <button onClick={() => { setNewExp({ ...newExp, category: "payroll" }); setShowAddExpense(true); }}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-sm text-amber-400 border border-amber-500/30">
-                  <Plus className="w-4 h-4" /> Add Salary
-                </button>
-              </div>
-            </div>
-
-            {/* Add form (reuses global) */}
-            {showAddExpense && newExp.category === "payroll" && (
-              <div className="bg-white/[0.03] border border-amber-500/30 rounded-xl p-5 space-y-4">
-                <h3 className="text-sm font-medium">New Salary</h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="text-[10px] text-slate-500 uppercase">Name *</label>
-                    <input value={newExp.name} onChange={e => setNewExp({ ...newExp, name: e.target.value })}
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm mt-1 focus:outline-none focus:border-amber-500/50" placeholder="e.g. Abdul Salary" />
-                  </div>
-                  <div>
-                    <label className="text-[10px] text-slate-500 uppercase">Amount *</label>
-                    <input value={newExp.amount} onChange={e => setNewExp({ ...newExp, amount: e.target.value })} type="number" step="0.01"
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm mt-1 focus:outline-none focus:border-amber-500/50" placeholder="0.00" />
-                  </div>
-                  <div>
-                    <label className="text-[10px] text-slate-500 uppercase">Notes</label>
-                    <input value={newExp.notes} onChange={e => setNewExp({ ...newExp, notes: e.target.value })}
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm mt-1 focus:outline-none focus:border-amber-500/50" placeholder="Payment schedule, notes" />
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <button onClick={addExpense} className="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-500/80 text-sm font-medium text-black">Save</button>
-                  <button onClick={() => setShowAddExpense(false)} className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-sm">Cancel</button>
-                </div>
-              </div>
-            )}
-
-            {/* Salary cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {payrollItems.map(e => (
-                <div key={e.id} className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 group hover:border-amber-500/20 transition-colors">
-                  <div className="flex items-center justify-between mb-2">
-                    <EditableField value={e.name} onSave={v => updateExpense(e.id, "name", v)} className="text-sm font-medium" />
-                    <button onClick={() => deleteExpense(e.id)}
-                      className="p-1.5 rounded hover:bg-red-500/20 text-slate-700 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all">
-                      <Trash2 className="w-3.5 h-3.5" />
+                <div className="flex items-center gap-3">
+                  <EditableField
+                    value={String(expense.amount)}
+                    type="number"
+                    onSave={(value) => updateExpense(expense.id, "amount", Number.parseFloat(value))}
+                    disabled={readOnly}
+                    className="font-mono text-xl font-semibold text-amber-400"
+                  />
+                  {!readOnly ? (
+                    <button onClick={() => deleteExpense(expense.id)} className="rounded p-1.5 hover:bg-red-500/20 hover:text-red-400">
+                      <Trash2 className="h-3.5 w-3.5" />
                     </button>
-                  </div>
-                  <div className="flex items-end justify-between">
-                    <div>
-                      <EditableField value={e.notes || ""} onSave={v => updateExpense(e.id, "notes", v)} className="text-[11px] text-slate-400" />
-                      <div className="mt-1">
-                        {e.type === "recurring" ? (
-                          <span className="text-[8px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400">↻ RECURRING</span>
-                        ) : (
-                          <span className="text-[8px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400">① ONE-TIME</span>
-                        )}
-                      </div>
-                    </div>
-                    <EditableField value={String(e.amount)} type="number" onSave={v => updateExpense(e.id, "amount", parseFloat(v))}
-                      className="text-xl font-mono font-semibold text-amber-400" />
-                  </div>
+                  ) : null}
                 </div>
-              ))}
+              </div>
             </div>
+          ))}
+          {expenses.filter((expense) => expense.category === "payroll").length === 0 ? (
+            <div className="py-12 text-center text-slate-600">No payroll items for this month.</div>
+          ) : null}
+        </div>
+      ) : null}
 
-            {payrollItems.length === 0 && (
-              <div className="text-center py-12 text-slate-600">No salaries yet. Click &quot;Add Salary&quot; to get started.</div>
-            )}
-          </div>
-        );
-      })()}
-
-      {/* ─── Commissions Tab ─── */}
-      {tab === "commissions" && (() => {
-        const commItems = expenses.filter(e => e.category === "commissions");
-        const total = commItems.reduce((s, e) => s + Number(e.amount), 0);
-        return (
-          <div className="space-y-6">
-            {/* Summary */}
-            <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-5"
-              style={{ borderLeftWidth: 3, borderLeftColor: CAT_COLORS.commissions }}>
+      {tab === "commissions" ? (
+        <div className="space-y-4">
+          {expenses.filter((expense) => expense.category === "commissions").map((expense) => (
+            <div key={expense.id} className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[11px] uppercase tracking-wider text-orange-400 mb-1">Total Commissions</p>
-                  <p className="text-2xl font-mono font-bold text-white">{fmt(total)}</p>
-                  <p className="text-[10px] text-slate-500 mt-1">{commItems.length} payees</p>
+                  <EditableField
+                    value={expense.name}
+                    onSave={(value) => updateExpense(expense.id, "name", value)}
+                    disabled={readOnly}
+                    className="text-sm font-medium"
+                  />
+                  <p className="mt-1 text-[11px] text-slate-400">{expense.client_name || expense.notes || "No notes"}</p>
                 </div>
-                <button onClick={() => { setNewExp({ ...newExp, category: "commissions" }); setShowAddExpense(true); }}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg bg-orange-500/20 hover:bg-orange-500/30 text-sm text-orange-400 border border-orange-500/30">
-                  <Plus className="w-4 h-4" /> Add Commission
-                </button>
-              </div>
-            </div>
-
-            {/* Add form */}
-            {showAddExpense && newExp.category === "commissions" && (
-              <div className="bg-white/[0.03] border border-orange-500/30 rounded-xl p-5 space-y-4">
-                <h3 className="text-sm font-medium">New Commission</h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="text-[10px] text-slate-500 uppercase">Name *</label>
-                    <input value={newExp.name} onChange={e => setNewExp({ ...newExp, name: e.target.value })}
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm mt-1 focus:outline-none focus:border-orange-500/50" placeholder="e.g. Manu Commission" />
-                  </div>
-                  <div>
-                    <label className="text-[10px] text-slate-500 uppercase">Amount *</label>
-                    <input value={newExp.amount} onChange={e => setNewExp({ ...newExp, amount: e.target.value })} type="number" step="0.01"
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm mt-1 focus:outline-none focus:border-orange-500/50" placeholder="0.00" />
-                  </div>
-                  <div>
-                    <label className="text-[10px] text-slate-500 uppercase">Client(s)</label>
-                    <input value={newExp.client_name} onChange={e => setNewExp({ ...newExp, client_name: e.target.value })}
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm mt-1 focus:outline-none focus:border-orange-500/50" placeholder="Which clients" />
-                  </div>
-                  <div className="col-span-2">
-                    <label className="text-[10px] text-slate-500 uppercase">Notes</label>
-                    <input value={newExp.notes} onChange={e => setNewExp({ ...newExp, notes: e.target.value })}
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm mt-1 focus:outline-none focus:border-orange-500/50" placeholder="Commission structure, payment timing" />
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <button onClick={addExpense} className="px-4 py-2 rounded-lg bg-orange-500 hover:bg-orange-500/80 text-sm font-medium text-black">Save</button>
-                  <button onClick={() => setShowAddExpense(false)} className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-sm">Cancel</button>
+                <div className="flex items-center gap-3">
+                  <EditableField
+                    value={String(expense.amount)}
+                    type="number"
+                    onSave={(value) => updateExpense(expense.id, "amount", Number.parseFloat(value))}
+                    disabled={readOnly}
+                    className="font-mono text-xl font-semibold text-orange-400"
+                  />
+                  {!readOnly ? (
+                    <button onClick={() => deleteExpense(expense.id)} className="rounded p-1.5 hover:bg-red-500/20 hover:text-red-400">
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  ) : null}
                 </div>
               </div>
-            )}
-
-            {/* Commission cards */}
-            <div className="space-y-3">
-              {commItems.map(e => (
-                <div key={e.id} className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 group hover:border-orange-500/20 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <EditableField value={e.name} onSave={v => updateExpense(e.id, "name", v)} className="text-sm font-medium" />
-                        {e.type === "recurring" ? (
-                          <span className="text-[8px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400">↻ RECURRING</span>
-                        ) : (
-                          <span className="text-[8px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400">① ONE-TIME</span>
-                        )}
-                      </div>
-                      {e.notes && (
-                        <EditableField value={e.notes} onSave={v => updateExpense(e.id, "notes", v)} className="text-[11px] text-slate-400" />
-                      )}
-                      {!e.notes && (
-                        <p className="text-[10px] text-slate-700 opacity-0 group-hover:opacity-100 cursor-pointer"
-                          onClick={() => updateExpense(e.id, "notes", "Add notes...")}>+ Add notes</p>
-                      )}
-                      {e.client_name && (
-                        <div className="mt-1">
-                          <span className="text-[10px] text-orange-400/60 bg-orange-500/10 px-2 py-0.5 rounded">
-                            {e.client_name}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <EditableField value={String(e.amount)} type="number" onSave={v => updateExpense(e.id, "amount", parseFloat(v))}
-                        className="text-xl font-mono font-semibold text-orange-400" />
-                      <button onClick={() => deleteExpense(e.id)}
-                        className="p-1.5 rounded hover:bg-red-500/20 text-slate-700 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all">
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
             </div>
+          ))}
+          {expenses.filter((expense) => expense.category === "commissions").length === 0 ? (
+            <div className="py-12 text-center text-slate-600">No commissions for this month.</div>
+          ) : null}
+        </div>
+      ) : null}
 
-            {commItems.length === 0 && (
-              <div className="text-center py-12 text-slate-600">No commissions yet. Click &quot;Add Commission&quot; to get started.</div>
-            )}
-          </div>
-        );
-      })()}
-
-      {showFailedPaymentsModal && failedPayments.length > 0 && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md px-4">
-          <div className="w-full max-w-2xl rounded-3xl border border-white/10 bg-white/[0.07] shadow-2xl shadow-black/40 backdrop-blur-2xl">
-            <div className="flex items-center justify-between border-b border-white/10 px-6 py-5">
+      {showFailedPaymentsModal ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+          <div className="max-h-[80vh] w-full max-w-3xl overflow-auto rounded-2xl border border-white/10 bg-[#0f1118] p-6">
+            <div className="mb-4 flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-semibold text-white">Failed Payments</h3>
-                <p className="text-sm text-slate-400 mt-1">{fmt(summary.totalFailedRevenue || 0)} outstanding this month</p>
+                <h3 className="text-lg font-semibold">Failed Payments</h3>
+                <p className="text-sm text-slate-500">{data?.monthLabel}</p>
               </div>
-              <button
-                type="button"
-                onClick={() => setShowFailedPaymentsModal(false)}
-                className="rounded-xl border border-white/10 bg-white/5 p-2 text-slate-400 transition hover:bg-white/10 hover:text-white"
-              >
-                <X className="w-4 h-4" />
+              <button onClick={() => setShowFailedPaymentsModal(false)} className="rounded-lg p-2 hover:bg-white/10">
+                <X className="h-4 w-4" />
               </button>
             </div>
-
-            <div className="max-h-[70vh] overflow-y-auto px-6 py-4 space-y-3">
-              {failedPayments.map((payment, index) => (
-                <div key={`${payment.stripeCustomerId}-${payment.dueDate || index}-${payment.amount}`} className="rounded-2xl border border-white/8 bg-black/20 px-4 py-4">
+            <div className="space-y-3">
+              {failedPayments.map((payment) => (
+                <div key={`${payment.stripeCustomerId}-${payment.amount}-${payment.dueDate}`} className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
                   <div className="flex items-start justify-between gap-4">
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        {payment.invoiceUrl ? (
-                          <a
-                            href={payment.invoiceUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-sm font-medium text-white underline decoration-white/20 underline-offset-4 hover:text-[#F93C3C]"
-                          >
-                            {payment.customerName}
-                          </a>
-                        ) : (
-                          <span className="text-sm font-medium text-white">{payment.customerName}</span>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => navigator.clipboard.writeText(payment.customerName)}
-                          className="rounded-md border border-white/10 bg-white/5 px-2 py-1 text-[10px] uppercase tracking-wider text-slate-400 transition hover:border-[#F93C3C]/30 hover:text-[#F93C3C]"
-                        >
-                          Copy
-                        </button>
-                      </div>
-                      <p className="mt-1 text-xs text-slate-500">{payment.email || payment.stripeCustomerId}</p>
+                    <div>
+                      <p className="font-medium text-white">{payment.customerName}</p>
+                      <p className="text-xs text-slate-500">{payment.email || "No email"}</p>
+                      <p className="mt-2 text-xs text-slate-400">Due {formatFailedDueDate(payment.dueDate)}</p>
                     </div>
-                    <span className="text-lg font-mono font-semibold text-[#F93C3C]">{fmt(payment.amount)}</span>
-                  </div>
-                  <div className="mt-3 flex items-center justify-between gap-4 text-xs">
-                    <span className="text-slate-400">Due {formatFailedDueDate(payment.dueDate)}</span>
-                    <span className="text-slate-600">{payment.stripeCustomerId}</span>
+                    <div className="text-right">
+                      <p className="font-mono text-lg font-semibold text-red-400">{fmt(payment.amount)}</p>
+                      {payment.invoiceUrl ? (
+                        <a
+                          href={payment.invoiceUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="mt-2 inline-block text-xs text-blue-400 hover:text-blue-300"
+                        >
+                          Open invoice
+                        </a>
+                      ) : null}
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

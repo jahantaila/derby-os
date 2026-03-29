@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Websites That Rank Higher, Convert More Diners, and Build a Brand People Actually Remember</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f8f9fa;
+            --paper: #ffffff;
+            --text: #111111;
+            --muted: #4b5563;
+            --line: rgba(17, 17, 17, 0.14);
+            --accent: #1daef0;
+            --accent-dark: #0c8dca;
+            --shadow: 0 22px 50px rgba(17, 17, 17, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            background:
+                radial-gradient(circle at top, rgba(29, 174, 240, 0.08), transparent 30%),
+                var(--bg);
+            color: var(--text);
+            font-family: "Inter", sans-serif;
+            line-height: 1.72;
+        }
+
+        .frame {
+            position: relative;
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 24px 20px 72px;
+        }
+
+        .frame::before,
+        .frame::after {
+            content: "";
+            position: absolute;
+            top: 12px;
+            bottom: 12px;
+            width: 2px;
+            background-image: radial-gradient(circle, rgba(29, 174, 240, 0.5) 1px, transparent 1.5px);
+            background-size: 2px 14px;
+            background-repeat: repeat-y;
+            opacity: 0.9;
+        }
+
+        .frame::before {
+            left: 6px;
+        }
+
+        .frame::after {
+            right: 6px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 10px 18px 34px;
+        }
+
+        .logo {
+            font-family: "Montserrat", sans-serif;
+            font-size: 1.2rem;
+            font-weight: 900;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        .topbar-right {
+            text-align: right;
+            font-size: 0.92rem;
+            color: var(--muted);
+        }
+
+        .topbar-right strong {
+            display: block;
+            font-family: "Montserrat", sans-serif;
+            font-size: 0.76rem;
+            font-weight: 800;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+
+        .phone-link {
+            color: var(--accent);
+            font-weight: 800;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .page {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .attn {
+            margin: 0 0 24px;
+            font-family: "Montserrat", sans-serif;
+            font-size: 0.86rem;
+            font-weight: 800;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: var(--accent);
+        }
+
+        h1,
+        h2,
+        h3 {
+            margin: 0;
+            font-family: "Montserrat", sans-serif;
+            font-weight: 900;
+            letter-spacing: 0.01em;
+            text-transform: uppercase;
+            color: var(--text);
+        }
+
+        h1 {
+            font-size: clamp(2.35rem, 7vw, 4.6rem);
+            line-height: 1.02;
+            margin-bottom: 24px;
+        }
+
+        h2 {
+            font-size: clamp(1.55rem, 4vw, 2.55rem);
+            line-height: 1.15;
+            margin-bottom: 24px;
+        }
+
+        h3 {
+            font-size: clamp(1.2rem, 3vw, 1.6rem);
+            line-height: 1.25;
+            margin-bottom: 18px;
+        }
+
+        p {
+            margin: 0 0 18px;
+            font-size: 1.08rem;
+            color: var(--muted);
+        }
+
+        .lead {
+            font-size: 1.18rem;
+            max-width: 740px;
+            margin: 0 auto 28px;
+        }
+
+        .accent {
+            color: var(--accent);
+        }
+
+        .strong,
+        strong {
+            color: var(--text);
+        }
+
+        .hero,
+        .section {
+            padding: 26px 0;
+        }
+
+        .story,
+        .quote,
+        .comparison-copy,
+        .faq-item,
+        .contact-panel,
+        .video-shell,
+        .number-block {
+            max-width: 760px;
+            margin: 0 auto;
+        }
+
+        .story,
+        .quote,
+        .comparison-copy,
+        .faq-item,
+        .contact-panel,
+        .number-block {
+            padding: 0 6px;
+        }
+
+        .video-shell {
+            position: relative;
+            aspect-ratio: 16 / 9;
+            margin: 28px auto 24px;
+            border-radius: 26px;
+            overflow: hidden;
+            background:
+                linear-gradient(rgba(17, 17, 17, 0.22), rgba(17, 17, 17, 0.28)),
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' x2='1' y1='0' y2='1'%3E%3Cstop stop-color='%231daef0'/%3E%3Cstop offset='1' stop-color='%230f172a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect fill='url(%23g)' width='1600' height='900'/%3E%3Ccircle fill='rgba(255,255,255,0.14)' cx='340' cy='280' r='160'/%3E%3Ccircle fill='rgba(255,255,255,0.1)' cx='1140' cy='580' r='240'/%3E%3C/svg%3E") center/cover no-repeat;
+            box-shadow: var(--shadow);
+        }
+
+        .video-shell::before {
+            content: "Video Sales Letter Placeholder";
+            position: absolute;
+            left: 50%;
+            top: calc(50% + 88px);
+            transform: translateX(-50%);
+            font-family: "Montserrat", sans-serif;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.82);
+        }
+
+        .play-button {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .play-button span {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 108px;
+            height: 108px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.94);
+            box-shadow: 0 18px 36px rgba(0, 0, 0, 0.2);
+        }
+
+        .play-button span::before {
+            content: "";
+            display: block;
+            margin-left: 8px;
+            border-top: 18px solid transparent;
+            border-bottom: 18px solid transparent;
+            border-left: 28px solid var(--accent);
+        }
+
+        .cta {
+            display: inline-block;
+            width: min(100%, 640px);
+            margin: 18px auto 14px;
+            padding: 20px 28px;
+            border-radius: 999px;
+            background: linear-gradient(180deg, var(--accent), var(--accent-dark));
+            color: #ffffff;
+            font-family: "Montserrat", sans-serif;
+            font-size: 1rem;
+            font-weight: 900;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            text-decoration: none;
+            box-shadow: 0 18px 36px rgba(29, 174, 240, 0.24);
+        }
+
+        .micro {
+            font-size: 0.98rem;
+        }
+
+        .trustline {
+            margin-top: 22px;
+            font-family: "Montserrat", sans-serif;
+            font-size: 0.92rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text);
+        }
+
+        .section + .section {
+            padding-top: 40px;
+        }
+
+        .eyebrow {
+            margin-bottom: 14px;
+            font-family: "Montserrat", sans-serif;
+            font-size: 0.8rem;
+            font-weight: 800;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: var(--accent);
+        }
+
+        .story p:last-child,
+        .quote p:last-child,
+        .faq-item p:last-child,
+        .comparison-copy p:last-child {
+            margin-bottom: 0;
+        }
+
+        .number {
+            font-family: "Montserrat", sans-serif;
+            font-size: clamp(3.4rem, 9vw, 5.7rem);
+            font-weight: 900;
+            line-height: 1;
+            color: var(--accent);
+            margin-bottom: 12px;
+        }
+
+        .divider {
+            width: 120px;
+            height: 2px;
+            margin: 12px auto 0;
+            background: linear-gradient(90deg, transparent, rgba(29, 174, 240, 0.6), transparent);
+        }
+
+        .check,
+        .xmark {
+            display: block;
+            margin-bottom: 14px;
+            font-size: 1.02rem;
+        }
+
+        .check strong,
+        .xmark strong {
+            display: inline;
+        }
+
+        .check::before {
+            content: "\2713  ";
+            color: var(--accent);
+            font-weight: 900;
+        }
+
+        .xmark::before {
+            content: "\2717  ";
+            color: #8b95a7;
+            font-weight: 900;
+        }
+
+        .quote {
+            font-size: 1.1rem;
+            color: var(--muted);
+        }
+
+        .quote em {
+            color: var(--text);
+            font-style: italic;
+        }
+
+        .quote-author {
+            margin-top: 14px;
+            font-family: "Montserrat", sans-serif;
+            font-size: 0.95rem;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--text);
+        }
+
+        .faq-item {
+            margin-bottom: 22px;
+        }
+
+        .faq-item strong {
+            display: block;
+            margin-bottom: 8px;
+            font-family: "Montserrat", sans-serif;
+            font-size: 1rem;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .contact-panel {
+            margin-top: 26px;
+            padding-top: 8px;
+        }
+
+        form {
+            max-width: 520px;
+            margin: 0 auto;
+        }
+
+        input {
+            width: 100%;
+            margin-bottom: 14px;
+            padding: 16px 18px;
+            border: 1px solid rgba(17, 17, 17, 0.14);
+            border-radius: 16px;
+            background: #ffffff;
+            color: var(--text);
+            font: inherit;
+            text-align: center;
+        }
+
+        input:focus {
+            outline: 2px solid rgba(29, 174, 240, 0.18);
+            border-color: var(--accent);
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+        }
+
+        footer {
+            padding: 48px 0 8px;
+            text-align: center;
+        }
+
+        footer p {
+            margin-bottom: 10px;
+            font-size: 0.98rem;
+        }
+
+        @media (max-width: 720px) {
+            .frame {
+                padding: 18px 14px 56px;
+            }
+
+            .frame::before,
+            .frame::after {
+                display: none;
+            }
+
+            .topbar {
+                flex-direction: column;
+                text-align: center;
+                padding-bottom: 28px;
+            }
+
+            .topbar-right {
+                text-align: center;
+            }
+
+            .cta {
+                border-radius: 22px;
+                font-size: 0.94rem;
+            }
+
+            .play-button span {
+                width: 88px;
+                height: 88px;
+            }
+
+            .video-shell::before {
+                top: calc(50% + 74px);
+                font-size: 0.72rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="frame">
+        <div class="topbar">
+            <a href="#contact" class="logo">Derby <span>Digital</span></a>
+            <div class="topbar-right">
+                <strong>Have Questions?</strong>
+                <a class="phone-link" href="tel:8595548185">&#9742; (859) 554-8185</a>
+            </div>
+        </div>
+
+        <main class="page">
+            <section class="hero">
+                <div class="attn">ATTN Restaurant Owners: Stop Paying $400/Month To Look Exactly Like Your Competition</div>
+
+                <div class="story">
+                    <p>Last month, a restaurant owner in Louisville called us. She was paying SpotHopper $400 a month.</p>
+                    <p>During our call, she pulled up her competitor's website. Same layout. Same fonts. Same ordering flow. Same everything.</p>
+                    <p>Two restaurants on the same street, paying the same company, looking exactly the same online.</p>
+                    <p>She was furious. And she should have been.</p>
+                    <p>That's when we told her the truth about what custom websites actually do for restaurants. Not just look different. Make more money.</p>
+                </div>
+
+                <h1>Custom Websites and Software That <span class="accent">Rank Higher on Google</span>, Convert More Diners, and Build a Brand People Actually Remember</h1>
+
+                <p class="lead">Templates treat every restaurant the same. But a fine dining customer and a pizza customer shop completely differently. Custom sites are designed around how YOUR specific customers make decisions. That's why they convert 3x better and rank 5x higher than generic templates.</p>
+
+                <div class="video-shell" aria-label="Video placeholder">
+                    <div class="play-button"><span aria-hidden="true"></span></div>
+                </div>
+
+                <a href="#contact" class="cta">Get Your Free Revenue Audit Now</a>
+                <p class="micro">Discover How Much Money Your Template Website Is Actually Costing You (Complete Analysis Worth $2,500)</p>
+                <p class="trustline">Custom Restaurant Websites | Zero Commission Ordering | AI-Powered Local SEO | 90+ Restaurants Served | 30-Day Revenue Guarantee</p>
+                <p><strong>Any Questions? Call <span class="accent">(859) 554-8185</span></strong></p>
+                <div class="divider"></div>
+            </section>
+
+            <section class="section">
+                <div class="eyebrow">The Problem</div>
+                <h2>Why Templates Are Killing Your Restaurant's Growth</h2>
+                <p>Template companies don't tell you this. But every month you use their system, you're losing money three ways.</p>
+                <p><strong>Lost Google rankings.</strong> When 10,000 restaurants use SpotHopper, they're all competing for the same generic keywords. "Restaurant food online ordering" instead of "best sushi in Rogers AR."</p>
+                <p><strong>Terrible conversion rates.</strong> One-size-fits-all ordering flows don't work. Fine dining customers need to see atmosphere and chef stories. Pizza customers want speed and deals. Templates give everyone the same experience.</p>
+                <p><strong>Invisible branding.</strong> When your site looks like every other restaurant's site, nobody remembers you. Your brand becomes disposable.</p>
+                <div class="number-block">
+                    <div class="number">$36,000</div>
+                    <p><strong class="accent">Average amount restaurants lose annually to template limitations and commission fees</strong></p>
+                </div>
+            </section>
+
+            <section class="section">
+                <div class="eyebrow">Benefit 1</div>
+                <h2>Rank Higher on Google (More Customers Find You First)</h2>
+                <p>Template sites all use identical SEO structures. When thousands of restaurants compete on the same platform, Google can't tell them apart.</p>
+                <p><strong>Custom sites rank for specific keywords.</strong> "Best Italian restaurant Louisville" not "order food online." "Rogers Arkansas sushi delivery" not "Japanese restaurant."</p>
+                <p><strong>Google rewards unique content.</strong> Our AI agents publish fresh blog posts every week. Your competitor's SpotHopper site hasn't been updated in six months.</p>
+                <div class="story">
+                    <p><strong>Real Example:</strong> Maria's Mexican Restaurant ranked #7 for "Mexican food Lexington" with their BentoBox template. Same keywords as 50 other Mexican restaurants on BentoBox.</p>
+                    <p>We built her a custom site optimized for "authentic Mexican catering Lexington" and "best margaritas downtown Lexington."</p>
+                    <p>Result? #1 for both terms within 60 days. Catering bookings increased 300%. That's an extra $4,200 per month.</p>
+                </div>
+                <p><strong>What this means for your revenue:</strong> When customers search for restaurants in your city, they find YOU first. Not your competitor with the same template.</p>
+            </section>
+
+            <section class="section">
+                <div class="eyebrow">Benefit 2</div>
+                <h2>Convert More Visitors Into Paying Customers</h2>
+                <p>Templates treat all restaurants the same. But customer behavior varies dramatically by restaurant type.</p>
+                <p><strong>Fine dining customers</strong> need to feel the atmosphere. See the chef's story. Imagine the evening. They're buying an experience, not just food.</p>
+                <p><strong>Fast casual customers</strong> want to see the menu, order quickly, maybe grab a deal. They need speed and simplicity.</p>
+                <p>Template companies give both customers the identical layout and flow. That's why template conversion rates are terrible.</p>
+                <div class="story">
+                    <p><strong>Real Example:</strong> Tony's upscale steakhouse was using a SpotHopper template. Same ordering flow as every pizza shop and taco truck on the platform.</p>
+                    <p>Customers couldn't make reservations easily. No wine pairing suggestions. No atmosphere photos. No chef bio.</p>
+                    <p>We built a custom site focused on the fine dining experience. Elegant photo galleries. Wine pairing guides. Easy reservation system.</p>
+                    <p>Result? Online reservations increased 180%. Average check size up $23 per customer. That's an extra $8,100 monthly.</p>
+                </div>
+                <p><strong>What this means for your revenue:</strong> More visitors become customers because your site is designed around how THEY actually make decisions.</p>
+            </section>
+
+            <section class="section">
+                <div class="eyebrow">Benefit 3</div>
+                <h2>Build a Brand People Actually Remember</h2>
+                <p>This is the long game. And it's huge.</p>
+                <p>When every restaurant on your block uses SpotHopper, they all look the same online. Customers can't tell one from another.</p>
+                <p><strong>Custom brand identity</strong> means when someone sees your website, social media, or emails, they know it's YOU. That recognition compounds over time.</p>
+                <p><strong>Better branding attracts better customers.</strong> When your online presence looks premium and unique, you attract people who value quality. Not just price shoppers hunting for the cheapest option.</p>
+                <div class="story">
+                    <p><strong>Real Question:</strong> Do you remember the last SpotHopper restaurant site you visited?</p>
+                    <p>Probably not. Because they all look identical.</p>
+                    <p>But you remember the restaurant with the stunning custom website that made you want to go there. That's brand power.</p>
+                </div>
+                <p><strong>Your brand becomes an asset</strong> that grows in value. A SpotHopper template is disposable. A custom brand identity is an investment that pays dividends for years.</p>
+                <p><strong>What this means for your revenue:</strong> Customers choose you over competitors because they recognize and trust your brand.</p>
+            </section>
+
+            <section class="section">
+                <div class="eyebrow">Benefit 4</div>
+                <h2>Systems Built Around Your Specific Goals</h2>
+                <p>Every restaurant has different goals. More reservations. More delivery orders. Catering growth. Filling weeknight tables.</p>
+                <p><strong>Template software gives everyone the same tools.</strong> Generic ordering. Basic menus. Cookie-cutter layouts.</p>
+                <p><strong>Custom software (DerbyFlow) is built around what YOU need to accomplish.</strong></p>
+                <div class="story">
+                    <p>Need a loyalty program that actually works? We build it.</p>
+                    <p>Want catering management that captures $15,000 events? We build it.</p>
+                    <p>Need AI review responses that bring in 5-star reviews automatically? We build it.</p>
+                    <p><strong>For YOUR restaurant. Your customers. Your goals.</strong></p>
+                </div>
+                <div class="story">
+                    <p><strong>Real Example:</strong> Luigi's Italian Bistro wanted to grow their private dining business. Their BentoBox template had no catering features.</p>
+                    <p>We built custom catering forms, event planning tools, and automated quote systems specifically for private dining.</p>
+                    <p>Result? They book 2-3 private events weekly now. Average event value $3,200. That's an extra $25,000 per month.</p>
+                </div>
+                <p><strong>What this means for your revenue:</strong> Your website and software work toward YOUR specific business goals, not generic restaurant functions.</p>
+            </section>
+
+            <section class="section">
+                <div class="eyebrow">Proof</div>
+                <h2>How Custom Benefits Work For Different Restaurants</h2>
+                <div class="story">
+                    <p><strong>Luigi's Fine Italian Dining</strong> needed to sell the experience, not just food.</p>
+                    <p>Custom solution: Elegant photo galleries showcasing ambiance. Chef biography and philosophy. Wine pairing guides. Sophisticated reservation system.</p>
+                    <p>SEO focus: "Best Italian fine dining Louisville" and "romantic dinner Louisville."</p>
+                    <p><strong class="accent">Result: #1 rankings for premium keywords. 180% increase in reservations. $23 higher average check.</strong></p>
+                </div>
+                <div class="story" style="margin-top: 22px;">
+                    <p><strong>Rocky's Pizza</strong> needed speed and convenience for hungry customers.</p>
+                    <p>Custom solution: Lightning-fast ordering system. Deal promotions. Real-time order tracking. Simple, mobile-optimized design.</p>
+                    <p>SEO focus: "Pizza delivery near me" and "fast pizza Rogers Arkansas."</p>
+                    <p><strong class="accent">Result: #1 for local pizza searches. 240% increase in online orders. Zero commission fees.</strong></p>
+                </div>
+                <p>Both won because both got exactly what THEIR customers needed. Templates can't do this.</p>
+            </section>
+
+            <section class="section">
+                <div class="eyebrow">Delivery</div>
+                <h2>How We Deliver These 4 Benefits</h2>
+                <p><strong>Custom Website Design:</strong> Built around your restaurant type and customer behavior. Fine dining gets elegance. Fast casual gets speed. No templates.</p>
+                <p><strong>Local SEO Optimization:</strong> Rank #1 for YOUR city and cuisine. "Best steakhouse downtown Louisville" not "restaurant food ordering."</p>
+                <p><strong>Zero-Commission Ordering:</strong> Keep 100% of delivery and pickup orders. No 30% cuts to DoorDash. On $5,000 monthly orders, save $1,500.</p>
+                <p><strong>DerbyFlow Software:</strong> Custom features for your goals. Loyalty programs. Catering management. Review automation. Built for YOUR restaurant.</p>
+            </section>
+
+            <section class="section">
+                <div class="eyebrow">Comparison</div>
+                <h2>Template Companies vs Results-Driven Custom</h2>
+                <div class="comparison-copy">
+                    <p class="xmark"><strong>SpotHopper/BentoBox on Google Rankings:</strong> Generic keywords, buried in search.</p>
+                    <p class="check"><strong>Derby Digital on Google Rankings:</strong> #1 for your city + cuisine.</p>
+                    <p class="xmark"><strong>SpotHopper/BentoBox on Conversion Rate:</strong> One-size-fits-all, poor results.</p>
+                    <p class="check"><strong>Derby Digital on Conversion Rate:</strong> Designed for YOUR customers.</p>
+                    <p class="xmark"><strong>SpotHopper/BentoBox on Brand Recognition:</strong> Looks like everyone else.</p>
+                    <p class="check"><strong>Derby Digital on Brand Recognition:</strong> Unique, memorable, premium.</p>
+                    <p class="xmark"><strong>SpotHopper/BentoBox on Commission Fees:</strong> 30% lost to delivery apps.</p>
+                    <p class="check"><strong>Derby Digital on Commission Fees:</strong> Zero commission, keep 100%.</p>
+                    <p class="xmark"><strong>SpotHopper/BentoBox on Monthly Cost:</strong> $300-500 forever.</p>
+                    <p class="check"><strong>Derby Digital on Monthly Cost:</strong> Low ongoing, you own it.</p>
+                    <p class="xmark"><strong>SpotHopper/BentoBox on Customization:</strong> "Sorry, not available."</p>
+                    <p class="check"><strong>Derby Digital on Customization:</strong> Whatever you need.</p>
+                </div>
+            </section>
+
+            <section class="section">
+                <div class="eyebrow">Origin Story</div>
+                <h2>A College Freshman Who Got Tired Of Watching Restaurants Get Scammed</h2>
+                <p>Jahan started Derby Digital because he was pissed off.</p>
+                <p>He was 18, freshman in college, helping local businesses with their websites. One client was a family restaurant paying SpotHopper $400 monthly for two years.</p>
+                <p>During a meeting, the owner showed Jahan his competitor's website. Exact same layout. Same fonts. Same everything.</p>
+                <p>Two different restaurants, same street, same template company, looking identical online.</p>
+                <p>The owner was paying $400 monthly to look exactly like his competition. That's insane.</p>
+                <p>Jahan realized template companies make millions selling the same website to thousands of restaurants. They don't care if you succeed. They care if you pay monthly fees.</p>
+                <p>Derby Digital was built to fix that. Custom websites that help restaurants win, not just look like everyone else.</p>
+                <p>Now we serve 90+ restaurants across the country. Each one unique. Each one optimized for their city and cuisine. Each one designed to bring customers through THEIR door, not their competitor's.</p>
+            </section>
+
+            <section class="section">
+                <div class="eyebrow">Testimonials</div>
+                <h2>What Restaurant Owners Are Saying</h2>
+                <div class="quote">
+                    <p><em>"We were paying SpotHopper $450 monthly and getting zero results. Derby Digital built us a custom site and we rank #1 for 'best Mexican restaurant Lexington.' Our catering bookings tripled in 90 days."</em></p>
+                    <p class="quote-author">Maria, Guadalajara Mexican Restaurant</p>
+                </div>
+                <div class="quote" style="margin-top: 24px;">
+                    <p><em>"I was losing $2,000 monthly to DoorDash commissions. Derby's custom ordering system eliminated that completely. Best investment I've ever made for the restaurant."</em></p>
+                    <p class="quote-author">Tony, Tony's Pizzeria</p>
+                </div>
+                <div class="quote" style="margin-top: 24px;">
+                    <p><em>"Our BentoBox site looked exactly like three other restaurants in town. Derby made us stand out. Revenue up 40% and we actually own our website now."</em></p>
+                    <p class="quote-author">Jennifer, The Blue Note Cafe</p>
+                </div>
+            </section>
+
+            <section class="section">
+                <div class="eyebrow">Process</div>
+                <h2>How It Works (3 Simple Steps)</h2>
+                <p><strong>Step 1: Revenue Audit</strong><br>We analyze your current website and marketing. Calculate exactly how much you're losing to template limitations and commission fees. Show you competitor rankings and conversion opportunities.</p>
+                <p><strong>Step 2: Custom Build</strong><br>We create your custom website and DerbyFlow system. Designed specifically for your restaurant type, city, and customer behavior. No templates. No compromises.</p>
+                <p><strong>Step 3: Launch and Scale</strong><br>Your new site goes live. You start ranking higher, converting more visitors, and keeping 100% of orders. We optimize everything based on performance data.</p>
+            </section>
+
+            <section class="section">
+                <div class="eyebrow">Guarantee</div>
+                <h2>Our 30-Day "More Revenue or We Pay You Back" Guarantee</h2>
+                <p>We're so confident your custom restaurant website will generate more revenue than your current template site, we guarantee it.</p>
+                <p>If you don't see higher Google rankings, more online orders, and increased revenue within 30 days, we'll refund every penny.</p>
+                <p><strong>Plus, you keep the website.</strong></p>
+                <p>Template companies can't offer this guarantee because they know their cookie-cutter approach doesn't work. We can because we've seen it work for 90+ restaurants.</p>
+            </section>
+
+            <section class="section">
+                <div class="eyebrow">FAQ</div>
+                <h2>Frequently Asked Questions</h2>
+                <div class="faq-item">
+                    <strong>Q: How much does it cost?</strong>
+                    <p>A: Much less than you'll pay SpotHopper annually. Most clients save $2,000-4,000 yearly compared to template companies, plus eliminate delivery app commissions worth thousands more.</p>
+                </div>
+                <div class="faq-item">
+                    <strong>Q: How long does it take?</strong>
+                    <p>A: 2-3 weeks from strategy call to launch. Much faster than template companies who take 6-8 weeks to give you the same site everyone else has.</p>
+                </div>
+                <div class="faq-item">
+                    <strong>Q: Do I own my website?</strong>
+                    <p>A: Yes. You own everything. No monthly hostage fees. No "sorry, you can't take your content" situations when you want to leave.</p>
+                </div>
+                <div class="faq-item">
+                    <strong>Q: Will it work for my type of restaurant?</strong>
+                    <p>A: We've worked with pizza shops, fine dining, Mexican, Italian, Chinese, cafes, bars, food trucks. Every restaurant is different. That's exactly why templates don't work.</p>
+                </div>
+                <div class="faq-item">
+                    <strong>Q: What about ongoing support?</strong>
+                    <p>A: Since you own your site, we can make any changes you want. Template companies say "sorry, that's not available in our system." We say "let's build it."</p>
+                </div>
+            </section>
+
+            <section class="section" id="contact">
+                <div class="eyebrow">Final Call</div>
+                <h2>Stop Losing Money To Templates - Get Your Free Audit Now</h2>
+                <a href="#contact" class="cta">Stop Losing Money To Templates - Get Your Free Audit Now</a>
+                <p class="micro">Discover Exactly How Much Revenue Your Template Website Is Costing You</p>
+                <p><strong>Call <span class="accent">(859) 554-8185</span> or fill out the form below</strong></p>
+
+                <div class="contact-panel">
+                    <h3>Get Your Free Revenue Audit ($2,500 Value)</h3>
+                    <form>
+                        <input type="text" placeholder="Restaurant Name" aria-label="Restaurant Name">
+                        <input type="text" placeholder="Your Name" aria-label="Your Name">
+                        <input type="email" placeholder="Email" aria-label="Email">
+                        <input type="tel" placeholder="Phone" aria-label="Phone">
+                        <input type="text" placeholder="City" aria-label="City">
+                        <button type="submit" class="cta">Get My Free Revenue Audit</button>
+                    </form>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p><strong>Derby Digital</strong> | Custom Restaurant Websites &amp; Marketing Systems</p>
+            <p>Call (859) 554-8185 | Email: hello@derbydigital.us</p>
+            <p>Stop paying monthly fees for websites that look like everyone else's. Own your digital presence.</p>
+        </footer>
+    </div>
+</body>
+</html>
