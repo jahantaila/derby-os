@@ -94,7 +94,6 @@ async function getAllTasks() {
   const rows = await supabaseReq("GET", "tasks", {
     params:
       "select=id,title,status,assignee,priority,description,notes,client,category,due_date,created_at,updated_at&order=updated_at.desc",
-    useAnonKey: true,
   });
 
   return Array.isArray(rows) ? (rows as OfficeAgentTaskRecord[]) : [];
