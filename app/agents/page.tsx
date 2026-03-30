@@ -231,7 +231,7 @@ export default function AgentsPage() {
       try {
         const res = await fetch("/api/agent-status");
         const data = await res.json();
-        setAgents(data);
+        setAgents(Array.isArray(data) ? data : []);
       } catch {
         // fallback
       } finally {
