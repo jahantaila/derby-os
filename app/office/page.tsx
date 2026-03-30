@@ -158,7 +158,7 @@ function getSceneTransform(width: number, height: number): SceneTransform {
 }
 
 function makeTransitPath(start: { x: number; y: number }, target: { x: number; y: number }) {
-  const corridorY = target.y < WORLD_HEIGHT * 0.48 ? 388 : 522;
+  const corridorY = target.y < 460 ? 388 : 748;
   return [
     { x: start.x, y: start.y },
     { x: start.x, y: corridorY },
@@ -492,73 +492,127 @@ function drawDeskSetup(
 function drawMeetingArea(ctx: CanvasRenderingContext2D) {
   ctx.fillStyle = "rgba(0,0,0,0.18)";
   ctx.beginPath();
-  ctx.ellipse(748, 368, 154, 86, 0, 0, Math.PI * 2);
+  ctx.ellipse(748, 518, 154, 86, 0, 0, Math.PI * 2);
   ctx.fill();
 
   ctx.fillStyle = "#7A604A";
   ctx.beginPath();
-  ctx.ellipse(748, 350, 146, 78, 0, 0, Math.PI * 2);
+  ctx.ellipse(748, 500, 146, 78, 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.fillStyle = "#9B7A58";
   ctx.beginPath();
-  ctx.ellipse(748, 344, 132, 62, 0, 0, Math.PI * 2);
+  ctx.ellipse(748, 494, 132, 62, 0, 0, Math.PI * 2);
   ctx.fill();
 
   for (const [x, y] of [
-    [622, 350],
-    [874, 350],
-    [748, 248],
-    [748, 452],
+    [622, 500],
+    [874, 500],
+    [748, 398],
+    [748, 602],
   ]) {
     drawSwivelChair(ctx, x, y, "#6A7280");
   }
 
   ctx.fillStyle = "#EFE4D1";
-  ctx.fillRect(716, 326, 64, 14);
+  ctx.fillRect(716, 476, 64, 14);
   ctx.fillStyle = "#C54747";
-  ctx.fillRect(722, 330, 18, 6);
+  ctx.fillRect(722, 480, 18, 6);
   ctx.fillStyle = "#2093FF";
-  ctx.fillRect(746, 330, 28, 6);
+  ctx.fillRect(746, 480, 28, 6);
 }
 
-function drawLounge(ctx: CanvasRenderingContext2D) {
-  ctx.fillStyle = "#5B3A31";
-  ctx.fillRect(408, 560, 312, 86);
-  ctx.fillRect(394, 574, 18, 72);
-  ctx.fillRect(720, 574, 18, 72);
-  ctx.fillStyle = "#C59A73";
-  ctx.fillRect(420, 548, 288, 74);
-  ctx.fillStyle = "#E0B58C";
-  ctx.fillRect(434, 560, 260, 24);
-  ctx.fillRect(434, 592, 260, 24);
-  ctx.fillStyle = "#7D5B45";
-  ctx.fillRect(548, 622, 34, 14);
-  ctx.fillRect(620, 622, 34, 14);
+function drawBookshelf(ctx: CanvasRenderingContext2D, x: number, y: number) {
+  ctx.fillStyle = "#4C3528";
+  ctx.fillRect(x, y, 96, 120);
+  ctx.fillStyle = "#674A37";
+  ctx.fillRect(x + 8, y + 10, 80, 8);
+  ctx.fillRect(x + 8, y + 42, 80, 8);
+  ctx.fillRect(x + 8, y + 74, 80, 8);
+  ctx.fillRect(x + 8, y + 106, 80, 8);
 
-  ctx.fillStyle = "#6A4E37";
-  ctx.fillRect(534, 668, 112, 38);
-  ctx.fillStyle = "#8C6A4B";
-  ctx.fillRect(542, 660, 96, 26);
-  ctx.fillStyle = "#E6D8BF";
-  ctx.fillRect(570, 666, 36, 10);
-  ctx.fillStyle = "#C8A977";
-  ctx.fillRect(552, 688, 18, 6);
-  ctx.fillRect(610, 688, 18, 6);
+  for (const [bx, by, bw, color] of [
+    [12, 18, 12, "#D4A373"],
+    [28, 18, 10, "#70B9FF"],
+    [42, 18, 14, "#E97474"],
+    [60, 18, 11, "#8FD18A"],
+    [16, 50, 16, "#F2C879"],
+    [36, 50, 10, "#D98FB8"],
+    [50, 50, 18, "#8AA6D9"],
+    [16, 82, 12, "#E7B270"],
+    [34, 82, 14, "#D6CFBF"],
+    [52, 82, 10, "#F87171"],
+  ]) {
+    ctx.fillStyle = color;
+    ctx.fillRect(x + bx, y + by, bw, 20);
+  }
+}
 
+function drawWaterCooler(ctx: CanvasRenderingContext2D, x: number, y: number) {
   ctx.fillStyle = "#CBD6E4";
-  ctx.fillRect(830, 570, 28, 84);
+  ctx.fillRect(x - 16, y - 40, 32, 86);
   ctx.fillStyle = "#9AB1C7";
   ctx.beginPath();
-  ctx.arc(844, 586, 16, 0, Math.PI * 2);
+  ctx.arc(x, y - 24, 18, 0, Math.PI * 2);
   ctx.fill();
   ctx.fillStyle = "#75A9E3";
   ctx.beginPath();
-  ctx.arc(844, 585, 11, 0, Math.PI * 2);
+  ctx.arc(x, y - 25, 12, 0, Math.PI * 2);
   ctx.fill();
   ctx.fillStyle = "#E9EDF5";
-  ctx.fillRect(834, 654, 20, 18);
+  ctx.fillRect(x - 12, y + 46, 24, 18);
+  ctx.fillStyle = "#F87171";
+  ctx.fillRect(x - 10, y + 8, 6, 10);
+  ctx.fillStyle = "#60A5FA";
+  ctx.fillRect(x + 4, y + 8, 6, 10);
+}
 
-  drawPlant(ctx, 916, 646, 1.3);
+function drawLounge(ctx: CanvasRenderingContext2D) {
+  ctx.save();
+  ctx.fillStyle = "rgba(0,0,0,0.14)";
+  drawRoundedRect(ctx, 470, 780, 220, 124, 28);
+  ctx.fill();
+  ctx.fillStyle = "#7A4F3C";
+  drawRoundedRect(ctx, 482, 768, 196, 112, 24);
+  ctx.fill();
+  ctx.fillStyle = "#A56A52";
+  drawRoundedRect(ctx, 496, 780, 168, 88, 22);
+  ctx.fill();
+  ctx.fillStyle = "rgba(255,255,255,0.08)";
+  ctx.fillRect(508, 794, 144, 6);
+  ctx.fillRect(508, 846, 144, 6);
+
+  ctx.fillStyle = "#5B3A31";
+  ctx.fillRect(408, 810, 312, 86);
+  ctx.fillRect(394, 824, 18, 72);
+  ctx.fillRect(720, 824, 18, 72);
+  ctx.fillStyle = "#C59A73";
+  ctx.fillRect(420, 798, 288, 74);
+  ctx.fillStyle = "#E0B58C";
+  ctx.fillRect(434, 810, 260, 24);
+  ctx.fillRect(434, 842, 260, 24);
+  ctx.fillStyle = "#7D5B45";
+  ctx.fillRect(548, 872, 34, 14);
+  ctx.fillRect(620, 872, 34, 14);
+
+  ctx.fillStyle = "#6A4E37";
+  ctx.fillRect(534, 918, 112, 38);
+  ctx.fillStyle = "#8C6A4B";
+  ctx.fillRect(542, 910, 96, 26);
+  ctx.fillStyle = "#E6D8BF";
+  ctx.fillRect(570, 916, 36, 10);
+  ctx.fillStyle = "#C8A977";
+  ctx.fillRect(552, 938, 18, 6);
+  ctx.fillRect(610, 938, 18, 6);
+
+  ctx.fillStyle = "#EAD7BE";
+  ctx.font = "700 20px 'Courier New', monospace";
+  ctx.textAlign = "center";
+  ctx.fillText("LOUNGE", 564, 778);
+
+  drawBookshelf(ctx, 792, 792);
+  drawWaterCooler(ctx, 860, 846);
+  drawPlant(ctx, 916, 896, 1.3);
+  ctx.restore();
 }
 
 function drawServerRack(ctx: CanvasRenderingContext2D, timeMs: number) {
@@ -656,10 +710,10 @@ function drawWallDecor(ctx: CanvasRenderingContext2D, now: Date) {
 function drawCorridorAccents(ctx: CanvasRenderingContext2D) {
   ctx.fillStyle = "rgba(255,255,255,0.06)";
   ctx.fillRect(160, 388, 1088, 10);
-  ctx.fillRect(160, 520, 1088, 10);
+  ctx.fillRect(160, 748, 1088, 10);
   ctx.fillStyle = "rgba(0,0,0,0.12)";
   ctx.fillRect(160, 398, 1088, 4);
-  ctx.fillRect(160, 530, 1088, 4);
+  ctx.fillRect(160, 758, 1088, 4);
 }
 
 function drawDustMotes(ctx: CanvasRenderingContext2D, timeMs: number) {
@@ -894,17 +948,13 @@ function drawOffice(
   const hour = now.getHours();
   const occupiedDesks = new Set(agents.filter((agent) => agent.lastMode === "working").map((agent) => agent.id));
   const { scale, offsetX, offsetY } = getSceneTransform(width, height);
-  const visibleWorldX = -offsetX / scale;
-  const visibleWorldY = -offsetY / scale;
-  const visibleWorldWidth = width / scale;
-  const visibleWorldHeight = height / scale;
 
   ctx.save();
   ctx.translate(offsetX, offsetY);
   ctx.scale(scale, scale);
   ctx.imageSmoothingEnabled = false;
 
-  drawWoodFloor(ctx, visibleWorldX, visibleWorldY, visibleWorldWidth, visibleWorldHeight);
+  drawWoodFloor(ctx, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
   drawWallsAndLights(ctx, timeMs);
   drawWindow(ctx, hour, timeMs);
   drawWallDecor(ctx, now);
@@ -929,6 +979,12 @@ function drawOffice(
 
   drawPlant(ctx, 118, 154, 1.2);
   drawPlant(ctx, 138, 718, 1.15);
+  drawPlant(ctx, 328, 750, 0.95);
+  drawPlant(ctx, 448, 750, 0.95);
+  drawPlant(ctx, 568, 750, 0.95);
+  drawPlant(ctx, 688, 750, 0.95);
+  drawPlant(ctx, 808, 750, 0.95);
+  drawPlant(ctx, 928, 750, 0.95);
   drawPlant(ctx, 1090, 708, 1.1);
   drawPlant(ctx, 1244, 350, 1);
   drawLightingOverlay(ctx, hour);
