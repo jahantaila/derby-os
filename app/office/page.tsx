@@ -51,7 +51,7 @@ type AgentArt = {
 };
 
 const WORLD_WIDTH = 1408;
-const WORLD_HEIGHT = 832;
+const WORLD_HEIGHT = 1100;
 const TILE_SIZE = 32;
 const SPRITE_SCALE = 3;
 const SPRITE_SIZE = 16;
@@ -60,19 +60,19 @@ const HUD_MUTED = "#c9b7a2";
 const OFFICE_AGENT_ORDER = ["kimberly", "kevin", "sabri", "alex", "jordan"] as const;
 
 const DESK_POSITIONS = {
-  kimberly: { x: 302, y: 244 },
-  kevin: { x: 270, y: 606 },
-  sabri: { x: 1104, y: 244 },
-  alex: { x: 950, y: 244 },
-  jordan: { x: 1028, y: 606 },
+  kimberly: { x: 302, y: 280 },
+  kevin: { x: 270, y: 640 },
+  sabri: { x: 1104, y: 280 },
+  alex: { x: 950, y: 280 },
+  jordan: { x: 1028, y: 640 },
 };
 
 const LOUNGE_POSITIONS = {
-  kimberly: { x: 432, y: 632 },
-  kevin: { x: 606, y: 654 },
-  sabri: { x: 732, y: 654 },
-  alex: { x: 554, y: 586 },
-  jordan: { x: 684, y: 586 },
+  kimberly: { x: 432, y: 880 },
+  kevin: { x: 606, y: 900 },
+  sabri: { x: 732, y: 900 },
+  alex: { x: 554, y: 840 },
+  jordan: { x: 684, y: 840 },
 };
 
 const AGENT_ART: Record<(typeof OFFICE_AGENT_ORDER)[number], AgentArt> = {
