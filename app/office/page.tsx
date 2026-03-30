@@ -1231,13 +1231,171 @@ export default function OfficePage() {
     };
   }, [router, viewport]);
 
+  // Activity log from status changes
+  const [activityLog, setActivityLog] = useState<Array<{ agent: string; action: string; time: string }>>([]);
+  const prevStatusRef = useRef<Record<string, string>>({});
+
+  useEffect(() => {
+    const current: Record<string, string> = {};
+    for (const a of agents) current[a.id] = a.lastMode;
+    const prev = prevStatusRef.current;
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+
+    for (const a of agents) {
+      if (prev[a.id] && prev[a.id] !== a.lastMode) {
+        const action = a.lastMode === "working"
+          ? `started working on ${a.task || "a task"}`
+          : "went idle";
+        setActivityLog((log) => [{ agent: a.name, action, time: timeStr }, ...log].slice(0, 20));
+      }
+    }
+    prevStatusRef.current = current;
+  }, [agents]);
+
+  const workingAgents = agents.filter((a) => a.lastMode === "working");
+  const idleAgents = agents.filter((a) => a.lastMode === "idle");
+
   return (
     <section
       aria-label="Pixel office"
       className="office-canvas-wrap"
     >
-      <h1 className="sr-only">Pixel Office</h1>
       <canvas ref={canvasRef} className="block" />
+
+      {/* TOP BAR OVERLAY */}
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "12px 20px",
+          background: "linear-gradient(180deg, rgba(10,10,15,0.85) 0%, rgba(10,10,15,0.4) 70%, transparent 100%)",
+          pointerEvents: "none",
+          zIndex: 10,
+        }}
+      >
+        <div>
+          <h1 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "#fff", letterSpacing: "-0.01em" }}>
+            The Office
+          </h1>
+          <p style={{ margin: 0, fontSize: 12, color: "#667788" }}>
+            AI team headquarters &mdash; live view
+          </p>
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 16, fontSize: 12, color: "#8896a8" }}>
+          <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#22C55E", boxShadow: "0 0 6px #22C55E" }} />
+            Working ({workingAgents.length})
+          </span>
+          <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#FFBD59" }} />
+            Walking
+          </span>
+          <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#555" }} />
+            Idle ({idleAgents.length})
+          </span>
+        </div>
+      </div>
+
+      {/* LIVE ACTIVITY PANEL */}
+      <div
+        style={{
+          position: "absolute",
+          top: 60,
+          right: 12,
+          width: 220,
+          maxHeight: "calc(100% - 80px)",
+          background: "rgba(10,10,15,0.75)",
+          backdropFilter: "blur(12px)",
+          border: "1px solid rgba(255,255,255,0.08)",
+          borderRadius: 12,
+          padding: "14px 16px",
+          zIndex: 10,
+          overflow: "auto",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12 }}>
+          <span style={{ fontSize: 13, color: "#FFBD59" }}>✦</span>
+          <span style={{ fontSize: 13, fontWeight: 600, color: "#fff" }}>Live Activity</span>
+          <span style={{ fontSize: 11, color: "#556677", marginLeft: "auto" }}>LIVE</span>
+        </div>
+
+        {activityLog.length === 0 && !isLoading && (
+          <div style={{ textAlign: "center", padding: "20px 0" }}>
+            <p style={{ fontSize: 12, color: "#556677", margin: "4px 0 0 0" }}>
+              Watching for status changes...
+            </p>
+          </div>
+        )}
+
+        {/* Current tasks */}
+        {workingAgents.length > 0 && (
+          <div style={{ marginBottom: 12 }}>
+            <div style={{ fontSize: 10, fontWeight: 600, color: "#556677", letterSpacing: "0.06em", marginBottom: 6 }}>
+              ACTIVE NOW
+            </div>
+            {workingAgents.map((a) => (
+              <div
+                key={a.id}
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 8,
+                  padding: "6px 0",
+                  borderBottom: "1px solid rgba(255,255,255,0.04)",
+                }}
+              >
+                <span
+                  style={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: "50%",
+                    background: "#22C55E",
+                    boxShadow: "0 0 4px #22C55E",
+                    marginTop: 5,
+                    flexShrink: 0,
+                  }}
+                />
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: "#ddd" }}>{a.name}</div>
+                  <div style={{ fontSize: 11, color: "#778899" }}>{a.task || "Working"}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Activity log */}
+        {activityLog.length > 0 && (
+          <div>
+            <div style={{ fontSize: 10, fontWeight: 600, color: "#556677", letterSpacing: "0.06em", marginBottom: 6 }}>
+              RECENT
+            </div>
+            {activityLog.slice(0, 8).map((entry, i) => (
+              <div
+                key={i}
+                style={{
+                  fontSize: 11,
+                  color: "#778899",
+                  padding: "4px 0",
+                  borderBottom: "1px solid rgba(255,255,255,0.03)",
+                }}
+              >
+                <span style={{ color: "#bbb", fontWeight: 500 }}>{entry.agent}</span>{" "}
+                {entry.action}
+                <span style={{ color: "#445566", marginLeft: 6 }}>{entry.time}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </section>
   );
 }
