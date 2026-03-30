@@ -967,7 +967,12 @@ function drawOffice(
   ctx.scale(scale, scale);
   ctx.imageSmoothingEnabled = false;
 
-  drawWoodFloor(ctx, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+  // Draw floor tiles across the entire visible area (not just world bounds)
+  const visX = -offsetX / scale;
+  const visY = -offsetY / scale;
+  const visW = width / scale;
+  const visH = height / scale;
+  drawWoodFloor(ctx, visX, visY, visW, visH);
   drawWallsAndLights(ctx, timeMs);
   drawWindow(ctx, hour, timeMs);
   drawWallDecor(ctx, now);
