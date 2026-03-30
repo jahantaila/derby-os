@@ -1156,7 +1156,14 @@ export default function OfficePage() {
     <section
       aria-label="Pixel office"
       className="relative overflow-hidden"
-      style={{ width: `${viewport.width}px`, height: `${viewport.height}px` }}
+      style={{
+        position: "fixed",
+        top: 0,
+        left: viewport.width < 840 ? 0 : 60,
+        width: `${viewport.width}px`,
+        height: `${viewport.height}px`,
+        zIndex: 50,
+      }}
     >
       <h1 className="sr-only">Pixel Office</h1>
       <canvas ref={canvasRef} className="block" />
