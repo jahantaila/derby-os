@@ -36,6 +36,39 @@ body {
   overflow-x: hidden;
 }
 
+body.office-immersive .app-shell {
+  gap: 0;
+  padding: 0;
+}
+
+body.office-immersive .app-main {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  padding: 0;
+}
+
+body.office-immersive .app-main > div {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+}
+
+body.office-immersive .app-main > div > header {
+  display: none;
+}
+
+body.office-immersive .space-y-6 > :not([hidden]) ~ :not([hidden]) {
+  margin-top: 0;
+}
+
+body.office-immersive .sidebar-shell {
+  height: 100vh;
+  border-radius: 0;
+}
+
 .heading-font,
 .page-title,
 .section-title,
@@ -662,6 +695,10 @@ body {
 }
 
 @media (max-width: 900px) {
+  body.office-immersive .sidebar-shell {
+    height: auto;
+  }
+
   .app-shell {
     flex-direction: column;
     gap: 0.7rem;
