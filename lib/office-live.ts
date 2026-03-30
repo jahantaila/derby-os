@@ -104,7 +104,8 @@ export async function getLiveOfficeAgents(): Promise<OfficeLiveAgent[]> {
 
   try {
     tasks = await getAllTasks();
-  } catch {
+  } catch (err) {
+    console.error("[office-live] getAllTasks failed:", err);
     tasks = [];
   }
 
@@ -131,7 +132,8 @@ export async function getAgentTasks(agentId: OfficeAgentId) {
   try {
     const tasks = await getAllTasks();
     return tasks.filter((task) => taskMatchesAgent(task, agent));
-  } catch {
+  } catch (err) {
+    console.error("[office-live] getAllTasks failed:", err);
     return [];
   }
 }
