@@ -53,18 +53,18 @@ type AgentArt = {
 const WORLD_WIDTH = 1408;
 const WORLD_HEIGHT = 1100;
 const TILE_SIZE = 32;
-const SPRITE_SCALE = 3;
+const PIXEL_SIZE = 5;
 const SPRITE_SIZE = 16;
 const HUD_TEXT = "#f6f2ea";
 const HUD_MUTED = "#c9b7a2";
 const OFFICE_AGENT_ORDER = ["kimberly", "kevin", "sabri", "alex", "jordan"] as const;
 
 const DESK_POSITIONS = {
-  kimberly: { x: 302, y: 280 },
+  kimberly: { x: 302, y: 320 },
   kevin: { x: 270, y: 640 },
-  sabri: { x: 1104, y: 280 },
-  alex: { x: 950, y: 280 },
-  jordan: { x: 1028, y: 640 },
+  sabri: { x: 1060, y: 320 },
+  alex: { x: 950, y: 320 },
+  jordan: { x: 980, y: 640 },
 };
 
 const LOUNGE_POSITIONS = {
@@ -158,7 +158,7 @@ function getSceneTransform(width: number, height: number): SceneTransform {
 }
 
 function makeTransitPath(start: { x: number; y: number }, target: { x: number; y: number }) {
-  const corridorY = target.y < 460 ? 388 : 748;
+  const corridorY = start.y < 500 || target.y < 500 ? 500 : 760;
   return [
     { x: start.x, y: start.y },
     { x: start.x, y: corridorY },
@@ -186,35 +186,48 @@ function makeInitialAgent(record: AgentApiRecord): AgentSprite {
     facing: "down",
     mode: record.status,
     lastMode: record.status,
-    hoverRadius: 34,
+    hoverRadius: 48,
   };
 }
 
-function syncAgents(previous: AgentSprite[], nextData: AgentApiRecord[]) {
+function syncAgents(previous: AgentSprite[], nextData: AgentApiRecord[]): AgentSprite[] {
   const prevById = new Map(previous.map((agent) => [agent.id, agent]));
 
   return nextData.map((record) => {
     const current = prevById.get(record.id);
     if (!current) return makeInitialAgent(record);
 
-    const target = record.status === "working" ? { x: current.deskX, y: current.deskY } : { x: current.seatX, y: current.seatY };
+    const desk = DESK_POSITIONS[record.id as keyof typeof DESK_POSITIONS];
+    const lounge = LOUNGE_POSITIONS[record.id as keyof typeof LOUNGE_POSITIONS];
+    const target = record.status === "working" ? desk : lounge;
     const statusChanged = current.lastMode !== record.status;
 
     if (!statusChanged) {
+      const mode: AgentSprite["mode"] = current.mode === "walking" ? "walking" : record.status;
       return {
         ...current,
         ...record,
-        mode: current.mode === "walking" ? "walking" : record.status,
+        seatX: lounge.x,
+        seatY: lounge.y,
+        deskX: desk.x,
+        deskY: desk.y,
+        mode,
         lastMode: record.status,
+        hoverRadius: 48,
       };
     }
 
     return {
       ...current,
       ...record,
+      seatX: lounge.x,
+      seatY: lounge.y,
+      deskX: desk.x,
+      deskY: desk.y,
       path: makeTransitPath({ x: current.x, y: current.y }, target).slice(1),
       mode: "walking",
       lastMode: record.status,
+      hoverRadius: 48,
     };
   });
 }
@@ -541,7 +554,7 @@ function drawBookshelf(ctx: CanvasRenderingContext2D, x: number, y: number) {
     [16, 82, 12, "#E7B270"],
     [34, 82, 14, "#D6CFBF"],
     [52, 82, 10, "#F87171"],
-  ]) {
+  ] as const) {
     ctx.fillStyle = color;
     ctx.fillRect(x + bx, y + by, bw, 20);
   }
@@ -709,11 +722,11 @@ function drawWallDecor(ctx: CanvasRenderingContext2D, now: Date) {
 
 function drawCorridorAccents(ctx: CanvasRenderingContext2D) {
   ctx.fillStyle = "rgba(255,255,255,0.06)";
-  ctx.fillRect(160, 388, 1088, 10);
-  ctx.fillRect(160, 748, 1088, 10);
+  ctx.fillRect(160, 500, 1088, 10);
+  ctx.fillRect(160, 760, 1088, 10);
   ctx.fillStyle = "rgba(0,0,0,0.12)";
-  ctx.fillRect(160, 398, 1088, 4);
-  ctx.fillRect(160, 758, 1088, 4);
+  ctx.fillRect(160, 510, 1088, 4);
+  ctx.fillRect(160, 770, 1088, 4);
 }
 
 function drawDustMotes(ctx: CanvasRenderingContext2D, timeMs: number) {
@@ -831,14 +844,14 @@ function drawPixelFigure(ctx: CanvasRenderingContext2D, agent: AgentSprite, time
   const swayX = isLoungeIdle ? Math.sin(timeMs / 520 + agent.x * 0.031) * 1.6 : 0;
   const swayY = isLoungeIdle ? Math.sin(timeMs / 680 + agent.y * 0.018) * 1.2 : 0;
   const bob = agent.mode === "walking" ? 0 : Math.round(Math.sin(timeMs / 360 + agent.x * 0.015) * 1 + swayY);
-  const x = Math.round(agent.x - (SPRITE_SIZE * SPRITE_SCALE) / 2 + swayX);
-  const y = Math.round(agent.y - SPRITE_SIZE * SPRITE_SCALE + bob);
+  const x = Math.round(agent.x - (SPRITE_SIZE * PIXEL_SIZE) / 2 + swayX);
+  const y = Math.round(agent.y - SPRITE_SIZE * PIXEL_SIZE + bob);
   const armLift = agent.mode === "working" ? (typingFrame === 0 ? 0 : 1) : 0;
   const legOffset = agent.mode === "walking" ? (walkFrame === 0 ? -1 : walkFrame === 2 ? 1 : 0) : 0;
 
   const paint = (px: number, py: number, pw: number, ph: number, color: string) => {
     ctx.fillStyle = color;
-    ctx.fillRect(x + px * SPRITE_SCALE, y + py * SPRITE_SCALE, pw * SPRITE_SCALE, ph * SPRITE_SCALE);
+    ctx.fillRect(x + px * PIXEL_SIZE, y + py * PIXEL_SIZE, pw * PIXEL_SIZE, ph * PIXEL_SIZE);
   };
 
   ctx.fillStyle = "rgba(0,0,0,0.28)";
@@ -960,17 +973,17 @@ function drawOffice(
   drawWallDecor(ctx, now);
   drawCorridorAccents(ctx);
 
-  drawDeskSetup(ctx, 302, 246, "left", "#2093FF", "KIMBERLY", occupiedDesks.has("kimberly"), timeMs);
+  drawDeskSetup(ctx, 302, 286, "left", "#2093FF", "KIMBERLY", occupiedDesks.has("kimberly"), timeMs);
   drawDeskSetup(ctx, 270, 608, "left", "#FFBD59", "KEVIN", occupiedDesks.has("kevin"), timeMs);
-  drawDeskSetup(ctx, 950, 246, "right", "#F93C3C", "ALEX", occupiedDesks.has("alex"), timeMs);
-  drawDeskSetup(ctx, 1104, 246, "right", "#F93C3C", "SABRI", occupiedDesks.has("sabri"), timeMs);
-  drawDeskSetup(ctx, 1028, 608, "right", "#22C55E", "JORDAN", occupiedDesks.has("jordan"), timeMs);
+  drawDeskSetup(ctx, 950, 286, "right", "#F93C3C", "ALEX", occupiedDesks.has("alex"), timeMs);
+  drawDeskSetup(ctx, 1060, 286, "right", "#F93C3C", "SABRI", occupiedDesks.has("sabri"), timeMs);
+  drawDeskSetup(ctx, 980, 608, "right", "#22C55E", "JORDAN", occupiedDesks.has("jordan"), timeMs);
 
-  drawSwivelChair(ctx, 302, 252, "#43648D");
+  drawSwivelChair(ctx, 302, 292, "#43648D");
   drawSwivelChair(ctx, 270, 614, "#7C6644");
-  drawSwivelChair(ctx, 950, 252, "#8C4747");
-  drawSwivelChair(ctx, 1104, 252, "#8C4747");
-  drawSwivelChair(ctx, 1028, 614, "#3E8558");
+  drawSwivelChair(ctx, 950, 292, "#8C4747");
+  drawSwivelChair(ctx, 1060, 292, "#8C4747");
+  drawSwivelChair(ctx, 980, 614, "#3E8558");
 
   drawMeetingArea(ctx);
   drawLounge(ctx);
@@ -1029,7 +1042,7 @@ function drawOffice(
   ctx.fillStyle = isLoading ? "#FFBD59" : error ? "#F87171" : "#6BE675";
   ctx.fillText("LIVE", 312, 53);
   ctx.fillStyle = HUD_MUTED;
-  ctx.font = "12px 'Courier New', monospace";
+  ctx.font = "14px 'Courier New', monospace";
   ctx.fillText(`LAST SYNC ${formatSync(updatedAt)}`, 62, 77);
   ctx.fillText(error ? "DEGRADED FEED" : "SUPABASE STREAM", 202, 77);
   ctx.restore();
