@@ -1136,18 +1136,23 @@ export default function OfficePage() {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = Math.max(1, Math.floor(viewport.width * dpr));
-    canvas.height = Math.max(1, Math.floor(viewport.height * dpr));
-    canvas.style.width = `${viewport.width}px`;
-    canvas.style.height = `${viewport.height}px`;
-
     const render = (time: number) => {
       const context = canvas.getContext("2d");
       if (!context) return;
 
-      const width = viewport.width;
-      const height = viewport.height;
+      const dpr = window.devicePixelRatio || 1;
+      const container = canvas.parentElement;
+      const cw = container ? container.clientWidth : viewport.width;
+      const ch = container ? container.clientHeight : viewport.height;
+      if (canvas.width !== Math.floor(cw * dpr) || canvas.height !== Math.floor(ch * dpr)) {
+        canvas.width = Math.max(1, Math.floor(cw * dpr));
+        canvas.height = Math.max(1, Math.floor(ch * dpr));
+        canvas.style.width = `${cw}px`;
+        canvas.style.height = `${ch}px`;
+      }
+
+      const width = cw;
+      const height = ch;
       context.setTransform(dpr, 0, 0, dpr, 0, 0);
       context.clearRect(0, 0, width, height);
 
@@ -1229,15 +1234,7 @@ export default function OfficePage() {
   return (
     <section
       aria-label="Pixel office"
-      className="relative overflow-hidden"
-      style={{
-        position: "fixed",
-        top: 0,
-        left: viewport.width < 840 ? 0 : 60,
-        width: `${viewport.width}px`,
-        height: `${viewport.height}px`,
-        zIndex: 50,
-      }}
+      className="office-canvas-wrap"
     >
       <h1 className="sr-only">Pixel Office</h1>
       <canvas ref={canvasRef} className="block" />

@@ -75,6 +75,23 @@ body.office-immersive .sidebar-shell {
   border-radius: 0;
 }
 
+.office-canvas-wrap {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 60px;
+  z-index: 50;
+  overflow: hidden;
+}
+
+@media (max-width: 899px) {
+  .office-canvas-wrap {
+    left: 0;
+    bottom: 72px;
+  }
+}
+
 .heading-font,
 .page-title,
 .section-title,
