@@ -34,6 +34,12 @@ type Viewport = {
   height: number;
 };
 
+type SceneTransform = {
+  scale: number;
+  offsetX: number;
+  offsetY: number;
+};
+
 type AgentArt = {
   shirt: string;
   hair: string;
@@ -137,8 +143,17 @@ function getViewport(): Viewport {
 
   const desktop = window.innerWidth >= 900;
   return {
-    width: Math.max(320, window.innerWidth - (desktop ? 60 : 0)),
-    height: Math.max(560, window.innerHeight - (desktop ? 0 : 72)),
+    width: Math.max(1, window.innerWidth - (desktop ? 60 : 0)),
+    height: Math.max(1, window.innerHeight - (desktop ? 0 : 72)),
+  };
+}
+
+function getSceneTransform(width: number, height: number): SceneTransform {
+  const scale = Math.max(width / WORLD_WIDTH, height / WORLD_HEIGHT);
+  return {
+    scale,
+    offsetX: (width - WORLD_WIDTH * scale) / 2,
+    offsetY: (height - WORLD_HEIGHT * scale) / 2,
   };
 }
 
@@ -230,27 +245,27 @@ function drawGlow(ctx: CanvasRenderingContext2D, x: number, y: number, radius: n
   ctx.fill();
 }
 
-function drawWoodFloor(ctx: CanvasRenderingContext2D) {
-  for (let y = 0; y < WORLD_HEIGHT / TILE_SIZE; y += 1) {
-    for (let x = 0; x < WORLD_WIDTH / TILE_SIZE; x += 1) {
+function drawWoodFloor(ctx: CanvasRenderingContext2D, x0: number, y0: number, width: number, height: number) {
+  const startTileX = Math.floor(x0 / TILE_SIZE);
+  const startTileY = Math.floor(y0 / TILE_SIZE);
+  const endTileX = Math.ceil((x0 + width) / TILE_SIZE);
+  const endTileY = Math.ceil((y0 + height) / TILE_SIZE);
+
+  for (let y = startTileY; y < endTileY; y += 1) {
+    for (let x = startTileX; x < endTileX; x += 1) {
+      const tileX = x * TILE_SIZE;
+      const tileY = y * TILE_SIZE;
       ctx.fillStyle = (x + y) % 2 === 0 ? "#3d3428" : "#4a3f32";
-      ctx.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+      ctx.fillRect(tileX, tileY, TILE_SIZE, TILE_SIZE);
       ctx.fillStyle = "rgba(255,255,255,0.04)";
-      ctx.fillRect(x * TILE_SIZE + 4, y * TILE_SIZE + 3, TILE_SIZE - 8, 1);
+      ctx.fillRect(tileX + 4, tileY + 3, TILE_SIZE - 8, 1);
       ctx.fillStyle = "rgba(0,0,0,0.08)";
-      ctx.fillRect(x * TILE_SIZE, y * TILE_SIZE + TILE_SIZE - 2, TILE_SIZE, 2);
+      ctx.fillRect(tileX, tileY + TILE_SIZE - 2, TILE_SIZE, 2);
     }
   }
 }
 
 function drawWallsAndLights(ctx: CanvasRenderingContext2D, timeMs: number) {
-  ctx.fillStyle = "#1a2030";
-  ctx.fillRect(0, 0, WORLD_WIDTH, 64);
-  ctx.fillRect(0, 0, 64, WORLD_HEIGHT);
-  ctx.fillStyle = "#2a3545";
-  ctx.fillRect(0, 64, WORLD_WIDTH, 8);
-  ctx.fillRect(64, 0, 8, WORLD_HEIGHT);
-
   for (const [x, y] of [
     [260, 84],
     [548, 84],
@@ -878,28 +893,18 @@ function drawOffice(
   const now = new Date();
   const hour = now.getHours();
   const occupiedDesks = new Set(agents.filter((agent) => agent.lastMode === "working").map((agent) => agent.id));
-  const scale = Math.min(width / WORLD_WIDTH, height / WORLD_HEIGHT);
-  const offsetX = (width - WORLD_WIDTH * scale) / 2;
-  const offsetY = (height - WORLD_HEIGHT * scale) / 2;
-
-  const backdrop = ctx.createLinearGradient(0, 0, 0, height);
-  backdrop.addColorStop(0, "#181110");
-  backdrop.addColorStop(1, "#080708");
-  ctx.fillStyle = backdrop;
-  ctx.fillRect(0, 0, width, height);
+  const { scale, offsetX, offsetY } = getSceneTransform(width, height);
+  const visibleWorldX = -offsetX / scale;
+  const visibleWorldY = -offsetY / scale;
+  const visibleWorldWidth = width / scale;
+  const visibleWorldHeight = height / scale;
 
   ctx.save();
   ctx.translate(offsetX, offsetY);
   ctx.scale(scale, scale);
   ctx.imageSmoothingEnabled = false;
 
-  const roomGlow = ctx.createLinearGradient(0, 0, 0, WORLD_HEIGHT);
-  roomGlow.addColorStop(0, "#120F10");
-  roomGlow.addColorStop(1, "#080708");
-  ctx.fillStyle = roomGlow;
-  ctx.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-
-  drawWoodFloor(ctx);
+  drawWoodFloor(ctx, visibleWorldX, visibleWorldY, visibleWorldWidth, visibleWorldHeight);
   drawWallsAndLights(ctx, timeMs);
   drawWindow(ctx, hour, timeMs);
   drawWallDecor(ctx, now);
@@ -1103,9 +1108,7 @@ export default function OfficePage() {
       const rect = canvas.getBoundingClientRect();
       const px = event.clientX - rect.left;
       const py = event.clientY - rect.top;
-      const scale = Math.min(rect.width / WORLD_WIDTH, rect.height / WORLD_HEIGHT);
-      const offsetX = (rect.width - WORLD_WIDTH * scale) / 2;
-      const offsetY = (rect.height - WORLD_HEIGHT * scale) / 2;
+      const { scale, offsetX, offsetY } = getSceneTransform(rect.width, rect.height);
       return {
         x: (px - offsetX) / scale,
         y: (py - offsetY) / scale,
@@ -1152,7 +1155,7 @@ export default function OfficePage() {
   return (
     <section
       aria-label="Pixel office"
-      className="relative overflow-hidden bg-[#080708]"
+      className="relative overflow-hidden"
       style={{ width: `${viewport.width}px`, height: `${viewport.height}px` }}
     >
       <h1 className="sr-only">Pixel Office</h1>

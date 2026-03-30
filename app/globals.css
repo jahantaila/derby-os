@@ -41,6 +41,11 @@ body.office-immersive .app-shell {
   padding: 0;
 }
 
+body.office-immersive .app-bg,
+body.office-immersive .app-orb {
+  display: none;
+}
+
 body.office-immersive .app-main {
   border: 0;
   border-radius: 0;
@@ -52,11 +57,12 @@ body.office-immersive .app-main {
 
 body.office-immersive .app-main > div {
   display: flex;
-  height: 100%;
+  min-height: 100vh;
   flex-direction: column;
 }
 
-body.office-immersive .app-main > div > header {
+body.office-immersive .app-main > div > header,
+body.office-immersive .app-main > div > .glass-surface {
   display: none;
 }
 
