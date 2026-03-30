@@ -269,18 +269,63 @@ function drawWallsAndLights(ctx: CanvasRenderingContext2D, timeMs: number) {
   }
 }
 
-function drawWindow(ctx: CanvasRenderingContext2D) {
+function drawWindow(ctx: CanvasRenderingContext2D, hour: number, timeMs: number) {
   const x = 1188;
   const y = 118;
   const w = 172;
   const h = 188;
+  const isDay = hour >= 6 && hour < 18;
   ctx.fillStyle = "#2a3545";
   ctx.fillRect(x - 8, y - 8, w + 16, h + 16);
   const sky = ctx.createLinearGradient(x, y, x, y + h);
-  sky.addColorStop(0, "#0D1730");
-  sky.addColorStop(1, "#16284A");
+  sky.addColorStop(0, isDay ? "#8AB9E8" : "#0D1730");
+  sky.addColorStop(1, isDay ? "#E7B270" : "#16284A");
   ctx.fillStyle = sky;
   ctx.fillRect(x, y, w, h);
+
+  ctx.fillStyle = isDay ? "#F8D567" : "#E6F0FF";
+  ctx.globalAlpha = 0.92 + Math.sin(timeMs / 1400) * 0.04;
+  ctx.beginPath();
+  ctx.arc(x + 34, y + 34, 13, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+  if (!isDay) {
+    ctx.fillStyle = "#16284A";
+    ctx.beginPath();
+    ctx.arc(x + 40, y + 29, 11, 0, Math.PI * 2);
+    ctx.fill();
+  } else {
+    ctx.strokeStyle = "rgba(248, 213, 103, 0.5)";
+    ctx.lineWidth = 2;
+    for (const [dx, dy] of [
+      [0, -19],
+      [0, 19],
+      [-19, 0],
+      [19, 0],
+      [-13, -13],
+      [13, -13],
+      [-13, 13],
+      [13, 13],
+    ]) {
+      ctx.beginPath();
+      ctx.moveTo(x + 34 + dx * 0.72, y + 34 + dy * 0.72);
+      ctx.lineTo(x + 34 + dx, y + 34 + dy);
+      ctx.stroke();
+    }
+  }
+
+  if (!isDay) {
+    for (const [sx, sy, radius] of [
+      [x + 76, y + 30, 2],
+      [x + 144, y + 44, 1.5],
+      [x + 116, y + 22, 1.75],
+    ]) {
+      ctx.fillStyle = "rgba(255,255,255,0.75)";
+      ctx.beginPath();
+      ctx.arc(sx, sy, radius, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
 
   ctx.fillStyle = "rgba(255,255,255,0.12)";
   ctx.fillRect(x + 55, y, 4, h);
@@ -300,11 +345,14 @@ function drawWindow(ctx: CanvasRenderingContext2D) {
     ctx.fillRect(building.bx, building.by, building.bw, building.bh);
     for (let wy = building.by + 8; wy < building.by + building.bh - 6; wy += 12) {
       for (let wx = building.bx + 4; wx < building.bx + building.bw - 4; wx += 8) {
-        ctx.fillStyle = (wx + wy) % 3 === 0 ? "#FFBD59" : (wx + wy) % 4 === 0 ? "#2093FF" : "#E97474";
+        ctx.fillStyle = isDay ? "#9FB5D0" : (wx + wy) % 3 === 0 ? "#FFBD59" : (wx + wy) % 4 === 0 ? "#2093FF" : "#E97474";
         ctx.fillRect(wx, wy, 3, 5);
       }
     }
   }
+
+  ctx.fillStyle = isDay ? "rgba(255, 220, 140, 0.12)" : "rgba(160, 210, 255, 0.08)";
+  ctx.fillRect(x, y, w, h);
 }
 
 function drawPlant(ctx: CanvasRenderingContext2D, x: number, y: number, scale = 1) {
@@ -331,7 +379,44 @@ function drawSwivelChair(ctx: CanvasRenderingContext2D, x: number, y: number, ac
   ctx.fillRect(x - 18, y - 10, 36, 4);
 }
 
-function drawDeskSetup(ctx: CanvasRenderingContext2D, x: number, y: number, side: "left" | "right", accent: string, label: string) {
+function drawTrashCan(ctx: CanvasRenderingContext2D, x: number, y: number) {
+  ctx.fillStyle = "#3B404A";
+  ctx.fillRect(x - 10, y - 16, 20, 18);
+  ctx.fillStyle = "#59606D";
+  ctx.fillRect(x - 12, y - 18, 24, 4);
+  ctx.fillStyle = "rgba(255,255,255,0.14)";
+  ctx.fillRect(x - 4, y - 14, 2, 12);
+  ctx.fillRect(x, y - 14, 2, 12);
+  ctx.fillRect(x + 4, y - 14, 2, 12);
+}
+
+function drawScreensaver(ctx: CanvasRenderingContext2D, x: number, y: number, timeMs: number) {
+  const width = 32;
+  const height = 16;
+  const radius = 3;
+  const periodX = width - radius * 2;
+  const periodY = height - radius * 2;
+  const rawX = ((timeMs / 35) % (periodX * 2)) as number;
+  const rawY = ((timeMs / 48) % (periodY * 2)) as number;
+  const bounceX = rawX > periodX ? periodX * 2 - rawX : rawX;
+  const bounceY = rawY > periodY ? periodY * 2 - rawY : rawY;
+
+  ctx.fillStyle = "#1E6CFF";
+  ctx.beginPath();
+  ctx.arc(x - width / 2 + radius + bounceX, y - height / 2 + radius + bounceY, radius, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawDeskSetup(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  side: "left" | "right",
+  accent: string,
+  label: string,
+  occupied: boolean,
+  timeMs: number,
+) {
   const topX = side === "left" ? x - 70 : x - 18;
   const returnX = side === "left" ? x - 12 : x - 74;
 
@@ -351,9 +436,13 @@ function drawDeskSetup(ctx: CanvasRenderingContext2D, x: number, y: number, side
 
   ctx.fillStyle = "#191B25";
   ctx.fillRect(x - 20, y - 52, 40, 24);
-  ctx.fillStyle = "#2093FF";
+  ctx.fillStyle = occupied ? "#2093FF" : "#0E1422";
   ctx.fillRect(x - 16, y - 48, 32, 16);
-  drawGlow(ctx, x, y - 40, 46, "#2093FF", 0.15);
+  if (occupied) {
+    drawGlow(ctx, x, y - 40, 46, "#2093FF", 0.15);
+  } else {
+    drawScreensaver(ctx, x, y - 40, timeMs);
+  }
 
   ctx.fillStyle = "#111827";
   ctx.fillRect(x - 4, y - 28, 8, 14);
@@ -364,6 +453,12 @@ function drawDeskSetup(ctx: CanvasRenderingContext2D, x: number, y: number, side
   ctx.fillRect(returnX + 12, y + 18, 8, 8);
   ctx.fillStyle = "#B48B66";
   ctx.fillRect(returnX + 28, y + 16, 10, 2);
+  ctx.fillStyle = "#F8E16A";
+  ctx.fillRect(topX + 18, y - 42, 12, 12);
+  ctx.fillStyle = "#FF9FB2";
+  ctx.fillRect(topX + 34, y - 38, 10, 10);
+  ctx.fillStyle = "#F5F1E6";
+  ctx.fillRect(topX + 72, y - 40, 14, 8);
 
   ctx.fillStyle = "rgba(8,7,6,0.24)";
   ctx.fillRect(topX + 4, y + 6, 96, 4);
@@ -375,6 +470,8 @@ function drawDeskSetup(ctx: CanvasRenderingContext2D, x: number, y: number, side
   ctx.font = "600 10px 'Courier New', monospace";
   ctx.textAlign = "center";
   ctx.fillText(label, x, y + 68);
+
+  drawTrashCan(ctx, side === "left" ? x - 82 : x + 82, y + 42);
 }
 
 function drawMeetingArea(ctx: CanvasRenderingContext2D) {
@@ -450,7 +547,6 @@ function drawLounge(ctx: CanvasRenderingContext2D) {
 }
 
 function drawServerRack(ctx: CanvasRenderingContext2D, timeMs: number) {
-  const leds = Math.floor(timeMs / 400) % 2 === 0;
   ctx.fillStyle = "#232833";
   ctx.fillRect(1164, 510, 86, 158);
   ctx.fillStyle = "#11141B";
@@ -458,18 +554,69 @@ function drawServerRack(ctx: CanvasRenderingContext2D, timeMs: number) {
 
   for (let i = 0; i < 5; i += 1) {
     const y = 532 + i * 24;
+    const tick = Math.floor(timeMs / 180);
+    const firstBlink = (tick + i) % 4 <= 1;
+    const secondBlink = (tick + i * 2) % 6 === 0 || (tick + i * 2) % 6 === 1;
     ctx.fillStyle = "#2D3640";
     ctx.fillRect(1182, y, 50, 14);
     ctx.fillStyle = i === 1 ? "#2093FF" : "#8FA5B8";
     ctx.fillRect(1186, y + 4, 26, 4);
-    ctx.fillStyle = leds || i % 2 === 0 ? "#22C55E" : "#56745F";
+    ctx.fillStyle = firstBlink ? "#22C55E" : "#56745F";
     ctx.fillRect(1218, y + 4, 4, 4);
-    ctx.fillStyle = !leds && i % 2 === 1 ? "#22C55E" : "#56745F";
+    ctx.fillStyle = secondBlink ? "#F59E0B" : "#56745F";
     ctx.fillRect(1226, y + 4, 4, 4);
   }
 }
 
-function drawWallDecor(ctx: CanvasRenderingContext2D) {
+function drawWallClock(ctx: CanvasRenderingContext2D, now: Date) {
+  const cx = 280;
+  const cy = 142;
+  const minutes = now.getMinutes();
+  const hours = now.getHours() % 12 + minutes / 60;
+
+  ctx.fillStyle = "#E8E1D3";
+  ctx.beginPath();
+  ctx.arc(cx, cy, 28, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = "#5B5046";
+  ctx.lineWidth = 4;
+  ctx.stroke();
+
+  ctx.strokeStyle = "#43372D";
+  ctx.lineCap = "round";
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(cx + Math.sin((Math.PI * 2 * hours) / 12) * 12, cy - Math.cos((Math.PI * 2 * hours) / 12) * 12);
+  ctx.stroke();
+
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(cx + Math.sin((Math.PI * 2 * minutes) / 60) * 18, cy - Math.cos((Math.PI * 2 * minutes) / 60) * 18);
+  ctx.stroke();
+
+  ctx.fillStyle = "#43372D";
+  ctx.beginPath();
+  ctx.arc(cx, cy, 3, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawWallDecor(ctx: CanvasRenderingContext2D, now: Date) {
+  drawWallClock(ctx, now);
+
+  ctx.fillStyle = "#D6CFBF";
+  ctx.fillRect(92, 110, 236, 92);
+  ctx.fillStyle = "#F8F7F0";
+  ctx.fillRect(100, 118, 220, 76);
+  ctx.fillStyle = "#95A3B5";
+  ctx.fillRect(118, 144, 72, 4);
+  ctx.fillRect(200, 136, 82, 4);
+  ctx.fillStyle = "#D94645";
+  ctx.font = "700 24px 'Courier New', monospace";
+  ctx.textAlign = "left";
+  ctx.fillText("SPRINT", 118, 171);
+
   ctx.fillStyle = "#DCCDBA";
   ctx.fillRect(420, 118, 150, 84);
   ctx.fillStyle = "#F4F0E8";
@@ -498,6 +645,31 @@ function drawCorridorAccents(ctx: CanvasRenderingContext2D) {
   ctx.fillStyle = "rgba(0,0,0,0.12)";
   ctx.fillRect(160, 398, 1088, 4);
   ctx.fillRect(160, 530, 1088, 4);
+}
+
+function drawDustMotes(ctx: CanvasRenderingContext2D, timeMs: number) {
+  const particles = [
+    { x: 196, y: 728, speed: 0.012, drift: 18, offset: 0 },
+    { x: 498, y: 702, speed: 0.016, drift: 12, offset: 700 },
+    { x: 884, y: 744, speed: 0.01, drift: 16, offset: 1300 },
+    { x: 1162, y: 690, speed: 0.014, drift: 10, offset: 1900 },
+  ];
+
+  for (const particle of particles) {
+    const progress = ((timeMs + particle.offset) * particle.speed) % 1;
+    const px = particle.x + Math.sin((timeMs + particle.offset) / 1800) * particle.drift;
+    const py = particle.y - progress * 280;
+    ctx.fillStyle = "rgba(255,255,255,0.12)";
+    ctx.beginPath();
+    ctx.arc(px, py, 2, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function drawLightingOverlay(ctx: CanvasRenderingContext2D, hour: number) {
+  const isDay = hour >= 6 && hour < 18;
+  ctx.fillStyle = isDay ? "rgba(255, 223, 140, 0.08)" : "rgba(120, 170, 255, 0.1)";
+  ctx.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
 }
 
 function drawTaskBubble(ctx: CanvasRenderingContext2D, agent: AgentSprite, timeMs: number) {
@@ -586,8 +758,11 @@ function drawPixelFigure(ctx: CanvasRenderingContext2D, agent: AgentSprite, time
   const art = AGENT_ART[agent.id as keyof typeof AGENT_ART];
   const walkFrame = Math.floor(timeMs / 120) % 4;
   const typingFrame = Math.floor(timeMs / 220) % 2;
-  const bob = agent.mode === "walking" ? 0 : Math.round(Math.sin(timeMs / 360 + agent.x * 0.015) * 1);
-  const x = Math.round(agent.x - (SPRITE_SIZE * SPRITE_SCALE) / 2);
+  const isLoungeIdle = agent.mode === "idle";
+  const swayX = isLoungeIdle ? Math.sin(timeMs / 520 + agent.x * 0.031) * 1.6 : 0;
+  const swayY = isLoungeIdle ? Math.sin(timeMs / 680 + agent.y * 0.018) * 1.2 : 0;
+  const bob = agent.mode === "walking" ? 0 : Math.round(Math.sin(timeMs / 360 + agent.x * 0.015) * 1 + swayY);
+  const x = Math.round(agent.x - (SPRITE_SIZE * SPRITE_SCALE) / 2 + swayX);
   const y = Math.round(agent.y - SPRITE_SIZE * SPRITE_SCALE + bob);
   const armLift = agent.mode === "working" ? (typingFrame === 0 ? 0 : 1) : 0;
   const legOffset = agent.mode === "walking" ? (walkFrame === 0 ? -1 : walkFrame === 2 ? 1 : 0) : 0;
@@ -597,9 +772,9 @@ function drawPixelFigure(ctx: CanvasRenderingContext2D, agent: AgentSprite, time
     ctx.fillRect(x + px * SPRITE_SCALE, y + py * SPRITE_SCALE, pw * SPRITE_SCALE, ph * SPRITE_SCALE);
   };
 
-  ctx.fillStyle = "rgba(0,0,0,0.24)";
+  ctx.fillStyle = "rgba(0,0,0,0.28)";
   ctx.beginPath();
-  ctx.ellipse(agent.x, agent.y + 6, 18, 7, 0, 0, Math.PI * 2);
+  ctx.ellipse(agent.x + swayX * 0.35, agent.y + 8, 18, 6, 0, 0, Math.PI * 2);
   ctx.fill();
 
   paint(5, 2, 6, 5, art.skin);
@@ -700,6 +875,9 @@ function drawOffice(
   error: string | null,
   updatedAt: string | null,
 ) {
+  const now = new Date();
+  const hour = now.getHours();
+  const occupiedDesks = new Set(agents.filter((agent) => agent.lastMode === "working").map((agent) => agent.id));
   const scale = Math.min(width / WORLD_WIDTH, height / WORLD_HEIGHT);
   const offsetX = (width - WORLD_WIDTH * scale) / 2;
   const offsetY = (height - WORLD_HEIGHT * scale) / 2;
@@ -723,15 +901,15 @@ function drawOffice(
 
   drawWoodFloor(ctx);
   drawWallsAndLights(ctx, timeMs);
-  drawWindow(ctx);
-  drawWallDecor(ctx);
+  drawWindow(ctx, hour, timeMs);
+  drawWallDecor(ctx, now);
   drawCorridorAccents(ctx);
 
-  drawDeskSetup(ctx, 302, 246, "left", "#2093FF", "KIMBERLY");
-  drawDeskSetup(ctx, 270, 608, "left", "#FFBD59", "KEVIN");
-  drawDeskSetup(ctx, 950, 246, "right", "#F93C3C", "ALEX");
-  drawDeskSetup(ctx, 1104, 246, "right", "#F93C3C", "SABRI");
-  drawDeskSetup(ctx, 1028, 608, "right", "#22C55E", "JORDAN");
+  drawDeskSetup(ctx, 302, 246, "left", "#2093FF", "KIMBERLY", occupiedDesks.has("kimberly"), timeMs);
+  drawDeskSetup(ctx, 270, 608, "left", "#FFBD59", "KEVIN", occupiedDesks.has("kevin"), timeMs);
+  drawDeskSetup(ctx, 950, 246, "right", "#F93C3C", "ALEX", occupiedDesks.has("alex"), timeMs);
+  drawDeskSetup(ctx, 1104, 246, "right", "#F93C3C", "SABRI", occupiedDesks.has("sabri"), timeMs);
+  drawDeskSetup(ctx, 1028, 608, "right", "#22C55E", "JORDAN", occupiedDesks.has("jordan"), timeMs);
 
   drawSwivelChair(ctx, 302, 252, "#43648D");
   drawSwivelChair(ctx, 270, 614, "#7C6644");
@@ -742,11 +920,13 @@ function drawOffice(
   drawMeetingArea(ctx);
   drawLounge(ctx);
   drawServerRack(ctx, timeMs);
+  drawDustMotes(ctx, timeMs);
 
   drawPlant(ctx, 118, 154, 1.2);
   drawPlant(ctx, 138, 718, 1.15);
   drawPlant(ctx, 1090, 708, 1.1);
   drawPlant(ctx, 1244, 350, 1);
+  drawLightingOverlay(ctx, hour);
 
   const sortedAgents = agents.slice().sort((a, b) => a.y - b.y);
 
