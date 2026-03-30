@@ -1234,15 +1234,25 @@ export default function OfficePage() {
   // Activity log from status changes
   const [activityLog, setActivityLog] = useState<Array<{ agent: string; action: string; time: string }>>([]);
   const prevStatusRef = useRef<Record<string, string>>({});
+  const [overlayAgents, setOverlayAgents] = useState<AgentSprite[]>([]);
+
+  // Sync overlay state from ref every second
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setOverlayAgents([...agentsRef.current]);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
+    if (overlayAgents.length === 0) return;
     const current: Record<string, string> = {};
-    for (const a of agents) current[a.id] = a.lastMode;
+    for (const a of overlayAgents) current[a.id] = a.lastMode;
     const prev = prevStatusRef.current;
     const now = new Date();
     const timeStr = now.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
 
-    for (const a of agents) {
+    for (const a of overlayAgents) {
       if (prev[a.id] && prev[a.id] !== a.lastMode) {
         const action = a.lastMode === "working"
           ? `started working on ${a.task || "a task"}`
@@ -1251,10 +1261,10 @@ export default function OfficePage() {
       }
     }
     prevStatusRef.current = current;
-  }, [agents]);
+  }, [overlayAgents]);
 
-  const workingAgents = agents.filter((a) => a.lastMode === "working");
-  const idleAgents = agents.filter((a) => a.lastMode === "idle");
+  const workingAgents = overlayAgents.filter((a) => a.lastMode === "working");
+  const idleAgents = overlayAgents.filter((a) => a.lastMode === "idle");
 
   return (
     <section
