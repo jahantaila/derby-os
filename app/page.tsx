@@ -14,6 +14,7 @@ import {
   Users,
   Zap,
 } from "lucide-react";
+import { CardSkeleton, GridSkeleton, TableSkeleton } from "@/components/loading-skeleton";
 import { cn } from "@/lib/utils";
 import { SEED_CONTACTS } from "@/lib/rolodex-seed";
 import { RELATIONSHIP_TYPE_COLORS } from "@/lib/rolodex-types";
@@ -127,6 +128,7 @@ export default function HomePage() {
   const [failedPayments, setFailedPayments] = useState<FailedPayment[]>([]);
   const [mrrTrend, setMrrTrend] = useState<Array<{ month: string; value: number }>>([]);
   const [activityFeed, setActivityFeed] = useState<ActivityItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
@@ -228,6 +230,10 @@ export default function HomePage() {
         setAgents([]);
         setMrrTrend([]);
         setActivityFeed([]);
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     }
 
@@ -249,6 +255,27 @@ export default function HomePage() {
   const arrProgress = Math.min(Math.round((currentArr / arrTarget) * 100), 100);
   const failedPaymentsCount = failedPayments.length;
   const failedPaymentsTotal = failedPayments.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="glass-panel rounded-2xl p-5">
+          <div className="animate-pulse space-y-3">
+            <div className="skeleton-shimmer h-3 w-28 rounded-full bg-white/10" />
+            <div className="skeleton-shimmer h-9 w-56 rounded-full bg-white/10" />
+          </div>
+        </div>
+        <GridSkeleton columns={2} count={4} className="lg:grid-cols-4" />
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          <div className="lg:col-span-2">
+            <TableSkeleton rows={4} />
+          </div>
+          <CardSkeleton className="h-full" />
+        </div>
+        <GridSkeleton columns={3} count={6} />
+      </div>
+    );
+  }
 
   const trendOption = {
     animationDuration: 700,

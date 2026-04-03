@@ -18,6 +18,7 @@ import {
   X,
   Zap,
 } from "lucide-react";
+import { CardSkeleton, GridSkeleton, TableSkeleton } from "@/components/loading-skeleton";
 import { cn } from "@/lib/utils";
 
 type TaskStatus = "todo" | "in_progress" | "needs_kimberly_approval" | "needs_jahan_approval" | "done";
@@ -299,7 +300,7 @@ function TaskCard({
       }}
       onDragEnd={onDragEnd}
       className={cn(
-        "group rounded-[24px] border bg-[#081224]/95 p-4 shadow-[0_12px_40px_rgba(0,0,0,0.24)] transition",
+        "group rounded-[24px] border bg-[#081224]/95 p-4 shadow-[0_12px_40px_rgba(0,0,0,0.24)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_20px_48px_rgba(0,0,0,0.32),0_0_32px_rgba(32,147,255,0.14)]",
         overdue ? "border-red-500/40" : "border-white/8 hover:border-white/16",
         dragging && "opacity-55"
       )}
@@ -552,8 +553,23 @@ export default function TasksPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#030711] text-white">
-        <Loader2 className="h-7 w-7 animate-spin text-sky-400" />
+      <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.18),_transparent_30%),linear-gradient(180deg,#020611_0%,#07101f_48%,#020611_100%)] px-4 py-6 text-white sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-[1600px] space-y-6">
+          <section className="glass-panel rounded-[32px] p-6">
+            <div className="animate-pulse space-y-4">
+              <div className="skeleton-shimmer h-3 w-28 rounded-full bg-white/10" />
+              <div className="skeleton-shimmer h-10 w-[min(100%,34rem)] rounded-full bg-white/10" />
+              <div className="skeleton-shimmer h-4 w-[min(100%,44rem)] rounded-full bg-white/10" />
+            </div>
+          </section>
+          <GridSkeleton columns={2} count={4} className="xl:grid-cols-4" />
+          <TableSkeleton rows={6} />
+          <div className="grid min-w-0 gap-4 xl:grid-cols-4">
+            {Array.from({ length: 4 }, (_, index) => (
+              <CardSkeleton key={index} className="min-h-[240px]" />
+            ))}
+          </div>
+        </div>
       </div>
     );
   }

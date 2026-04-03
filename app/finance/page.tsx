@@ -17,6 +17,7 @@ import {
   X,
   Zap,
 } from "lucide-react";
+import { CardSkeleton, GridSkeleton, TableSkeleton } from "@/components/loading-skeleton";
 import { cn } from "@/lib/utils";
 
 const ReactECharts = dynamic(() => import("echarts-for-react"), { ssr: false });
@@ -610,8 +611,23 @@ export default function FinancePage() {
 
   if (loading && !data) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#0a0a0f] text-white">
-        <RefreshCw className="h-6 w-6 animate-spin text-[#2093FF]" />
+      <div className="min-h-screen space-y-6 bg-[#0a0a0f] p-6 text-white">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="animate-pulse space-y-3">
+            <div className="skeleton-shimmer h-10 w-40 rounded-full bg-white/10" />
+            <div className="skeleton-shimmer h-4 w-72 rounded-full bg-white/10" />
+          </div>
+          <div className="flex gap-3">
+            <div className="skeleton-shimmer h-11 w-44 rounded-2xl bg-white/10" />
+            <div className="skeleton-shimmer h-11 w-36 rounded-2xl bg-white/10" />
+          </div>
+        </div>
+        <GridSkeleton columns={3} count={6} className="md:grid-cols-3 xl:grid-cols-6" />
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+          <TableSkeleton className="xl:col-span-2" rows={4} />
+          <CardSkeleton className="h-full" />
+        </div>
+        <TableSkeleton rows={6} />
       </div>
     );
   }
@@ -708,7 +724,7 @@ export default function FinancePage() {
           { label: "Profit", value: fmt(summary.profit), icon: Zap, color: "#22C55E" },
           { label: "Margin", value: pct(summary.profitMargin), icon: TrendingUp, color: "#FFBD59" },
         ].map((card) => (
-          <div key={card.label} className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4">
+          <div key={card.label} className="glass-card rounded-xl p-4">
             <div className="mb-2 flex items-center gap-2">
               <card.icon className="h-4 w-4" style={{ color: card.color }} />
               <span className="text-[11px] uppercase tracking-wider text-slate-500">{card.label}</span>
@@ -718,7 +734,7 @@ export default function FinancePage() {
         ))}
       </div>
 
-      <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4">
+      <div className="glass-panel rounded-xl p-4">
         <div className="mb-2 flex items-center justify-between">
           <span className="text-sm text-slate-400">Annual Run Rate → $1M Goal</span>
           <span className="font-mono text-sm text-[#2093FF]">{fmt(summary.arr)}</span>
@@ -750,7 +766,7 @@ export default function FinancePage() {
       {tab === "overview" ? (
         <div className="space-y-6">
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-            <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-5 xl:col-span-2">
+            <div className="glass-panel rounded-xl p-5 xl:col-span-2">
               <div className="mb-4 flex items-center justify-between">
                 <h3 className="text-sm font-medium text-slate-400">Revenue Trends</h3>
                 <span className="text-[10px] uppercase tracking-[0.2em] text-slate-600">
@@ -760,7 +776,7 @@ export default function FinancePage() {
               <ReactECharts option={revenueTrendOption} style={{ height: 320 }} />
             </div>
 
-            <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-5">
+            <div className="glass-panel rounded-xl p-5">
               <h3 className="mb-4 text-sm font-medium text-slate-400">Monthly P&amp;L</h3>
               <div className="space-y-2">
                 <div className="flex justify-between py-1">

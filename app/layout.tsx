@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { CommandPalette } from "@/components/command-palette";
+import { PageTransition } from "@/components/page-transition";
 import { Sidebar } from "@/components/sidebar";
 import { TopBar } from "@/components/topbar";
 
@@ -29,7 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <main className="app-main">
             <div className="space-y-6">
               <TopBar />
-              {children}
+              <PageTransition>{children}</PageTransition>
             </div>
           </main>
         </div>
