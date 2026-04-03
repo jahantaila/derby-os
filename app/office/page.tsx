@@ -1078,6 +1078,7 @@ export default function OfficePage() {
   const agentsRef = useRef<AgentSprite[]>([]);
   const hoveredIdRef = useRef<string | null>(null);
   const lastFrameTimeRef = useRef(0);
+  const [agents, setAgents] = useState<AgentSprite[]>([]);
   const [viewport, setViewport] = useState<Viewport>(() => getViewport());
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -1111,6 +1112,7 @@ export default function OfficePage() {
         if (!mounted) return;
         const ordered = OFFICE_AGENT_ORDER.map((id) => data.find((agent) => agent.id === id)).filter(Boolean) as AgentApiRecord[];
         agentsRef.current = syncAgents(agentsRef.current, ordered);
+        setAgents(agentsRef.current.map((agent) => ({ ...agent, path: [...agent.path] })));
         setUpdatedAt(new Date().toISOString());
         setError(null);
       } catch (loadError) {
